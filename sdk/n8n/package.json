@@ -1,0 +1,38 @@
+{
+  "name": "n8n-nodes-xr2",
+  "version": "0.1.0",
+  "description": "n8n community nodes for xR2 API (Get Prompt, Events)",
+  "license": "MIT",
+  "author": "xR2",
+  "keywords": [
+    "n8n-community-node",
+    "n8n-nodes",
+    "xr2",
+    "prompts",
+    "analytics"
+  ],
+  "homepage": "https://github.com/channeler-ai/xr2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/channeler-ai/xr2.git"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p .",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.0"
+  },
+  "peerDependencies": {
+    "n8n-workflow": ">=1.0.0"
+  }
+}
+
