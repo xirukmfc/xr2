@@ -24,9 +24,11 @@ COPY . .
 RUN npm install -g pnpm
 
 # Set environment variable for build
+# API URL can be overridden via build arg
+ARG NEXT_PUBLIC_API_URL=https://xr2.uk/internal
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-ENV NEXT_PUBLIC_API_URL=http://localhost/internal
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 # Build the app
 RUN pnpm build

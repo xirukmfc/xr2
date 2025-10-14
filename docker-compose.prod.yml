@@ -129,11 +129,15 @@ services:
 
   # Frontend (Next.js)
   frontend:
-    image: xr2-frontend:latest
+    build:
+      context: ./prompt-editor
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: https://xr2.uk/internal
     container_name: xr2_frontend_prod
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost/internal
-      - NODE_ENV=production
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
     ports:
       - "3000:3000"
     depends_on:
@@ -141,6 +145,12 @@ services:
     networks:
       - xr2_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Nginx
   nginx:

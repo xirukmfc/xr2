@@ -146,6 +146,31 @@ services:
       retries: 3
       start_period: 40s
 
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: ./prompt-editor
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: https://xr2.uk/internal
+    container_name: xr2_frontend
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - app
+    networks:
+      - xr2_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   # Nginx reverse proxy с защитой
   nginx:
     image: nginx:alpine
@@ -160,6 +185,7 @@ services:
       - nginx_logs:/var/log/nginx
     depends_on:
       - app
+      - frontend
     networks:
       - xr2_network
     restart: unless-stopped

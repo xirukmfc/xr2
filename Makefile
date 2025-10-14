@@ -15,27 +15,32 @@ help: ## Показать эту справку
 
 ##@ Основные команды
 
-up: ## Запустить ВСЕ (для сервера/production) - backend + frontend в Docker
-	@echo "$(GREEN)🚀 Запуск xR2 Platform (Production - все в Docker)$(NC)"
+deploy: ## 🚀 Деплой на production (с автоматической сборкой)
+	@echo "$(GREEN)🚀 Деплой xR2 Platform на Production$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Проверка .env.prod файла...$(NC)"
 	@if [ ! -f .env.prod ]; then \
 		echo "$(RED)❌ Файл .env.prod не найден!$(NC)"; \
-		echo "$(YELLOW)Создайте файл .env.prod на основе env.example$(NC)"; \
-		exit 1; \
+		echo "$(YELLOW)Создаю из .env.example...$(NC)"; \
+		cp .env.example .env.prod; \
+		echo "$(RED)⚠️  ВАЖНО: Отредактируйте .env.prod с production паролями!$(NC)"; \
 	fi
-	@echo "$(YELLOW)Сборка frontend образа...$(NC)"
-	@docker build -t xr2-frontend:latest ./prompt-editor
+	@echo "$(YELLOW)Сборка и запуск всех сервисов...$(NC)"
+	@docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 	@echo ""
-	@echo "$(YELLOW)Запуск всех сервисов...$(NC)"
-	@docker-compose --env-file .env.prod -f docker-compose.prod.yml -p xr2-platform up -d
-	@sleep 10
-	@docker-compose --env-file .env.prod -f docker-compose.prod.yml -p xr2-platform ps
+	@echo "$(YELLOW)Ожидание запуска сервисов...$(NC)"
+	@sleep 15
+	@docker compose --env-file .env.prod -f docker-compose.prod.yml ps
 	@echo ""
-	@echo "$(GREEN)✅ Платформа запущена!$(NC)"
-	@echo "$(YELLOW)Приложение: http://localhost$(NC)"
-	@echo "$(YELLOW)Admin: http://localhost/admin$(NC)"
-	@echo "$(YELLOW)API Docs: http://localhost/docs$(NC)"
+	@echo "$(GREEN)✅ Платформа развернута!$(NC)"
+	@echo "$(YELLOW)🌐 Приложение: https://xr2.uk$(NC)"
+	@echo "$(YELLOW)📚 API Docs:   https://xr2.uk/docs$(NC)"
+	@echo "$(YELLOW)🔐 Admin:      https://xr2.uk/admin$(NC)"
+
+up: ## Запустить production (все в Docker)
+	@echo "$(GREEN)🚀 Запуск xR2 Platform$(NC)"
+	@docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
+	@echo "$(GREEN)✅ Запущено!$(NC)"
 
 up-local: ## Запустить для локальной разработки (только backend в Docker)
 	@echo "$(GREEN)🛠️  Запуск backend для локальной разработки$(NC)"
@@ -49,13 +54,13 @@ up-local: ## Запустить для локальной разработки (
 
 down: ## Остановить все сервисы
 	@echo "$(RED)🛑 Остановка сервисов...$(NC)"
-	@docker-compose -p xr2-platform down 2>/dev/null || true
-	@docker-compose --env-file .env.prod -f docker-compose.prod.yml -p xr2-platform down 2>/dev/null || true
-	@pkill -f "next dev" || true
+	@docker compose --env-file .env.prod -f docker-compose.prod.yml down 2>/dev/null || true
+	@docker compose down 2>/dev/null || true
 	@echo "$(GREEN)✅ Сервисы остановлены$(NC)"
 
 restart: ## Перезапустить сервисы
-	@docker-compose -p xr2-platform restart 2>/dev/null || docker-compose -f docker-compose.prod.yml -p xr2-platform restart
+	@echo "$(YELLOW)🔄 Перезапуск сервисов...$(NC)"
+	@docker compose --env-file .env.prod -f docker-compose.prod.yml restart
 	@echo "$(GREEN)✅ Сервисы перезапущены$(NC)"
 
 ##@ Мониторинг
@@ -107,10 +112,9 @@ clean: ## Очистить все ресурсы (volumes, networks, images)
 
 rebuild: ## Пересобрать все образы
 	@echo "$(YELLOW)🔨 Пересборка образов...$(NC)"
-	@docker-compose build --no-cache
-	@docker-compose --env-file .env.prod -f docker-compose.prod.yml build --no-cache
-	@docker build --no-cache -t xr2-frontend:latest ./prompt-editor
+	@docker compose --env-file .env.prod -f docker-compose.prod.yml build --no-cache
 	@echo "$(GREEN)✅ Образы пересобраны$(NC)"
+	@echo "$(YELLOW)Для применения изменений выполните:$(NC) make up"
 
 ##@ База данных
 
