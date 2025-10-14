@@ -1,0 +1,160 @@
+// app/editor/[slug]/page.tsx
+import React, { useState } from "react";
+import CenterPanel from "@/components/center-panel";
+import FullScreenEditor from "@/components/full-screen-editor";
+import type { PromptData } from "@/lib/prompt";
+import type { ModelId } from "@/lib/tokens";
+
+const Page = () => {
+  const [promptData, setPromptData] = useState<PromptData>({
+    systemPrompt: "",
+    userPrompt: "",
+  });
+  const [activeTab, setActiveTab] = useState<"system" | "user" | "assistant">("system")
+  const [totalCharacters, setTotalCharacters] = useState<number>(0);
+  const [definedVariables, setDefinedVariables] = useState<number>(0);
+  const [undefinedVariables, setUndefinedVariables] = useState<number>(0);
+  const [selectedModels, setSelectedModels] = useState<ModelId[]>(["gpt-4o"]);
+  const [isFullScreenOpen, setIsFullScreenOpen] = useState<boolean>(false);
+
+  const updatePromptData = (updates: Partial<PromptData>) => {
+    setPromptData((prev) => ({ ...prev, ...updates }));
+  };
+
+  const updateCharacterCount = () => {
+    // Logic to update character count
+  };
+
+  const updateVariableCount = () => {
+    // Logic to update variable count
+  };
+
+  return (
+    <div>
+      <CenterPanel
+        promptData={promptData}
+        updatePromptData={updatePromptData}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        totalCharacters={totalCharacters}
+        variableCount={definedVariables}
+        undefinedCount={undefinedVariables}
+        selectedModels={selectedModels}
+        onChangeSelectedModels={setSelectedModels}
+      />
+      {isFullScreenOpen && (
+        <FullScreenEditor
+          isOpen={isFullScreenOpen}
+          onClose={() => setIsFullScreenOpen(false)}
+          promptData={promptData}
+          updatePromptData={updatePromptData}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          selectedModels={selectedModels}
+          onChangeSelectedModels={setSelectedModels}
+        />
+      )}
+    </div>
+  );
+};
+
+export default Page;
+
+// components/center-panel.tsx
+import React from "react";
+import TokenBadges from "./token-badges";
+import ModelPicker from "./model-picker";
+import FullScreenEditor from "./full-screen-editor";
+import type { PromptData } from "@/lib/prompt";
+import type { ModelId } from "@/lib/tokens";
+
+interface CenterPanelProps {
+  promptData: PromptData;
+  updatePromptData: (updates: Partial<PromptData>) => void;
+  activeTab: "system" | "user";
+  setActiveTab: (tab: "system" | "user") => void;
+  totalCharacters: number;
+  variableCount: number;
+  undefinedCount: number;
+  selectedModels: ModelId[];
+  onChangeSelectedModels: (next: ModelId[]) => void;
+}
+
+const CenterPanel = ({
+  promptData,
+  updatePromptData,
+  activeTab,
+  setActiveTab,
+  totalCharacters,
+  variableCount,
+  undefinedCount,
+  selectedModels,
+  onChangeSelectedModels,
+}: CenterPanelProps) => {
+  const handleFullScreenToggle = () => {
+    // Logic to toggle full screen
+  };
+
+  return (
+    <div>
+      {/* Main content here */}
+      <footer>
+        <TokenBadges
+          systemText={promptData.systemPrompt}
+          userText={promptData.userPrompt}
+          models={selectedModels}
+        />
+        <ModelPicker selected={selectedModels} onChange={onChangeSelectedModels} />
+        <button onClick={handleFullScreenToggle}>Toggle Full Screen</button>
+      </footer>
+    </div>
+  );
+};
+
+export default CenterPanel;
+
+// components/full-screen-editor.tsx
+import React from "react";
+import TokenBadges from "./token-badges";
+import ModelPicker from "./model-picker";
+import type { PromptData } from "@/lib/prompt";
+import type { ModelId } from "@/lib/tokens";
+
+interface FullScreenEditorProps {
+  isOpen: boolean;
+  onClose: () => void;
+  promptData: PromptData;
+  updatePromptData: (updates: Partial<PromptData>) => void;
+  activeTab: "system" | "user";
+  setActiveTab: (tab: "system" | "user") => void;
+  selectedModels: ModelId[];
+  onChangeSelectedModels: (next: ModelId[]) => void;
+}
+
+const FullScreenEditor = ({
+  isOpen,
+  onClose,
+  promptData,
+  updatePromptData,
+  activeTab,
+  setActiveTab,
+  selectedModels,
+  onChangeSelectedModels,
+}: FullScreenEditorProps) => {
+  return (
+    <div>
+      {/* Full screen editor content here */}
+      <footer>
+        <TokenBadges
+          systemText={promptData.systemPrompt}
+          userText={promptData.userPrompt}
+          models={selectedModels}
+        />
+        <ModelPicker selected={selectedModels} onChange={onChangeSelectedModels} />
+        <button onClick={onClose}>Close</button>
+      </footer>
+    </div>
+  );
+};
+
+export default FullScreenEditor;

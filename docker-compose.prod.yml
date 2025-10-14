@@ -1,0 +1,176 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: xr2_postgres_prod
+    environment:
+      POSTGRES_DB: xr2_db
+      POSTGRES_USER: xr2_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-xr2_secure_password_2024}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - xr2_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U xr2_user -d xr2_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: xr2_redis_prod
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_secure_password_2024}
+    volumes:
+      - redis_data_prod:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - xr2_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Database initialization
+  db-init:
+    build: .
+    container_name: xr2_db_init_prod
+    environment:
+      DATABASE_URL: postgresql+asyncpg://xr2_user:${POSTGRES_PASSWORD:-xr2_secure_password_2024}@postgres:5432/xr2_db
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: xr2_user
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-xr2_secure_password_2024}
+      DB_NAME: xr2_db
+      SECRET_KEY: ${SECRET_KEY:-your_super_secret_key_change_in_production}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin_secure_password_2024}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@xr2.com}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-dummy_client_id}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-dummy_client_secret}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - xr2_network
+    command: >
+      sh -c "
+        echo '🚀 Starting database initialization...' &&
+        echo '⏳ Waiting for database...' &&
+        while ! pg_isready -h postgres -p 5432 -U xr2_user -d xr2_db; do
+          echo '   Database not ready, waiting...'
+          sleep 2
+        done &&
+        echo '✅ Database is ready!' &&
+        echo '📋 Creating database tables...' &&
+        python -c 'import asyncio; from app.core.database import init_db; asyncio.run(init_db())' &&
+        echo '✅ Tables created!' &&
+        echo '🔄 Stamping database migrations...' &&
+        alembic stamp head &&
+        echo '✅ Migrations stamped!' &&
+        echo '🤖 Initializing LLM providers...' &&
+        python scripts/init_db.py &&
+        echo '✅ LLM providers initialized!' &&
+        echo '🎉 Database initialization completed!'
+      "
+    restart: "no"
+
+  # Backend application
+  app:
+    build: .
+    container_name: xr2_app_prod
+    environment:
+      DATABASE_URL: postgresql+asyncpg://xr2_user:${POSTGRES_PASSWORD:-xr2_secure_password_2024}@postgres:5432/xr2_db
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_password_2024}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-your_super_secret_key_change_in_production}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin_secure_password_2024}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@xr2.com}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-dummy_client_id}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-dummy_client_secret}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
+      RATE_LIMIT_BURST: ${RATE_LIMIT_BURST:-100}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DEBUG: ${DEBUG:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: xr2_user
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-xr2_secure_password_2024}
+      DB_NAME: xr2_db
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+    networks:
+      - xr2_network
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend (Next.js)
+  frontend:
+    image: xr2-frontend:latest
+    container_name: xr2_frontend_prod
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost/internal
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - app
+    networks:
+      - xr2_network
+    restart: unless-stopped
+
+  # Nginx
+  nginx:
+    image: nginx:alpine
+    container_name: xr2_nginx_prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs_prod:/var/log/nginx
+    depends_on:
+      - app
+      - frontend
+    networks:
+      - xr2_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:
+  nginx_logs_prod:
+
+networks:
+  xr2_network:
+    driver: bridge

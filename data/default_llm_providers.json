@@ -1,0 +1,47 @@
+{
+  "llm_providers": [
+    {
+      "name": "openai",
+      "display_name": "OpenAI",
+      "description": "OpenAI GPT models including GPT-4, GPT-4o, and GPT-3.5",
+      "is_active": true,
+      "api_base_url": "https://api.openai.com/v1",
+      "models": [
+        "gpt-5",
+        "gpt-4o",
+        "gpt-4o-mini", 
+        "gpt-4-turbo",
+        "gpt-4",
+        "gpt-3.5-turbo"
+      ]
+    },
+    {
+      "name": "anthropic",
+      "display_name": "Anthropic",
+      "description": "Claude AI models from Anthropic",
+      "is_active": true,
+      "api_base_url": "https://api.anthropic.com/v1",
+      "models": [
+        "claude-4.1-opus",
+        "claude-4-sonnet",
+        "claude-4-haiku",
+        "claude-3.5-sonnet",
+        "claude-3.5-haiku",
+        "claude-3-opus",
+        "claude-3-sonnet",
+        "claude-3-haiku"
+      ]
+    },
+    {
+      "name": "google",
+      "display_name": "Google AI",
+      "description": "Google Gemini models including 2.5 Pro and Flash",
+      "is_active": true,
+      "api_base_url": "https://generativelanguage.googleapis.com/v1",
+      "models": [
+        "gemini-2.5-pro",
+        "gemini-2.5-flash"
+      ]
+    }
+  ]
+}

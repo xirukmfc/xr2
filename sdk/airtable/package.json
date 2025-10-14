@@ -1,0 +1,24 @@
+{
+  "name": "airtable-xr2-module",
+  "version": "0.1.0",
+  "description": "Airtable extension helper to call xR2 API (Get Prompt)",
+  "license": "MIT",
+  "author": "xR2",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p .",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "axios": "^1.7.2"
+  }
+}
+
+
