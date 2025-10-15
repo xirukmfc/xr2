@@ -54,11 +54,18 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const fetchAnalyticsData = async () => {
       try {
-        const response = await fetch('http://localhost:8000/internal/analytics/dashboard-test?period=7d');
-        if (response.ok) {
-          const data = await response.json();
-          setAnalyticsData(data);
-        }
+        // Remove test endpoint or replace with actual API call
+        // const response = await fetch('/internal/analytics/dashboard?period=7d');
+        // if (response.ok) {
+        //   const data = await response.json();
+        //   setAnalyticsData(data);
+        // }
+
+        // For now, set empty data until proper endpoint is implemented
+        setAnalyticsData({
+          recent_events: [],
+          monthly_events_chart: { dates: [], series: [] }
+        });
       } catch (error) {
         console.error('Failed to fetch analytics data:', error);
       } finally {
