@@ -230,6 +230,8 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,
-        log_level="info"
+        log_level="info",
+        proxy_headers=True,
+        forwarded_allow_ips="*",
+        reload=False,
     )

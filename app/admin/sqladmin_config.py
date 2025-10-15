@@ -905,6 +905,7 @@ def create_admin(app: FastAPI) -> Admin:
     # Get the path to the templates directory
     template_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates')
 
+    # Configure admin with proxy-aware settings
     admin = Admin(
         app=app,
         engine=sync_engine,
