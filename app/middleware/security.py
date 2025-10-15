@@ -12,12 +12,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 SAFE_PATHS = {
-    "/",
-    "/health",
-    "/docs", "/redoc", "/openapi.json",
+    "/", "/health",
+    "/docs", "/docs/", "/redoc", "/openapi.json",
+    "/api/docs", "/api/docs/", "/api/openapi.json",
     "/admin-docs", "/admin-docs/", "/admin-docs/openapi.json",
 }
-
 
 class SecurityMiddleware(BaseHTTPMiddleware):
     """
@@ -226,7 +225,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             # Skip security checks for health endpoint
             path = request.url.path
             # пускаем служебные пути без проверок
-            if path in SAFE_PATHS or any(path.startswith(p) for p in ("/docs/", "/admin-docs/")):
+            if any(path.startswith(p) for p in SAFE_PATHS):
                 return await call_next(request)
 
             # Проверка на подозрительные запросы
