@@ -88,9 +88,6 @@ app = FastAPI(
 # Add security middleware (should be first for maximum protection)
 app.add_middleware(SecurityMiddleware)
 
-# Add rate limiting middleware (should be first to prevent abuse)
-app.add_middleware(RateLimitMiddleware, limiter=rate_limiter)
-
 # Add Swagger authentication middleware (protects admin docs)
 # Add Swagger authentication middleware (temporarily disabled for testing)
 # app.add_middleware(SwaggerAuthMiddleware, admin_path="/admin-docs")
@@ -194,13 +191,13 @@ async def admin_openapi():
     temp_app.include_router(api_router, prefix="/internal")
     temp_app.include_router(statistics_router, prefix="/internal")
     temp_app.include_router(event_definitions_router, prefix="/internal")
-    
+
     return get_openapi(
         title="xR2 Admin API Documentation",
         version="1.0.0",
-        description="Full API documentation for administrators - includes all internal and external APIs",
+        description="Full API documentation…",
         routes=temp_app.routes,
-        servers=[{"url": "http://localhost:8000", "description": "Local development server"}]
+        servers=[{"url": "https://xr2.uk", "description": "Production"}]
     )
 
 

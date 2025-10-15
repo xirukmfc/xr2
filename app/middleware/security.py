@@ -11,6 +11,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+SAFE_PATHS = {
+    "/",
+    "/health",
+    "/docs", "/redoc", "/openapi.json",
+    "/admin-docs", "/admin-docs/", "/admin-docs/openapi.json",
+}
+
+
 class SecurityMiddleware(BaseHTTPMiddleware):
     """
     Комплексный middleware для защиты от DDoS, брутфорса и других атак
@@ -216,12 +224,14 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         """Основная логика middleware"""
         try:
             # Skip security checks for health endpoint
-            if request.url.path == "/health":
+            path = request.url.path
+            # пускаем служебные пути без проверок
+            if path in SAFE_PATHS or any(path.startswith(p) for p in ("/docs/", "/admin-docs/")):
                 return await call_next(request)
 
             # Проверка на подозрительные запросы
             if self._is_suspicious_request(request):
-                logger.warning(f"Подозрительный запрос от {self._get_client_ip(request)}: {request.url.path}")
+                logger.warning(f"Подозрительный запрос от {self._get_client_ip(request)}: {path}")
                 return JSONResponse(
                     status_code=status.HTTP_403_FORBIDDEN,
                     content={"detail": "Access denied"}
@@ -252,7 +262,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             # Логирование подозрительной активности
             if response.status_code >= 400:
                 client_ip = self._get_client_ip(request)
-                logger.warning(f"HTTP {response.status_code} от {client_ip}: {request.url.path}")
+                logger.warning(f"HTTP {response.status_code} от {client_ip}: {path}")
             
             return response
             
