@@ -313,7 +313,6 @@ export default function AnalyticsPage() {
         </div>
         <FunnelAnalysis
           data={funnelData}
-          analyticsData={analyticsData}
           onFunnelChange={(steps) => setCustomFunnelSteps(steps)}
         />
       </div>
