@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from contextlib import asynccontextmanager
 import uvicorn
 from dotenv import load_dotenv
@@ -97,6 +99,21 @@ app.add_middleware(ProductAPILoggingMiddleware)
 
 # Add session middleware for admin auth
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+
+# Proxy headers middleware - Trust nginx proxy headers
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class ProxyHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        # Trust X-Forwarded-* headers from nginx
+        if "x-forwarded-proto" in request.headers:
+            request.scope["scheme"] = request.headers["x-forwarded-proto"]
+        if "x-forwarded-host" in request.headers:
+            request.scope["server"] = (request.headers["x-forwarded-host"], 443 if request.scope.get("scheme") == "https" else 80)
+        response = await call_next(request)
+        return response
+
+app.add_middleware(ProxyHeadersMiddleware)
 
 # Add CORS middleware
 app.add_middleware(
