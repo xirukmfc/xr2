@@ -15,7 +15,7 @@ help: ## Показать эту справку
 
 ##@ Основные команды
 
-deploy: ## 🚀 Деплой на production (с автоматической сборкой)
+deploy: ## 🚀 Деплой на production (без контейнерного nginx)
 	@echo "$(GREEN)🚀 Деплой xR2 Platform на Production$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Проверка .env.prod файла...$(NC)"
@@ -25,8 +25,8 @@ deploy: ## 🚀 Деплой на production (с автоматической с
 		cp .env.example .env.prod; \
 		echo "$(RED)⚠️  ВАЖНО: Отредактируйте .env.prod с production паролями!$(NC)"; \
 	fi
-	@echo "$(YELLOW)Сборка и запуск всех сервисов...$(NC)"
-	@docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+	@echo "$(YELLOW)Сборка и запуск сервисов (без nginx)...$(NC)"
+	@docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build redis postgres db-init app frontend --remove-orphans
 	@echo ""
 	@echo "$(YELLOW)Ожидание запуска сервисов...$(NC)"
 	@sleep 15
