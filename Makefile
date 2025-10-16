@@ -128,7 +128,36 @@ setup-admin-auth: ## Настроить авторизацию для /admin-doc
 	@docker compose --env-file .env.prod -f docker-compose.prod.yml restart nginx 2>/dev/null || echo "$(YELLOW)Запустите nginx для применения изменений$(NC)"
 	@echo "$(GREEN)✅ Готово!$(NC)"
 
-##@ База данных
+##@ Тестирование
+
+test-server: ## 🧪 Запустить автотесты на сервере
+	@echo "$(GREEN)🧪 Запуск автотестов на сервере...$(NC)"
+	@if [ -z "$(ADMIN_PASSWORD)" ]; then \
+		echo "$(RED)❌ ADMIN_PASSWORD не установлен!$(NC)"; \
+		echo "$(YELLOW)Использование:$(NC) make test-server ADMIN_PASSWORD=your_password"; \
+		exit 1; \
+	fi
+	@echo "$(YELLOW)Сборка образа для автотестов...$(NC)"
+	@docker build -f Dockerfile.test -t xr2-autotest .
+	@echo "$(YELLOW)Запуск автотестов...$(NC)"
+	@docker run --rm \
+		-e SERVER_URL=https://xr2.uk \
+		-e FRONTEND_URL=https://xr2.uk \
+		-e BACKEND_URL=https://xr2.uk \
+		-e TEST_USERNAME=$(ADMIN_USERNAME:-admin) \
+		-e TEST_PASSWORD=$(ADMIN_PASSWORD) \
+		-v $(PWD)/test_screenshots:/app/test_screenshots \
+		-v $(PWD)/test_report.json:/app/test_report.json \
+		xr2-autotest
+	@echo "$(GREEN)✅ Автотесты завершены!$(NC)"
+	@echo "$(YELLOW)📊 Результаты: test_report.json$(NC)"
+	@echo "$(YELLOW)📸 Скриншоты: test_screenshots/$(NC)"
+
+test-local: ## 🧪 Запустить автотесты локально
+	@echo "$(GREEN)🧪 Запуск автотестов локально...$(NC)"
+	@python auto-test.py
+	@echo "$(GREEN)✅ Локальные автотесты завершены!$(NC)"
+
 
 db-shell: ## Подключиться к PostgreSQL
 	@docker exec -it xr2_postgres psql -U xr2_user -d xr2_db 2>/dev/null || docker exec -it xr2_postgres_prod psql -U xr2_user -d xr2_db
