@@ -1,0 +1,63 @@
+FROM node:20-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat python3 make g++
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies with increased timeout and memory
+RUN pnpm config set network-timeout 600000 && \
+    pnpm install --frozen-lockfile --prefer-offline
+
+# Builder - without standalone tracing
+FROM base AS builder
+WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Temporarily disable standalone for faster build
+ARG NEXT_PUBLIC_API_URL=https://xr2.uk/internal
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_OUTPUT_MODE=export
+ENV NODE_ENV=production
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# Build without standalone
+RUN NEXT_OUTPUT_STANDALONE=false pnpm build
+
+# Production image
+FROM base AS runner
+WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy all needed files (full build, not standalone)
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["pnpm", "start"]

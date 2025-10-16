@@ -15,20 +15,12 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   
-  // Экспериментальные настройки для максимальной производительности
+  // Экспериментальные настройки (минимальные для быстрой сборки)
   experimental: {
     optimizePackageImports: [
-      'lucide-react', 
+      'lucide-react',
       '@radix-ui/react-dialog',
-      '@radix-ui/react-tooltip',
-      '@radix-ui/react-select',
-      '@radix-ui/react-tabs',
-      'react-hook-form',
-      'date-fns'
     ],
-    optimizeServerReact: true,
-    serverMinification: true,
-    webVitalsAttribution: ['CLS', 'LCP'],
     scrollRestoration: true,
   },
 
@@ -61,25 +53,17 @@ const nextConfig = {
           },
         }
       } else {
-        // Агрессивное разделение чанков только для production
+        // Упрощенное разделение чанков для production (быстрая сборка)
         config.optimization = {
           ...config.optimization,
           splitChunks: {
             chunks: 'all',
-            minSize: 20000,
-            maxSize: 244000,
             cacheGroups: {
-              default: {
-                minChunks: 2,
-                priority: -20,
-                reuseExistingChunk: true,
-              },
               vendor: {
                 test: /[\\/]node_modules[\\/]/,
                 name: 'vendors',
                 priority: -10,
                 chunks: 'all',
-                maxSize: 244000,
               },
               monaco: {
                 test: /[\\/]node_modules[\\/](monaco-editor|@monaco-editor)[\\/]/,
@@ -88,18 +72,6 @@ const nextConfig = {
                 chunks: 'async',
                 enforce: true,
               },
-              radix: {
-                test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
-                name: 'radix',
-                priority: 5,
-                chunks: 'all',
-              },
-              lucide: {
-                test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
-                name: 'lucide',
-                priority: 3,
-                chunks: 'all',
-              }
             },
           },
         }
@@ -130,14 +102,16 @@ const nextConfig = {
   // Production оптимизации (всегда для Docker)
   output: 'standalone',
 
-  ...(process.env.NODE_ENV === 'production' && {
-    modularizeImports: {
-      'lucide-react': {
-        transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
-        skipDefaultConversion: true,
-      },
-    },
-  }),
+  // Оптимизация трейсинга для ускорения сборки
+  outputFileTracingExcludes: {
+    '*': [
+      'node_modules/@swc/core-linux-x64-gnu',
+      'node_modules/@swc/core-linux-x64-musl',
+      'node_modules/@esbuild',
+      'node_modules/webpack',
+      'node_modules/terser',
+    ],
+  },
 }
 
 export default nextConfig
