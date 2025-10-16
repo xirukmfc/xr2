@@ -1,3 +1,8 @@
+import os
+
+os.environ["FORWARDED_ALLOW_IPS"] = "*"
+os.environ["FORCE_HTTPS"] = "true"
+
 from sqladmin import Admin, ModelView
 from sqladmin.authentication import AuthenticationBackend
 from starlette.requests import Request
