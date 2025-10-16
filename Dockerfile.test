@@ -8,17 +8,17 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# Установка Playwright и браузеров
-RUN pip install playwright
-RUN playwright install chromium
-RUN playwright install-deps chromium
-
 # Установка рабочей директории
 WORKDIR /app
 
 # Копирование файлов проекта
 COPY requirements.txt .
 RUN pip install -r requirements.txt
+
+# Установка Playwright и браузеров
+RUN pip install playwright
+RUN playwright install chromium
+RUN playwright install-deps chromium
 
 # Копирование автотестов
 COPY auto-test.py .
