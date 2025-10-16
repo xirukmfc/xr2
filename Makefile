@@ -73,7 +73,7 @@ status: ## Показать статус сервисов
 	@docker-compose -p xr2-platform ps 2>/dev/null || echo "  Не запущены"
 	@echo ""
 	@echo "$(GREEN)Production сервисы:$(NC)"
-	@docker-compose --env-file .env.prod -f docker-compose.prod.yml -p xr2-platform ps 2>/dev/null || echo "  Не запущены"
+	@docker compose --env-file .env.prod -f docker-compose.prod.yml ps 2>/dev/null || echo "  Не запущены"
 	@echo ""
 	@ps aux | grep "next dev" | grep -v grep > /dev/null && echo "$(GREEN)✅ Frontend (local):$(NC) Running" || echo "$(YELLOW)❌ Frontend (local):$(NC) Not running"
 
@@ -118,6 +118,15 @@ rebuild: ## Пересобрать все образы
 	@docker compose --env-file .env.prod -f docker-compose.prod.yml build --no-cache
 	@echo "$(GREEN)✅ Образы пересобраны$(NC)"
 	@echo "$(YELLOW)Для применения изменений выполните:$(NC) make up"
+
+##@ Безопасность
+
+setup-admin-auth: ## Настроить авторизацию для /admin-docs/
+	@echo "$(YELLOW)🔐 Настройка авторизации для admin-docs...$(NC)"
+	@./scripts/generate-htpasswd.sh
+	@echo "$(YELLOW)Перезапуск nginx...$(NC)"
+	@docker compose --env-file .env.prod -f docker-compose.prod.yml restart nginx 2>/dev/null || echo "$(YELLOW)Запустите nginx для применения изменений$(NC)"
+	@echo "$(GREEN)✅ Готово!$(NC)"
 
 ##@ База данных
 
