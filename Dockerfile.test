@@ -19,10 +19,12 @@ RUN pip install -r requirements.txt
 
 # Копирование автотестов
 COPY auto-test.py .
-COPY test_report.json .
 
 # Создание директории для скриншотов
 RUN mkdir -p test_screenshots
+
+# Создание пустого файла отчета
+RUN echo '{}' > test_report.json
 
 # Установка рабочей директории
 WORKDIR /app
