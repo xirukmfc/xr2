@@ -1,11 +1,25 @@
 # Dockerfile для автотестов
 FROM python:3.12-slim
 
-# Установка системных зависимостей
+# Установка системных зависимостей для Playwright
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
     gnupg \
+    # Зависимости для Chromium
+    libnss3 \
+    libnspr4 \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libxss1 \
+    libasound2 \
+    fonts-liberation \
+    fonts-unifont \
     && rm -rf /var/lib/apt/lists/*
 
 # Установка рабочей директории
@@ -18,7 +32,6 @@ RUN pip install -r requirements.txt
 # Установка Playwright и браузеров
 RUN pip install playwright
 RUN playwright install chromium
-RUN playwright install-deps chromium
 
 # Копирование автотестов
 COPY auto-test.py .
