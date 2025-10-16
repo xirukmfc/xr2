@@ -210,9 +210,20 @@ class XR2AutoTester:
         try:
             self.playwright = await async_playwright().start()
             self.browser = await self.playwright.chromium.launch(
-                headless=False,  # Показывать браузер для отладки
+                headless=True,  # Показывать браузер для отладки
                 slow_mo=300,  # Замедлить действия для наблюдения
-                args=['--start-maximized', '--disable-web-security', '--disable-features=VizDisplayCompositor']
+                args=[
+                    '--start-maximized', 
+                    '--disable-web-security', 
+                    '--disable-features=VizDisplayCompositor',
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                    '--disable-extensions',
+                    '--disable-popup-blocking',
+                    '--disable-notifications',
+                    '--disable-web-security',]
             )
             self.context = await self.browser.new_context(
                 viewport={'width': 1920, 'height': 1080},

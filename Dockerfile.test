@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     libxfixes3 \
     libpango-1.0-0 \
     libcairo2 \
+    xvfb \
     && rm -rf /var/lib/apt/lists/*
 
 # Установка рабочей директории
@@ -47,5 +48,5 @@ RUN mkdir -p test_screenshots
 # Создание пустого файла отчета
 RUN echo '{}' > test_report.json
 
-# Команда по умолчанию
-CMD ["python", "auto-test.py"]
+# И изменить команду запуска:
+CMD ["xvfb-run", "-a", "python", "auto-test.py"]
