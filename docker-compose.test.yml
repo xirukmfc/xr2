@@ -1,0 +1,33 @@
+services:
+  # Автотесты
+  autotest:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: xr2_autotest
+    environment:
+      # URL сервера
+      SERVER_URL: ${SERVER_URL:-https://xr2.uk}
+      FRONTEND_URL: ${FRONTEND_URL:-https://xr2.uk}
+      BACKEND_URL: ${BACKEND_URL:-https://xr2.uk}
+      
+      # Тестовые данные
+      TEST_USERNAME: ${ADMIN_USERNAME:-admin}
+      TEST_PASSWORD: ${ADMIN_PASSWORD}
+      
+      # Настройки браузера
+      HEADLESS: ${HEADLESS:-true}
+      BROWSER_TIMEOUT: ${BROWSER_TIMEOUT:-30000}
+      
+      # Настройки тестов
+      TEST_TIMEOUT: ${TEST_TIMEOUT:-300}
+      SCREENSHOT_ON_FAILURE: ${SCREENSHOT_ON_FAILURE:-true}
+    volumes:
+      - ./test_screenshots:/app/test_screenshots
+      - ./test_report.json:/app/test_report.json
+    networks:
+      - xr2_network
+    restart: "no"
+    depends_on:
+      - app
+      - frontend
