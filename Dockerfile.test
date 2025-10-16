@@ -13,6 +13,9 @@ RUN pip install playwright
 RUN playwright install chromium
 RUN playwright install-deps chromium
 
+# Установка рабочей директории
+WORKDIR /app
+
 # Копирование файлов проекта
 COPY requirements.txt .
 RUN pip install -r requirements.txt
@@ -25,9 +28,6 @@ RUN mkdir -p test_screenshots
 
 # Создание пустого файла отчета
 RUN echo '{}' > test_report.json
-
-# Установка рабочей директории
-WORKDIR /app
 
 # Команда по умолчанию
 CMD ["python", "auto-test.py"]
