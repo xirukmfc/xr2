@@ -8,3 +8,6 @@ build/
 .env*
 .venv/
 .venv/
+
+# Nginx auth files (contains passwords)
+nginx/.htpasswd
