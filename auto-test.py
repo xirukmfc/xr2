@@ -1241,7 +1241,7 @@ class XR2AutoTester:
                         test_urls = [
                             f"{self.backend_url}{test_config['endpoint']}",
                             f"{self.backend_url}{test_config['endpoint']}".replace('localhost', '127.0.0.1'),
-                            f"http://127.0.0.1:8000{test_config['endpoint']}"
+                            f"{self.backend_url}{test_config['endpoint']}"
                         ]
 
                         request_successful = False
@@ -1962,7 +1962,7 @@ class XR2AutoTester:
             async def admin_login():
                 # Logout перед admin логином
                 await self.logout_user()
-                await self.page.goto("http://127.0.0.1:8000/admin")
+                await self.page.goto(f"{self.backend_url}/admin")
                 await self.page.wait_for_load_state("networkidle")
                 if "login" not in self.page.url:
                     return
@@ -1982,13 +1982,13 @@ class XR2AutoTester:
 
             async def set_limits_eee_zero():
                 # list → create
-                await self.page.goto("http://127.0.0.1:8000/admin/user-limits/list")
+                await self.page.goto(f"{self.backend_url}/admin/user-limits/list")
                 await self.page.wait_for_load_state("networkidle")
                 create = await self.page.query_selector('a:has-text("Create"), .addlink, a[href$="/create"]')
                 if create:
                     await create.click()
                 else:
-                    await self.page.goto("http://127.0.0.1:8000/admin/user-limits/create")
+                    await self.page.goto(f"{self.backend_url}/admin/user-limits/create")
 
                 # выбрать пользователя по ТЕКСТУ "User: eee"
                 user_select = await self.page.query_selector('select#user[name="user"]')
@@ -2179,7 +2179,7 @@ class XR2AutoTester:
                 timeout = aiohttp.ClientTimeout(total=10)
                 async with aiohttp.ClientSession(timeout=timeout) as session:
                     for variant in [url, url.replace("localhost", "127.0.0.1"),
-                                    "http://127.0.0.1:8000/api/v1/get-prompt"]:
+                                    f"{self.backend_url}/api/v1/get-prompt"]:
                         try:
                             async with session.post(variant, json=payload, headers=headers) as r:
                                 txt = (await r.text()).lower()
@@ -5143,7 +5143,7 @@ class XR2AutoTester:
 
                     try:
                         # Подготовка URL
-                        url = f"http://127.0.0.1:8000{endpoint_config['path']}"
+                        url = f"{self.backend_url}{endpoint_config['path']}"
 
                         # Замена динамических параметров
                         if endpoint_config.get('dynamic'):
@@ -5298,7 +5298,7 @@ class XR2AutoTester:
                 }
 
                 try:
-                    async with session.post("http://127.0.0.1:8000/api/v1/prompts", json=create_payload,
+                    async with session.post(f"{self.backend_url}/api/v1/prompts", json=create_payload,
                                             headers=headers) as response:
                         if response.status in [200, 201]:
                             prompt_data = await response.json()
@@ -5319,7 +5319,7 @@ class XR2AutoTester:
 
                     for i, version_payload in enumerate(version_payloads):
                         try:
-                            async with session.post(f"http://127.0.0.1:8000/api/v1/prompts/{test_prompt_id}/versions",
+                            async with session.post(f"{self.backend_url}/api/v1/prompts/{test_prompt_id}/versions",
                                                     json=version_payload, headers=headers) as response:
                                 if response.status in [200, 201]:
                                     logger.info(f"✅ Created version {i + 1}")
@@ -5459,7 +5459,7 @@ class XR2AutoTester:
                     try:
                         start_time = time.time()
 
-                        async with session.post("http://127.0.0.1:8000/api/v1/get-prompt", json=test_case["payload"],
+                        async with session.post(f"{self.backend_url}/api/v1/get-prompt", json=test_case["payload"],
                                                 headers=headers) as response:
                             response_time = time.time() - start_time
                             test_result_item["response_time"] = f"{response_time:.3f}s"
@@ -6827,7 +6827,7 @@ class XR2AutoTester:
 
             async with aiohttp.ClientSession() as session:
                 headers = {"Authorization": f"Bearer {self.auth_token}"}
-                base_url = "http://127.0.0.1:8000/internal/statistics"
+                base_url = f"{self.backend_url}/internal/statistics"
 
                 # 1. Тест общей статистики
                 try:
@@ -6938,7 +6938,7 @@ class XR2AutoTester:
 
                 # 1. Проверяем, что API логи записываются
                 try:
-                    async with session.get("http://127.0.0.1:8000/internal/api-usage/logs?limit=10", headers=headers) as resp:
+                    async with session.get(f"{self.backend_url}/internal/api-usage/logs?limit=10", headers=headers) as resp:
                         if resp.status == 200:
                             data = await resp.json()
                             if isinstance(data, dict) and 'logs' in data and len(data['logs']) > 0:
@@ -6955,7 +6955,7 @@ class XR2AutoTester:
 
                         for i in range(3):
                             async with session.post(
-                                "http://127.0.0.1:8000/api/v1/get-prompt",
+                                f"{self.backend_url}/api/v1/get-prompt",
                                 headers=product_headers,
                                 json={
                                     "slug": "nonexistent-prompt-for-test",
@@ -6973,7 +6973,7 @@ class XR2AutoTester:
 
                 # 3. Проверяем агрегацию статистики
                 try:
-                    async with session.post("http://127.0.0.1:8000/internal/statistics/aggregate?period_type=hour", headers=headers) as resp:
+                    async with session.post(f"{self.backend_url}/internal/statistics/aggregate?period_type=hour", headers=headers) as resp:
                         if resp.status == 200:
                             data = await resp.json()
                             if 'records_processed' in data:
@@ -6988,7 +6988,7 @@ class XR2AutoTester:
                 if hasattr(self, 'created_prompt_id') and self.created_prompt_id:
                     try:
                         prompt_id = self.created_prompt_id
-                        async with session.get(f"http://127.0.0.1:8000/internal/statistics/prompt/{prompt_id}/summary", headers=headers) as resp:
+                        async with session.get(f"{self.backend_url}/internal/statistics/prompt/{prompt_id}/summary", headers=headers) as resp:
                             if resp.status == 200:
                                 data = await resp.json()
                                 if isinstance(data, dict) and 'prompt_id' in data:
