@@ -23,7 +23,7 @@ python auto-test.py
 make test-server ADMIN_PASSWORD=your_admin_password
 
 # С дополнительными параметрами
-make test-server ADMIN_PASSWORD=your_password ADMIN_USERNAME=admin
+make test-server ADMIN_PASSWORD=LHaoawJOpxhYfGmP2mHX ADMIN_USERNAME=www
 ```
 
 ### Запуск через Docker Compose
