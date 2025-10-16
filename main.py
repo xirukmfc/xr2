@@ -90,6 +90,11 @@ app = FastAPI(
 # Add security middleware (should be first for maximum protection)
 app.add_middleware(SecurityMiddleware)
 
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["xr2.uk", "www.xr2.uk", "localhost", "127.0.0.1"]
+)
+
 # Add Swagger authentication middleware (protects admin docs)
 # Add Swagger authentication middleware (temporarily disabled for testing)
 # app.add_middleware(SwaggerAuthMiddleware, admin_path="/admin-docs")
