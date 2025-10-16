@@ -169,8 +169,8 @@ class TestResult:
 
 class XR2AutoTester:
     def __init__(self):
-        self.frontend_url = "http://127.0.0.1:3000"  # Используем IPv4 напрямую
-        self.backend_url = "http://127.0.0.1:8000"   # Используем IPv4 напрямую
+        self.frontend_url = os.getenv('FRONTEND_URL', 'http://127.0.0.1:3000')
+        self.backend_url = os.getenv('BACKEND_URL', 'http://127.0.0.1:8000')
         self.test_results: List[TestResult] = []
         self.browser: Optional[Browser] = None
         self.context: Optional[BrowserContext] = None
