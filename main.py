@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -47,6 +48,7 @@ from app.admin.sqladmin_config import create_admin
 # Load environment variables
 load_dotenv()
 
+os.environ["FORWARDED_ALLOW_IPS"] = "*"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -84,7 +86,9 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    lifespan=lifespan
+    lifespan=lifespan,
+    servers=[{"url": "https://xr2.uk", "description": "Production"}],
+    root_path_in_servers=False,
 )
 
 # Add security middleware (should be first for maximum protection)
