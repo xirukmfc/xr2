@@ -101,6 +101,10 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-production}
       DEBUG: ${DEBUG:-false}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
+
+      FORWARDED_ALLOW_IPS: "*"
+      ROOT_PATH: ""
+
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: xr2_user
