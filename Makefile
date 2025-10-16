@@ -37,6 +37,9 @@ deploy: ## 🚀 Деплой на production (без контейнерного 
 	@echo "$(YELLOW)📚 API Docs:   https://xr2.uk/docs$(NC)"
 	@echo "$(YELLOW)🔐 Admin:      https://xr2.uk/admin$(NC)"
 
+deploy-fast: ## ⚡ Быстрый деплой с оптимизациями (BuildKit, увеличенная память)
+	@export DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 && ./deploy-optimized.sh
+
 up: ## Запустить production (все в Docker)
 	@echo "$(GREEN)🚀 Запуск xR2 Platform$(NC)"
 	@docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
