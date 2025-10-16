@@ -144,7 +144,7 @@ test-server: ## 🧪 Запустить автотесты на сервере
 		-e SERVER_URL=https://xr2.uk \
 		-e FRONTEND_URL=https://xr2.uk \
 		-e BACKEND_URL=https://xr2.uk \
-		-e TEST_USERNAME=$(ADMIN_USERNAME:-admin) \
+		-e TEST_USERNAME=$${ADMIN_USERNAME:-admin} \
 		-e TEST_PASSWORD=$(ADMIN_PASSWORD) \
 		-v $(PWD)/test_screenshots:/app/test_screenshots \
 		-v $(PWD)/test_report.json:/app/test_report.json \
