@@ -63,8 +63,11 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
             response_body = None
             error_message = None
 
+            # Debug: log response type
+            # print(f"[DEBUG] Response type: {type(response)}, has body: {hasattr(response, 'body')}, has body_iterator: {hasattr(response, 'body_iterator')}")
+
             # Check if response already has body (non-streaming response)
-            if hasattr(response, 'body'):
+            if hasattr(response, 'body') and not hasattr(response, 'body_iterator'):
                 # Non-streaming response with pre-rendered body
                 try:
                     body_bytes = response.body
