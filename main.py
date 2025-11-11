@@ -21,6 +21,7 @@ from app.middleware.product_logging import ProductAPILoggingMiddleware
 from app.middleware.rate_limiter import RateLimitMiddleware, rate_limiter
 from app.middleware.swagger_auth import SwaggerAuthMiddleware
 from app.middleware.security import SecurityMiddleware
+from app.middleware.error_handler import ErrorHandlerMiddleware
 from fastapi import Form
 from fastapi.responses import RedirectResponse, Response
 
@@ -91,7 +92,10 @@ app = FastAPI(
     root_path_in_servers=False,
 )
 
-# Add security middleware (should be first for maximum protection)
+# Add error handler middleware (should be first to catch all errors)
+app.add_middleware(ErrorHandlerMiddleware)
+
+# Add security middleware (should be second for maximum protection)
 app.add_middleware(SecurityMiddleware)
 
 app.add_middleware(
