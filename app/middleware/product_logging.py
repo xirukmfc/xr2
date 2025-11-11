@@ -62,9 +62,28 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
             # Read response body for logging
             response_body = None
             error_message = None
-            
+
+            # Check if response already has body (non-streaming response)
+            if hasattr(response, 'body'):
+                # Non-streaming response with pre-rendered body
+                try:
+                    body_bytes = response.body
+                    body_text = body_bytes.decode('utf-8')
+                    if body_text:
+                        response_body = json.loads(body_text)
+
+                        # Extract error message for failed requests
+                        if response.status_code >= 400:
+                            if isinstance(response_body, dict):
+                                detail = response_body.get('detail', response_body)
+                                error_message = json.dumps(detail) if isinstance(detail, (dict, list)) else str(detail)
+                except Exception as e:
+                    response_body = {"error": f"Failed to parse response: {str(e)}"}
+                    if response.status_code >= 400:
+                        error_message = f"Response parsing failed: {str(e)}"
+
             # For streaming responses, we need to read the body
-            if hasattr(response, 'body_iterator'):
+            elif hasattr(response, 'body_iterator'):
                 try:
                     # Collect all chunks
                     body_chunks = []
