@@ -56,127 +56,44 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
                     print(f"Error getting API key: {e}")
         
         # Process the request
+        response = None
+        error_message = None
+        status_code = 500  # Default in case of exception
+
         try:
             response = await call_next(request)
-            
-            # Read response body for logging
-            response_body = None
-            error_message = None
+            status_code = response.status_code
 
-            # Debug: log response type (disabled)
-            # print(f"[DEBUG] Response type: {type(response)}, has body: {hasattr(response, 'body')}, has body_iterator: {hasattr(response, 'body_iterator')}")
+            # Extract error message from headers if available
+            # (Some frameworks set error details in headers)
+            if status_code >= 400:
+                error_message = f"HTTP {status_code}"
+                # Could extract from response headers if needed
 
-            # Check if response already has body (non-streaming response)
-            if hasattr(response, 'body') and not hasattr(response, 'body_iterator'):
-                # Non-streaming response with pre-rendered body
-                try:
-                    body_bytes = response.body
-                    body_text = body_bytes.decode('utf-8')
-                    if body_text:
-                        response_body = json.loads(body_text)
-
-                        # Extract error message for failed requests
-                        if response.status_code >= 400:
-                            if isinstance(response_body, dict):
-                                detail = response_body.get('detail', response_body)
-                                error_message = json.dumps(detail) if isinstance(detail, (dict, list)) else str(detail)
-                except Exception as e:
-                    response_body = {"error": f"Failed to parse response: {str(e)}"}
-                    if response.status_code >= 400:
-                        error_message = f"Response parsing failed: {str(e)}"
-
-            # Skip reading body_iterator entirely to avoid RuntimeError
-            # This was causing "Unexpected message received" errors
-            # Body logging is not critical, stability is more important
-            elif hasattr(response, 'body_iterator') and False:  # Disabled
-                try:
-                    # Collect all chunks
-                    body_chunks = []
-                    async for chunk in response.body_iterator:
-                        body_chunks.append(chunk)
-
-                    # Reconstruct the body
-                    body_bytes = b''.join(body_chunks)
-
-                    # Parse JSON if possible
-                    try:
-                        body_text = body_bytes.decode('utf-8')
-                        if body_text:
-                            response_body = json.loads(body_text)
-
-                            # Extract error message for failed requests
-                            if response.status_code >= 400:
-                                if isinstance(response_body, dict):
-                                    # Check for validation errors (422)
-                                    if response_body.get('detail') and isinstance(response_body['detail'], list):
-                                        errors = response_body['detail']
-                                        error_messages = []
-                                        for error in errors:
-                                            if isinstance(error, dict) and 'msg' in error:
-                                                loc = " -> ".join(str(x) for x in error.get('loc', []))
-                                                error_messages.append(f"{loc}: {error['msg']}")
-                                        error_message = "; ".join(error_messages) if error_messages else json.dumps(response_body.get('detail'))
-                                    else:
-                                        # Use json.dumps instead of str() to get proper JSON formatting
-                                        detail = response_body.get('detail', response_body)
-                                        error_message = json.dumps(detail) if isinstance(detail, (dict, list)) else str(detail)
-                                else:
-                                    error_message = json.dumps(response_body) if isinstance(response_body, (dict, list)) else str(response_body)
-                    except Exception as e:
-                        response_body = {"error": f"Failed to parse response: {str(e)}"}
-                        if response.status_code >= 400:
-                            error_message = f"Response parsing failed: {str(e)}"
-
-                    # Create a new response with the body for return
-                    from fastapi.responses import Response
-                    new_response = Response(
-                        content=body_bytes,
-                        status_code=response.status_code,
-                        headers=dict(response.headers),
-                        media_type=response.headers.get('content-type')
-                    )
-                    response = new_response
-
-                except RuntimeError as e:
-                    # Handle client disconnection during body read
-                    if "Unexpected message received" in str(e):
-                        print(f"[EXTERNAL API LOG] Client disconnected during response: {request.method} {request.url.path}")
-                        error_message = "Client disconnected"
-                        response_body = {"error": "Client closed connection"}
-
-                        # Create a proper response for disconnection
-                        from fastapi.responses import JSONResponse
-                        response = JSONResponse(
-                            status_code=499,  # Client Closed Request
-                            content=response_body
-                        )
-                    else:
-                        raise
-            
-            # Log the request
+            # Log the request (no response body, just metadata)
             await self._log_request(
                 request=request,
                 api_key=api_key,
                 request_body=request_body,
-                response_body=response_body,
-                status_code=response.status_code,
+                response_body=None,  # Don't log response body
+                status_code=status_code,
                 start_time=start_time,
                 error_message=error_message
             )
-            
+
             return response
-            
+
         except Exception as e:
             # Log failed requests
-            error_response = {"error": str(e)}
+            error_message = str(e)
             await self._log_request(
                 request=request,
                 api_key=api_key,
                 request_body=request_body,
-                response_body=error_response,
-                status_code=500,
+                response_body=None,  # Don't log response body
+                status_code=status_code,
                 start_time=start_time,
-                error_message=str(e)
+                error_message=error_message
             )
             raise
     
