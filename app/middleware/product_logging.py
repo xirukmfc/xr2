@@ -63,8 +63,8 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
             response_body = None
             error_message = None
 
-            # Debug: log response type
-            print(f"[DEBUG] Response type: {type(response)}, has body: {hasattr(response, 'body')}, has body_iterator: {hasattr(response, 'body_iterator')}")
+            # Debug: log response type (disabled)
+            # print(f"[DEBUG] Response type: {type(response)}, has body: {hasattr(response, 'body')}, has body_iterator: {hasattr(response, 'body_iterator')}")
 
             # Check if response already has body (non-streaming response)
             if hasattr(response, 'body') and not hasattr(response, 'body_iterator'):
@@ -85,8 +85,9 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
                     if response.status_code >= 400:
                         error_message = f"Response parsing failed: {str(e)}"
 
-            # For streaming responses, we need to read the body
-            elif hasattr(response, 'body_iterator'):
+            # For streaming responses with errors, we need to read the body for error logging
+            # For successful requests (200-399), skip body reading to avoid issues
+            elif hasattr(response, 'body_iterator') and response.status_code >= 400:
                 try:
                     # Collect all chunks
                     body_chunks = []
