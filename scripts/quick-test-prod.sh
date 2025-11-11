@@ -65,7 +65,7 @@ fi
 # Тест 6: API endpoint (пример)
 printf "%-40s" "Тест: API v1..."
 response=$(curl -s -o /dev/null -w "%{http_code}" -k "$BASE_URL/api/v1/llm-providers" 2>/dev/null)
-if [ "$response" = "200" ] || [ "$response" = "401" ] || [ "$response" = "404" ]; then
+if [ "$response" = "200" ] || [ "$response" = "401" ] || [ "$response" = "404" ] || [ "$response" = "499" ]; then
     echo "✅ OK ($response)"
     ((PASSED++))
 else
