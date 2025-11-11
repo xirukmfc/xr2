@@ -35,7 +35,10 @@ echo ""
 # Создаем fullchain.pem из отдельных файлов
 if [ -f "xr2.uk.crt" ] && [ -f "xr2.uk.ca-bundle" ]; then
     echo "Создание fullchain.pem из xr2.uk.crt и xr2.uk.ca-bundle..."
-    cat xr2.uk.crt xr2.uk.ca-bundle > fullchain.pem
+    # ВАЖНО: добавляем пустую строку между сертификатами
+    cat xr2.uk.crt > fullchain.pem
+    echo "" >> fullchain.pem
+    cat xr2.uk.ca-bundle >> fullchain.pem
     echo "✅ fullchain.pem создан"
 else
     echo "❌ Файлы xr2.uk.crt или xr2.uk.ca-bundle не найдены!"
@@ -43,7 +46,7 @@ else
     exit 1
 fi
 
-# Копируем приватный ключ
+# Копируем правильный приватный ключ
 if [ -f "xr2.uk.key" ]; then
     echo "Создание key.pem из xr2.uk.key..."
     cp xr2.uk.key key.pem
