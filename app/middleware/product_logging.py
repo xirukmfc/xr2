@@ -65,52 +65,63 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
             
             # For streaming responses, we need to read the body
             if hasattr(response, 'body_iterator'):
-                # Collect all chunks
-                body_chunks = []
-                async for chunk in response.body_iterator:
-                    body_chunks.append(chunk)
-                
-                # Reconstruct the body
-                body_bytes = b''.join(body_chunks)
-                
-                # Parse JSON if possible
                 try:
-                    body_text = body_bytes.decode('utf-8')
-                    if body_text:
-                        response_body = json.loads(body_text)
-                        
-                        # Extract error message for failed requests
-                        if response.status_code >= 400:
-                            if isinstance(response_body, dict):
-                                # Check for validation errors (422)
-                                if response_body.get('detail') and isinstance(response_body['detail'], list):
-                                    errors = response_body['detail']
-                                    error_messages = []
-                                    for error in errors:
-                                        if isinstance(error, dict) and 'msg' in error:
-                                            loc = " -> ".join(str(x) for x in error.get('loc', []))
-                                            error_messages.append(f"{loc}: {error['msg']}")
-                                    error_message = "; ".join(error_messages) if error_messages else json.dumps(response_body.get('detail'))
+                    # Collect all chunks
+                    body_chunks = []
+                    async for chunk in response.body_iterator:
+                        body_chunks.append(chunk)
+
+                    # Reconstruct the body
+                    body_bytes = b''.join(body_chunks)
+
+                    # Parse JSON if possible
+                    try:
+                        body_text = body_bytes.decode('utf-8')
+                        if body_text:
+                            response_body = json.loads(body_text)
+
+                            # Extract error message for failed requests
+                            if response.status_code >= 400:
+                                if isinstance(response_body, dict):
+                                    # Check for validation errors (422)
+                                    if response_body.get('detail') and isinstance(response_body['detail'], list):
+                                        errors = response_body['detail']
+                                        error_messages = []
+                                        for error in errors:
+                                            if isinstance(error, dict) and 'msg' in error:
+                                                loc = " -> ".join(str(x) for x in error.get('loc', []))
+                                                error_messages.append(f"{loc}: {error['msg']}")
+                                        error_message = "; ".join(error_messages) if error_messages else json.dumps(response_body.get('detail'))
+                                    else:
+                                        # Use json.dumps instead of str() to get proper JSON formatting
+                                        detail = response_body.get('detail', response_body)
+                                        error_message = json.dumps(detail) if isinstance(detail, (dict, list)) else str(detail)
                                 else:
-                                    # Use json.dumps instead of str() to get proper JSON formatting
-                                    detail = response_body.get('detail', response_body)
-                                    error_message = json.dumps(detail) if isinstance(detail, (dict, list)) else str(detail)
-                            else:
-                                error_message = json.dumps(response_body) if isinstance(response_body, (dict, list)) else str(response_body)
-                except Exception as e:
-                    response_body = {"error": f"Failed to parse response: {str(e)}"}
-                    if response.status_code >= 400:
-                        error_message = f"Response parsing failed: {str(e)}"
-                
-                # Create a new response with the body for return
-                from fastapi.responses import Response
-                new_response = Response(
-                    content=body_bytes,
-                    status_code=response.status_code,
-                    headers=dict(response.headers),
-                    media_type=response.headers.get('content-type')
-                )
-                response = new_response
+                                    error_message = json.dumps(response_body) if isinstance(response_body, (dict, list)) else str(response_body)
+                    except Exception as e:
+                        response_body = {"error": f"Failed to parse response: {str(e)}"}
+                        if response.status_code >= 400:
+                            error_message = f"Response parsing failed: {str(e)}"
+
+                    # Create a new response with the body for return
+                    from fastapi.responses import Response
+                    new_response = Response(
+                        content=body_bytes,
+                        status_code=response.status_code,
+                        headers=dict(response.headers),
+                        media_type=response.headers.get('content-type')
+                    )
+                    response = new_response
+
+                except RuntimeError as e:
+                    # Handle client disconnection during body read
+                    if "Unexpected message received" in str(e):
+                        print(f"[EXTERNAL API LOG] Client disconnected during response: {request.method} {request.url.path}")
+                        error_message = "Client disconnected"
+                        response_body = {"error": "Client closed connection"}
+                        # Don't re-raise, just log and return
+                    else:
+                        raise
             
             # Log the request
             await self._log_request(
