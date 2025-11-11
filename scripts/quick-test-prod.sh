@@ -126,15 +126,27 @@ echo ""
 echo "=========================================="
 echo "Результаты"
 echo "=========================================="
+
+# Пересчитаем FAILED для корректности
+FAILED=$((TOTAL - PASSED))
+
 echo "Всего тестов:   $TOTAL"
 echo "Пройдено:       $PASSED ✅"
 echo "Провалено:      $FAILED ❌"
+
+if [ "$PASSED" -eq "$TOTAL" ]; then
+    SUCCESS_RATE=100
+else
+    SUCCESS_RATE=$((PASSED * 100 / TOTAL))
+fi
+
+echo "Успешность:     ${SUCCESS_RATE}%"
 echo ""
 
 if [ $FAILED -eq 0 ]; then
     echo "🎉 Все тесты пройдены успешно!"
     exit 0
 else
-    echo "⚠️  Некоторые тесты провалены"
+    echo "⚠️  Некоторые тесты провалены ($FAILED из $TOTAL)"
     exit 1
 fi
