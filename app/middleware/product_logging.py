@@ -119,7 +119,13 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
                         print(f"[EXTERNAL API LOG] Client disconnected during response: {request.method} {request.url.path}")
                         error_message = "Client disconnected"
                         response_body = {"error": "Client closed connection"}
-                        # Don't re-raise, just log and return
+
+                        # Create a proper response for disconnection
+                        from fastapi.responses import JSONResponse
+                        response = JSONResponse(
+                            status_code=499,  # Client Closed Request
+                            content=response_body
+                        )
                     else:
                         raise
             
