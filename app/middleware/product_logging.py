@@ -23,20 +23,13 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
         start_time = time.perf_counter()
         
         # Read request body for logging
+        # Note: request.body() caches the body, so it's safe to call multiple times
         request_body = None
         try:
-            # Read the body once and store it
             body_bytes = await request.body()
             request_body = json.loads(body_bytes) if body_bytes else None
         except Exception:
             request_body = None
-        
-        # Create a new request object with the body restored
-        async def receive():
-            return {"type": "http.request", "body": body_bytes, "more_body": False}
-        
-        # Replace the receive callable
-        request._receive = receive
         
         # Extract API key from Authorization header
         api_key = None
