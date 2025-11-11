@@ -85,9 +85,10 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
                     if response.status_code >= 400:
                         error_message = f"Response parsing failed: {str(e)}"
 
-            # For streaming responses with errors, we need to read the body for error logging
-            # For successful requests (200-399), skip body reading to avoid issues
-            elif hasattr(response, 'body_iterator') and response.status_code >= 400:
+            # Skip reading body_iterator entirely to avoid RuntimeError
+            # This was causing "Unexpected message received" errors
+            # Body logging is not critical, stability is more important
+            elif hasattr(response, 'body_iterator') and False:  # Disabled
                 try:
                     # Collect all chunks
                     body_chunks = []
