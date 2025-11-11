@@ -404,3 +404,6 @@ from app.api.events import router as events_router
 # Add events routes to public API router (external API)
 public_api_router.include_router(events_router, prefix="", tags=["external api"])
 
+
+
+

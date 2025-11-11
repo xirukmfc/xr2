@@ -158,3 +158,13 @@ make logs-app
 2. Убедитесь в доступности сервера
 3. Проверьте правильность учетных данных
 4. Создайте issue в репозитории
+
+docker run --rm -it \
+  -e SERVER_URL=https://xr2.uk \
+  -e FRONTEND_URL=https://xr2.uk \
+  -e BACKEND_URL=https://xr2.uk \
+  -e TEST_USERNAME=www \
+  -e TEST_PASSWORD=***REMOVED_ADMIN_PWD*** \
+  -v $(pwd)/test_screenshots:/app/test_screenshots \
+  -v $(pwd)/test_report.json:/app/test_report.json \
+  xr2-autotest bash

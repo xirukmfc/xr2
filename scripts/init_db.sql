@@ -38,3 +38,6 @@ BEGIN
     RAISE NOTICE 'xR2 Database initialized successfully!';
 END $$;
 
+
+
+

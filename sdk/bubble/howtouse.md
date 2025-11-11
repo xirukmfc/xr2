@@ -37,3 +37,6 @@ import { getPrompt } from './dist/modules/getPrompt';
 - 404: Validate `slug` and ownership.
 - 429: Rate limit hit.
 
+
+
+
