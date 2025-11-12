@@ -107,6 +107,26 @@ async def create_event_definition(
         print(f"[EVENT_DEF] Creating event definition for workspace: {workspace_id}")
         print(f"[EVENT_DEF] Request data: {request.dict()}")
 
+        # Check if already exists
+        existing_query = select(EventDefinition).where(
+            and_(
+                EventDefinition.workspace_id == workspace_id,
+                EventDefinition.event_name == request.event_name
+            )
+        )
+        result = await db.execute(existing_query)
+        existing = result.scalar_one_or_none()
+
+        if existing:
+            print(f"[EVENT_DEF] Already exists: {existing.id}")
+            return {
+                "id": str(existing.id),
+                "status": "already_exists",
+                "event_name": existing.event_name,
+                "category": existing.category,
+                "created_at": existing.created_at.isoformat() if existing.created_at else None
+            }
+
         # Create new event definition
         definition = EventDefinition(
             workspace_id=workspace_id,
