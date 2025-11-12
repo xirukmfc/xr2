@@ -100,7 +100,7 @@ app.add_middleware(SecurityMiddleware)
 
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["xr2.uk", "www.xr2.uk", "localhost", "127.0.0.1"]
+    allowed_hosts=["xr2.uk", "www.xr2.uk", "localhost", "127.0.0.1", "app"]
 )
 
 # Add Swagger authentication middleware (protects admin docs)
