@@ -234,7 +234,7 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
     console.log('[TestModal] Request body:', requestBody)
     const fetchStart = performance.now()
 
-    const res = await fetch("http://localhost:8000/internal/llm/test-run", {
+    const res = await fetch("/internal/llm/test-run", {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
