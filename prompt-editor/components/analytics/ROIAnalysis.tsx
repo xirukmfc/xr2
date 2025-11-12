@@ -36,8 +36,8 @@ export default function ROIAnalysis({ promptId }: ROIAnalysisProps) {
     setLoading(true);
     try {
       const endpoint = promptId
-        ? `/api/internal/analytics/roi/${promptId}?period_days=${period}`
-        : `/api/internal/analytics/roi/workspace?period_days=${period}`;
+        ? `/internal/analytics/roi/${promptId}?period_days=${period}`
+        : `/internal/analytics/roi/workspace?period_days=${period}`;
 
       const response = await fetch(endpoint, {
         credentials: 'include'

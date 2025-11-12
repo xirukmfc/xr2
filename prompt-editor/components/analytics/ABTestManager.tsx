@@ -65,7 +65,7 @@ export default function ABTestManager({ promptId }: { promptId: string }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/internal/ab-tests?prompt_id=${promptId}`, {
+      const response = await fetch(`/internal/ab-tests?prompt_id=${promptId}`, {
         credentials: 'include'
       });
 

@@ -41,7 +41,7 @@ export default function RecentEventsTable() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/internal/analytics/events', {
+      const response = await fetch('/internal/analytics/events', {
         credentials: 'include'
       });
 
