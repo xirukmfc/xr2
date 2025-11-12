@@ -66,9 +66,7 @@ export default function ABTestManager({ promptId }: { promptId: string }) {
     setError(null);
     try {
       const response = await fetch(`/api/internal/ab-tests?prompt_id=${promptId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -90,8 +88,8 @@ export default function ABTestManager({ promptId }: { promptId: string }) {
     try {
       const response = await fetch(`/internal/ab-tests/${testId}/start`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
           'Content-Type': 'application/json'
         }
       });
@@ -108,9 +106,7 @@ export default function ABTestManager({ promptId }: { promptId: string }) {
     try {
       const response = await fetch(`/internal/ab-tests/${testId}/stop`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
+        credentials: 'include'
       });
 
       if (response.ok) {

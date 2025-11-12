@@ -126,16 +126,12 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
         : `http://localhost:8000/internal/analytics/dashboard-test?${queryParams}`;
 
       // Use different headers for test vs production endpoints
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json'
-      };
-
-      // Only add authorization for non-test endpoints
-      if (!endpoint.includes('dashboard-test')) {
-        headers['Authorization'] = `Bearer ${localStorage.getItem('auth_token')}`;
-      }
-
-      const response = await fetch(endpoint, { headers });
+      const response = await fetch(endpoint, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
       if (!response.ok) {
         if (response.status === 401) {

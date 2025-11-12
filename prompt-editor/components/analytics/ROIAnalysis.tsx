@@ -40,9 +40,7 @@ export default function ROIAnalysis({ promptId }: ROIAnalysisProps) {
         : `/api/internal/analytics/roi/workspace?period_days=${period}`;
 
       const response = await fetch(endpoint, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
+        credentials: 'include'
       });
 
       const data = await response.json();
