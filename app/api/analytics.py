@@ -365,7 +365,7 @@ async def get_workspace_events(
             "event_type": event.event_type,
             "outcome": event.outcome,
             "user_id": event.user_id,
-            "metadata": event.event_metadata,
+            "event_metadata": event.event_metadata,
             "business_metrics": event.business_metrics,
             "created_at": event.created_at.isoformat()
         }
