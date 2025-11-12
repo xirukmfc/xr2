@@ -72,7 +72,7 @@ export default function SimpleABTestManager() {
 
   const loadTests = async () => {
     try {
-      const response = await fetch('/internal/ab-tests-simple/test');
+      const response = await fetch('/internal/ab-tests-simple/');
       if (response.ok) {
         const data = await response.json();
         setTests(data);
@@ -84,7 +84,7 @@ export default function SimpleABTestManager() {
 
   const loadPrompts = async () => {
     try {
-      const response = await fetch('/internal/ab-tests-simple/test/prompts');
+      const response = await fetch('/internal/ab-tests-simple/prompts');
       if (response.ok) {
         const data = await response.json();
         setPrompts(data);
@@ -107,7 +107,7 @@ export default function SimpleABTestManager() {
 
     setLoading(true);
     try {
-      const response = await fetch('/internal/ab-tests-simple/test', {
+      const response = await fetch('/internal/ab-tests-simple/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ export default function SimpleABTestManager() {
   const startTest = async (testId: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`/internal/ab-tests-simple/test/${testId}/start`, {
+      const response = await fetch(`/internal/ab-tests-simple/${testId}/start`, {
         method: 'POST',
       });
 
@@ -161,7 +161,7 @@ export default function SimpleABTestManager() {
   const stopTest = async (testId: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`/internal/ab-tests-simple/test/${testId}/stop`, {
+      const response = await fetch(`/internal/ab-tests-simple/${testId}/stop`, {
         method: 'POST',
       });
 
@@ -186,7 +186,7 @@ export default function SimpleABTestManager() {
 
     setLoading(true);
     try {
-      const response = await fetch(`/internal/ab-tests-simple/test/${testId}/complete`, {
+      const response = await fetch(`/internal/ab-tests-simple/${testId}/complete`, {
         method: 'POST',
       });
 
@@ -211,7 +211,7 @@ export default function SimpleABTestManager() {
 
     setLoading(true);
     try {
-      const response = await fetch(`/internal/ab-tests-simple/test/${testId}`, {
+      const response = await fetch(`/internal/ab-tests-simple/${testId}`, {
         method: 'DELETE',
       });
 
