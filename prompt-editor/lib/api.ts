@@ -638,14 +638,14 @@ class ApiClient {
     }
 
     async getPublicPrompt(token: string): Promise<PublicPromptData> {
-        // This endpoint doesn't require authentication and uses a different base URL
+        // This endpoint doesn't require authentication
+        // Use /api/share/{token} to avoid conflict with Next.js /share/[token] route
         const originalToken = this.token;
         this.token = null; // Temporarily remove token for public endpoint
 
         try {
-            // Use direct fetch since we need to call a different endpoint structure
-            const url = `${this.baseUrl.replace('/internal', '')}/share/${token}`;
-            const response = await fetch(url, {
+            // Call backend API directly via /api/share/{token}
+            const response = await fetch(`/api/share/${token}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
