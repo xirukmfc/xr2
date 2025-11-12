@@ -13,6 +13,7 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { CheckCircle, XCircle, Clock, AlertTriangle, Search, Filter } from 'lucide-react';
+import { apiClient } from '@/lib/api';
 
 interface PromptEvent {
   id: string;
@@ -41,16 +42,8 @@ export default function RecentEventsTable() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/internal/analytics/events', {
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setEvents(data);
-      } else {
-        console.error('Failed to fetch events:', response.status);
-      }
+      const data = await apiClient.request<PromptEvent[]>('/analytics/events');
+      setEvents(data);
     } catch (error) {
       console.error('Failed to fetch events:', error);
     } finally {
