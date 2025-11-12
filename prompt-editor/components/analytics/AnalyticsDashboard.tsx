@@ -122,42 +122,13 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
       }
 
       const endpoint = promptId
-        ? `/internal/analytics/performance/${promptId}?${queryParams}`
-        : `/internal/analytics/dashboard?${queryParams}`;
+        ? `/analytics/performance/${promptId}?${queryParams}`
+        : `/analytics/dashboard?${queryParams}`;
 
-      // Use different headers for test vs production endpoints
-      const response = await fetch(endpoint, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          console.warn('Authentication required for analytics API');
-          // Set empty data instead of error to gracefully handle auth issues
-          setData({
-            summary: { total_events: 0, success_rate: 0, total_revenue: 0, unique_users: 0, avg_response_time_ms: 0, roi_percentage: 0 },
-            top_prompts: [],
-            trends: [],
-            recent_events: [],
-            monthly_events_chart: { dates: [], series: [] }
-          });
-          return;
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const text = await response.text();
-      try {
-        const analyticsData = JSON.parse(text);
-        console.log('Analytics data received:', analyticsData);
-        setData(analyticsData);
-      } catch (parseError) {
-        console.error('Failed to parse JSON response:', text);
-        throw new Error('Invalid JSON response from server');
-      }
+      // Use apiClient with JWT authentication
+      const analyticsData = await apiClient.request(endpoint);
+      console.log('Analytics data received:', analyticsData);
+      setData(analyticsData);
     } catch (error) {
       console.error('Failed to fetch analytics:', error);
       // Set fallback data for graceful degradation
