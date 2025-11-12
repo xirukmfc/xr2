@@ -122,8 +122,8 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
       }
 
       const endpoint = promptId
-        ? `http://localhost:8000/internal/analytics/performance/${promptId}?${queryParams}`
-        : `http://localhost:8000/internal/analytics/dashboard-test?${queryParams}`;
+        ? `/internal/analytics/performance/${promptId}?${queryParams}`
+        : `/internal/analytics/dashboard?${queryParams}`;
 
       // Use different headers for test vs production endpoints
       const response = await fetch(endpoint, {

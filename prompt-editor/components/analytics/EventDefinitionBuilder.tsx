@@ -288,7 +288,7 @@ export default function EventDefinitionBuilder({
     const traceId = `evt_${Math.random().toString(36).substring(2, 11)}_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
 
     return `curl -X 'POST' \\
-  'http://localhost:8000/internal/events/events' \\
+  '/internal/events/events' \\
   -H 'accept: application/json' \\
   -H 'Content-Type: application/json' \\
   -d '{

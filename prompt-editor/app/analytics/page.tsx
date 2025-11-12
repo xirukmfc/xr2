@@ -20,6 +20,7 @@ import ConversionsManager from '@/components/analytics/ConversionsManager';
 import NewEventModal from '@/components/analytics/NewEventModal';
 import NewConversionModal from '@/components/analytics/NewConversionModal';
 import SimpleEventsTable from '@/components/analytics/SimpleEventsTable';
+import RecentEventsTable from '@/components/analytics/RecentEventsTable';
 import FunnelAnalysis from '@/components/analytics/FunnelAnalysis';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -158,15 +159,7 @@ export default function AnalyticsPage() {
 
   const renderRecentEventsSection = () => (
     <div className="space-y-3">
-      <div>
-        <h2 className="text-base font-semibold">Recent Events</h2>
-        <p className="text-xs text-slate-600">View recent events tracked across your workspace</p>
-      </div>
-      {loading ? (
-        <div className="flex items-center justify-center h-48">Loading events...</div>
-      ) : (
-        <SimpleEventsTable events={analyticsData?.recent_events || []} />
-      )}
+      <RecentEventsTable />
     </div>
   )
 
