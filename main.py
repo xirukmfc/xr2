@@ -104,8 +104,7 @@ app.add_middleware(
 )
 
 # Add Swagger authentication middleware (protects admin docs)
-# Add Swagger authentication middleware (temporarily disabled for testing)
-# app.add_middleware(SwaggerAuthMiddleware, admin_path="/admin-docs")
+app.add_middleware(SwaggerAuthMiddleware, admin_path="/admin-docs")
 
 # Add product API logging middleware
 app.add_middleware(ProductAPILoggingMiddleware)

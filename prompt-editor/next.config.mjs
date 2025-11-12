@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: false, // Disable to prevent double requests in production
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -10,7 +11,7 @@ const nextConfig = {
     unoptimized: true,
     formats: ['image/webp', 'image/avif'],
   },
-  
+
   // Прогрессивная загрузка и оптимизации
   poweredByHeader: false,
   compress: true,
