@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 
 from app.core.database import get_session
 from app.core.auth import get_current_user
+from app.core.config import settings
 from app.models.user import User
 from app.models.prompt import PromptVersion
 from app.models.public_share import PublicShare
@@ -85,7 +86,8 @@ async def create_public_share(
     await session.refresh(public_share)
 
     # Construct the share URL
-    base_url = "http://localhost:3000"  # TODO: Make this configurable
+    # Use FRONTEND_URL from settings, fallback to localhost for development
+    base_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
     share_url = f"{base_url}/share/{token}"
 
     return PublicShareResponse(

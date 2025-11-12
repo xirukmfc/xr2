@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "xR2 Platform"
     VERSION: str = "1.0.0"
     DEBUG: bool = False
+    FRONTEND_URL: str = "http://localhost:3000"  # Frontend URL for generating links
 
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]

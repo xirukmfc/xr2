@@ -42,14 +42,14 @@ export default function RecentEventsTable() {
     setLoading(true);
     try {
       const response = await fetch('/api/internal/analytics/events', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
+        credentials: 'include'
       });
 
       if (response.ok) {
         const data = await response.json();
         setEvents(data);
+      } else {
+        console.error('Failed to fetch events:', response.status);
       }
     } catch (error) {
       console.error('Failed to fetch events:', error);
