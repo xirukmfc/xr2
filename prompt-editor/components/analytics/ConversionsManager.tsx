@@ -82,7 +82,7 @@ export default function ConversionsManager({ showCreateButton = true }: { showCr
 
       // Load data using protected API endpoints
       const results = await Promise.allSettled([
-        apiClient.request('/conversion-funnels').catch(err => {
+        apiClient.request('/conversion-funnels/').catch(err => {
           console.warn('Conversion funnels endpoint error:', err.message);
           return [];
         }),
@@ -170,7 +170,7 @@ export default function ConversionsManager({ showCreateButton = true }: { showCr
           body: JSON.stringify(payload)
         });
       } else {
-        await apiClient.request('/conversion-funnels', {
+        await apiClient.request('/conversion-funnels/', {
           method: 'POST',
           body: JSON.stringify(payload)
         });

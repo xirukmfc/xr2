@@ -194,7 +194,7 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
 
   const loadSavedConfigurations = async () => {
     try {
-      const response = await fetch('/internal/custom-funnel-configurations/test');
+      const response = await fetch('/internal/custom-funnel-configurations/');
       if (response.ok) {
         const configurations = await response.json();
         setSavedConfigurations(configurations);
@@ -213,7 +213,7 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
 
   const loadEventDefinitions = async () => {
     try {
-      const response = await fetch('/internal/event-definitions/test');
+      const response = await fetch('/internal/event-definitions/');
       if (response.ok) {
         const definitions = await response.json();
         setEventDefinitions(definitions);
@@ -225,7 +225,7 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
 
   const loadCompletedABTests = async () => {
     try {
-      const response = await fetch('/internal/ab-tests-simple/test');
+      const response = await fetch('/internal/ab-tests-simple/');
       if (response.ok) {
         const tests = await response.json();
         const completed = tests.filter((test: ABTest) => test.status === 'completed');
@@ -241,7 +241,7 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
 
     setLoading(true);
     try {
-      const response = await fetch('/internal/analytics/funnel-test', {
+      const response = await fetch('/internal/analytics/funnel/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -270,7 +270,7 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
   const saveFunnelConfiguration = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/internal/custom-funnel-configurations/test', {
+      const response = await fetch('/internal/custom-funnel-configurations/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -323,7 +323,7 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
 
     setLoading(true);
     try {
-      const response = await fetch(`/internal/custom-funnel-configurations/test/${configId}`, {
+      const response = await fetch(`/internal/custom-funnel-configurations/${configId}`, {
         method: 'DELETE',
       });
 

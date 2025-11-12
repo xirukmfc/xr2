@@ -113,7 +113,7 @@ export default function NewConversionModal({ onSave, onCancel }: NewConversionMo
         conversion_window_hours: formData.conversion_window_hours
       };
 
-      await apiClient.request('/conversion-funnels', {
+      await apiClient.request('/conversion-funnels/', {
         method: 'POST',
         body: JSON.stringify(payload)
       });

@@ -176,7 +176,7 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
   const fetchConversions = async () => {
     try {
       // Fetch conversion funnels using protected endpoint
-      const conversionsData = await apiClient.request('/conversion-funnels');
+      const conversionsData = await apiClient.request('/conversion-funnels/');
       console.log('Conversions loaded:', conversionsData);
       setConversions(conversionsData);
 

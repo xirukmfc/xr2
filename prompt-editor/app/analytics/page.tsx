@@ -22,6 +22,7 @@ import NewConversionModal from '@/components/analytics/NewConversionModal';
 import SimpleEventsTable from '@/components/analytics/SimpleEventsTable';
 import RecentEventsTable from '@/components/analytics/RecentEventsTable';
 import FunnelAnalysis from '@/components/analytics/FunnelAnalysis';
+import { apiClient } from '@/lib/api';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
@@ -55,20 +56,15 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const fetchAnalyticsData = async () => {
       try {
-        // Remove test endpoint or replace with actual API call
-        // const response = await fetch('/internal/analytics/dashboard?period=7d');
-        // if (response.ok) {
-        //   const data = await response.json();
-        //   setAnalyticsData(data);
-        // }
-
-        // For now, set empty data until proper endpoint is implemented
+        const data = await apiClient.request('/analytics/dashboard?period=30d');
+        setAnalyticsData(data);
+      } catch (error) {
+        console.error('Failed to fetch analytics data:', error);
+        // Set empty data as fallback
         setAnalyticsData({
           recent_events: [],
           monthly_events_chart: { dates: [], series: [] }
         });
-      } catch (error) {
-        console.error('Failed to fetch analytics data:', error);
       } finally {
         setLoading(false);
       }
