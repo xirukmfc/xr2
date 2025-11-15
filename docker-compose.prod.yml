@@ -167,6 +167,38 @@ services:
       retries: 3
       start_period: 60s
 
+  # TGSight 2.0 - Временный проект для демонстрации
+  tgsight:
+    build:
+      context: ./tgsight2.0
+      dockerfile: Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+      shm_size: '2gb'
+    container_name: xr2_tgsight_prod
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+    ports:
+      - "3001:3001"
+    networks:
+      - xr2_network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://0.0.0.0:3001/tgsight"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
   # Nginx
   nginx:
     image: nginx:alpine
@@ -183,6 +215,7 @@ services:
     depends_on:
       - app
       - frontend
+      - tgsight
     networks:
       - xr2_network
     restart: unless-stopped

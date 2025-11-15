@@ -10,3 +10,9 @@ build/
 
 # Nginx auth files (contains passwords)
 nginx/.htpasswd
+
+# Production server credentials
+PRODUCTION_SERVER.md
+
+# TGSight deployment guide (temporary, not needed in repo)
+TGSIGHT_DEPLOY_GUIDE.md

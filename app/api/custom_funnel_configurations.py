@@ -115,16 +115,16 @@ async def create_test_custom_funnel_configuration(
     """Create a new custom funnel configuration for testing (no authentication)"""
     try:
         # Get first real workspace_id from the database
-        from app.models.analytics import PromptEvent
+        from app.models.workspace import Workspace
         workspace_query = await db.execute(
-            select(PromptEvent.workspace_id).limit(1)
+            select(Workspace.id).limit(1)
         )
         workspace_row = workspace_query.first()
 
         if not workspace_row:
             raise HTTPException(404, "No workspace found")
 
-        workspace_id = workspace_row.workspace_id
+        workspace_id = workspace_row.id
 
         # Check name uniqueness
         existing = await db.execute(
