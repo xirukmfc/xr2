@@ -156,8 +156,8 @@ class ProductAPILog(Base):
     method = Column(String(10), nullable=False)
 
     # Prompt tracking (populated when possible from request data)
-    prompt_id = Column(UUID(as_uuid=True), ForeignKey('prompts.id'), nullable=True, index=True)
-    prompt_version_id = Column(UUID(as_uuid=True), ForeignKey('prompt_versions.id'), nullable=True, index=True)
+    prompt_id = Column(UUID(as_uuid=True), ForeignKey('prompts.id', ondelete='SET NULL'), nullable=True, index=True)
+    prompt_version_id = Column(UUID(as_uuid=True), ForeignKey('prompt_versions.id', ondelete='SET NULL'), nullable=True, index=True)
     
     # Request/Response data
     request_params = Column(JSON)  # Query parameters
