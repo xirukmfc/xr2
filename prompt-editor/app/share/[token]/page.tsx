@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Copy, Check, User, Calendar } from 'lucide-react'
+import { Copy, Check, User, Calendar, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getPublicPrompt } from '@/lib/api'
 import type { PublicPromptData } from '@/lib/api'
@@ -63,7 +63,15 @@ export default function SharedPromptPage() {
         const data = await getPublicPrompt(token)
         setPromptData(data)
       } catch (err: any) {
-        setError(err.message || 'Failed to load shared prompt')
+        // Parse error message to provide user-friendly feedback
+        const errorMessage = err.message || ''
+        if (errorMessage.includes('404') || errorMessage.toLowerCase().includes('not found')) {
+          setError('Prompt not found. This shared link may have been deleted or has expired.')
+        } else if (errorMessage.includes('403') || errorMessage.toLowerCase().includes('forbidden')) {
+          setError('Access denied. You do not have permission to view this prompt.')
+        } else {
+          setError('Failed to load shared prompt. Please try again later.')
+        }
       } finally {
         setLoading(false)
       }
@@ -100,10 +108,21 @@ export default function SharedPromptPage() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardHeader>
-            <CardTitle className="text-destructive">Error</CardTitle>
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-destructive" />
+              <CardTitle className="text-destructive">Prompt Not Found</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <p className="text-muted-foreground">{error}</p>
+            <div className="pt-2 text-sm text-muted-foreground">
+              <p className="font-medium mb-1">Possible reasons:</p>
+              <ul className="list-disc list-inside space-y-1 text-xs">
+                <li>The shared link has been deleted by the owner</li>
+                <li>The link has expired</li>
+                <li>The link URL is incorrect</li>
+              </ul>
+            </div>
           </CardContent>
         </Card>
       </div>
