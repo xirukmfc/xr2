@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { ProtectedRoute } from "@/components/protected-route"
-import {MoreHorizontal, Copy, Edit2, Trash2, Eye, EyeOff, Search, Key, Edit} from "lucide-react"
+import {MoreHorizontal, Copy, Edit2, Trash2, Eye, EyeOff, Search, Key, Edit, BookOpen} from "lucide-react"
 import { getApiKeys, deleteApiKey, createApiKey } from "@/lib/api"
 import { useCountsContext } from "@/components/counts-context"
 import { Button } from "@/components/ui/button"
@@ -295,8 +295,16 @@ function ApiKeysPageContent() {
               </div>
             </div>
 
-            {/* Create API Key button */}
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
+            {/* Create API Key button and Documentation link */}
+            <div className="max-w-7xl mx-auto flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => window.open('/docs', '_blank')}
+                className="h-[35px] border-blue-600 text-blue-600 hover:bg-blue-50"
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                API Docs
+              </Button>
               <Button
                 onClick={() => setIsNewApiKeyModalOpen(true)}
                 className="bg-blue-600/90 hover:bg-blue-600 text-white h-[35px]"
