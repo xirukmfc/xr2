@@ -11,7 +11,7 @@ import {
 import DynamicMonaco from "@/components/dynamic-monaco"
 import {useMonaco} from "@monaco-editor/react"
 import {Button} from "@/components/ui/button"
-import {Maximize2, Plus, Minus, Copy} from "lucide-react"
+import {Maximize2, Plus, Minus, Copy, FileText} from "lucide-react"
 import FullScreenEditor from "@/components/full-screen-editor"
 import type {PromptData} from "@/app/editor/[id]/page"
 import {ModelPicker} from "@/components/model-picker"
@@ -75,8 +75,24 @@ export function CenterPanel({
     const [theme] = useState<"vs" | "vs-dark">("vs")
     const [showLineNumbers] = useState(true)
     const [fontSize, setFontSize] = useState(14)
+    const [editorLanguage, setEditorLanguage] = useState<"markdown" | "plaintext">("plaintext")
 
     const {showNotification} = useNotification()
+
+    // Update language when editorLanguage changes
+    useEffect(() => {
+        if (!monaco) return
+
+        if (sysModelRef.current) {
+            monaco.editor.setModelLanguage(sysModelRef.current, editorLanguage)
+        }
+        if (userModelRef.current) {
+            monaco.editor.setModelLanguage(userModelRef.current, editorLanguage)
+        }
+        if (assistantModelRef.current) {
+            monaco.editor.setModelLanguage(assistantModelRef.current, editorLanguage)
+        }
+    }, [editorLanguage, monaco])
 
     const handleCopyActive = async () => {
         try {
@@ -185,10 +201,10 @@ export function CenterPanel({
     const onMount = (editor: any, m: any) => {
         editorRef.current = editor
 
-        if (!sysModelRef.current) sysModelRef.current = m.editor.createModel(promptData.systemPrompt || "", "markdown")
-        if (!userModelRef.current) userModelRef.current = m.editor.createModel(promptData.userPrompt || "", "markdown")
+        if (!sysModelRef.current) sysModelRef.current = m.editor.createModel(promptData.systemPrompt || "", editorLanguage)
+        if (!userModelRef.current) userModelRef.current = m.editor.createModel(promptData.userPrompt || "", editorLanguage)
         if (!assistantModelRef.current)
-            assistantModelRef.current = m.editor.createModel(promptData.assistantPrompt || "", "markdown")
+            assistantModelRef.current = m.editor.createModel(promptData.assistantPrompt || "", editorLanguage)
 
         const activeModel =
             activeTab === "system" ? sysModelRef.current : activeTab === "user" ? userModelRef.current : assistantModelRef.current
@@ -451,6 +467,23 @@ export function CenterPanel({
                             <Button variant="ghost" size="sm" onClick={handleCopyActive} className="h-8 w-8 p-0"
                                     title="Copy">
                                 <Copy className="w-4 h-4"/>
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    const newLang = editorLanguage === "markdown" ? "plaintext" : "markdown"
+                                    setEditorLanguage(newLang)
+                                    showNotification(
+                                        newLang === "plaintext" ? "Syntax highlighting disabled" : "Markdown highlighting enabled",
+                                        "success"
+                                    )
+                                }}
+                                className="h-8 w-8 p-0"
+                                title={editorLanguage === "markdown" ? "Disable syntax highlighting" : "Enable markdown highlighting"}
+                            >
+                                <FileText className={`w-4 h-4 ${editorLanguage === "markdown" ? "text-blue-600" : "text-slate-400"}`} />
                             </Button>
 
                             <div className="flex items-center border border-slate-300 rounded-md bg-white">
