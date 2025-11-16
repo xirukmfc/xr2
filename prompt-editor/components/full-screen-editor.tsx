@@ -8,7 +8,7 @@ import { useMonaco } from "@monaco-editor/react"
 import { Button } from "@/components/ui/button"
 import {
   Save, Plus, Minus, Eye, EyeOff, BookOpen, ChevronDown, ChevronRight,
-  AlertCircle, CheckCircle2, Type, Moon, Sun, Copy, Edit
+  AlertCircle, CheckCircle2, Type, Moon, Sun, Copy, Edit, FileText
 } from "lucide-react"
 import { useNotification } from "@/components/notification-provider"
 import { ModelPicker } from "@/components/model-picker"
@@ -194,6 +194,7 @@ function FullScreenEditor({
   const [showLineNumbers, setShowLineNumbers] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isPreviewMode, setIsPreviewMode] = useState(false)
+  const [editorLanguage, setEditorLanguage] = useState<"markdown" | "plaintext">("plaintext")
 
   const safePrompt: PromptData = {
     systemPrompt: promptData?.systemPrompt ?? "",
@@ -338,13 +339,13 @@ function FullScreenEditor({
     editorRef.current = editor
 
     if (!sysModelRef.current) {
-      sysModelRef.current = m.editor.createModel(safePrompt.systemPrompt || "", "markdown")
+      sysModelRef.current = m.editor.createModel(safePrompt.systemPrompt || "", editorLanguage)
     }
     if (!userModelRef.current) {
-      userModelRef.current = m.editor.createModel(safePrompt.userPrompt || "", "markdown")
+      userModelRef.current = m.editor.createModel(safePrompt.userPrompt || "", editorLanguage)
     }
     if (!assistantModelRef.current) {
-      assistantModelRef.current = m.editor.createModel(safePrompt.assistantPrompt || "", "markdown")
+      assistantModelRef.current = m.editor.createModel(safePrompt.assistantPrompt || "", editorLanguage)
     }
 
     const initialModel =
@@ -436,13 +437,28 @@ function FullScreenEditor({
     }
   }, [safePrompt.systemPrompt, safePrompt.userPrompt, safePrompt.assistantPrompt, refreshDecorations])
 
+  // Update language when editorLanguage changes
+  useEffect(() => {
+    if (!monaco) return
+
+    if (sysModelRef.current) {
+      monaco.editor.setModelLanguage(sysModelRef.current, editorLanguage)
+    }
+    if (userModelRef.current) {
+      monaco.editor.setModelLanguage(userModelRef.current, editorLanguage)
+    }
+    if (assistantModelRef.current) {
+      monaco.editor.setModelLanguage(assistantModelRef.current, editorLanguage)
+    }
+  }, [editorLanguage, monaco])
+
   // tab change
   useEffect(() => {
     const ed = editorRef.current
     if (!ed) return
 
     if (activeTab === "assistant" && !assistantModelRef.current && monaco?.editor) {
-      assistantModelRef.current = monaco.editor.createModel(safePrompt.assistantPrompt || "", "markdown")
+      assistantModelRef.current = monaco.editor.createModel(safePrompt.assistantPrompt || "", editorLanguage)
     }
 
     const model =
@@ -462,7 +478,7 @@ function FullScreenEditor({
         ed.layout({ width: el.clientWidth, height: el.clientHeight })
       } catch {}
     })
-  }, [activeTab, monaco, refreshDecorations, safePrompt.assistantPrompt])
+  }, [activeTab, monaco, refreshDecorations, safePrompt.assistantPrompt, editorLanguage])
 
   const totalCharacters =
       (safePrompt.systemPrompt?.length || 0) +
@@ -575,6 +591,22 @@ function FullScreenEditor({
               >
                 {showVariablePanel ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const newLang = editorLanguage === "markdown" ? "plaintext" : "markdown"
+                  setEditorLanguage(newLang)
+                  showNotification(
+                    newLang === "plaintext" ? "Syntax highlighting disabled" : "Markdown highlighting enabled",
+                    "success"
+                  )
+                }}
+                className="h-8 w-8 p-0"
+                title={editorLanguage === "markdown" ? "Disable syntax highlighting" : "Enable markdown highlighting"}
+              >
+                <FileText className={`w-4 h-4 ${editorLanguage === "markdown" ? "text-blue-600" : "text-slate-400"}`} />
+              </Button>
               <Button variant="ghost" size="sm" onClick={handleCopyAll} className="h-8 w-8 p-0" title="Copy">
                 <Copy className="w-4 h-4" />
               </Button>
@@ -677,7 +709,7 @@ function FullScreenEditor({
                 width="100%"
                 options={editorOptions}
                 theme={theme === "dark" ? "vs-dark" : "vs"}
-                language="markdown"
+                language={editorLanguage}
               />
             </div>
           )}
