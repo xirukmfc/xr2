@@ -13,8 +13,8 @@ class PromptEvent(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     workspace_id = Column(UUID(as_uuid=True), ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False)
     trace_id = Column(String(100), nullable=False, index=True)
-    prompt_id = Column(UUID(as_uuid=True), ForeignKey("prompts.id"))
-    prompt_version_id = Column(UUID(as_uuid=True), ForeignKey("prompt_versions.id"))
+    prompt_id = Column(UUID(as_uuid=True), ForeignKey("prompts.id", ondelete="SET NULL"))
+    prompt_version_id = Column(UUID(as_uuid=True), ForeignKey("prompt_versions.id", ondelete="SET NULL"))
     event_type = Column(String(50), nullable=False)
     outcome = Column(String(50))
     session_id = Column(String(100))
@@ -41,8 +41,8 @@ class PromptMetricsHourly(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     workspace_id = Column(UUID(as_uuid=True), ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False)
-    prompt_id = Column(UUID(as_uuid=True), ForeignKey("prompts.id"))
-    prompt_version_id = Column(UUID(as_uuid=True), ForeignKey("prompt_versions.id"))
+    prompt_id = Column(UUID(as_uuid=True), ForeignKey("prompts.id", ondelete="SET NULL"))
+    prompt_version_id = Column(UUID(as_uuid=True), ForeignKey("prompt_versions.id", ondelete="SET NULL"))
     hour_bucket = Column(TIMESTAMP(timezone=True), nullable=False)
     total_requests = Column(Integer, default=0)
     successful_outcomes = Column(Integer, default=0)
@@ -100,7 +100,7 @@ class ConversionFunnel(Base):
     # Source configuration (numerator)
     source_type = Column(String(50), nullable=False)  # 'prompt_requests' or 'event'
     source_event_name = Column(String(100))  # if source_type == 'event'
-    source_prompt_id = Column(UUID(as_uuid=True), ForeignKey("prompts.id"))  # if source_type == 'prompt_requests'
+    source_prompt_id = Column(UUID(as_uuid=True), ForeignKey("prompts.id", ondelete="SET NULL"))  # if source_type == 'prompt_requests'
 
     # Target configuration (denominator)
     target_event_name = Column(String(100), nullable=False)
@@ -138,11 +138,11 @@ class ABTest(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     workspace_id = Column(UUID(as_uuid=True), ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False)
     name = Column(String(255), nullable=False)
-    prompt_id = Column(UUID(as_uuid=True), ForeignKey("prompts.id"))
+    prompt_id = Column(UUID(as_uuid=True), ForeignKey("prompts.id", ondelete="SET NULL"))
 
     # Simple A/B test: only 2 versions
-    version_a_id = Column(UUID(as_uuid=True), ForeignKey("prompt_versions.id"))  # Control version
-    version_b_id = Column(UUID(as_uuid=True), ForeignKey("prompt_versions.id"))  # Variant version
+    version_a_id = Column(UUID(as_uuid=True), ForeignKey("prompt_versions.id", ondelete="SET NULL"))  # Control version
+    version_b_id = Column(UUID(as_uuid=True), ForeignKey("prompt_versions.id", ondelete="SET NULL"))  # Variant version
 
     # Request tracking
     total_requests = Column(Integer, nullable=False)  # Total number of requests for this test

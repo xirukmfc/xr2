@@ -21,8 +21,8 @@ class PromptStats(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     
     # What we're tracking stats for
-    prompt_id = Column(UUID(as_uuid=True), ForeignKey('prompts.id'), nullable=False, index=True)
-    prompt_version_id = Column(UUID(as_uuid=True), ForeignKey('prompt_versions.id'), nullable=True, index=True)
+    prompt_id = Column(UUID(as_uuid=True), ForeignKey('prompts.id', ondelete='CASCADE'), nullable=False, index=True)
+    prompt_version_id = Column(UUID(as_uuid=True), ForeignKey('prompt_versions.id', ondelete='SET NULL'), nullable=True, index=True)
     source_name = Column(String(100), nullable=False, index=True)  # Who requested the prompt
     
     # Time period for these stats
