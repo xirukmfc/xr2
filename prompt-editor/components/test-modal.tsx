@@ -220,14 +220,27 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
       .filter(([key, value]) => value)
       .map(([key]) => key)
 
+    // Substitute variables in prompts before sending
+    const substituteVariables = (text: string, vars: Record<string, string>) => {
+      let result = text
+      Object.entries(vars).forEach(([key, value]) => {
+        const placeholder = `{{${key}}}`
+        result = result.replace(new RegExp(placeholder.replace(/[{}]/g, '\\$&'), 'g'), value)
+      })
+      return result
+    }
+
+    const systemPromptWithVars = substituteVariables(safePrompt.systemPrompt, testVars)
+    const userPromptWithVars = substituteVariables(safePrompt.userPrompt, testVars)
+
     const requestBody = {
       provider: providerName,
       model,
       temperature,
       max_output_tokens: maxTokens,
-      systemPrompt: safePrompt.systemPrompt,
-      userPrompt: safePrompt.userPrompt,
-      variables: testVars,
+      systemPrompt: systemPromptWithVars,
+      userPrompt: userPromptWithVars,
+      variables: testVars, // Keep variables for reference/logging
       tools: toolsArray,
     }
 
