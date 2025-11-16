@@ -165,29 +165,93 @@ class PromptContentResponse(BaseModel):
     ab_test_variant: Optional[str] = Field(None, description="A/B test variant (version_a or version_b)")
 
 
-@public_api_router.post("/get-prompt", response_model=PromptContentResponse)
+@public_api_router.post(
+    "/get-prompt",
+    response_model=PromptContentResponse,
+    summary="Get Prompt Content",
+    description="""
+    Retrieve prompt content by slug. Returns the production version by default, or specific version if requested.
+
+    ## Authentication
+    Requires API key authentication. Include your API key in the request header:
+    ```
+    X-API-Key: xr2_prod_your_api_key_here
+    ```
+
+    ## How to get an API key
+    1. Go to https://xr2.uk/api-keys
+    2. Click "Create Keys" button
+    3. Give your key a name and click "Create"
+    4. Copy the generated API key and store it securely
+
+    ## Basic Usage
+
+    **Request:**
+    ```json
+    {
+        "slug": "customer-support-greeting",
+        "source_name": "your_username"
+    }
+    ```
+
+    **Response:**
+    ```json
+    {
+        "slug": "customer-support-greeting",
+        "source_name": "your_username",
+        "version_number": 1,
+        "status": "production",
+        "system_prompt": "You are a helpful customer support agent...",
+        "user_prompt": "Help the customer with {{issue}}",
+        "assistant_prompt": null,
+        "variables": [{"name": "issue", "type": "string", "defaultValue": ""}],
+        "model_config": {},
+        "trace_id": "evt_abc123_1634567890_xyz",
+        "deployed_at": "2024-01-15T10:30:00Z",
+        "created_at": "2024-01-15T10:00:00Z",
+        "updated_at": "2024-01-15T10:30:00Z"
+    }
+    ```
+
+    ## Advanced Usage
+
+    **Get specific version:**
+    ```json
+    {
+        "slug": "customer-support-greeting",
+        "source_name": "your_username",
+        "version_number": 2
+    }
+    ```
+
+    **Get draft version:**
+    ```json
+    {
+        "slug": "customer-support-greeting",
+        "source_name": "your_username",
+        "status": "draft"
+    }
+    ```
+
+    ## Important Notes
+    - The `trace_id` in the response should be saved and used when tracking events (see `/api/v1/events`)
+    - A/B tests are automatically handled - if active, you'll receive the test variant in the response
+    - Rate limits apply based on your subscription plan
+    - Variables in prompts use `{{variable_name}}` syntax - you'll need to substitute them in your application
+
+    ## Error Responses
+    - 404: Prompt not found or no production version available
+    - 429: API rate limit exceeded
+    - 401: Invalid API key
+    """
+)
 async def get_prompt(
         request: Request,
         prompt_request: GetPromptRequest,
         session: AsyncSession = Depends(get_session),
         api_key: ProductAPIKey = Depends(get_product_api_key)
 ):
-    """
-    Get prompt content by slug and source name
-
-    Required parameters:
-    - slug: Prompt slug
-    - source_name: Username of the prompt creator
-
-    Optional parameters:
-    - version_number: Specific version number
-    - status: Version status filter (draft, testing, production, inactive, deprecated)
-
-    Logic:
-    - If only slug and source_name provided: returns the deployed (production) version
-    - If version_number or status specified: applies these filters without requiring deployed version
-    - If status is "production", only deployed versions are returned
-    """
+    """Get prompt content by slug and source name"""
     start_time = time.time()
 
     # Store the request payload for logging

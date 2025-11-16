@@ -33,32 +33,125 @@ class EventRequest(BaseModel):
 
 
 
-@router.post("/events")
+@router.post(
+    "/events",
+    summary="Track Custom Events",
+    description="""
+    Track custom events related to your prompts. This allows you to measure business outcomes and conversion funnels.
+
+    ## Authentication
+    Requires API key authentication. Include your API key in the request header:
+    ```
+    X-API-Key: xr2_prod_your_api_key_here
+    ```
+
+    ## How it works
+    1. First, call `/api/v1/get-prompt` to retrieve your prompt
+    2. Save the `trace_id` from the response
+    3. When a relevant event occurs (user signup, purchase, etc.), send it to this endpoint with the saved `trace_id`
+    4. This links the event back to the specific prompt instance, enabling analytics and A/B testing
+
+    ## Event Definitions
+    Before tracking events, you must define them in your xR2 dashboard:
+    1. Go to https://xr2.uk/analytics/events
+    2. Click "Create Event Definition"
+    3. Define event name, category, and required/optional fields
+    4. Use these definitions when sending events via API
+
+    ## Basic Usage Example
+
+    **Step 1: Get prompt and save trace_id**
+    ```python
+    import requests
+
+    # Get prompt
+    response = requests.post(
+        "https://xr2.uk/api/v1/get-prompt",
+        headers={"X-API-Key": "xr2_prod_your_key"},
+        json={
+            "slug": "customer-greeting",
+            "source_name": "your_username"
+        }
+    )
+    trace_id = response.json()["trace_id"]  # Save this!
+    ```
+
+    **Step 2: Later, track the event**
+    ```python
+    # When user signs up (for example)
+    requests.post(
+        "https://xr2.uk/api/v1/events",
+        headers={"X-API-Key": "xr2_prod_your_key"},
+        json={
+            "trace_id": trace_id,  # Use the saved trace_id
+            "event_name": "user_signup",
+            "category": "conversion",
+            "fields": {
+                "user_id": "user_12345",
+                "plan": "premium",
+                "revenue": 29.99
+            }
+        }
+    )
+    ```
+
+    ## Complete Workflow Example
+
+    **Request:**
+    ```json
+    {
+        "trace_id": "evt_abc123_1634567890_xyz",
+        "event_name": "purchase_completed",
+        "category": "revenue",
+        "fields": {
+            "user_id": "user_12345",
+            "order_id": "order_67890",
+            "amount": 99.99,
+            "currency": "USD",
+            "product": "premium_plan"
+        }
+    }
+    ```
+
+    **Response:**
+    ```json
+    {
+        "status": "success",
+        "event_id": "evt_def456_1634567899_abc",
+        "trace_id": "evt_abc123_1634567890_xyz",
+        "message": "Event tracked successfully"
+    }
+    ```
+
+    ## Use Cases
+    - **Conversion tracking**: Track signups, purchases after AI interactions
+    - **A/B testing**: Measure which prompt variant performs better
+    - **Funnel analysis**: See drop-off rates at each step
+    - **ROI measurement**: Calculate revenue generated per prompt
+
+    ## Field Requirements
+    - Required fields are defined in your event definition
+    - Optional fields can be included for additional context
+    - Field validation happens automatically based on your definitions
+
+    ## Error Responses
+    - 404: Event definition not found (create it in dashboard first)
+    - 400: Missing required fields
+    - 401: Invalid API key
+
+    ## Important Notes
+    - Events are processed asynchronously for better performance
+    - Duplicate events (same trace_id + event_name + category) are ignored
+    - Events can be tracked up to 30 days after the prompt was retrieved
+    - Use consistent event naming across your application for better analytics
+    """
+)
 async def track_event(
         event: EventRequest,
         background_tasks: BackgroundTasks,
         db: AsyncSession = Depends(get_db)
 ):
-    """
-    Track a single event
-
-    Required fields:
-    - trace_id: Trace ID from prompt response
-    - event_name: Name of the event as defined in event definitions
-    - category: Event category
-    - fields: Dynamic fields containing required and optional data
-
-    Example request:
-    {
-        "trace_id": "evt_abc123_1634567890_xyz",
-        "event_name": "user_signup",
-        "category": "user_lifecycle",
-        "fields": {
-            "user_id": "user123",
-            "source": "website"
-        }
-    }
-    """
+    """Track custom events for prompt analytics and conversion funnels"""
 
     try:
         # Get trace context from Redis
