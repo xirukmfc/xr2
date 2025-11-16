@@ -131,119 +131,143 @@ async def get_ab_test_version(session: AsyncSession, prompt_id: UUID, workspace_
 
 class GetPromptRequest(BaseModel):
     """Request model for getting prompt"""
-    slug: str = Field(..., description="Prompt slug (required)")
-    source_name: str = Field(..., description="Source name - username who created the prompt (required)")
+    slug: str = Field(..., description="Prompt slug", examples=["customer-support-greeting"])
+    source_name: str = Field(..., description="Username of the prompt creator", examples=["john_doe"])
 
     # Optional filters
-    version_number: Optional[int] = Field(None, description="Specific version number")
-    status: Optional[str] = Field(None, description="Version status filter (draft, testing, production, inactive, deprecated)")
+    version_number: Optional[int] = Field(None, description="Specific version number to retrieve", examples=[2])
+    status: Optional[str] = Field(
+        None,
+        description="Version status filter",
+        examples=["production"],
+        pattern="^(draft|testing|production|inactive|deprecated)$"
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "slug": "customer-support-greeting",
+                    "source_name": "john_doe"
+                },
+                {
+                    "slug": "customer-support-greeting",
+                    "source_name": "john_doe",
+                    "version_number": 2
+                },
+                {
+                    "slug": "customer-support-greeting",
+                    "source_name": "john_doe",
+                    "status": "production"
+                }
+            ]
+        }
+    }
 
 
 class PromptContentResponse(BaseModel):
     """Response model for prompt content"""
-    slug: str
-    source_name: str
-    version_number: int
-    status: str
+    slug: str = Field(..., description="Prompt slug")
+    source_name: str = Field(..., description="Username of the prompt creator")
+    version_number: int = Field(..., description="Version number")
+    status: str = Field(..., description="Version status (draft, testing, production, etc.)")
 
     # Prompt content
-    system_prompt: Optional[str] = None
-    user_prompt: Optional[str] = None
-    assistant_prompt: Optional[str] = None
+    system_prompt: Optional[str] = Field(None, description="System prompt content")
+    user_prompt: Optional[str] = Field(None, description="User prompt content")
+    assistant_prompt: Optional[str] = Field(None, description="Assistant prompt content")
 
     # Metadata
-    variables: List[dict] = []
-    model_config: Dict[str, Any] = {}
-    deployed_at: Optional[datetime] = None
-    created_at: datetime
-    updated_at: datetime
-    trace_id: str = Field(..., description="Unique trace ID for this request")
+    variables: List[dict] = Field(default_factory=list, description="List of prompt variables")
+    model_config: Dict[str, Any] = Field(default_factory=dict, description="Model configuration")
+    deployed_at: Optional[datetime] = Field(None, description="Deployment timestamp")
+    created_at: datetime = Field(..., description="Creation timestamp")
+    updated_at: datetime = Field(..., description="Last update timestamp")
+    trace_id: str = Field(..., description="Unique trace ID for tracking events. Save this to link events back to this prompt request.")
 
     # A/B Test metadata
-    ab_test_id: Optional[str] = Field(None, description="A/B test ID if this response is part of an A/B test")
-    ab_test_name: Optional[str] = Field(None, description="A/B test name if this response is part of an A/B test")
+    ab_test_id: Optional[str] = Field(None, description="A/B test ID if this is part of an active A/B test")
+    ab_test_name: Optional[str] = Field(None, description="A/B test name")
     ab_test_variant: Optional[str] = Field(None, description="A/B test variant (version_a or version_b)")
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "slug": "customer-support-greeting",
+                    "source_name": "john_doe",
+                    "version_number": 1,
+                    "status": "production",
+                    "system_prompt": "You are a helpful customer support agent.",
+                    "user_prompt": "Help the customer with {{issue}}",
+                    "assistant_prompt": None,
+                    "variables": [{"name": "issue", "type": "string", "defaultValue": ""}],
+                    "model_config": {},
+                    "trace_id": "evt_abc123_1634567890_xyz",
+                    "deployed_at": "2024-01-15T10:30:00Z",
+                    "created_at": "2024-01-15T10:00:00Z",
+                    "updated_at": "2024-01-15T10:30:00Z",
+                    "ab_test_id": None,
+                    "ab_test_name": None,
+                    "ab_test_variant": None
+                }
+            ]
+        }
+    }
 
 
 @public_api_router.post(
     "/get-prompt",
     response_model=PromptContentResponse,
     summary="Get Prompt Content",
-    description="""
-    Retrieve prompt content by slug. Returns the production version by default, or specific version if requested.
+    description="""Retrieve prompt content by slug. Returns production version by default or specific version if filters are provided.
 
-    ## Authentication
-    Requires API key authentication. Include your API key in the request header:
-    ```
-    X-API-Key: xr2_prod_your_api_key_here
-    ```
+**Authentication:** Requires API key in header `X-API-Key: xr2_prod_...`
 
-    ## How to get an API key
-    1. Go to https://xr2.uk/api-keys
-    2. Click "Create Keys" button
-    3. Give your key a name and click "Create"
-    4. Copy the generated API key and store it securely
+**Get API Key:** Visit https://xr2.uk/api-keys → Click "Create Keys" → Copy your key
 
-    ## Basic Usage
+**Default Behavior:** Returns the deployed (production) version of the prompt
 
-    **Request:**
-    ```json
-    {
-        "slug": "customer-support-greeting",
-        "source_name": "your_username"
+**Filtering:** Use `version_number` or `status` to get specific versions
+
+**Important:** Save the `trace_id` from response to track events later (see POST /events)
+
+**A/B Testing:** If an active A/B test exists, the response will include `ab_test_id`, `ab_test_name`, and `ab_test_variant`
+
+**Variables:** Prompts may contain variables like `{{variable_name}}` - substitute them in your application before use
+
+**Rate Limits:** Apply based on your subscription plan (check response headers for remaining quota)
+""",
+    responses={
+        200: {
+            "description": "Successful response with prompt content",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "slug": "customer-support-greeting",
+                        "source_name": "john_doe",
+                        "version_number": 1,
+                        "status": "production",
+                        "system_prompt": "You are a helpful customer support agent.",
+                        "user_prompt": "Help the customer with {{issue}}",
+                        "assistant_prompt": None,
+                        "variables": [{"name": "issue", "type": "string", "defaultValue": ""}],
+                        "model_config": {},
+                        "trace_id": "evt_abc123_1634567890_xyz",
+                        "deployed_at": "2024-01-15T10:30:00Z",
+                        "created_at": "2024-01-15T10:00:00Z",
+                        "updated_at": "2024-01-15T10:30:00Z",
+                        "ab_test_id": None,
+                        "ab_test_name": None,
+                        "ab_test_variant": None
+                    }
+                }
+            }
+        },
+        404: {"description": "Prompt not found or no production version available"},
+        429: {"description": "API rate limit exceeded"},
+        401: {"description": "Invalid or missing API key"}
     }
-    ```
-
-    **Response:**
-    ```json
-    {
-        "slug": "customer-support-greeting",
-        "source_name": "your_username",
-        "version_number": 1,
-        "status": "production",
-        "system_prompt": "You are a helpful customer support agent...",
-        "user_prompt": "Help the customer with {{issue}}",
-        "assistant_prompt": null,
-        "variables": [{"name": "issue", "type": "string", "defaultValue": ""}],
-        "model_config": {},
-        "trace_id": "evt_abc123_1634567890_xyz",
-        "deployed_at": "2024-01-15T10:30:00Z",
-        "created_at": "2024-01-15T10:00:00Z",
-        "updated_at": "2024-01-15T10:30:00Z"
-    }
-    ```
-
-    ## Advanced Usage
-
-    **Get specific version:**
-    ```json
-    {
-        "slug": "customer-support-greeting",
-        "source_name": "your_username",
-        "version_number": 2
-    }
-    ```
-
-    **Get draft version:**
-    ```json
-    {
-        "slug": "customer-support-greeting",
-        "source_name": "your_username",
-        "status": "draft"
-    }
-    ```
-
-    ## Important Notes
-    - The `trace_id` in the response should be saved and used when tracking events (see `/api/v1/events`)
-    - A/B tests are automatically handled - if active, you'll receive the test variant in the response
-    - Rate limits apply based on your subscription plan
-    - Variables in prompts use `{{variable_name}}` syntax - you'll need to substitute them in your application
-
-    ## Error Responses
-    - 404: Prompt not found or no production version available
-    - 429: API rate limit exceeded
-    - 401: Invalid API key
-    """
 )
 async def get_prompt(
         request: Request,
