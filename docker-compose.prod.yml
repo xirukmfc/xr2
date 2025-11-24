@@ -102,6 +102,9 @@ services:
       DEBUG: ${DEBUG:-false}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
 
+      # API Server URL for Swagger docs (production)
+      API_SERVER_URL: https://xr2.uk
+
       FORWARDED_ALLOW_IPS: "*"
       ROOT_PATH: ""
 

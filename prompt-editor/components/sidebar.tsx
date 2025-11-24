@@ -114,7 +114,7 @@ export function Sidebar() {
     { name: "Prompts", href: "/prompts", icon: MessageSquare, count: promptsCount },
     { name: "Analytics", href: "/analytics", icon: BarChart3 },
     { name: "API Keys", href: "/api-keys", icon: Key, count: apiKeysCount },
-    { name: "Logs", href: "/logs", icon: FileText },
+    { name: "Api Logs", href: "/logs", icon: FileText },
     { name: "Settings", href: "/settings", icon: Settings },
   ]
 

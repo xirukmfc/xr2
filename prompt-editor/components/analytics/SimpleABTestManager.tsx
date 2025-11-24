@@ -9,6 +9,7 @@ import {
   PlayCircle, PauseCircle, Plus, Trash2, CheckCircle, XCircle, StopCircle
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { apiClient } from '@/lib/api';
 
 interface ABTest {
   id: string;
@@ -72,11 +73,8 @@ export default function SimpleABTestManager() {
 
   const loadTests = async () => {
     try {
-      const response = await fetch('/internal/ab-tests-simple/test');
-      if (response.ok) {
-        const data = await response.json();
-        setTests(data);
-      }
+      const data = await apiClient.request<ABTest[]>('/ab-tests-simple/test');
+      setTests(data);
     } catch (error) {
       console.error('Failed to load A/B tests:', error);
     }
@@ -84,11 +82,8 @@ export default function SimpleABTestManager() {
 
   const loadPrompts = async () => {
     try {
-      const response = await fetch('/internal/ab-tests-simple/test/prompts');
-      if (response.ok) {
-        const data = await response.json();
-        setPrompts(data);
-      }
+      const data = await apiClient.request<Prompt[]>('/ab-tests-simple/test/prompts');
+      setPrompts(data);
     } catch (error) {
       console.error('Failed to load prompts:', error);
     }
@@ -107,31 +102,23 @@ export default function SimpleABTestManager() {
 
     setLoading(true);
     try {
-      const response = await fetch('/internal/ab-tests-simple/test', {
+      await apiClient.request('/ab-tests-simple/test', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        body: formData,
       });
 
-      if (response.ok) {
-        await loadTests();
-        setShowCreateForm(false);
-        setFormData({
-          name: '',
-          prompt_id: '',
-          version_a_id: '',
-          version_b_id: '',
-          total_requests: 100
-        });
-      } else {
-        const error = await response.json();
-        alert(`Failed to create A/B test: ${error.detail || 'Unknown error'}`);
-      }
-    } catch (error) {
+      await loadTests();
+      setShowCreateForm(false);
+      setFormData({
+        name: '',
+        prompt_id: '',
+        version_a_id: '',
+        version_b_id: '',
+        total_requests: 100
+      });
+    } catch (error: any) {
       console.error('Failed to create A/B test:', error);
-      alert('Failed to create A/B test. Please try again.');
+      alert(`Failed to create A/B test: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -140,19 +127,11 @@ export default function SimpleABTestManager() {
   const startTest = async (testId: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`/internal/ab-tests-simple/test/${testId}/start`, {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        await loadTests();
-      } else {
-        const error = await response.json();
-        alert(`Failed to start test: ${error.detail || 'Unknown error'}`);
-      }
-    } catch (error) {
+      await apiClient.request(`/ab-tests-simple/test/${testId}/start`, { method: 'POST' });
+      await loadTests();
+    } catch (error: any) {
       console.error('Failed to start test:', error);
-      alert('Failed to start test. Please try again.');
+      alert(`Failed to start test: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -161,19 +140,11 @@ export default function SimpleABTestManager() {
   const stopTest = async (testId: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`/internal/ab-tests-simple/test/${testId}/stop`, {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        await loadTests();
-      } else {
-        const error = await response.json();
-        alert(`Failed to stop test: ${error.detail || 'Unknown error'}`);
-      }
-    } catch (error) {
+      await apiClient.request(`/ab-tests-simple/test/${testId}/stop`, { method: 'POST' });
+      await loadTests();
+    } catch (error: any) {
       console.error('Failed to stop test:', error);
-      alert('Failed to stop test. Please try again.');
+      alert(`Failed to stop test: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -186,19 +157,11 @@ export default function SimpleABTestManager() {
 
     setLoading(true);
     try {
-      const response = await fetch(`/internal/ab-tests-simple/test/${testId}/complete`, {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        await loadTests();
-      } else {
-        const error = await response.json();
-        alert(`Failed to complete test: ${error.detail || 'Unknown error'}`);
-      }
-    } catch (error) {
+      await apiClient.request(`/ab-tests-simple/test/${testId}/complete`, { method: 'POST' });
+      await loadTests();
+    } catch (error: any) {
       console.error('Failed to complete test:', error);
-      alert('Failed to complete test. Please try again.');
+      alert(`Failed to complete test: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -211,19 +174,11 @@ export default function SimpleABTestManager() {
 
     setLoading(true);
     try {
-      const response = await fetch(`/internal/ab-tests-simple/test/${testId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        await loadTests();
-      } else {
-        const error = await response.json();
-        alert(`Failed to delete test: ${error.detail || 'Unknown error'}`);
-      }
-    } catch (error) {
+      await apiClient.request(`/ab-tests-simple/test/${testId}`, { method: 'DELETE' });
+      await loadTests();
+    } catch (error: any) {
       console.error('Failed to delete test:', error);
-      alert('Failed to delete test. Please try again.');
+      alert(`Failed to delete test: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

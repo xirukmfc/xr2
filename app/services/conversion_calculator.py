@@ -6,7 +6,6 @@ from sqlalchemy import select, func, and_, or_, text, Numeric
 from sqlalchemy.dialects.postgresql import aggregate_order_by
 
 from app.models.analytics import ConversionFunnel, PromptEvent
-from app.models.product_api_key import ProductAPILog
 
 
 async def calculate_conversion_metrics(
@@ -65,12 +64,14 @@ async def _get_source_count(
     """Get the count of source events (prompt requests or custom events)"""
 
     if funnel.source_type == "prompt_requests":
-        # Count unique trace_ids from ProductAPILog for the specific prompt
-        query = select(func.count(func.distinct(ProductAPILog.trace_id))).where(
+        # Count prompt_request events for the specific prompt
+        query = select(func.count(PromptEvent.id)).where(
             and_(
-                ProductAPILog.prompt_id == funnel.source_prompt_id,
-                ProductAPILog.created_at >= start_date,
-                ProductAPILog.created_at <= end_date
+                PromptEvent.workspace_id == funnel.workspace_id,
+                PromptEvent.event_type == "prompt_request",
+                PromptEvent.prompt_id == funnel.source_prompt_id,
+                PromptEvent.created_at >= start_date,
+                PromptEvent.created_at <= end_date
             )
         )
 
@@ -118,12 +119,14 @@ async def _get_target_metrics(
 
     # For conversion window filtering, we need to match trace_ids
     if funnel.source_type == "prompt_requests" and funnel.source_prompt_id:
-        # Get trace_ids from the source prompt requests within conversion window
-        source_traces_query = select(ProductAPILog.trace_id).where(
+        # Get trace_ids from the source prompt request events within conversion window
+        source_traces_query = select(PromptEvent.trace_id).where(
             and_(
-                ProductAPILog.prompt_id == funnel.source_prompt_id,
-                ProductAPILog.created_at >= start_date,
-                ProductAPILog.created_at <= end_date
+                PromptEvent.workspace_id == funnel.workspace_id,
+                PromptEvent.event_type == "prompt_request",
+                PromptEvent.prompt_id == funnel.source_prompt_id,
+                PromptEvent.created_at >= start_date,
+                PromptEvent.created_at <= end_date
             )
         )
 
@@ -156,12 +159,14 @@ async def _get_target_metrics(
 
         # For conversion window filtering, we need to match trace_ids
         if funnel.source_type == "prompt_requests" and funnel.source_prompt_id:
-            # Get trace_ids from the source prompt requests within conversion window
-            source_traces_query = select(ProductAPILog.trace_id).where(
+            # Get trace_ids from the source prompt request events within conversion window
+            source_traces_query = select(PromptEvent.trace_id).where(
                 and_(
-                    ProductAPILog.prompt_id == funnel.source_prompt_id,
-                    ProductAPILog.created_at >= start_date,
-                    ProductAPILog.created_at <= end_date
+                    PromptEvent.workspace_id == funnel.workspace_id,
+                    PromptEvent.event_type == "prompt_request",
+                    PromptEvent.prompt_id == funnel.source_prompt_id,
+                    PromptEvent.created_at >= start_date,
+                    PromptEvent.created_at <= end_date
                 )
             )
 
@@ -199,12 +204,14 @@ async def _get_target_metrics(
 
         # For conversion window filtering, we need to match trace_ids
         if funnel.source_type == "prompt_requests" and funnel.source_prompt_id:
-            # Get trace_ids from the source prompt requests within conversion window
-            source_traces_query = select(ProductAPILog.trace_id).where(
+            # Get trace_ids from the source prompt request events within conversion window
+            source_traces_query = select(PromptEvent.trace_id).where(
                 and_(
-                    ProductAPILog.prompt_id == funnel.source_prompt_id,
-                    ProductAPILog.created_at >= start_date,
-                    ProductAPILog.created_at <= end_date
+                    PromptEvent.workspace_id == funnel.workspace_id,
+                    PromptEvent.event_type == "prompt_request",
+                    PromptEvent.prompt_id == funnel.source_prompt_id,
+                    PromptEvent.created_at >= start_date,
+                    PromptEvent.created_at <= end_date
                 )
             )
 
@@ -325,9 +332,9 @@ async def get_conversion_attribution(
     query = text("""
         SELECT
             pe.trace_id,
-            pal.created_at as source_timestamp,
+            pe_source.created_at as source_timestamp,
             pe.created_at as target_timestamp,
-            EXTRACT(EPOCH FROM (pe.created_at - pal.created_at))/60 as time_to_convert_minutes,
+            EXTRACT(EPOCH FROM (pe.created_at - pe_source.created_at))/60 as time_to_convert_minutes,
             CASE
                 WHEN :metric_type = 'sum' AND :metric_field IS NOT NULL
                 THEN (pe.event_metadata->'fields'->:metric_field)::numeric
@@ -335,14 +342,15 @@ async def get_conversion_attribution(
             END as target_value,
             pe.user_id
         FROM prompt_events pe
-        JOIN product_api_logs pal ON pe.trace_id = pal.trace_id
+        JOIN prompt_events pe_source ON pe.trace_id = pe_source.trace_id
         WHERE pe.workspace_id = :workspace_id
             AND pe.event_metadata->>'event_name' = :target_event_name
             AND (:target_event_category IS NULL OR pe.event_metadata->>'category' = :target_event_category)
-            AND pal.prompt_id = :source_prompt_id
+            AND pe_source.event_type = 'prompt_request'
+            AND pe_source.prompt_id = :source_prompt_id
             AND pe.created_at BETWEEN :start_date AND :end_date
-            AND pe.created_at >= pal.created_at  -- Ensure proper sequence
-            AND pe.created_at <= pal.created_at + INTERVAL :conversion_window_hours HOUR
+            AND pe.created_at >= pe_source.created_at  -- Ensure proper sequence
+            AND pe.created_at <= pe_source.created_at + INTERVAL :conversion_window_hours HOUR
         ORDER BY pe.created_at DESC
         LIMIT :limit
     """)

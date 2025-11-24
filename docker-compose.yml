@@ -107,18 +107,21 @@ services:
       # OAuth
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-dummy_client_id}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-dummy_client_secret}
-      
+
       # API Security
       RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
       RATE_LIMIT_BURST: ${RATE_LIMIT_BURST:-100}
-      
+
       # Environment
       ENVIRONMENT: ${ENVIRONMENT:-production}
       DEBUG: ${DEBUG:-false}
-      
+
       # CORS
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
-      
+
+      # API Server URL for Swagger docs
+      API_SERVER_URL: ${API_SERVER_URL:-http://localhost:8000}
+
       # Database connection for scripts
       DB_HOST: postgres
       DB_PORT: 5432
@@ -152,7 +155,7 @@ services:
       context: ./prompt-editor
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: https://xr2.uk/internal
+        NEXT_PUBLIC_API_URL: http://localhost/internal
     container_name: xr2_frontend
     environment:
       NODE_ENV: production

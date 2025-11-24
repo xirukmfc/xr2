@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from pydantic import BaseModel, Field, ValidationError
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
+import json
 
 from app.models.analytics import CustomFunnelConfiguration
 from app.models.user import User
@@ -107,12 +108,46 @@ async def get_test_custom_funnel_configurations(db: AsyncSession = Depends(get_d
         return [{"error": str(e)}]
 
 
+@router.post("/test/debug")
+async def debug_funnel_request(request: Request):
+    """Debug endpoint to see raw request body"""
+    try:
+        body = await request.body()
+        body_str = body.decode('utf-8')
+        body_json = json.loads(body_str)
+        print(f"[DEBUG] Raw body: {body_str}")
+        print(f"[DEBUG] Parsed JSON: {body_json}")
+
+        # Try to validate with Pydantic
+        try:
+            validated = CustomFunnelConfigurationCreate(**body_json)
+            print(f"[DEBUG] Pydantic validation SUCCESS: {validated}")
+            return {"status": "valid", "data": validated.dict()}
+        except ValidationError as e:
+            print(f"[DEBUG] Pydantic validation FAILED: {e}")
+            return {"status": "invalid", "errors": e.errors()}
+    except Exception as e:
+        print(f"[DEBUG] Exception: {e}")
+        return {"status": "error", "message": str(e)}
+
+
 @router.post("/test", response_model=CustomFunnelConfigurationResponse)
 async def create_test_custom_funnel_configuration(
     config_data: CustomFunnelConfigurationCreate,
     db: AsyncSession = Depends(get_db)
 ):
     """Create a new custom funnel configuration for testing (no authentication)"""
+    print(f"[FUNNEL CREATE] Received data: name={config_data.name}, description={config_data.description}, event_steps={config_data.event_steps}")
+
+    # Validate event_steps
+    if not config_data.event_steps or len(config_data.event_steps) < 2:
+        print(f"[FUNNEL CREATE ERROR] Not enough event steps: {len(config_data.event_steps) if config_data.event_steps else 0}")
+        raise HTTPException(422, "At least 2 event steps are required")
+
+    if any(not step or not step.strip() for step in config_data.event_steps):
+        print(f"[FUNNEL CREATE ERROR] Empty event steps found")
+        raise HTTPException(422, "All event steps must be non-empty")
+
     try:
         # Get first real workspace_id from the database
         from app.models.workspace import Workspace

@@ -22,6 +22,13 @@ interface PromptEvent {
   event_type: string;
   outcome: 'success' | 'failure' | 'partial' | 'abandoned';
   user_id?: string;
+  event_metadata?: {
+    event_name?: string;
+    prompt_name?: string;
+    prompt_slug?: string;
+    version_number?: number;
+    [key: string]: any;
+  };
   metadata?: any;
   business_metrics?: any;
   created_at: string;
@@ -33,7 +40,7 @@ export default function RecentEventsTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [outcomeFilter, setOutcomeFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [eventsPerPage] = useState(10);
+  const [eventsPerPage] = useState(20);
 
   useEffect(() => {
     fetchEvents();
@@ -54,15 +61,15 @@ export default function RecentEventsTable() {
   const getOutcomeIcon = (outcome: string) => {
     switch (outcome) {
       case 'success':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-3 w-3 text-green-500" />;
       case 'failure':
-        return <XCircle className="h-4 w-4 text-red-500" />;
+        return <XCircle className="h-3 w-3 text-red-500" />;
       case 'partial':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+        return <AlertTriangle className="h-3 w-3 text-yellow-500" />;
       case 'abandoned':
-        return <Clock className="h-4 w-4 text-gray-500" />;
+        return <Clock className="h-3 w-3 text-gray-500" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+        return <Clock className="h-3 w-3 text-gray-500" />;
     }
   };
 
@@ -84,8 +91,7 @@ export default function RecentEventsTable() {
   const filteredEvents = events.filter(event => {
     const matchesSearch =
       event.trace_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.prompt_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.user_id?.toLowerCase().includes(searchTerm.toLowerCase());
+      event.prompt_id.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesOutcome = outcomeFilter === 'all' || event.outcome === outcomeFilter;
 
@@ -107,102 +113,95 @@ export default function RecentEventsTable() {
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-0 shadow-none">
+      <CardHeader className="px-4 py-3">
         <div className="flex justify-between items-center">
-          <CardTitle>Recent Events</CardTitle>
-          <Button variant="outline" size="sm" onClick={fetchEvents}>
+          <CardTitle className="text-base font-semibold">Recent Events</CardTitle>
+          <Button variant="ghost" size="sm" onClick={fetchEvents} className="h-7 text-xs">
             Refresh
           </Button>
         </div>
 
         {/* Filters */}
-        <div className="flex gap-4 mt-4">
+        <div className="flex gap-2 mt-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
-              placeholder="Search by trace ID, prompt ID, or user ID..."
+              placeholder="Search by trace ID or prompt ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-8 h-8 text-xs"
             />
           </div>
           <Select value={outcomeFilter} onValueChange={setOutcomeFilter}>
-            <SelectTrigger className="w-40">
-              <Filter className="h-4 w-4 mr-2" />
+            <SelectTrigger className="w-32 h-8 text-xs">
+              <Filter className="h-3.5 w-3.5 mr-1" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Outcomes</SelectItem>
-              <SelectItem value="success">Success</SelectItem>
-              <SelectItem value="failure">Failure</SelectItem>
-              <SelectItem value="partial">Partial</SelectItem>
-              <SelectItem value="abandoned">Abandoned</SelectItem>
+              <SelectItem value="all" className="text-xs">All</SelectItem>
+              <SelectItem value="success" className="text-xs">Success</SelectItem>
+              <SelectItem value="failure" className="text-xs">Failure</SelectItem>
+              <SelectItem value="partial" className="text-xs">Partial</SelectItem>
+              <SelectItem value="abandoned" className="text-xs">Abandoned</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </CardHeader>
 
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Timestamp</TableHead>
-              <TableHead>Trace ID</TableHead>
-              <TableHead>Event Type</TableHead>
-              <TableHead>Outcome</TableHead>
-              <TableHead>User ID</TableHead>
-              <TableHead>Revenue</TableHead>
-              <TableHead>Details</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {displayedEvents.map((event) => (
-              <TableRow key={event.id}>
-                <TableCell className="font-mono text-sm">
-                  {new Date(event.created_at).toLocaleString()}
-                </TableCell>
-                <TableCell className="font-mono text-sm">
-                  <span className="bg-muted px-2 py-1 rounded text-xs">
-                    {event.trace_id.slice(-8)}
-                  </span>
-                </TableCell>
-                <TableCell>{event.event_type}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    {getOutcomeIcon(event.outcome)}
-                    {getOutcomeBadge(event.outcome)}
-                  </div>
-                </TableCell>
-                <TableCell className="font-mono text-sm">
-                  {event.user_id ? (
-                    <span className="bg-muted px-2 py-1 rounded text-xs">
-                      {event.user_id.slice(-6)}
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {event.business_metrics?.revenue ? (
-                    <span className="font-medium text-green-600">
-                      ${event.business_metrics.revenue.toFixed(2)}
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {event.event_metadata?.event_name && (
-                    <Badge variant="outline" className="text-xs">
-                      {event.event_metadata.event_name}
-                    </Badge>
-                  )}
-                </TableCell>
+      <CardContent className="px-4 py-0">
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent border-b">
+                <TableHead className="h-8 px-2 text-xs font-medium">Time</TableHead>
+                <TableHead className="h-8 px-2 text-xs font-medium">Trace ID</TableHead>
+                <TableHead className="h-8 px-2 text-xs font-medium">Version</TableHead>
+                <TableHead className="h-8 px-2 text-xs font-medium">Prompt</TableHead>
+                <TableHead className="h-8 px-2 text-xs font-medium">Event</TableHead>
+                <TableHead className="h-8 px-2 text-xs font-medium">Details</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {displayedEvents.map((event) => (
+                <TableRow key={event.id} className="hover:bg-muted/50">
+                  <TableCell className="px-2 py-1.5 font-mono text-[11px] text-muted-foreground">
+                    {new Date(event.created_at).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false
+                    })}
+                  </TableCell>
+                  <TableCell className="px-2 py-1.5">
+                    <code className="text-[10px] bg-muted/50 px-1.5 py-0.5 rounded font-mono break-all">
+                      {event.trace_id}
+                    </code>
+                  </TableCell>
+                  <TableCell className="px-2 py-1.5 text-xs">
+                    {event.event_metadata?.version_number
+                      ? `v${event.event_metadata.version_number}`
+                      : '—'}
+                  </TableCell>
+                  <TableCell className="px-2 py-1.5">
+                    {event.event_metadata?.prompt_name ? (
+                      <span className="text-xs">{event.event_metadata.prompt_name}</span>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="px-2 py-1.5 text-xs">{event.event_type}</TableCell>
+                  <TableCell className="px-2 py-1.5">
+                    {event.event_metadata?.event_name && (
+                      <span className="text-xs">{event.event_metadata.event_name}</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
         {filteredEvents.length === 0 && (
           <div className="text-center text-muted-foreground py-8">
@@ -212,27 +211,29 @@ export default function RecentEventsTable() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-between items-center mt-4">
-            <div className="text-sm text-muted-foreground">
-              Showing {startIndex + 1} to {Math.min(startIndex + eventsPerPage, filteredEvents.length)} of {filteredEvents.length} events
+          <div className="flex justify-between items-center mt-3 mb-3">
+            <div className="text-[11px] text-muted-foreground">
+              {startIndex + 1}-{Math.min(startIndex + eventsPerPage, filteredEvents.length)} of {filteredEvents.length}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
+                className="h-7 px-2 text-xs"
               >
-                Previous
+                Prev
               </Button>
-              <span className="px-3 py-1 text-sm">
-                Page {currentPage} of {totalPages}
+              <span className="px-2 py-1 text-[11px] text-muted-foreground">
+                {currentPage}/{totalPages}
               </span>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
+                className="h-7 px-2 text-xs"
               >
                 Next
               </Button>

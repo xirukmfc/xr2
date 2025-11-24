@@ -367,7 +367,6 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
                         <th className="text-left p-2">Source Events</th>
                         <th className="text-left p-2">Target Events</th>
                         <th className="text-left p-2">Conversion Rate</th>
-                        <th className="text-left p-2">Total Value</th>
                         <th className="text-left p-2">Period</th>
                       </tr>
                     </thead>
@@ -385,9 +384,6 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
                             }`}>
                               {(metric.conversion_rate || metric.rate || 0)?.toFixed(2)}%
                             </span>
-                          </td>
-                          <td className="p-2">
-                            {(metric.total_value || metric.value) ? `${(metric.total_value || metric.value).toLocaleString()}` : '-'}
                           </td>
                           <td className="p-2 text-xs text-gray-500">
                             {(metric.period_start && metric.period_end)

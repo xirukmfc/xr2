@@ -1,0 +1,27 @@
+services:
+  # TGSight 2.0 - Production контейнер в режиме разработки (с basePath /tgsight и hot reload)
+  tgsight:
+    build:
+      context: ./tgsight2.0
+      dockerfile: Dockerfile.dev
+    container_name: xr2_tgsight_prod
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: 1
+      NEXT_PUBLIC_BASE_PATH: "/tgsight"
+      PORT: 3001
+      HOSTNAME: "0.0.0.0"
+    ports:
+      - "3001:3001"
+    volumes:
+      # Mount source code for hot reload
+      - ./tgsight2.0:/app
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://0.0.0.0:3001/tgsight"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s

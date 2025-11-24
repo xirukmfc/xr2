@@ -222,7 +222,7 @@ class PromptContentResponse(BaseModel):
     summary="Get Prompt Content",
     description="""Retrieve prompt content by slug. Returns production version by default or specific version if filters are provided.
 
-**Authentication:** Requires API key in header `X-API-Key: xr2_prod_...`
+**Authentication:** Requires API key in header `Authorization': Bearer xr2_prod_YOUR_API_KEY
 
 **Get API Key:** Visit https://xr2.uk/api-keys → Click "Create Keys" → Copy your key
 
@@ -236,7 +236,7 @@ class PromptContentResponse(BaseModel):
 
 **Variables:** Prompts may contain variables like `{{variable_name}}` - substitute them in your application before use
 
-**Rate Limits:** Apply based on your subscription plan (check response headers for remaining quota)
+**Rate Limits:** Apply based on your subscription plan
 """,
     responses={
         200: {
@@ -467,6 +467,32 @@ async def get_prompt(
         # Increment API usage counter
         await limits_service.increment_api_usage(user.id)
 
+        # Create prompt_request event for analytics
+        from app.models.analytics import PromptEvent
+        prompt_request_event = PromptEvent(
+            workspace_id=workspace_id,
+            trace_id=trace_id,
+            prompt_id=prompt.id,
+            prompt_version_id=target_version.id,
+            event_type="prompt_request",
+            outcome="success",
+            session_id=None,
+            user_id=None,
+            event_metadata={
+                "event_name": "prompt_request",
+                "category": "api",
+                "prompt_slug": prompt.slug,
+                "prompt_name": prompt.name,
+                "version_number": target_version.version_number,
+                "source_name": prompt_request.source_name
+            },
+            business_metrics=None,
+            error_details=None,
+            created_at=datetime.utcnow()
+        )
+        session.add(prompt_request_event)
+        await session.commit()
+
         # Note: Logging is handled by ProductAPILoggingMiddleware
         # Store metadata for middleware to use
         request.state.prompt_id = prompt.id
@@ -491,6 +517,9 @@ from app.api.events import router as events_router
 
 # Add events routes to public API router (external API)
 public_api_router.include_router(events_router, prefix="", tags=["external api"])
+
+
+
 
 
 

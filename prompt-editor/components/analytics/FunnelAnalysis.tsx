@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, X, Trash2, Lightbulb } from 'lucide-react';
+import { apiClient } from '@/lib/api';
 
 // Custom smooth funnel component - Google Analytics style
 const SmoothFunnel = ({ data, color = "#8884d8" }: { data: FunnelStep[], color?: string }) => {
@@ -194,17 +195,14 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
 
   const loadSavedConfigurations = async () => {
     try {
-      const response = await fetch('/internal/custom-funnel-configurations/test');
-      if (response.ok) {
-        const configurations = await response.json();
-        setSavedConfigurations(configurations);
+      const configurations = await apiClient.request<CustomFunnelConfiguration[]>('/custom-funnel-configurations/test');
+      setSavedConfigurations(configurations);
 
-        // Load the first active configuration if available
-        const activeConfig = configurations.find((config: CustomFunnelConfiguration) => config.is_active);
-        if (activeConfig && onFunnelChange) {
-          setCurrentConfiguration(activeConfig);
-          onFunnelChange(activeConfig.event_steps);
-        }
+      // Load the first active configuration if available
+      const activeConfig = configurations.find((config: CustomFunnelConfiguration) => config.is_active);
+      if (activeConfig && onFunnelChange) {
+        setCurrentConfiguration(activeConfig);
+        onFunnelChange(activeConfig.event_steps);
       }
     } catch (error) {
       console.error('Failed to load saved funnel configurations:', error);
@@ -213,11 +211,8 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
 
   const loadEventDefinitions = async () => {
     try {
-      const response = await fetch('/internal/event-definitions/test');
-      if (response.ok) {
-        const definitions = await response.json();
-        setEventDefinitions(definitions);
-      }
+      const definitions = await apiClient.request<any[]>('/event-definitions/test');
+      setEventDefinitions(definitions);
     } catch (error) {
       console.error('Failed to load event definitions:', error);
     }
@@ -225,12 +220,9 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
 
   const loadCompletedABTests = async () => {
     try {
-      const response = await fetch('/internal/ab-tests-simple/test');
-      if (response.ok) {
-        const tests = await response.json();
-        const completed = tests.filter((test: ABTest) => test.status === 'completed');
-        setCompletedABTests(completed);
-      }
+      const tests = await apiClient.request<ABTest[]>('/ab-tests-simple/test');
+      const completed = tests.filter((test: ABTest) => test.status === 'completed');
+      setCompletedABTests(completed);
     } catch (error) {
       console.error('Failed to load completed A/B tests:', error);
     }
@@ -241,24 +233,14 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
 
     setLoading(true);
     try {
-      const response = await fetch('/internal/analytics/funnel/', {
+      const data = await apiClient.request<any>('/analytics/funnel/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+        body: {
           event_sequence: currentConfiguration.event_steps,
           ab_test_id: selectedABTestId
-        })
+        }
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSplitFunnelData(data);
-      } else {
-        console.error('Failed to fetch split funnel data');
-        setSplitFunnelData(null);
-      }
+      setSplitFunnelData(data);
     } catch (error) {
       console.error('Error fetching split funnel data:', error);
       setSplitFunnelData(null);
@@ -268,42 +250,70 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
   };
 
   const saveFunnelConfiguration = async () => {
+    console.log('saveFunnelConfiguration called');
+    console.log('funnelName:', funnelName);
+    console.log('funnelSteps:', funnelSteps);
+
+    const validSteps = funnelSteps.filter(step => step.trim());
+    console.log('validSteps:', validSteps);
+
+    // Validate
+    if (!funnelName.trim()) {
+      alert('Please enter a funnel name');
+      return;
+    }
+
+    if (validSteps.length < 2) {
+      alert('Please enter at least 2 funnel steps');
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await fetch('/internal/custom-funnel-configurations/test', {
+      const newConfiguration = await apiClient.request<CustomFunnelConfiguration>('/custom-funnel-configurations/test', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+        body: {
+          name: funnelName.trim(),
+          description: `Custom funnel with steps: ${validSteps.join(' → ')}`,
+          event_steps: validSteps
         },
-        body: JSON.stringify({
-          name: funnelName,
-          description: `Custom funnel with steps: ${funnelSteps.filter(step => step.trim()).join(' → ')}`,
-          event_steps: funnelSteps.filter(step => step.trim())
-        }),
       });
 
-      if (response.ok) {
-        const newConfiguration = await response.json();
-        setSavedConfigurations(prev => [...prev, newConfiguration]);
-        setCurrentConfiguration(newConfiguration);
+      setSavedConfigurations(prev => [...prev, newConfiguration]);
+      setCurrentConfiguration(newConfiguration);
 
-        // Notify parent component to use new steps
-        if (onFunnelChange) {
-          onFunnelChange(newConfiguration.event_steps);
-        }
-
-        // Reset form
-        setShowCreateForm(false);
-        setFunnelName('');
-        setFunnelSteps(['', '']);
-      } else {
-        const error = await response.json();
-        console.error('Failed to save funnel configuration:', error);
-        alert('Failed to save funnel configuration. Please try again.');
+      // Notify parent component to use new steps
+      if (onFunnelChange) {
+        onFunnelChange(newConfiguration.event_steps);
       }
-    } catch (error) {
+
+      // Reset form
+      setShowCreateForm(false);
+      setFunnelName('');
+      setFunnelSteps(['', '']);
+    } catch (error: any) {
       console.error('Failed to save funnel configuration:', error);
-      alert('Failed to save funnel configuration. Please try again.');
+      console.error('Request data:', {
+        name: funnelName.trim(),
+        description: `Custom funnel with steps: ${validSteps.join(' → ')}`,
+        event_steps: validSteps
+      });
+
+      let errorMessage = 'Please try again.';
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.detail) {
+        if (typeof error.detail === 'string') {
+          errorMessage = error.detail;
+        } else if (Array.isArray(error.detail)) {
+          // Handle Pydantic validation errors
+          errorMessage = error.detail.map((err: any) => err.msg || JSON.stringify(err)).join(', ');
+        } else {
+          errorMessage = JSON.stringify(error.detail);
+        }
+      }
+
+      alert(`Failed to save funnel configuration: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -323,29 +333,23 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
 
     setLoading(true);
     try {
-      const response = await fetch(`/internal/custom-funnel-configurations/test/${configId}`, {
+      await apiClient.request(`/custom-funnel-configurations/test/${configId}`, {
         method: 'DELETE',
       });
 
-      if (response.ok) {
-        // Remove from local state
-        setSavedConfigurations(prev => prev.filter(config => config.id !== configId));
+      // Remove from local state
+      setSavedConfigurations(prev => prev.filter(config => config.id !== configId));
 
-        // If this was the current configuration, clear it
-        if (currentConfiguration?.id === configId) {
-          setCurrentConfiguration(null);
-          if (onFunnelChange) {
-            onFunnelChange([]); // Clear funnel steps
-          }
+      // If this was the current configuration, clear it
+      if (currentConfiguration?.id === configId) {
+        setCurrentConfiguration(null);
+        if (onFunnelChange) {
+          onFunnelChange([]); // Clear funnel steps
         }
-      } else {
-        const error = await response.json();
-        console.error('Failed to delete funnel configuration:', error);
-        alert('Failed to delete funnel configuration. Please try again.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete funnel configuration:', error);
-      alert('Failed to delete funnel configuration. Please try again.');
+      alert(`Failed to delete funnel configuration: ${error.message || 'Please try again.'}`);
     } finally {
       setLoading(false);
     }

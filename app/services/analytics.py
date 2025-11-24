@@ -368,14 +368,67 @@ async def get_top_performing_prompts(db: AsyncSession, workspace_id: UUID, start
     return []
 
 
-async def get_recent_events(db: AsyncSession, workspace_id: UUID, limit: int = 100):
-    """Get recent events"""
+async def get_recent_events(
+    db: AsyncSession,
+    workspace_id: UUID,
+    limit: int = 100,
+    prompt_id: Optional[UUID] = None,
+    version_id: Optional[UUID] = None,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None
+):
+    """Get recent events with prompt names and version numbers, with optional filtering"""
+    from app.models.prompt import Prompt, PromptVersion
+    from sqlalchemy.orm import selectinload
+
+    # Build filter conditions
+    conditions = [PromptEvent.workspace_id == workspace_id]
+
+    if prompt_id:
+        conditions.append(PromptEvent.prompt_id == prompt_id)
+
+    if version_id:
+        conditions.append(PromptEvent.prompt_version_id == version_id)
+
+    if start_date:
+        conditions.append(PromptEvent.created_at >= start_date)
+
+    if end_date:
+        conditions.append(PromptEvent.created_at <= end_date)
+
     events = await db.execute(
-        select(PromptEvent).where(
-            PromptEvent.workspace_id == workspace_id
-        ).order_by(PromptEvent.created_at.desc()).limit(limit)
+        select(PromptEvent)
+        .outerjoin(Prompt, PromptEvent.prompt_id == Prompt.id)
+        .where(and_(*conditions))
+        .order_by(PromptEvent.created_at.desc())
+        .limit(limit)
     )
-    return events.scalars().all()
+
+    events_list = events.scalars().all()
+
+    # Add prompt_name and version_number to event_metadata for each event
+    for event in events_list:
+        if event.prompt_id:
+            prompt = await db.get(Prompt, event.prompt_id)
+            if prompt and event.event_metadata:
+                event.event_metadata['prompt_name'] = prompt.name
+                event.event_metadata['prompt_slug'] = prompt.slug
+            elif prompt:
+                event.event_metadata = {
+                    'prompt_name': prompt.name,
+                    'prompt_slug': prompt.slug
+                }
+
+        # Add version_number from prompt_version relationship
+        if event.prompt_version_id:
+            version = await db.get(PromptVersion, event.prompt_version_id)
+            if version:
+                if event.event_metadata:
+                    event.event_metadata['version_number'] = version.version_number
+                else:
+                    event.event_metadata = {'version_number': version.version_number}
+
+    return events_list
 
 
 async def get_error_analysis(db: AsyncSession, workspace_id: UUID, start_date: datetime, end_date: datetime):
@@ -421,11 +474,18 @@ async def get_metric_trends(db: AsyncSession, workspace_id: UUID, start_date: da
 async def get_monthly_events_chart_data(db: AsyncSession, workspace_id: UUID):
     """Get monthly event data grouped by event_name + category for dashboard chart"""
     # Get data for the last month, but extend to include today
-    end_date = datetime.utcnow() + timedelta(hours=1)  # Add 1 hour to ensure today is included
+    from datetime import timezone
+    end_date = datetime.now(timezone.utc) + timedelta(hours=1)  # Add 1 hour to ensure today is included
     start_date = end_date - timedelta(days=31)  # Use 31 days to be safe
 
-    # Query events grouped by day, event_name, and category
-    event_name_field = func.coalesce(PromptEvent.event_metadata['event_name'].astext, 'unknown')
+    # Query events grouped by day, event_type and event_name
+    # Use event_type for standard events, and event_metadata.event_name for custom_event type
+    from sqlalchemy import case
+    event_name_field = case(
+        (PromptEvent.event_type == 'custom_event',
+         func.coalesce(PromptEvent.event_metadata['event_name'].astext, 'unknown')),
+        else_=PromptEvent.event_type
+    )
     category_field = func.coalesce(PromptEvent.event_metadata['category'].astext, 'general')
     # Use date_trunc to avoid timezone issues
     date_field = func.date_trunc('day', PromptEvent.created_at)
@@ -459,6 +519,7 @@ async def get_monthly_events_chart_data(db: AsyncSession, workspace_id: UUID):
         # row.date is now a timestamp from date_trunc, extract date part
         date_str = row.date.date().strftime('%Y-%m-%d') if hasattr(row.date, 'date') else row.date.strftime('%Y-%m-%d')
         group_key = f"{row.event_name}_{row.category}"
+        print(f"[MONTHLY_EVENTS] Row: date={date_str}, event_name={row.event_name}, category={row.category}, count={row.count}")
 
         if group_key not in chart_data:
             chart_data[group_key] = {

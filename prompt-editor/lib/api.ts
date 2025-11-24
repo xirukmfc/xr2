@@ -233,7 +233,7 @@ class ApiClient {
         return !!this.token;
     }
 
-    async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    async request<T>(endpoint: string, options: RequestInit & { body?: any } = {}): Promise<T> {
         const url = `${this.baseUrl}${endpoint}`;
         console.log('[API Client] Making request to:', url, 'with method:', options.method || 'GET');
         console.log('[API Client] Token available:', !!this.token);
@@ -246,10 +246,17 @@ class ApiClient {
         } else {
             console.warn('[API Client] No token available for authenticated request');
         }
-        
+
+        // Stringify body if it's an object
+        const processedOptions = { ...options };
+        if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
+            processedOptions.body = JSON.stringify(options.body);
+            console.log('[API Client] Stringified body:', processedOptions.body);
+        }
+
         const config: RequestInit = {
             headers: {...defaultHeaders, ...options.headers},
-            ...options,
+            ...processedOptions,
         };
 
         try {

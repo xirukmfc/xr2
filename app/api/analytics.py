@@ -350,18 +350,38 @@ async def get_analytics_dashboard(
 @router.get("/events")
 async def get_workspace_events(
         limit: int = Query(100, ge=1, le=1000),
+        prompt_id: Optional[str] = Query(None, description="Filter by prompt ID"),
+        version_id: Optional[str] = Query(None, description="Filter by version ID"),
+        start_date: Optional[str] = Query(None, description="Start date (ISO format)"),
+        end_date: Optional[str] = Query(None, description="End date (ISO format)"),
         current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
-    """Get recent events for the workspace"""
+    """Get recent events for the workspace with optional filters"""
     workspace_id = await get_user_workspace(db, current_user)
-    events = await get_recent_events(db, workspace_id, limit)
+
+    # Convert string parameters to proper types
+    prompt_uuid = UUID(prompt_id) if prompt_id else None
+    version_uuid = UUID(version_id) if version_id else None
+    start_dt = datetime.fromisoformat(start_date) if start_date else None
+    end_dt = datetime.fromisoformat(end_date) if end_date else None
+
+    events = await get_recent_events(
+        db,
+        workspace_id,
+        limit,
+        prompt_id=prompt_uuid,
+        version_id=version_uuid,
+        start_date=start_dt,
+        end_date=end_dt
+    )
 
     return [
         {
             "id": str(event.id),
             "trace_id": event.trace_id,
             "prompt_id": str(event.prompt_id) if event.prompt_id else None,
+            "prompt_version_id": str(event.prompt_version_id) if event.prompt_version_id else None,
             "event_type": event.event_type,
             "outcome": event.outcome,
             "user_id": event.user_id,

@@ -165,15 +165,39 @@ test-local: ## 🧪 Запустить автотесты локально
 
 ##@ TGSight управление
 
-tgsight-up: ## 🚀 Запустить только TGSight
+tgsight-up: ## 🚀 Запустить только TGSight (production)
 	@echo "$(GREEN)🚀 Запуск TGSight...$(NC)"
 	@docker compose --env-file .env.prod -f docker-compose.prod.yml up -d tgsight
 	@echo "$(GREEN)✅ TGSight запущен!$(NC)"
 	@echo "$(YELLOW)🔍 Доступен по адресу: https://xr2.uk/tgsight$(NC)"
 
-tgsight-down: ## 🛑 Остановить TGSight
+tgsight-up-local: ## 🚀 Запустить TGSight для локальной разработки (без basePath, с hot reload)
+	@echo "$(GREEN)🚀 Запуск TGSight для локальной разработки...$(NC)"
+	@docker compose -f docker-compose.tgsight.local.yml up -d --build
+	@echo "$(GREEN)✅ TGSight запущен!$(NC)"
+	@echo "$(YELLOW)🔍 Доступен по адресу: http://localhost:3001$(NC)"
+	@echo "$(YELLOW)🔄 Hot reload включен - изменения применяются автоматически$(NC)"
+
+tgsight-up-dev: ## 🚀 Запустить TGSight для разработки (production контейнер с hot reload)
+	@echo "$(GREEN)🚀 Запуск TGSight для разработки (production контейнер)...$(NC)"
+	@docker compose -f docker-compose.tgsight.dev.yml up -d --build
+	@echo "$(GREEN)✅ TGSight запущен!$(NC)"
+	@echo "$(YELLOW)🔍 Доступен по адресу: http://localhost:3001/tgsight$(NC)"
+	@echo "$(YELLOW)🔄 Hot reload включен - изменения применяются автоматически$(NC)"
+
+tgsight-down: ## 🛑 Остановить TGSight (production)
 	@echo "$(RED)🛑 Остановка TGSight...$(NC)"
 	@docker compose --env-file .env.prod -f docker-compose.prod.yml stop tgsight
+	@echo "$(GREEN)✅ TGSight остановлен$(NC)"
+
+tgsight-down-local: ## 🛑 Остановить TGSight (локальная разработка)
+	@echo "$(RED)🛑 Остановка TGSight (локальная)...$(NC)"
+	@docker compose -f docker-compose.tgsight.local.yml down
+	@echo "$(GREEN)✅ TGSight остановлен$(NC)"
+
+tgsight-down-dev: ## 🛑 Остановить TGSight (dev режим production контейнера)
+	@echo "$(RED)🛑 Остановка TGSight (dev)...$(NC)"
+	@docker compose -f docker-compose.tgsight.dev.yml down
 	@echo "$(GREEN)✅ TGSight остановлен$(NC)"
 
 tgsight-rebuild: ## 🔨 Пересобрать TGSight

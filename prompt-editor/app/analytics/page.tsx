@@ -22,6 +22,7 @@ import NewConversionModal from '@/components/analytics/NewConversionModal';
 import SimpleEventsTable from '@/components/analytics/SimpleEventsTable';
 import RecentEventsTable from '@/components/analytics/RecentEventsTable';
 import FunnelAnalysis from '@/components/analytics/FunnelAnalysis';
+import PromptEventsViewer from '@/components/analytics/PromptEventsViewer';
 import { apiClient } from '@/lib/api';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -32,6 +33,7 @@ const subsections = [
   { id: "dashboard", name: "Dashboard", icon: BarChart3 },
   { id: "recent-events", name: "Recent Events", icon: FileText },
   { id: "monthly-events", name: "Monthly Events", icon: TrendingUp },
+  { id: "prompt-events", name: "Prompt Events", icon: FileText },
   { id: "funnel", name: "Funnel Analysis", icon: BarChart3 },
   { id: "ab-tests", name: "A/B Tests", icon: TestTube },
   { id: "events", name: "Events define", icon: Settings },
@@ -308,6 +310,18 @@ export default function AnalyticsPage() {
     );
   }
 
+  const renderPromptEventsSection = () => {
+    return (
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-base font-semibold">Prompt Events</h2>
+          <p className="text-xs text-slate-600">View events by prompt and version over time</p>
+        </div>
+        <PromptEventsViewer />
+      </div>
+    );
+  }
+
 
   const renderContent = () => {
     switch (activeSubsection) {
@@ -317,6 +331,8 @@ export default function AnalyticsPage() {
         return renderRecentEventsSection()
       case "monthly-events":
         return renderMonthlyEventsSection()
+      case "prompt-events":
+        return renderPromptEventsSection()
       case "funnel":
         return renderFunnelSection()
       case "ab-tests":
