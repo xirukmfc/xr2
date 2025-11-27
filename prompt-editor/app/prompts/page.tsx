@@ -19,6 +19,8 @@ import { LoadingState } from "@/components/ui/loading-state"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
 import {useNotification, NotificationProvider} from "@/components/notification-provider"
+import {OnboardingWelcome} from "@/components/onboarding-welcome"
+import {useAuth} from "@/contexts/auth-context"
 
 // UI model expected by design components
 export interface UIPrompt {
@@ -101,9 +103,12 @@ function PromptsPageContent() {
     const [error, setError] = useState<string | null>(null)
     const [selectedPrompts, setSelectedPrompts] = useState<string[]>([])
     const [bulkActionsLoading, setBulkActionsLoading] = useState(false)
+    const [showOnboarding, setShowOnboarding] = useState(false)
+    const [userApiKey, setUserApiKey] = useState<string | null>(null)
     const countsContext = useCountsContext()
     const workspaceContext = useWorkspaceContext()
     const { showNotification } = useNotification()
+    const { user } = useAuth()
 
     // Setup hotkeys (removed Cmd+N functionality)
 
@@ -117,6 +122,73 @@ function PromptsPageContent() {
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(10)
     const router = useRouter()
+
+    // Check if user needs onboarding and fetch API key if needed
+    useEffect(() => {
+        console.log('[PromptsPage] useEffect triggered, user:', user)
+        if (typeof window !== 'undefined' && user) {
+            const checkOnboarding = async () => {
+                console.log('[PromptsPage] checkOnboarding called, user.onboarding_completed:', user.onboarding_completed, 'type:', typeof user.onboarding_completed)
+                
+                // Use ONLY server-side onboarding_completed flag - ignore localStorage completely
+                // Convert to boolean to handle any edge cases (string "true", etc.)
+                const onboardingCompleted = Boolean(user.onboarding_completed === true || user.onboarding_completed === 'true')
+                
+                console.log('[PromptsPage] Calculated onboardingCompleted:', onboardingCompleted, 'from server value:', user.onboarding_completed)
+                
+                // Sync localStorage with server value (for backward compatibility only)
+                if (onboardingCompleted) {
+                    localStorage.setItem('onboarding_completed', 'true')
+                } else {
+                    // Clear localStorage if server says onboarding is not completed
+                    localStorage.removeItem('onboarding_completed')
+                }
+                
+                // Get API key from localStorage first
+                let apiKey = localStorage.getItem('api_key')
+                
+                // If no API key in localStorage but onboarding not completed, try to fetch from server
+                if (!apiKey && !onboardingCompleted) {
+                    try {
+                        const { getApiKeys } = await import('@/lib/api')
+                        const keys = await getApiKeys()
+                        if (keys && keys.length > 0 && keys[0].api_key) {
+                            apiKey = keys[0].api_key
+                            localStorage.setItem('api_key', apiKey)
+                            setUserApiKey(apiKey)
+                        }
+                    } catch (error) {
+                        console.error('[PromptsPage] Failed to fetch API keys:', error)
+                    }
+                } else if (apiKey) {
+                    setUserApiKey(apiKey)
+                }
+                
+                console.log('[PromptsPage] Onboarding check:', {
+                    userOnboardingCompleted: user.onboarding_completed,
+                    calculatedOnboardingCompleted: onboardingCompleted,
+                    localStorageCompleted: localStorage.getItem('onboarding_completed'),
+                    apiKey: apiKey ? `${apiKey.substring(0, 20)}...` : null,
+                    userId: user.id,
+                    userCreated: user.created_at,
+                    willShowOnboarding: !onboardingCompleted
+                })
+                
+                // Show onboarding if onboarding is not completed yet (regardless of API key)
+                if (!onboardingCompleted) {
+                    console.log('[PromptsPage] ✅ Setting showOnboarding to TRUE (onboarding_completed = false)')
+                    setShowOnboarding(true)
+                } else {
+                    console.log('[PromptsPage] ❌ NOT showing onboarding (onboarding_completed = true)')
+                    setShowOnboarding(false)
+                }
+            }
+            
+            checkOnboarding()
+        } else {
+            console.log('[PromptsPage] User not available yet, user:', user)
+        }
+    }, [user])
 
     // Load data
     const loadData = useCallback(async () => {
@@ -556,6 +628,59 @@ function PromptsPageContent() {
               isOpen={isNewPromptModalOpen}
               onClose={() => setIsNewPromptModalOpen(false)}
               onPromptCreated={() => loadData()}
+            />
+            {(() => {
+              // Force check onboarding status on every render
+              const shouldShow = user && (user.onboarding_completed === false || user.onboarding_completed === undefined || user.onboarding_completed === null)
+              console.log('[PromptsPage] Rendering OnboardingWelcome:', {
+                showOnboarding,
+                userOnboardingCompleted: user?.onboarding_completed,
+                shouldShow,
+                userExists: !!user
+              })
+              
+              // Force show if server says onboarding is not completed
+              if (shouldShow && !showOnboarding) {
+                console.log('[PromptsPage] 🔴 FORCING showOnboarding to TRUE based on server value')
+                setTimeout(() => setShowOnboarding(true), 0)
+              }
+              
+              return null
+            })()}
+            {/* ALWAYS render OnboardingWelcome - it will check user.onboarding_completed internally */}
+            {(() => {
+              // CRITICAL: Check user.onboarding_completed on EVERY render
+              const needsOnboarding = user && (
+                user.onboarding_completed === false || 
+                user.onboarding_completed === undefined || 
+                user.onboarding_completed === null
+              )
+              
+              console.log('[PromptsPage] 🔥 RENDERING OnboardingWelcome component:', {
+                userId: user?.id,
+                onboarding_completed: user?.onboarding_completed,
+                onboarding_completed_type: typeof user?.onboarding_completed,
+                needsOnboarding,
+                showOnboarding,
+                willForceShow: needsOnboarding
+              })
+              
+              // Force show if user needs onboarding
+              if (needsOnboarding && !showOnboarding) {
+                console.log('[PromptsPage] 🚨 FORCING showOnboarding to TRUE!')
+                setTimeout(() => setShowOnboarding(true), 0)
+              }
+              
+              return null
+            })()}
+            <OnboardingWelcome
+              isOpen={showOnboarding || (user && (user.onboarding_completed === false || user.onboarding_completed === undefined || user.onboarding_completed === null))}
+              onClose={() => {
+                console.log('[PromptsPage] OnboardingWelcome onClose called')
+                setShowOnboarding(false)
+              }}
+              apiKey={userApiKey || undefined}
+              onCreatePrompt={() => setIsNewPromptModalOpen(true)}
             />
             <BulkActionsToolbar
                 selectedCount={selectedPrompts.length}

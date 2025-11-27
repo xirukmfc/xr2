@@ -22,6 +22,7 @@ class User(Base):
     # Status flags
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
+    onboarding_completed = Column(Boolean, default=False)
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -57,6 +58,7 @@ class User(Base):
             "full_name": self.full_name,
             "is_active": self.is_active,
             "is_superuser": self.is_superuser,
+            "onboarding_completed": bool(self.onboarding_completed) if self.onboarding_completed is not None else False,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "last_login": self.last_login.isoformat() if self.last_login else None,

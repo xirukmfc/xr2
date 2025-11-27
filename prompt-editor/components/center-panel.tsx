@@ -456,10 +456,6 @@ export function CenterPanel({
                             >
                                 User Prompt
                             </button>
-                            {currentViewingVersion && (
-                                <div className="px-1 py-2 text-xs text-slate-500">Viewing
-                                    v.{currentViewingVersion}</div>
-                            )}
                         </div>
 
                         {/* Controls */}

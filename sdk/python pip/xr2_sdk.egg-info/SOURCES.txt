@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+./xr2_sdk/__init__.py
+./xr2_sdk/client.py
+./xr2_sdk/config.py
+./xr2_sdk/models.py
+xr2_sdk/__init__.py
+xr2_sdk/client.py
+xr2_sdk/config.py
+xr2_sdk/models.py
+xr2_sdk.egg-info/PKG-INFO
+xr2_sdk.egg-info/SOURCES.txt
+xr2_sdk.egg-info/dependency_links.txt
+xr2_sdk.egg-info/requires.txt
+xr2_sdk.egg-info/top_level.txt

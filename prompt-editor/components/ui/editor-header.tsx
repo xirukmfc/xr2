@@ -44,6 +44,15 @@ export function EditorHeader({
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [isTesting, setIsTesting] = useState(false)
+  const [slugCopied, setSlugCopied] = useState(false)
+
+  const copySlug = () => {
+    if (promptSlug) {
+      navigator.clipboard.writeText(promptSlug)
+      setSlugCopied(true)
+      setTimeout(() => setSlugCopied(false), 2000)
+    }
+  }
 
   useEffect(() => {
     const onModS = (e: KeyboardEvent) => {
@@ -152,7 +161,7 @@ export function EditorHeader({
   return (
     <header className="fixed top-0 h-[65px] left-0 right-0 bg-white/95 backdrop-blur border-b border-slate-200 px-4 py-3 z-50">
       <div className="flex items-center justify-between">
-        <div className="flex items-center">
+        <div className="flex items-center gap-4">
           <Button
             onClick={() => router.push("/prompts")}
             variant="ghost"
@@ -161,6 +170,27 @@ export function EditorHeader({
             <span className="text-lg leading-none">←</span>
             <span>Back</span>
           </Button>
+          {promptSlug && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-slate-500">slug:</span>
+              <button
+                onClick={copySlug}
+                className={`px-2 py-1 rounded font-mono text-xs transition-colors cursor-pointer ${
+                  slugCopied 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                }`}
+                title="Click to copy"
+              >
+                {slugCopied ? 'Copied!' : promptSlug}
+              </button>
+            </div>
+          )}
+          {currentViewingVersion && (
+            <div className="text-sm text-slate-500">
+              v.{currentViewingVersion}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2">

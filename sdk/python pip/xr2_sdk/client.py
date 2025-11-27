@@ -13,11 +13,24 @@ from .models import (
     PromptContentResponse,
     EventRequest,
     EventResponse,
+    Response,
 )
 from .config import BASE_URL
 
 
 DEFAULT_TIMEOUT_SECONDS = 10.0
+
+
+def _parse_error(resp) -> str:
+    """Extract error message from response"""
+    try:
+        data = resp.json()
+        detail = data.get("detail", {})
+        if isinstance(detail, dict):
+            return detail.get("message", str(detail))
+        return str(detail)
+    except Exception:
+        return resp.text or f"HTTP {resp.status_code}"
 
 
 def _build_requests_session(total_retries: int, backoff_factor: float) -> requests.Session:
@@ -42,11 +55,12 @@ class xR2Client:
         self,
         api_key: str,
         *,
+        base_url: str | None = None,
         timeout: float = DEFAULT_TIMEOUT_SECONDS,
         total_retries: int = 3,
         backoff_factor: float = 0.5,
     ) -> None:
-        self.base_url = BASE_URL.rstrip("/")
+        self.base_url = (base_url or BASE_URL).rstrip("/")
         self.timeout = timeout
         self._session = _build_requests_session(total_retries, backoff_factor)
         self._headers = {
@@ -61,7 +75,7 @@ class xR2Client:
         slug: str,
         version_number: Optional[int] = None,
         status: Optional[str] = None,
-    ) -> PromptContentResponse:
+    ) -> Response[PromptContentResponse]:
         payload = GetPromptRequest(
             slug=slug,
             source_name="python_sdk",
@@ -70,9 +84,13 @@ class xR2Client:
         ).model_dump(exclude_none=True)
 
         url = f"{self.base_url}/api/v1/get-prompt"
-        resp = self._session.post(url, json=payload, headers=self._headers, timeout=self.timeout)
-        resp.raise_for_status()
-        return PromptContentResponse.model_validate(resp.json())
+        try:
+            resp = self._session.post(url, json=payload, headers=self._headers, timeout=self.timeout)
+            if not resp.ok:
+                return Response(error=_parse_error(resp), status_code=resp.status_code)
+            return Response(data=PromptContentResponse.model_validate(resp.json()))
+        except Exception as e:
+            return Response(error=str(e), status_code=0)
 
     def track_event(
         self,
@@ -81,7 +99,7 @@ class xR2Client:
         event_name: str,
         category: str,
         fields: dict,
-    ) -> EventResponse:
+    ) -> Response[EventResponse]:
         payload = EventRequest(
             trace_id=trace_id,
             event_name=event_name,
@@ -90,9 +108,13 @@ class xR2Client:
         ).model_dump()
 
         url = f"{self.base_url}/api/v1/events"
-        resp = self._session.post(url, json=payload, headers=self._headers, timeout=self.timeout)
-        resp.raise_for_status()
-        return EventResponse.model_validate(resp.json())
+        try:
+            resp = self._session.post(url, json=payload, headers=self._headers, timeout=self.timeout)
+            if not resp.ok:
+                return Response(error=_parse_error(resp), status_code=resp.status_code)
+            return Response(data=EventResponse.model_validate(resp.json()))
+        except Exception as e:
+            return Response(error=str(e), status_code=0)
 
 
 class AsyncxR2Client:
@@ -100,11 +122,12 @@ class AsyncxR2Client:
         self,
         api_key: str,
         *,
+        base_url: str | None = None,
         timeout: float = DEFAULT_TIMEOUT_SECONDS,
         total_retries: int = 3,
         backoff_factor: float = 0.5,
     ) -> None:
-        self.base_url = BASE_URL.rstrip("/")
+        self.base_url = (base_url or BASE_URL).rstrip("/")
         self.timeout = timeout
         self._headers = {
             "Authorization": f"Bearer {api_key}",
@@ -138,7 +161,7 @@ class AsyncxR2Client:
         slug: str,
         version_number: Optional[int] = None,
         status: Optional[str] = None,
-    ) -> PromptContentResponse:
+    ) -> Response[PromptContentResponse]:
         payload = GetPromptRequest(
             slug=slug,
             source_name="python_sdk",
@@ -147,9 +170,13 @@ class AsyncxR2Client:
         ).model_dump(exclude_none=True)
 
         url = f"{self.base_url}/api/v1/get-prompt"
-        resp = await self._post_with_retry(url, json=payload)
-        resp.raise_for_status()
-        return PromptContentResponse.model_validate(resp.json())
+        try:
+            resp = await self._post_with_retry(url, json=payload)
+            if resp.status_code >= 400:
+                return Response(error=_parse_error(resp), status_code=resp.status_code)
+            return Response(data=PromptContentResponse.model_validate(resp.json()))
+        except Exception as e:
+            return Response(error=str(e), status_code=0)
 
     async def track_event(
         self,
@@ -158,7 +185,7 @@ class AsyncxR2Client:
         event_name: str,
         category: str,
         fields: dict,
-    ) -> EventResponse:
+    ) -> Response[EventResponse]:
         payload = EventRequest(
             trace_id=trace_id,
             event_name=event_name,
@@ -167,8 +194,12 @@ class AsyncxR2Client:
         ).model_dump()
 
         url = f"{self.base_url}/api/v1/events"
-        resp = await self._post_with_retry(url, json=payload)
-        resp.raise_for_status()
-        return EventResponse.model_validate(resp.json())
+        try:
+            resp = await self._post_with_retry(url, json=payload)
+            if resp.status_code >= 400:
+                return Response(error=_parse_error(resp), status_code=resp.status_code)
+            return Response(data=EventResponse.model_validate(resp.json()))
+        except Exception as e:
+            return Response(error=str(e), status_code=0)
 
 

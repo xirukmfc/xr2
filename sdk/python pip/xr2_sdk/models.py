@@ -2,8 +2,72 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
+
+# ============== Response Wrapper ==============
+
+from typing import Generic, TypeVar
+
+T = TypeVar("T")
+
+
+class Response(Generic[T]):
+    """Wrapper for API responses with error handling"""
+    
+    def __init__(
+        self,
+        data: T | None = None,
+        error: str | None = None,
+        status_code: int = 200,
+    ):
+        self.data = data
+        self.error = error
+        self.status_code = status_code
+        self.ok = error is None
+    
+    def __repr__(self) -> str:
+        import json
+        if self.ok and hasattr(self.data, 'model_dump'):
+            data_dict = self.data.model_dump(mode='json')
+            return json.dumps({"ok": True, "data": data_dict}, indent=2, ensure_ascii=False)
+        elif self.ok:
+            return json.dumps({"ok": True, "data": str(self.data)}, indent=2, ensure_ascii=False)
+        return json.dumps({"ok": False, "error": self.error, "status_code": self.status_code}, indent=2, ensure_ascii=False)
+    
+    def __bool__(self) -> bool:
+        """Allow `if response:` checks"""
+        return self.ok
+    
+    def to_dict(self) -> dict:
+        """Convert response to dictionary"""
+        if self.ok and hasattr(self.data, 'model_dump'):
+            return {"ok": True, "data": self.data.model_dump(mode='json')}
+        return {"ok": False, "error": self.error, "status_code": self.status_code}
+
+
+# Legacy exceptions (for those who prefer try/except)
+class XR2Error(Exception):
+    """Base exception for xR2 SDK"""
+    def __init__(self, message: str, status_code: int = 0):
+        self.message = message
+        self.status_code = status_code
+        super().__init__(message)
+
+
+class PromptNotFoundError(XR2Error):
+    pass
+
+
+class AuthenticationError(XR2Error):
+    pass
+
+
+class APIError(XR2Error):
+    pass
+
+
+# ============== Request Models ==============
 
 class GetPromptRequest(BaseModel):
     slug: str
@@ -13,6 +77,8 @@ class GetPromptRequest(BaseModel):
 
 
 class PromptContentResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    
     slug: str
     source_name: str
     version_number: int
@@ -23,7 +89,7 @@ class PromptContentResponse(BaseModel):
     assistant_prompt: Optional[str] = None
 
     variables: List[Dict[str, Any]] = Field(default_factory=list)
-    model_config: Dict[str, Any] = Field(default_factory=dict)
+    prompt_model_config: Dict[str, Any] = Field(default_factory=dict, alias="model_config")
     deployed_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime

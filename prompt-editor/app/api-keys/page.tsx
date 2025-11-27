@@ -295,15 +295,15 @@ function ApiKeysPageContent() {
               </div>
             </div>
 
-            {/* Create API Key button and Documentation link */}
+            {/* Create API Key button and Documentation links */}
             <div className="max-w-7xl mx-auto flex items-center gap-2">
               <Button
                 variant="outline"
-                onClick={() => window.open('/docs', '_blank')}
-                className="h-[35px] border-blue-600 text-blue-600 hover:bg-blue-50"
+                onClick={() => window.open('http://localhost:8000/docs', '_blank')}
+                className="h-[35px] border-slate-300 text-slate-600 hover:bg-slate-50"
               >
                 <BookOpen className="w-4 h-4 mr-2" />
-                API Docs
+                Swagger
               </Button>
               <Button
                 onClick={() => setIsNewApiKeyModalOpen(true)}

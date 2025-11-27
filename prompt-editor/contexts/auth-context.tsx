@@ -9,6 +9,8 @@ interface User {
   email: string
   full_name: string | null
   is_active: boolean
+  onboarding_completed?: boolean
+  created_at?: string
 }
 
 interface AuthContextType {
@@ -52,6 +54,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const userData = await apiClient.getCurrentUser()
           console.log('[AuthContext] Got user data:', userData);
           setUser(userData)
+          
+          // Sync localStorage with server onboarding_completed value
+          if (typeof window !== 'undefined' && userData.onboarding_completed !== undefined) {
+            if (userData.onboarding_completed) {
+              localStorage.setItem('onboarding_completed', 'true')
+            } else {
+              localStorage.removeItem('onboarding_completed')
+            }
+          }
         } catch (error: any) {
           // Only log error if it's not a common authentication failure
           if (error.message?.includes('401') || error.message?.includes('User not found')) {
@@ -78,6 +89,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await apiClient.login(username, password)
       console.log('[AuthContext] Login successful, setting user:', response.user);
       setUser(response.user)
+      
+      // Sync localStorage with server onboarding_completed value
+      if (typeof window !== 'undefined' && response.user.onboarding_completed !== undefined) {
+        if (response.user.onboarding_completed) {
+          localStorage.setItem('onboarding_completed', 'true')
+        } else {
+          localStorage.removeItem('onboarding_completed')
+        }
+      }
     } catch (error) {
       console.error('Login failed:', error)
       throw error
@@ -91,6 +111,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await apiClient.googleLogin(credential)
       setUser(response.user)
+      
+      // Sync localStorage with server onboarding_completed value
+      if (typeof window !== 'undefined' && response.user.onboarding_completed !== undefined) {
+        if (response.user.onboarding_completed) {
+          localStorage.setItem('onboarding_completed', 'true')
+        } else {
+          localStorage.removeItem('onboarding_completed')
+        }
+      }
     } catch (error) {
       console.error('Google login failed:', error)
       throw error
@@ -120,6 +149,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const userData = await apiClient.getCurrentUser()
         setUser(userData)
+        
+        // Sync localStorage with server onboarding_completed value
+        if (typeof window !== 'undefined' && userData.onboarding_completed !== undefined) {
+          if (userData.onboarding_completed) {
+            localStorage.setItem('onboarding_completed', 'true')
+          } else {
+            localStorage.removeItem('onboarding_completed')
+          }
+        }
       } catch (error) {
         console.error('Failed to refresh user data:', error)
         // Clear invalid token and logout

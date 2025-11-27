@@ -1,7 +1,7 @@
 
 "use client"
 
-import { MessageSquare, Activity, Key, FileText, Users, Settings, User, LogOut, Zap, AlertTriangle, BarChart3 } from "lucide-react"
+import { MessageSquare, Activity, Key, FileText, Users, Settings, User, LogOut, Zap, AlertTriangle, BarChart3, BookOpen } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
@@ -240,6 +240,21 @@ export function Sidebar() {
 
       {/* Bottom Actions */}
       <div className="absolute bottom-4 left-4 right-4 space-y-2">
+        {/* Full Docs Button */}
+        <a
+          href="https://xr2.gitbook.io/docs"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`flex items-center p-2 rounded-md transition-colors group text-slate-600 hover:bg-blue-50 hover:text-blue-700 ${
+            isCollapsed
+              ? "w-8 h-8 justify-center"
+              : "w-full justify-start space-x-2"
+          }`}
+          title="Full Documentation"
+        >
+          <BookOpen className="w-4 h-4" />
+          {!isCollapsed && <span className="text-sm">Full Docs</span>}
+        </a>
         {/* Logout Button */}
         <button
           onClick={() => logout()}

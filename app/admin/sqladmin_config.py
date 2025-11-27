@@ -8,7 +8,7 @@ from sqladmin.authentication import AuthenticationBackend
 from starlette.requests import Request
 from starlette.concurrency import run_in_threadpool
 from fastapi import FastAPI
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, delete
 from sqlalchemy.exc import IntegrityError
 from wtforms import Form, StringField, BooleanField, PasswordField
 from wtforms.validators import DataRequired, Email, Optional
@@ -24,6 +24,9 @@ from app.models.prompt import Prompt, PromptVersion, Tag
 from app.models.llm import LLMProvider, UserAPIKey
 from app.models.product_api_key import ProductAPIKey, ProductAPILog
 from app.models.user_limits import UserLimits, GlobalLimits, UserAPIUsage
+from app.models.analytics import EventDefinition, ConversionFunnel, CustomFunnelConfiguration
+from app.models.public_share import PublicShare
+from app.models.workspace import workspace_members
 
 
 class AdminAuth(AuthenticationBackend):
@@ -57,9 +60,23 @@ class AdminAuth(AuthenticationBackend):
 
 
 class UserAdmin(ModelView, model=User):
-    column_list = [User.id, User.username, User.email, User.is_active, User.created_at]
+    column_list = [User.id, User.username, User.email, User.is_active, User.onboarding_completed, User.created_at]
+    # Exclude only hashed_password from detail view - all other fields will be shown
     column_details_exclude_list = [User.hashed_password]
     form_excluded_columns = [User.id, User.hashed_password, User.created_at, User.updated_at, User.last_login]
+    
+    column_labels = {
+        User.id: "ID",
+        User.username: "Username",
+        User.email: "Email",
+        User.full_name: "Full Name",
+        User.is_active: "Active",
+        User.is_superuser: "Superuser",
+        User.onboarding_completed: "Onboarding Completed",
+        User.created_at: "Created",
+        User.updated_at: "Updated",
+        User.last_login: "Last Login",
+    }
 
     # Add search functionality for username and email
     # column_searchable_list = [User.username, User.email]  # Temporarily disabled due to SQLAdmin 0.21.0 bug
@@ -78,9 +95,10 @@ class UserAdmin(ModelView, model=User):
             username = StringField('Username', validators=[DataRequired()])
             email = StringField('Email', validators=[DataRequired(), Email()])
             full_name = StringField('Full Name', validators=[Optional()])
-            password = PasswordField('Password', validators=[DataRequired()])
+            password = PasswordField('Password', validators=[Optional()])
             is_active = BooleanField('Is Active', default=True)
             is_superuser = BooleanField('Is Superuser', default=False)
+            onboarding_completed = BooleanField('Onboarding Completed', default=False)
 
         return UserForm
 
@@ -144,8 +162,9 @@ class UserAdmin(ModelView, model=User):
         """Update user (in threadpool)."""
 
         def _update_sync() -> User:
+            # Remove password from data and only hash if it's provided and not empty
             password = data.pop('password', None)
-            if password:
+            if password and password.strip():
                 data['hashed_password'] = get_password_hash(password)
 
             with SyncSessionLocal() as session:
@@ -175,10 +194,12 @@ class UserAdmin(ModelView, model=User):
                     return False
 
                 # Check if user owns any workspaces
-                workspaces_result = session.execute(
-                    select(Workspace).where(Workspace.owner_id == pk)
-                )
-                owned_workspaces = workspaces_result.scalars().all()
+                # Use no_autoflush to prevent any premature flushes
+                with session.no_autoflush:
+                    workspaces_result = session.execute(
+                        select(Workspace).where(Workspace.owner_id == pk)
+                    )
+                    owned_workspaces = workspaces_result.scalars().all()
 
                 # Check if this would leave the system without any admin users
                 admin_count_result = session.execute(
@@ -216,15 +237,306 @@ class UserAdmin(ModelView, model=User):
                         )
 
                     # Transfer ownership of all workspaces to the new owner
+                    # Use COMPLETELY SEPARATE database connection to bypass ORM
+                    from sqlalchemy import text, create_engine
+                    from app.core.config import settings
+                    
+                    # Collect workspace data BEFORE any operations
+                    workspace_data = []
                     for workspace in owned_workspaces:
-                        workspace.owner_id = new_owner.id
-                        # Also ensure the new owner is a member of the workspace if not already
-                        if new_owner not in workspace.members:
-                            workspace.members.append(new_owner)
+                        workspace_data.append({
+                            'id': str(workspace.id),
+                            'slug': workspace.slug
+                        })
+                    
+                    # CRITICAL: Expunge ALL workspace objects from session BEFORE any SQL operations
+                    for workspace in owned_workspaces:
+                        session.expunge(workspace)
+                    
+                    user_id_to_delete = str(pk)
+                    session.expunge(user_to_delete)
+                    
+                    # Create COMPLETELY SEPARATE database connection (not from session)
+                    # This ensures ORM has ZERO knowledge of what we're doing
+                    db_url = settings.DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+                    separate_engine = create_engine(db_url)
+                    
+                    try:
+                        with separate_engine.connect() as separate_conn:
+                            # Now perform ALL workspace updates using ONLY raw SQL through separate connection
+                            for ws_data in workspace_data:
+                                workspace_id = ws_data['id']
+                                current_slug = ws_data['slug']
+                                new_owner_id = str(new_owner.id)
+                                
+                                # Check if new owner already has a workspace with the same slug
+                                existing_result = separate_conn.execute(
+                                    text("""
+                                        SELECT id FROM workspaces 
+                                        WHERE owner_id = :owner_id AND slug = :slug
+                                    """),
+                                    {"owner_id": new_owner_id, "slug": current_slug}
+                                )
+                                existing = existing_result.scalar_one_or_none()
+                                
+                                # If slug conflict exists, modify the slug
+                                if existing:
+                                    base_slug = current_slug
+                                    counter = 1
+                                    new_slug = f"{base_slug}-transferred-{counter}"
+                                    
+                                    # Find unique slug
+                                    while True:
+                                        check_result = separate_conn.execute(
+                                            text("SELECT id FROM workspaces WHERE owner_id = :owner_id AND slug = :slug"),
+                                            {"owner_id": new_owner_id, "slug": new_slug}
+                                        )
+                                        if not check_result.scalar_one_or_none():
+                                            break
+                                        counter += 1
+                                        new_slug = f"{base_slug}-transferred-{counter}"
+                                    
+                                    # Update both slug and owner_id in ONE SQL statement
+                                    separate_conn.execute(
+                                        text("UPDATE workspaces SET slug = :new_slug, owner_id = CAST(:owner_id AS UUID), updated_at = NOW() WHERE id = CAST(:workspace_id AS UUID)"),
+                                        {"new_slug": new_slug, "owner_id": new_owner_id, "workspace_id": workspace_id}
+                                    )
+                                    separate_conn.commit()
+                                    print(f"Changed workspace slug from '{base_slug}' to '{new_slug}' and transferred ownership")
+                                else:
+                                    # No conflict, just update owner_id
+                                    separate_conn.execute(
+                                        text("UPDATE workspaces SET owner_id = CAST(:owner_id AS UUID), updated_at = NOW() WHERE id = CAST(:workspace_id AS UUID)"),
+                                        {"owner_id": new_owner_id, "workspace_id": workspace_id}
+                                    )
+                                    separate_conn.commit()
+                                
+                                # Add new owner as member if not already
+                                separate_conn.execute(
+                                    text("""
+                                        INSERT INTO workspace_members (workspace_id, user_id, role, joined_at)
+                                        SELECT CAST(:workspace_id AS UUID), CAST(:user_id AS UUID), 'member', NOW()
+                                        WHERE NOT EXISTS (
+                                            SELECT 1 FROM workspace_members 
+                                            WHERE workspace_id = CAST(:workspace_id AS UUID) AND user_id = CAST(:user_id AS UUID)
+                                        )
+                                    """),
+                                    {"workspace_id": workspace_id, "user_id": new_owner_id}
+                                )
+                                separate_conn.commit()
+                    finally:
+                        separate_engine.dispose()
+                    
+                    print(f"Transferred ownership of {len(owned_workspaces)} workspace(s) from user {user_id_to_delete} to {new_owner.username}")
+                    
+                    # Re-query user_to_delete after workspace transfer is complete
+                    # Use no_autoflush to prevent any workspace sync attempts
+                    with session.no_autoflush:
+                        user_to_delete = session.execute(
+                            select(User).where(User.id == pk)
+                        ).scalar_one_or_none()
+                    
+                    if not user_to_delete:
+                        return False
 
-                    session.commit()
-                    print(f"Transferred ownership of {len(owned_workspaces)} workspace(s) from "
-                          f"{user_to_delete.username} to {new_owner.username}")
+                # Delete user's ProductAPIKeys and ProductAPILogs using direct SQL
+                # This MUST happen before deleting the user to avoid foreign key violations
+                from sqlalchemy import text
+                
+                # Delete API logs first (they reference API keys)
+                session.execute(
+                    text("""
+                        DELETE FROM product_api_logs 
+                        WHERE api_key_id IN (
+                            SELECT id FROM product_api_keys WHERE user_id = :user_id
+                        )
+                    """),
+                    {"user_id": str(pk)}
+                )
+                
+                # Delete API keys
+                result = session.execute(
+                    text("DELETE FROM product_api_keys WHERE user_id = :user_id"),
+                    {"user_id": str(pk)}
+                )
+                
+                # Flush to ensure deletions are applied in this transaction
+                session.flush()
+                
+                # Verify deletion
+                remaining_count = session.execute(
+                    text("SELECT COUNT(*) FROM product_api_keys WHERE user_id = :user_id"),
+                    {"user_id": str(pk)}
+                ).scalar()
+                
+                if remaining_count and remaining_count > 0:
+                    raise ValueError(f"Failed to delete {remaining_count} ProductAPIKey(s) - they still exist after deletion attempt!")
+
+                # Delete user's LLM API keys
+                user_api_keys_result = session.execute(
+                    select(UserAPIKey).where(UserAPIKey.user_id == pk)
+                )
+                user_api_keys = user_api_keys_result.scalars().all()
+                for api_key in user_api_keys:
+                    session.delete(api_key)
+                
+                # Delete user's limits (should cascade, but delete explicitly)
+                user_limits_result = session.execute(
+                    select(UserLimits).where(UserLimits.user_id == pk)
+                )
+                user_limits = user_limits_result.scalars().one_or_none()
+                if user_limits:
+                    session.delete(user_limits)
+                
+                # Delete user's API usage records
+                user_usage_result = session.execute(
+                    select(UserAPIUsage).where(UserAPIUsage.user_id == pk)
+                )
+                user_usage_records = user_usage_result.scalars().all()
+                for usage in user_usage_records:
+                    session.delete(usage)
+
+                # Transfer user's prompts to another admin (if any prompts exist)
+                # This MUST happen before deleting the user to avoid foreign key violations
+                user_prompts_result = session.execute(
+                    select(Prompt).where(Prompt.created_by == pk)
+                )
+                user_prompts = user_prompts_result.scalars().all()
+
+                if user_prompts:
+                    # Find another admin user to transfer prompts to
+                    admin_result = session.execute(
+                        select(User).where(
+                            User.is_superuser == True,
+                            User.id != pk,
+                            User.is_active == True
+                        ).limit(1)
+                    )
+                    new_prompt_owner = admin_result.scalar_one_or_none()
+
+                    if not new_prompt_owner:
+                        # No other admin available - cannot delete user with prompts
+                        raise ValueError(
+                            f"Cannot delete user {user_to_delete.username}: "
+                            f"User has {len(user_prompts)} prompt(s) and no other admin user "
+                            f"is available to transfer ownership to. Please create another admin user first."
+                        )
+
+                    # Transfer all prompts using raw SQL to avoid ORM issues
+                    from sqlalchemy import text
+
+                    # Transfer prompts (created_by)
+                    session.execute(
+                        text("""
+                            UPDATE prompts
+                            SET created_by = CAST(:new_owner_id AS UUID),
+                                updated_at = NOW()
+                            WHERE created_by = CAST(:old_owner_id AS UUID)
+                        """),
+                        {"new_owner_id": str(new_prompt_owner.id), "old_owner_id": str(pk)}
+                    )
+
+                    # Transfer prompt versions (created_by)
+                    session.execute(
+                        text("""
+                            UPDATE prompt_versions
+                            SET created_by = CAST(:new_owner_id AS UUID),
+                                updated_at = NOW()
+                            WHERE created_by = CAST(:old_owner_id AS UUID)
+                        """),
+                        {"new_owner_id": str(new_prompt_owner.id), "old_owner_id": str(pk)}
+                    )
+
+                    # Also update updated_by if it references the deleted user
+                    session.execute(
+                        text("""
+                            UPDATE prompts
+                            SET updated_by = CAST(:new_owner_id AS UUID),
+                                updated_at = NOW()
+                            WHERE updated_by = CAST(:old_owner_id AS UUID)
+                        """),
+                        {"new_owner_id": str(new_prompt_owner.id), "old_owner_id": str(pk)}
+                    )
+
+                    session.execute(
+                        text("""
+                            UPDATE prompt_versions
+                            SET updated_by = CAST(:new_owner_id AS UUID),
+                                updated_at = NOW()
+                            WHERE updated_by = CAST(:old_owner_id AS UUID)
+                        """),
+                        {"new_owner_id": str(new_prompt_owner.id), "old_owner_id": str(pk)}
+                    )
+
+                    # Also update last_deployed_by if it references the deleted user
+                    session.execute(
+                        text("""
+                            UPDATE prompts
+                            SET last_deployed_by = CAST(:new_owner_id AS UUID)
+                            WHERE last_deployed_by = CAST(:old_owner_id AS UUID)
+                        """),
+                        {"new_owner_id": str(new_prompt_owner.id), "old_owner_id": str(pk)}
+                    )
+
+                    # Also update deployed_by in prompt_versions if it references the deleted user
+                    session.execute(
+                        text("""
+                            UPDATE prompt_versions
+                            SET deployed_by = CAST(:new_owner_id AS UUID)
+                            WHERE deployed_by = CAST(:old_owner_id AS UUID)
+                        """),
+                        {"new_owner_id": str(new_prompt_owner.id), "old_owner_id": str(pk)}
+                    )
+
+                    session.flush()
+                    print(f"Transferred {len(user_prompts)} prompt(s) from user {user_to_delete.username} to {new_prompt_owner.username}")
+
+                # Delete user's tags
+                tags_result = session.execute(
+                    select(Tag).where(Tag.created_by == pk)
+                )
+                tags = tags_result.scalars().all()
+                for tag in tags:
+                    session.delete(tag)
+                
+                # Delete user's public shares
+                public_shares_result = session.execute(
+                    select(PublicShare).where(PublicShare.created_by == pk)
+                )
+                public_shares = public_shares_result.scalars().all()
+                for share in public_shares:
+                    session.delete(share)
+                
+                # Delete user's event definitions
+                event_defs_result = session.execute(
+                    select(EventDefinition).where(EventDefinition.created_by == pk)
+                )
+                event_defs = event_defs_result.scalars().all()
+                for event_def in event_defs:
+                    session.delete(event_def)
+                
+                # Delete user's conversion funnels
+                funnels_result = session.execute(
+                    select(ConversionFunnel).where(ConversionFunnel.created_by == pk)
+                )
+                funnels = funnels_result.scalars().all()
+                for funnel in funnels:
+                    session.delete(funnel)
+                
+                # Delete user's custom funnel configurations
+                custom_funnels_result = session.execute(
+                    select(CustomFunnelConfiguration).where(CustomFunnelConfiguration.created_by == pk)
+                )
+                custom_funnels = custom_funnels_result.scalars().all()
+                for funnel in custom_funnels:
+                    session.delete(funnel)
+                
+                # Remove user from workspace_members (many-to-many)
+                session.execute(
+                    delete(workspace_members).where(workspace_members.c.user_id == pk)
+                )
+                
+                session.flush()
 
                 # Now safe to delete the user
                 session.delete(user_to_delete)

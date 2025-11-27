@@ -4,7 +4,6 @@ import {useState, useMemo, useEffect, useRef} from "react"
 import {
     Edit,
     Trash2,
-    Eye,
     Plus,
     Minus,
     Code,
@@ -664,18 +663,6 @@ export function LeftPanel({
                                         <div className="flex items-center justify-between">
                                             <span className="text-gray-400">{version.timestamp} · {version.updater || 'Unknown'}</span>
                                             <div className="flex gap-1">
-                                                <Button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        handleViewVersion(version)
-                                                    }}
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700 hover:bg-blue-50"
-                                                    title="View version"
-                                                >
-                                                    <Eye className="w-3 h-3"/>
-                                                </Button>
                                                 <Button
                                                     onClick={(e) => {
                                                         e.stopPropagation()

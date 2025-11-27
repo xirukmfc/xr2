@@ -24,7 +24,7 @@ Repository = "https://github.com/channeler-ai/xr2"
 Issues = "https://github.com/channeler-ai/xr2/issues"
 
 [tool.setuptools]
-packages = ["channeler_sdk"]
+packages = ["xr2_sdk"]
 package-dir = {"" = "."}
 
 

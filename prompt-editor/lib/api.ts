@@ -438,8 +438,8 @@ class ApiClient {
     }
 
     // Authentication API methods
-    async login(username: string, password: string): Promise<{access_token: string, token_type: string, user: any}> {
-        const response = await this.request<{access_token: string, token_type: string, user: any}>('/auth/login', {
+    async login(username: string, password: string): Promise<{access_token: string, token_type: string, user: any, api_key?: string}> {
+        const response = await this.request<{access_token: string, token_type: string, user: any, api_key?: string}>('/auth/login', {
             method: 'POST',
             body: JSON.stringify({ username, password }),
         });
@@ -447,14 +447,27 @@ class ApiClient {
         // Store token automatically
         this.setToken(response.access_token);
         
+        // Store API key if provided (for new users)
+        if (response.api_key && typeof window !== 'undefined') {
+            localStorage.setItem('api_key', response.api_key);
+        }
+        
         return response;
     }
 
-    async googleLogin(credential: string): Promise<{access_token: string, token_type: string, user: any}> {
-        const response = await this.request<{access_token: string, token_type: string, user: any}>('/auth/google', {
+    async googleLogin(credential: string): Promise<{access_token: string, token_type: string, user: any, api_key?: string}> {
+        const response = await this.request<{access_token: string, token_type: string, user: any, api_key?: string}>('/auth/google', {
             method: 'POST',
             body: JSON.stringify({ credential }),
         });
+        
+        // Store API key if provided (for new users)
+        if (response.api_key && typeof window !== 'undefined') {
+            console.log('[API Client] Saving API key to localStorage:', response.api_key.substring(0, 20) + '...');
+            localStorage.setItem('api_key', response.api_key);
+        } else {
+            console.log('[API Client] No API key in response');
+        }
         
         // Store token automatically
         this.setToken(response.access_token);
@@ -471,6 +484,13 @@ class ApiClient {
                 password, 
                 full_name: fullName 
             }),
+        });
+    }
+
+    async completeOnboarding(completed: boolean = true): Promise<{ onboarding_completed: boolean }> {
+        return this.request<{ onboarding_completed: boolean }>('/auth/onboarding/complete', {
+            method: 'POST',
+            body: JSON.stringify({ completed }),
         });
     }
 
