@@ -1,0 +1,28 @@
+{
+    "name": "xr2_api_key",
+    "label": "xR2 API Key Connection",
+    "type": "apikey",
+    "parameters": [
+        {
+            "name": "apiKey",
+            "type": "text",
+            "label": "API Key",
+            "help": "Enter your xR2 Product API Key. Get it at: https://xr2.uk/api-keys",
+            "required": true
+        }
+    ],
+    "common": {
+        "headers": {
+            "Authorization": "Bearer {{parameters.apiKey}}"
+        }
+    },
+    "test": {
+        "request": {
+            "url": "/check-api-key",
+            "method": "GET"
+        },
+        "response": {
+            "valid": "{{body.ok}}"
+        }
+    }
+}

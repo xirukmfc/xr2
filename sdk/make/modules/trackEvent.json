@@ -1,0 +1,113 @@
+{
+    "name": "trackEvent",
+    "label": "Track Event",
+    "description": "Send a prompt usage event for analytics. Use the trace_id from the Get Prompt response.",
+    "connection": "xr2_api_key",
+    "parameters": [
+        {
+            "name": "trace_id",
+            "type": "text",
+            "label": "Trace ID",
+            "help": "Request identifier from the Get Prompt response (trace_id field)",
+            "required": true
+        },
+        {
+            "name": "event_name",
+            "type": "text",
+            "label": "Event Name",
+            "help": "Event name (e.g., conversion, purchase, click, signup)",
+            "required": true
+        },
+        {
+            "name": "category",
+            "type": "select",
+            "label": "Category",
+            "help": "Event category",
+            "required": true,
+            "options": [
+                {"label": "Conversion", "value": "conversion"},
+                {"label": "Revenue", "value": "revenue"},
+                {"label": "Engagement", "value": "engagement"},
+                {"label": "Custom", "value": "custom"}
+            ]
+        },
+        {
+            "name": "fields",
+            "type": "collection",
+            "label": "Event Fields",
+            "help": "Additional event data (key-value pairs)",
+            "required": false,
+            "spec": [
+                {
+                    "name": "amount",
+                    "type": "number",
+                    "label": "Amount",
+                    "help": "Amount (for revenue events)"
+                },
+                {
+                    "name": "currency",
+                    "type": "text",
+                    "label": "Currency",
+                    "help": "Currency code (USD, EUR, etc.)"
+                },
+                {
+                    "name": "product_id",
+                    "type": "text",
+                    "label": "Product ID"
+                },
+                {
+                    "name": "user_id",
+                    "type": "text",
+                    "label": "User ID"
+                },
+                {
+                    "name": "custom_field_1",
+                    "type": "text",
+                    "label": "Custom Field 1"
+                },
+                {
+                    "name": "custom_field_2",
+                    "type": "text",
+                    "label": "Custom Field 2"
+                }
+            ]
+        }
+    ],
+    "expect": [
+        {"name": "trace_id", "type": "text", "label": "Trace ID"},
+        {"name": "event_name", "type": "text", "label": "Event Name"},
+        {"name": "category", "type": "select", "label": "Category"},
+        {"name": "fields", "type": "collection", "label": "Fields"}
+    ],
+    "interface": [
+        {"name": "success", "type": "boolean", "label": "Success"},
+        {"name": "event_id", "type": "text", "label": "Event ID"},
+        {"name": "trace_id", "type": "text", "label": "Trace ID"},
+        {"name": "message", "type": "text", "label": "Message"}
+    ],
+    "communication": {
+        "url": "/events",
+        "method": "POST",
+        "body": {
+            "type": "json",
+            "trace_id": "{{parameters.trace_id}}",
+            "event_name": "{{parameters.event_name}}",
+            "category": "{{parameters.category}}",
+            "fields": "{{ifempty(parameters.fields, emptyobject)}}"
+        },
+        "response": {
+            "output": "{{body}}"
+        }
+    },
+    "samples": {
+        "parameters": {
+            "trace_id": "evt_abc123_1634567890_xyz",
+            "event_name": "purchase",
+            "category": "revenue",
+            "fields": {
+                "amount": 99.99,
+                "currency": "USD"
+            }
+        }
+    }
+}

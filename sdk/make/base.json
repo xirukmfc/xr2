@@ -1,0 +1,17 @@
+{
+    "baseUrl": "https://xr2.uk/api/v1",
+    "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    },
+    "log": {
+        "sanitize": ["request.headers.authorization"]
+    },
+    "response": {
+        "error": {
+            "message": "{{body.detail.message}}",
+            "type": "{{body.detail.error}}"
+        }
+    }
+}
+

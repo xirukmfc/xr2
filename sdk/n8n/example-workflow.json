@@ -1,0 +1,77 @@
+{
+  "name": "xR2 Example Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "resource": "prompt",
+        "operation": "get",
+        "slug": "welcome-message",
+        "versionNumber": 0
+      },
+      "name": "Get Prompt",
+      "type": "n8n-nodes-xr2.xr2",
+      "typeVersion": 1,
+      "position": [440, 300],
+      "credentials": {
+        "xr2Api": {
+          "id": "1",
+          "name": "xR2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "track",
+        "traceId": "={{ $json.trace_id }}",
+        "eventName": "prompt_fetched",
+        "category": "workflow",
+        "fields": "{ \"workflow_name\": \"Example\", \"environment\": \"test\" }"
+      },
+      "name": "Track Event",
+      "type": "n8n-nodes-xr2.xr2",
+      "typeVersion": 1,
+      "position": [640, 300],
+      "credentials": {
+        "xr2Api": {
+          "id": "1",
+          "name": "xR2 API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Get Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Prompt": {
+      "main": [
+        [
+          {
+            "node": "Track Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "tags": []
+}

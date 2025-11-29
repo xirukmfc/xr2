@@ -1,0 +1,11 @@
+{
+    "name": "xr2",
+    "label": "xR2 - Prompt Management",
+    "description": "AI prompt management platform: versioning, A/B testing, analytics. Get prompts from xR2 and track usage events.",
+    "version": "1.0.0",
+    "categories": ["ai-tools", "marketing-automation", "development-tools"],
+    "iconColor": "#6366F1",
+    "audience": ["all"],
+    "country": null,
+    "language": "en"
+}

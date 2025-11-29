@@ -5,7 +5,7 @@ export class XR2 implements INodeType {
     description: INodeTypeDescription = {
         displayName: 'xR2',
         name: 'xr2',
-        icon: 'file:xr2.svg',
+        icon: 'file:xr2-logo.png',
         group: ['transform'],
         version: 1,
         description: 'Interact with xR2 APIs',
@@ -95,7 +95,7 @@ export class XR2 implements INodeType {
                 type: 'number',
                 default: 0,
                 typeOptions: { minValue: 0 },
-                description: 'Specific version to fetch',
+                description: 'Specific version number to fetch (0 = latest deployed version). Use this when you need a particular version of the prompt.',
                 displayOptions: {
                     show: {
                         resource: ['prompt'],
@@ -108,14 +108,15 @@ export class XR2 implements INodeType {
                 name: 'status',
                 type: 'options',
                 options: [
-                    { name: 'Draft', value: 'draft' },
-                    { name: 'Testing', value: 'testing' },
+                    { name: 'Any (Default)', value: '' },
                     { name: 'Production', value: 'production' },
+                    { name: 'Testing', value: 'testing' },
+                    { name: 'Draft', value: 'draft' },
                     { name: 'Inactive', value: 'inactive' },
                     { name: 'Deprecated', value: 'deprecated' },
                 ],
                 default: '',
-                description: 'Filter by version status',
+                description: 'Filter by version status. Leave as "Any" to get the latest deployed version regardless of status. Only use specific statuses if you need a particular version.',
                 displayOptions: {
                     show: {
                         resource: ['prompt'],

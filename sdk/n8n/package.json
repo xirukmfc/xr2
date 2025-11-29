@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-xr2",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "n8n community nodes for xR2 API (Get Prompt, Events)",
   "license": "MIT",
   "author": "xR2",
@@ -19,10 +19,12 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "src/nodes/**/xr2.svg"
   ],
   "scripts": {
-    "build": "tsc -p .",
+    "build": "tsc -p . && npm run copy-assets",
+    "copy-assets": "mkdir -p dist/nodes/XR2 && cp src/nodes/XR2/*.svg src/nodes/XR2/*.png dist/nodes/XR2/ 2>/dev/null || true",
     "clean": "rimraf dist",
     "prepublishOnly": "npm run clean && npm run build"
   },
@@ -33,6 +35,9 @@
   },
   "peerDependencies": {
     "n8n-workflow": ">=1.0.0"
+  },
+  "overrides": {
+    "form-data": "^4.0.4"
   }
 }
 

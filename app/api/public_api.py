@@ -512,6 +512,75 @@ async def get_prompt(
         )
 
 
+class CheckAPIKeyResponse(BaseModel):
+    """Response model for API key check"""
+    ok: bool = Field(..., description="API key is valid")
+    user: str = Field(..., description="Username of the API key owner")
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "ok": True,
+                    "user": "www"
+                }
+            ]
+        }
+    }
+
+
+@public_api_router.get(
+    "/check-api-key",
+    response_model=CheckAPIKeyResponse,
+    summary="Check API Key",
+    description="""Validate your API key and get the username associated with it.
+
+**Authentication:** Requires API key in header `Authorization: Bearer xr2_prod_YOUR_KEY`
+
+**Get API Key:** Visit https://xr2.uk/api-keys → Click "Create Keys" → Copy your key
+
+**Use Case:** Test your API key before making other API calls, or verify which user account owns the key
+
+**Response:** Returns `ok: true` and the username if the key is valid
+""",
+    responses={
+        200: {
+            "description": "API key is valid",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "ok": True,
+                        "user": "www"
+                    }
+                }
+            }
+        },
+        401: {"description": "Invalid or missing API key"}
+    }
+)
+async def check_api_key(
+        session: AsyncSession = Depends(get_session),
+        api_key: ProductAPIKey = Depends(get_product_api_key)
+):
+    """Check if API key is valid and return the username"""
+    try:
+        # Get user from API key
+        user = await get_user_from_api_key(api_key, session)
+
+        return CheckAPIKeyResponse(
+            ok=True,
+            user=user.username
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error checking API key: {str(e)}"
+        )
+
+
 # Import events API for external access
 from app.api.events import router as events_router
 
