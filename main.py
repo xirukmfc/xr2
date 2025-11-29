@@ -26,9 +26,10 @@ from fastapi import Form
 from fastapi.responses import RedirectResponse, Response
 
 # Product API routes (separate router for external API)
-from app.api.product import router as product_router
+# Deprecated: moved to public_api_router
+# from app.api.product import router as product_router
 
-# Public API routes (limited to 2 methods)
+# Public API routes (includes check-api-key, get-prompt, events)
 from app.api.public_api import public_api_router
 
 # Statistics API routes
@@ -137,7 +138,7 @@ app.add_middleware(
 )
 
 
-# Include only public API routes (2 methods) in main app
+# Include public API routes (check-api-key, get-prompt, events) in main app
 app.include_router(public_api_router, prefix="/api/v1")
 
 # Include internal API routes (for actual API functionality)
@@ -146,8 +147,8 @@ app.include_router(api_router, prefix="/internal", include_in_schema=False)
 app.include_router(statistics_router, prefix="/internal", include_in_schema=False)
 app.include_router(event_definitions_router, prefix="/internal", include_in_schema=False)
 
-# Include product API routes
-app.include_router(product_router, prefix="/api/v1")
+# Product API routes - deprecated, moved to public_api_router
+# app.include_router(product_router, prefix="/api/v1")
 
 # Public sharing endpoints (no authentication required)
 from app.api.public_share import public_router as public_share_router
