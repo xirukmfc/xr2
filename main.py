@@ -89,7 +89,10 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
-    servers=[{"url": "http://localhost:8000", "description": "Development"}],
+    servers=[
+        {"url": "https://xr2.uk", "description": "Production"},
+        {"url": "http://localhost:8000", "description": "Development"}
+    ],
     root_path_in_servers=False,
 )
 
