@@ -4,113 +4,269 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Plus, X, Trash2, Lightbulb } from 'lucide-react';
+import { Plus, X, Trash2, Lightbulb, Pencil, ArrowRight, TrendingDown, GitCompare, ArrowUpRight, ArrowDownRight, Calendar } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 
-// Custom smooth funnel component - Google Analytics style
-const SmoothFunnel = ({ data, color = "#8884d8" }: { data: FunnelStep[], color?: string }) => {
+// Comparison funnel component - side by side with diff
+const ComparisonFunnel = ({ 
+  leftData, 
+  rightData, 
+  leftLabel, 
+  rightLabel,
+  onRemoveRight 
+}: { 
+  leftData: FunnelStep[], 
+  rightData: FunnelStep[], 
+  leftLabel: string,
+  rightLabel: string,
+  onRemoveRight: () => void 
+}) => {
+  if (!leftData || leftData.length === 0) return null;
+
+  const maxUsers = Math.max(
+    ...leftData.map(d => d.users),
+    ...rightData.map(d => d.users)
+  );
+
+  return (
+    <div className="space-y-0">
+      {/* Header row */}
+      <div className="flex items-center gap-2 pb-3 mb-2 border-b">
+        <div className="w-5 flex-shrink-0" />
+        <div className="w-28 flex-shrink-0" />
+        <div className="flex-1 text-center">
+          <span className="text-xs font-semibold text-blue-600">{leftLabel}</span>
+        </div>
+        <div className="flex-1 text-center flex items-center justify-center gap-1">
+          <span className="text-xs font-semibold text-green-600">{rightLabel}</span>
+          <button 
+            onClick={onRemoveRight}
+            className="ml-1 p-0.5 rounded hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+        <div className="w-16 text-center flex-shrink-0">
+          <span className="text-[10px] text-muted-foreground">Diff</span>
+        </div>
+      </div>
+
+      {leftData.map((step, index) => {
+        const rightStep = rightData[index];
+        const leftWidthPercent = maxUsers > 0 ? (step.users / maxUsers) * 100 : 0;
+        const rightWidthPercent = rightStep && maxUsers > 0 ? (rightStep.users / maxUsers) * 100 : 0;
+        
+        // Calculate diff
+        const conversionDiff = rightStep ? rightStep.conversion_rate - step.conversion_rate : 0;
+        const isPositive = conversionDiff > 0;
+        const isNegative = conversionDiff < 0;
+        
+        return (
+          <div key={step.step}>
+            {/* Step row */}
+            <div className="flex items-center gap-2 py-1.5 group hover:bg-muted/30 rounded px-2 -mx-2 transition-colors">
+              {/* Step number */}
+              <div className="flex-shrink-0 w-5 h-5 rounded bg-foreground text-background flex items-center justify-center text-[10px] font-bold">
+                {index + 1}
+              </div>
+              
+              {/* Step name */}
+              <div className="w-28 flex-shrink-0">
+                <span className="text-xs font-medium truncate block">{step.step}</span>
+              </div>
+              
+              {/* Left version bar */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 relative h-5 bg-blue-100 rounded overflow-hidden">
+                    <div 
+                      className="absolute inset-y-0 left-0 bg-blue-500 rounded transition-all duration-500 ease-out"
+                      style={{ width: `${Math.max(leftWidthPercent, 1)}%` }}
+                    />
+                  </div>
+                  <div className="w-10 text-right">
+                    <span className="text-[10px] font-medium tabular-nums">{step.users.toLocaleString()}</span>
+                  </div>
+                  <div className="w-10 text-right">
+                    <span className="text-[10px] font-bold tabular-nums text-blue-600">{step.conversion_rate.toFixed(1)}%</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Right version bar */}
+              <div className="flex-1 min-w-0">
+                {rightStep ? (
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 relative h-5 bg-green-100 rounded overflow-hidden">
+                      <div 
+                        className="absolute inset-y-0 left-0 bg-green-500 rounded transition-all duration-500 ease-out"
+                        style={{ width: `${Math.max(rightWidthPercent, 1)}%` }}
+                      />
+                    </div>
+                    <div className="w-10 text-right">
+                      <span className="text-[10px] font-medium tabular-nums">{rightStep.users.toLocaleString()}</span>
+                    </div>
+                    <div className="w-10 text-right">
+                      <span className="text-[10px] font-bold tabular-nums text-green-600">{rightStep.conversion_rate.toFixed(1)}%</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-[10px] text-muted-foreground text-center">—</div>
+                )}
+              </div>
+              
+              {/* Diff indicator */}
+              <div className="w-16 text-right flex-shrink-0">
+                {rightStep ? (
+                  <span className={`text-[10px] font-semibold flex items-center justify-end gap-0.5 ${
+                    isPositive ? 'text-green-600' : isNegative ? 'text-red-500' : 'text-muted-foreground'
+                  }`}>
+                    {isPositive && <ArrowUpRight className="w-3 h-3" />}
+                    {isNegative && <ArrowDownRight className="w-3 h-3" />}
+                    {isPositive ? '+' : ''}{conversionDiff.toFixed(1)}%
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">—</span>
+                )}
+              </div>
+            </div>
+            
+            {/* Connector line */}
+            {index < leftData.length - 1 && (
+              <div className="flex items-center gap-2 h-0.5">
+                <div className="w-5 flex justify-center">
+                  <div className="w-px h-1.5 bg-border" />
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+      
+      {/* Summary footer */}
+      {leftData.length >= 2 && rightData.length >= 2 && (
+        <div className="mt-3 pt-3 border-t">
+          <div className="flex items-center gap-2">
+            <div className="w-5 flex-shrink-0" />
+            <div className="w-28 flex-shrink-0">
+              <span className="text-xs text-muted-foreground">Overall</span>
+            </div>
+            <div className="flex-1 text-center">
+              <span className="text-sm font-bold text-blue-600">
+                {leftData[leftData.length - 1].conversion_rate.toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex-1 text-center">
+              <span className="text-sm font-bold text-green-600">
+                {rightData[rightData.length - 1].conversion_rate.toFixed(1)}%
+              </span>
+            </div>
+            <div className="w-16 text-right flex-shrink-0">
+              {(() => {
+                const diff = rightData[rightData.length - 1].conversion_rate - leftData[leftData.length - 1].conversion_rate;
+                const isPos = diff > 0;
+                const isNeg = diff < 0;
+                return (
+                  <span className={`text-xs font-bold ${isPos ? 'text-green-600' : isNeg ? 'text-red-500' : 'text-muted-foreground'}`}>
+                    {isPos ? '+' : ''}{diff.toFixed(1)}%
+                  </span>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Modern horizontal funnel component - matching analytics style
+const ModernFunnel = ({ data, color = "#6366f1" }: { data: FunnelStep[], color?: string }) => {
   if (!data || data.length === 0) return null;
 
   const maxUsers = Math.max(...data.map(d => d.users));
-  const height = 250;
-  const svgWidth = 400;
-  const padding = 20;
-  const availableHeight = height - (padding * 2);
-  const stepHeight = availableHeight / data.length;
-  const gap = 2; // Gap between segments
-  const cornerRadius = 4; // Rounded corners
-
-  // Generate unique ID for gradients to avoid conflicts
-  const gradientId = `funnelGradient-${color.replace('#', '')}`;
 
   return (
-    <svg width="100%" height={height} viewBox={`0 0 ${svgWidth} ${height}`} preserveAspectRatio="xMidYMid meet">
-      <defs>
-        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor={color} stopOpacity="0.85" />
-          <stop offset="50%" stopColor={color} stopOpacity="1" />
-          <stop offset="100%" stopColor={color} stopOpacity="0.85" />
-        </linearGradient>
-        <filter id={`shadow-${color.replace('#', '')}`}>
-          <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
-          <feOffset dx="0" dy="1" result="offsetblur" />
-          <feComponentTransfer>
-            <feFuncA type="linear" slope="0.2" />
-          </feComponentTransfer>
-          <feMerge>
-            <feMergeNode />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-
+    <div className="space-y-0">
       {data.map((step, index) => {
-        const y = padding + (index * stepHeight);
-        const actualStepHeight = stepHeight - gap;
-
-        // Calculate widths based on user count (percentage of max)
-        const widthPercent = (step.users / maxUsers) * 70 + 15; // 15-85%
-        const nextWidthPercent = index < data.length - 1
-          ? (data[index + 1].users / maxUsers) * 70 + 15
-          : widthPercent * 0.7;
-
-        const topWidth = (widthPercent / 100) * (svgWidth - padding * 2);
-        const bottomWidth = (nextWidthPercent / 100) * (svgWidth - padding * 2);
-
-        const x1 = (svgWidth - topWidth) / 2;
-        const x2 = svgWidth - x1;
-        const nextX1 = (svgWidth - bottomWidth) / 2;
-        const nextX2 = svgWidth - nextX1;
-
-        // Create trapezoid with rounded corners
-        const path = `
-          M ${x1 + cornerRadius} ${y}
-          L ${x2 - cornerRadius} ${y}
-          Q ${x2} ${y} ${x2} ${y + cornerRadius}
-          L ${nextX2} ${y + actualStepHeight - cornerRadius}
-          Q ${nextX2} ${y + actualStepHeight} ${nextX2 - cornerRadius} ${y + actualStepHeight}
-          L ${nextX1 + cornerRadius} ${y + actualStepHeight}
-          Q ${nextX1} ${y + actualStepHeight} ${nextX1} ${y + actualStepHeight - cornerRadius}
-          L ${x1} ${y + cornerRadius}
-          Q ${x1} ${y} ${x1 + cornerRadius} ${y}
-          Z
-        `;
-
+        const widthPercent = maxUsers > 0 ? (step.users / maxUsers) * 100 : 0;
+        const dropPercent = index > 0 && data[index - 1].users > 0 
+          ? ((data[index - 1].users - step.users) / data[index - 1].users * 100) 
+          : 0;
+        
         return (
-          <g key={step.step}>
-            <path
-              d={path}
-              fill={`url(#${gradientId})`}
-              filter={`url(#shadow-${color.replace('#', '')})`}
-              stroke="white"
-              strokeWidth="0.5"
-              opacity="0.95"
-            />
-            <text
-              x={svgWidth / 2}
-              y={y + actualStepHeight / 2 - 4}
-              textAnchor="middle"
-              fill="white"
-              fontSize="15"
-              fontWeight="700"
-            >
-              {step.users.toLocaleString()}
-            </text>
-            <text
-              x={svgWidth / 2}
-              y={y + actualStepHeight / 2 + 12}
-              textAnchor="middle"
-              fill="white"
-              fontSize="12"
-              fontWeight="500"
-              opacity="0.95"
-            >
-              {step.conversion_rate.toFixed(1)}%
-            </text>
-          </g>
+          <div key={step.step}>
+            {/* Step row */}
+            <div className="flex items-center gap-3 py-2 group hover:bg-muted/30 rounded px-2 -mx-2 transition-colors">
+              {/* Step number */}
+              <div className="flex-shrink-0 w-5 h-5 rounded bg-foreground text-background flex items-center justify-center text-[10px] font-bold">
+                {index + 1}
+              </div>
+              
+              {/* Step name */}
+              <div className="w-32 flex-shrink-0">
+                <span className="text-xs font-medium truncate block">{step.step}</span>
+              </div>
+              
+              {/* Progress bar */}
+              <div className="flex-1 min-w-0">
+                <div className="relative h-6 bg-muted rounded overflow-hidden">
+                  <div 
+                    className="absolute inset-y-0 left-0 bg-foreground/80 rounded transition-all duration-500 ease-out"
+                    style={{ width: `${Math.max(widthPercent, 1)}%` }}
+                  />
+                </div>
+              </div>
+              
+              {/* Users count - always right aligned after bar */}
+              <div className="w-16 text-right flex-shrink-0">
+                <span className="text-xs font-medium tabular-nums">{step.users.toLocaleString()}</span>
+              </div>
+              
+              {/* Conversion rate */}
+              <div className="w-12 text-right flex-shrink-0">
+                <span className="text-xs font-bold tabular-nums">{step.conversion_rate.toFixed(1)}%</span>
+              </div>
+              
+              {/* Drop indicator */}
+              <div className="w-20 text-right flex-shrink-0">
+                {index > 0 ? (
+                  <span className="text-[10px] text-red-500 font-medium">
+                    −{dropPercent.toFixed(1)}%
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">—</span>
+                )}
+              </div>
+            </div>
+            
+            {/* Connector line */}
+            {index < data.length - 1 && (
+              <div className="flex items-center gap-3 h-1">
+                <div className="w-5 flex justify-center">
+                  <div className="w-px h-2 bg-border" />
+                </div>
+              </div>
+            )}
+          </div>
         );
       })}
-    </svg>
+      
+      {/* Summary footer */}
+      {data.length >= 2 && (
+        <div className="mt-3 pt-3 border-t flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">Overall conversion</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold">
+              {data[data.length - 1].conversion_rate.toFixed(1)}%
+            </span>
+            <span className="text-[10px] text-muted-foreground">
+              ({data[data.length - 1].users.toLocaleString()} / {data[0].users.toLocaleString()})
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -137,61 +293,238 @@ interface EventDefinition {
   description?: string;
 }
 
-interface ABTest {
+interface PromptInfo {
   id: string;
   name: string;
-  status: string;
+  slug: string;
 }
 
-interface SplitFunnelData {
-  ab_test_id: string;
-  ab_test_name: string;
-  prompt_name: string;
-  version_a: {
-    version_id: string;
-    version_number: number;
-    data: FunnelStep[];
-  };
-  version_b: {
-    version_id: string;
-    version_number: number;
-    data: FunnelStep[];
-  };
+interface PromptVersionInfo {
+  id: string;
+  version_number: number;
+  status: string;
 }
 
 interface FunnelAnalysisProps {
   data?: FunnelStep[] | null;
   onFunnelChange?: (steps: string[]) => void;
+  onFilterChange?: (promptId: string | null, versionId: string | null) => void;
+  showCreateButton?: boolean;
+  externalShowCreateForm?: boolean;
+  onCreateFormClose?: () => void;
 }
 
-export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisProps) {
-  const [showCreateForm, setShowCreateForm] = useState(false);
+export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, showCreateButton = true, externalShowCreateForm, onCreateFormClose }: FunnelAnalysisProps) {
+  const [internalShowCreateForm, setInternalShowCreateForm] = useState(false);
+  // Combine external and internal state - show form if either is true
+  const showCreateForm = externalShowCreateForm || internalShowCreateForm;
+  const setShowCreateForm = (value: boolean) => {
+    // Always update internal state
+    setInternalShowCreateForm(value);
+    // If closing and external callback exists, call it
+    if (!value && onCreateFormClose) {
+      onCreateFormClose();
+    }
+  };
   const [funnelName, setFunnelName] = useState('');
-  const [funnelSteps, setFunnelSteps] = useState<string[]>(['', '']);
+  const [funnelSteps, setFunnelSteps] = useState<string[]>(['get_prompt', '']);
   const [savedConfigurations, setSavedConfigurations] = useState<CustomFunnelConfiguration[]>([]);
   const [currentConfiguration, setCurrentConfiguration] = useState<CustomFunnelConfiguration | null>(null);
   const [loading, setLoading] = useState(false);
+  const [funnelDataFromAPI, setFunnelDataFromAPI] = useState<FunnelStep[] | null>(null);
+  const [editingConfiguration, setEditingConfiguration] = useState<CustomFunnelConfiguration | null>(null);
   const [eventDefinitions, setEventDefinitions] = useState<EventDefinition[]>([]);
   const [showSuggestions, setShowSuggestions] = useState<number | null>(null);
-  const [completedABTests, setCompletedABTests] = useState<ABTest[]>([]);
-  const [selectedABTestId, setSelectedABTestId] = useState<string>('');
-  const [splitFunnelData, setSplitFunnelData] = useState<SplitFunnelData | null>(null);
+  
+  // Prompt and version filters
+  const [prompts, setPrompts] = useState<PromptInfo[]>([]);
+  const [selectedPromptId, setSelectedPromptId] = useState<string>('');
+  const [promptVersions, setPromptVersions] = useState<PromptVersionInfo[]>([]);
+  const [selectedVersionId, setSelectedVersionId] = useState<string>('');
+  
+  // Version comparison
+  const [compareVersionId, setCompareVersionId] = useState<string>('');
+  const [compareData, setCompareData] = useState<FunnelStep[] | null>(null);
+  const [isComparing, setIsComparing] = useState(false);
+  
+  // Date range filter
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   // Load saved configurations and event definitions on component mount
   useEffect(() => {
     loadSavedConfigurations();
     loadEventDefinitions();
-    loadCompletedABTests();
+    loadPrompts();
   }, []);
-
-  // Fetch split funnel data when A/B test is selected
+  
+  // Load versions when prompt is selected
   useEffect(() => {
-    if (selectedABTestId && currentConfiguration) {
-      fetchSplitFunnelData();
+    if (selectedPromptId) {
+      loadPromptVersions(selectedPromptId);
     } else {
-      setSplitFunnelData(null);
+      setPromptVersions([]);
+      setSelectedVersionId('');
     }
-  }, [selectedABTestId, currentConfiguration]);
+  }, [selectedPromptId]);
+
+  // Notify parent about filter changes
+  useEffect(() => {
+    if (onFilterChange) {
+      onFilterChange(
+        selectedPromptId || null,
+        selectedVersionId || null
+      );
+    }
+  }, [selectedPromptId, selectedVersionId]);
+
+  // Fetch funnel data when configuration, filters, or dates change
+  // All filters are applied together (AND condition):
+  // - If prompt selected: filter by prompt_id
+  // - If version selected: filter by version_id (within selected prompt if prompt also selected)
+  // - If dates selected: filter by date range
+  useEffect(() => {
+    if (currentConfiguration) {
+      // Use API if any filter is selected (prompt, version, or dates)
+      // All selected filters will be applied together (AND)
+      if (selectedPromptId || selectedVersionId || startDate || endDate) {
+        console.log('useEffect: Filters detected, calling fetchFunnelData', {
+          selectedPromptId,
+          selectedVersionId,
+          startDate,
+          endDate
+        });
+        fetchFunnelData();
+      } else {
+        // If no filters selected, clear API data to use props data
+        console.log('useEffect: No filters, clearing API data');
+        setFunnelDataFromAPI(null);
+      }
+    }
+  }, [currentConfiguration, selectedPromptId, selectedVersionId, startDate, endDate]);
+
+  // Fetch comparison data when compare version is selected
+  useEffect(() => {
+    if (compareVersionId && currentConfiguration && selectedPromptId) {
+      fetchCompareData(compareVersionId);
+    } else {
+      setCompareData(null);
+    }
+  }, [compareVersionId, currentConfiguration, startDate, endDate]);
+
+  const fetchFunnelData = async () => {
+    if (!currentConfiguration) {
+      console.log('fetchFunnelData: No configuration selected');
+      return;
+    }
+    
+    console.log('fetchFunnelData: Starting fetch', {
+      selectedPromptId,
+      selectedVersionId,
+      startDate,
+      endDate,
+      eventSteps: currentConfiguration.event_steps
+    });
+    
+    setLoading(true);
+    try {
+      // Prepare request body with optional filters
+      const requestBody: any = {
+        event_sequence: currentConfiguration.event_steps
+      };
+      
+      // Add prompt filter if provided (AND condition)
+      if (selectedPromptId) {
+        requestBody.prompt_id = selectedPromptId;
+        console.log('fetchFunnelData: Adding prompt_id filter:', selectedPromptId);
+      }
+      
+      // Add version filter if provided (AND condition - filters within selected prompt)
+      if (selectedVersionId) {
+        requestBody.version_id = selectedVersionId;
+        console.log('fetchFunnelData: Adding version_id filter:', selectedVersionId);
+      }
+      
+      if (startDate) {
+        // Ensure start date is at beginning of day
+        const startDateTime = new Date(startDate);
+        startDateTime.setHours(0, 0, 0, 0);
+        requestBody.start_date = startDateTime.toISOString();
+        console.log('fetchFunnelData: Adding start_date filter:', requestBody.start_date);
+      }
+      if (endDate) {
+        // Set end date to end of day
+        const endDateTime = new Date(endDate);
+        endDateTime.setHours(23, 59, 59, 999);
+        requestBody.end_date = endDateTime.toISOString();
+        console.log('fetchFunnelData: Adding end_date filter:', requestBody.end_date);
+      }
+      
+      console.log('fetchFunnelData: Sending request with body:', JSON.stringify(requestBody, null, 2));
+      
+      const result = await apiClient.request<FunnelStep[]>(
+        '/analytics/funnel-test',
+        {
+          method: 'POST',
+          body: JSON.stringify(requestBody)
+        }
+      );
+      console.log('fetchFunnelData: Received result:', result);
+      setFunnelDataFromAPI(result || []);
+    } catch (error) {
+      console.error('fetchFunnelData: Failed to fetch funnel data:', error);
+      setFunnelDataFromAPI([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCompareData = async (versionId: string) => {
+    if (!currentConfiguration) return;
+    
+    try {
+      // Prepare request body with optional date filters
+      const requestBody: any = {
+        event_sequence: currentConfiguration.event_steps,
+        version_id: versionId
+      };
+      
+      if (startDate) {
+        requestBody.start_date = new Date(startDate).toISOString();
+      }
+      if (endDate) {
+        // Set end date to end of day
+        const endDateTime = new Date(endDate);
+        endDateTime.setHours(23, 59, 59, 999);
+        requestBody.end_date = endDateTime.toISOString();
+      }
+      
+      // Use the funnel-test endpoint with version filter
+      const result = await apiClient.request<FunnelStep[]>(
+        '/analytics/funnel-test',
+        {
+          method: 'POST',
+          body: JSON.stringify(requestBody)
+        }
+      );
+      setCompareData(result || []);
+    } catch (error) {
+      console.error('Failed to fetch comparison funnel data:', error);
+      setCompareData(null);
+    }
+  };
+
+  const startComparison = () => {
+    setIsComparing(true);
+    setCompareVersionId('');
+    setCompareData(null);
+  };
+
+  const stopComparison = () => {
+    setIsComparing(false);
+    setCompareVersionId('');
+    setCompareData(null);
+  };
 
   const loadSavedConfigurations = async () => {
     try {
@@ -218,34 +551,22 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
     }
   };
 
-  const loadCompletedABTests = async () => {
+  const loadPrompts = async () => {
     try {
-      const tests = await apiClient.request<ABTest[]>('/ab-tests-simple/test');
-      const completed = tests.filter((test: ABTest) => test.status === 'completed');
-      setCompletedABTests(completed);
+      const promptsList = await apiClient.request<PromptInfo[]>('/prompts/');
+      setPrompts(promptsList);
     } catch (error) {
-      console.error('Failed to load completed A/B tests:', error);
+      console.error('Failed to load prompts:', error);
     }
   };
 
-  const fetchSplitFunnelData = async () => {
-    if (!currentConfiguration || !selectedABTestId) return;
-
-    setLoading(true);
+  const loadPromptVersions = async (promptId: string) => {
     try {
-      const data = await apiClient.request<any>('/analytics/funnel/', {
-        method: 'POST',
-        body: {
-          event_sequence: currentConfiguration.event_steps,
-          ab_test_id: selectedABTestId
-        }
-      });
-      setSplitFunnelData(data);
+      const versions = await apiClient.request<PromptVersionInfo[]>(`/prompts/${promptId}/versions`);
+      setPromptVersions(versions);
     } catch (error) {
-      console.error('Error fetching split funnel data:', error);
-      setSplitFunnelData(null);
-    } finally {
-      setLoading(false);
+      console.error('Failed to load prompt versions:', error);
+      setPromptVersions([]);
     }
   };
 
@@ -326,6 +647,59 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
     }
   };
 
+  const startEditConfiguration = (config: CustomFunnelConfiguration) => {
+    setEditingConfiguration(config);
+    setFunnelName(config.name);
+    setFunnelSteps(config.event_steps.length > 0 ? config.event_steps : ['get_prompt', '']);
+    setShowCreateForm(true);
+  };
+
+  const updateFunnelConfiguration = async () => {
+    if (!editingConfiguration) return;
+
+    const validSteps = funnelSteps.filter(step => step.trim());
+
+    if (!funnelName.trim()) {
+      alert('Please enter a funnel name');
+      return;
+    }
+
+    if (validSteps.length < 2) {
+      alert('Please enter at least 2 funnel steps');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const updatedConfiguration = await apiClient.request<CustomFunnelConfiguration>(`/custom-funnel-configurations/test/${editingConfiguration.id}`, {
+        method: 'PUT',
+        body: {
+          name: funnelName.trim(),
+          description: `Custom funnel with steps: ${validSteps.join(' → ')}`,
+          event_steps: validSteps
+        },
+      });
+
+      setSavedConfigurations(prev => prev.map(c => c.id === editingConfiguration.id ? updatedConfiguration : c));
+      setCurrentConfiguration(updatedConfiguration);
+
+      if (onFunnelChange) {
+        onFunnelChange(updatedConfiguration.event_steps);
+      }
+
+      // Reset form
+      setShowCreateForm(false);
+      setEditingConfiguration(null);
+      setFunnelName('');
+      setFunnelSteps(['get_prompt', '']);
+    } catch (error: any) {
+      console.error('Failed to update funnel configuration:', error);
+      alert(`Failed to update funnel configuration: ${error.message || 'Please try again.'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const deleteFunnelConfiguration = async (configId: string) => {
     if (!confirm('Are you sure you want to delete this funnel configuration?')) {
       return;
@@ -372,7 +746,11 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
   };
 
   const handleCreateFunnel = async () => {
-    await saveFunnelConfiguration();
+    if (editingConfiguration) {
+      await updateFunnelConfiguration();
+    } else {
+      await saveFunnelConfiguration();
+    }
   };
 
   if (!data || data.length === 0) {
@@ -407,6 +785,13 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
                         {currentConfiguration?.id === config.id ? "Active" : "Load"}
                       </Button>
                       <Button
+                        onClick={() => startEditConfiguration(config)}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
                         onClick={() => deleteFunnelConfiguration(config.id)}
                         variant="outline"
                         size="sm"
@@ -425,14 +810,12 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Funnel Analysis</CardTitle>
-              <p className="text-sm text-muted-foreground">Create custom conversion funnels to track user journeys</p>
-            </div>
-            <Button onClick={() => setShowCreateForm(true)} className="bg-black hover:bg-gray-800" data-testid="open-create-funnel" size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Create Funnel
-            </Button>
+            {showCreateButton && (
+              <Button onClick={() => setShowCreateForm(true)} className="bg-black hover:bg-gray-800" data-testid="open-create-funnel" size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Funnel
+              </Button>
+            )}
           </CardHeader>
           <CardContent>
             {showCreateForm ? (
@@ -458,38 +841,63 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
                         <div className="flex-1 relative">
                           <Input
                             data-testid={`funnel-step-${index}`}
-                            placeholder={`Event name (e.g., ${index === 0 ? 'start' : index === 1 ? 'end' : 'buy'})`}
+                            placeholder={`Event name (e.g., ${index === 0 ? 'get_prompt' : index === 1 ? 'purchase' : 'signup'})`}
                             value={step}
                             onChange={(e) => updateStep(index, e.target.value)}
                             onFocus={() => setShowSuggestions(index)}
                             onBlur={() => setTimeout(() => setShowSuggestions(null), 200)}
                           />
-                          {showSuggestions === index && eventDefinitions.length > 0 && (
+                          {showSuggestions === index && (
                             <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                              {/* Built-in events */}
                               <div className="p-2 border-b bg-gray-50">
                                 <div className="flex items-center gap-1 text-xs text-gray-600">
                                   <Lightbulb className="w-3 h-3" />
-                                  Event Definitions
+                                  Built-in Events
                                 </div>
                               </div>
-                              {eventDefinitions
-                                .filter(def => def.event_name.toLowerCase().includes(step.toLowerCase()))
-                                .map((definition) => (
-                                  <button
-                                    key={definition.id}
-                                    className="w-full text-left p-2 hover:bg-gray-50 border-b last:border-b-0"
-                                    onClick={() => {
-                                      updateStep(index, definition.event_name);
-                                      setShowSuggestions(null);
-                                    }}
-                                  >
-                                    <div className="font-medium text-sm">{definition.event_name}</div>
-                                    <div className="text-xs text-gray-500">{definition.category}</div>
-                                    {definition.description && (
-                                      <div className="text-xs text-gray-400 mt-1">{definition.description}</div>
-                                    )}
-                                  </button>
-                                ))}
+                              {['get_prompt'].filter(name => name.toLowerCase().includes(step.toLowerCase())).map((eventName) => (
+                                <button
+                                  key={eventName}
+                                  className="w-full text-left p-2 hover:bg-gray-50 border-b"
+                                  onClick={() => {
+                                    updateStep(index, eventName);
+                                    setShowSuggestions(null);
+                                  }}
+                                >
+                                  <div className="font-medium text-sm">{eventName}</div>
+                                  <div className="text-xs text-gray-500">System event - prompt request</div>
+                                </button>
+                              ))}
+                              {/* Custom event definitions */}
+                              {eventDefinitions.length > 0 && (
+                                <>
+                                  <div className="p-2 border-b bg-gray-50">
+                                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                                      <Lightbulb className="w-3 h-3" />
+                                      Custom Events
+                                    </div>
+                                  </div>
+                                  {eventDefinitions
+                                    .filter(def => def.event_name.toLowerCase().includes(step.toLowerCase()))
+                                    .map((definition) => (
+                                      <button
+                                        key={definition.id}
+                                        className="w-full text-left p-2 hover:bg-gray-50 border-b last:border-b-0"
+                                        onClick={() => {
+                                          updateStep(index, definition.event_name);
+                                          setShowSuggestions(null);
+                                        }}
+                                      >
+                                        <div className="font-medium text-sm">{definition.event_name}</div>
+                                        <div className="text-xs text-gray-500">{definition.category}</div>
+                                        {definition.description && (
+                                          <div className="text-xs text-gray-400 mt-1">{definition.description}</div>
+                                        )}
+                                      </button>
+                                    ))}
+                                </>
+                              )}
                             </div>
                           )}
                         </div>
@@ -529,15 +937,16 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
                     onClick={handleCreateFunnel}
                     disabled={!funnelName || funnelSteps.some(step => !step.trim()) || loading}
                   >
-                    {loading ? 'Saving...' : 'Create Funnel'}
+                    {loading ? 'Saving...' : (editingConfiguration ? 'Update Funnel' : 'Create Funnel')}
                   </Button>
                   <Button
                     data-testid="cancel-funnel-button"
                     variant="outline"
                     onClick={() => {
                       setShowCreateForm(false);
+                      setEditingConfiguration(null);
                       setFunnelName('');
-                      setFunnelSteps(['', '']);
+                      setFunnelSteps(['get_prompt', '']);
                     }}
                   >
                     Cancel
@@ -556,159 +965,332 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
     );
   }
 
+  // Quick date presets helper
+  const applyDatePreset = (preset: 'today' | '7days' | '30days' | 'thisMonth') => {
+    const today = new Date();
+    const formatDate = (d: Date) => d.toISOString().split('T')[0];
+    
+    switch (preset) {
+      case 'today':
+        setStartDate(formatDate(today));
+        setEndDate(formatDate(today));
+        break;
+      case '7days':
+        const week = new Date(today);
+        week.setDate(week.getDate() - 7);
+        setStartDate(formatDate(week));
+        setEndDate(formatDate(today));
+        break;
+      case '30days':
+        const month = new Date(today);
+        month.setDate(month.getDate() - 30);
+        setStartDate(formatDate(month));
+        setEndDate(formatDate(today));
+        break;
+      case 'thisMonth':
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        setStartDate(formatDate(firstDay));
+        setEndDate(formatDate(today));
+        break;
+    }
+  };
+
   return (
     <div className="space-y-3">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-base">Conversion Funnel</CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Current funnel: {currentConfiguration?.name || 'User Onboarding'}
-            </p>
-          </div>
-          <div className="flex gap-1.5 flex-wrap">
-            {savedConfigurations.length > 0 && (
-              <select
-                className="text-xs border rounded px-2 py-1"
-                value={currentConfiguration?.id || ''}
-                onChange={(e) => {
-                  const config = savedConfigurations.find(c => c.id === e.target.value);
-                  if (config) loadConfiguration(config);
-                }}
-              >
-                <option value="">Select saved funnel...</option>
-                {savedConfigurations.map((config) => (
-                  <option key={config.id} value={config.id}>
-                    {config.name}
-                  </option>
-                ))}
-              </select>
-            )}
-            {completedABTests.length > 0 && currentConfiguration && (
-              <select
-                className="text-xs border rounded px-2 py-1 bg-purple-50"
-                value={selectedABTestId}
-                onChange={(e) => setSelectedABTestId(e.target.value)}
-              >
-                <option value="">No A/B Test Split</option>
-                {completedABTests.map((test) => (
-                  <option key={test.id} value={test.id}>
-                    A/B: {test.name}
-                  </option>
-                ))}
-              </select>
-            )}
-            {currentConfiguration && (
-              <Button
-                onClick={() => deleteFunnelConfiguration(currentConfiguration.id)}
-                variant="outline"
-                size="sm"
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 px-2"
-                disabled={loading}
-              >
-                <Trash2 className="w-3 h-3" />
-              </Button>
-            )}
-            <Button onClick={() => setShowCreateForm(true)} variant="outline" size="sm" className="text-xs h-7 px-2">
-              <Plus className="w-3 h-3 mr-1" />
-              New Funnel
-            </Button>
-          </div>
+        <CardHeader className="p-4">
+          {!showCreateForm && (
+            <div className="flex flex-col gap-2">
+              {/* Row 1: Funnel + Edit/Delete + Prompt + Version + Compare */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {savedConfigurations.length > 0 && (
+                  <select
+                    className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[140px] h-8"
+                    value={currentConfiguration?.id || ''}
+                    onChange={(e) => {
+                      const config = savedConfigurations.find(c => c.id === e.target.value);
+                      if (config) loadConfiguration(config);
+                    }}
+                  >
+                    <option value="">Select funnel...</option>
+                    {savedConfigurations.map((config) => (
+                      <option key={config.id} value={config.id}>
+                        {config.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {currentConfiguration && (
+                  <>
+                    <Button
+                      onClick={() => startEditConfiguration(currentConfiguration)}
+                      variant="outline"
+                      className="h-8 w-8 p-0"
+                      title="Edit funnel configuration"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      onClick={() => deleteFunnelConfiguration(currentConfiguration.id)}
+                      variant="outline"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                      disabled={loading}
+                      title="Delete funnel configuration"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </>
+                )}
+                {showCreateButton && (
+                  <Button onClick={() => setShowCreateForm(true)} variant="outline" className="text-xs h-8 px-2">
+                    <Plus className="w-3.5 h-3.5 mr-1" />
+                    New
+                  </Button>
+                )}
+                
+                {/* Separator */}
+                {currentConfiguration && prompts.length > 0 && (
+                  <div className="w-px h-6 bg-gray-200 mx-1" />
+                )}
+                
+                {/* Prompt filter */}
+                {currentConfiguration && prompts.length > 0 && (
+                  <select
+                    className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[140px] h-8"
+                    value={selectedPromptId}
+                    onChange={(e) => {
+                      setSelectedPromptId(e.target.value);
+                      setSelectedVersionId('');
+                    }}
+                  >
+                    <option value="">All Prompts</option>
+                    {prompts.map((prompt) => (
+                      <option key={prompt.id} value={prompt.id}>
+                        {prompt.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {/* Version filter */}
+                {currentConfiguration && selectedPromptId && promptVersions.length > 0 && (
+                  <>
+                    <select
+                      className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[100px] h-8"
+                      value={selectedVersionId}
+                      onChange={(e) => {
+                        setSelectedVersionId(e.target.value);
+                        if (isComparing) {
+                          setCompareVersionId('');
+                          setCompareData(null);
+                        }
+                      }}
+                    >
+                      <option value="">All Versions</option>
+                      {promptVersions.map((version) => (
+                        <option key={version.id} value={version.id}>
+                          v{version.version_number} ({version.status})
+                        </option>
+                      ))}
+                    </select>
+                    
+                    {/* Compare button */}
+                    {selectedVersionId && !isComparing && (
+                      <Button
+                        onClick={startComparison}
+                        variant="outline"
+                        className="h-8 px-2 text-xs gap-1"
+                        title="Compare with another version"
+                      >
+                        <GitCompare className="w-3.5 h-3.5" />
+                        Compare
+                      </Button>
+                    )}
+                    
+                    {/* Compare version selector */}
+                    {isComparing && selectedVersionId && (
+                      <>
+                        <span className="text-xs text-muted-foreground">vs</span>
+                        <select
+                          className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[100px] h-8"
+                          value={compareVersionId}
+                          onChange={(e) => setCompareVersionId(e.target.value)}
+                        >
+                          <option value="">Select...</option>
+                          {promptVersions
+                            .filter(v => v.id !== selectedVersionId)
+                            .map((version) => (
+                              <option key={version.id} value={version.id}>
+                                v{version.version_number} ({version.status})
+                              </option>
+                            ))}
+                        </select>
+                        <Button
+                          onClick={stopComparison}
+                          variant="ghost"
+                          className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
+                          title="Cancel comparison"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </Button>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+              
+              {/* Row 2: Date range with quick presets */}
+              {currentConfiguration && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  
+                  {/* Quick presets */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => applyDatePreset('today')}
+                      className="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
+                    >
+                      Today
+                    </button>
+                    <button
+                      onClick={() => applyDatePreset('7days')}
+                      className="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
+                    >
+                      7 days
+                    </button>
+                    <button
+                      onClick={() => applyDatePreset('30days')}
+                      className="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
+                    >
+                      30 days
+                    </button>
+                    <button
+                      onClick={() => applyDatePreset('thisMonth')}
+                      className="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
+                    >
+                      This month
+                    </button>
+                  </div>
+                  
+                  <div className="w-px h-5 bg-gray-200 mx-1" />
+                  
+                  {/* Custom date range */}
+                  <div className="flex items-center gap-1.5">
+                    <Input
+                      id="start-date"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="text-xs h-8 w-[130px]"
+                    />
+                    <span className="text-xs text-muted-foreground">—</span>
+                    <Input
+                      id="end-date"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="text-xs h-8 w-[130px]"
+                    />
+                  </div>
+                  
+                  {(startDate || endDate) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setStartDate('');
+                        setEndDate('');
+                      }}
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-gray-900"
+                      title="Clear date filter"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {!showCreateForm ? (
             <>
-              {splitFunnelData ? (
-                // Split view for A/B test
-                <div className="space-y-2">
-                  <div className="text-center space-y-1">
-                    <Badge className="bg-purple-600 text-white text-xs px-2 py-0.5">A/B Test: {splitFunnelData.ab_test_name}</Badge>
-                    <p className="text-xs text-muted-foreground">
-                      Prompt: <span className="font-medium">{splitFunnelData.prompt_name}</span>
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Version A */}
-                    <div className="border-r pr-3">
-                      <h3 className="text-sm font-semibold mb-2 text-blue-600 text-center">
-                        Version {splitFunnelData.version_a.version_number}
-                      </h3>
-                      <div style={{ height: '200px' }}>
-                        <SmoothFunnel data={splitFunnelData.version_a.data} color="#3b82f6" />
-                      </div>
-
-                      <div className="mt-2 space-y-1">
-                        {splitFunnelData.version_a.data.map((step, index) => (
-                          <div key={step.step} className="flex justify-between items-center p-1.5 bg-blue-50 rounded">
-                            <div>
-                              <div className="font-medium text-xs">{step.step}</div>
-                              <div className="text-[10px] text-muted-foreground">
-                                {step.users.toLocaleString()} users
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="font-bold text-xs">{step.conversion_rate.toFixed(1)}%</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+              {(() => {
+                // Check if any filters are selected (prompt, version, or dates)
+                const hasFilters = selectedPromptId || selectedVersionId || startDate || endDate;
+                
+                // Show loading state when fetching API data
+                if (loading && hasFilters) {
+                  return (
+                    <div className="flex items-center justify-center py-8 text-muted-foreground">
+                      <p className="text-sm">Loading funnel data...</p>
                     </div>
-
-                    {/* Version B */}
-                    <div className="pl-3">
-                      <h3 className="text-sm font-semibold mb-2 text-green-600 text-center">
-                        Version {splitFunnelData.version_b.version_number}
-                      </h3>
-                      <div style={{ height: '200px' }}>
-                        <SmoothFunnel data={splitFunnelData.version_b.data} color="#10b981" />
-                      </div>
-
-                      <div className="mt-2 space-y-1">
-                        {splitFunnelData.version_b.data.map((step, index) => (
-                          <div key={step.step} className="flex justify-between items-center p-1.5 bg-green-50 rounded">
-                            <div>
-                              <div className="font-medium text-xs">{step.step}</div>
-                              <div className="text-[10px] text-muted-foreground">
-                                {step.users.toLocaleString()} users
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="font-bold text-xs">{step.conversion_rate.toFixed(1)}%</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                  );
+                }
+                
+                // Use API data if filters are selected (prompt, version, or dates)
+                // Otherwise use props data
+                // IMPORTANT: If filters are selected, ONLY use API data (never fall back to props)
+                const displayData = hasFilters 
+                  ? (funnelDataFromAPI !== null ? funnelDataFromAPI : [])  // Use API data, empty array if not loaded yet
+                  : data;  // Use props data when no filters
+                
+                // Show message if filters are active but no data returned
+                if (hasFilters && !loading && (!displayData || displayData.length === 0)) {
+                  const filterMessages = [];
+                  if (selectedPromptId) {
+                    const promptName = prompts.find(p => p.id === selectedPromptId)?.name || 'selected prompt';
+                    filterMessages.push(`Prompt: ${promptName}`);
+                  }
+                  if (selectedVersionId) {
+                    const version = promptVersions.find(v => v.id === selectedVersionId);
+                    if (version) {
+                      filterMessages.push(`Version: v${version.version_number}`);
+                    }
+                  }
+                  if (startDate || endDate) {
+                    if (startDate && endDate) {
+                      filterMessages.push(`Period: ${startDate} to ${endDate}`);
+                    } else if (startDate) {
+                      filterMessages.push(`From: ${startDate}`);
+                    } else if (endDate) {
+                      filterMessages.push(`Until: ${endDate}`);
+                    }
+                  }
+                  
+                  return (
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                      <p className="text-sm font-medium">No data found for the selected filters</p>
+                      {filterMessages.length > 0 && (
+                        <p className="text-xs mt-1">{filterMessages.join(' • ')}</p>
+                      )}
                     </div>
-                  </div>
-                </div>
-              ) : (
-                // Normal single funnel view
-                <>
-                  <SmoothFunnel data={data} color="#8884d8" />
-
-                  <div className="mt-3 space-y-1.5">
-                    {data.map((step, index) => (
-                      <div key={step.step} className="flex justify-between items-center p-2 bg-muted rounded">
-                        <div>
-                          <div className="font-medium text-xs">{step.step}</div>
-                          <div className="text-[10px] text-muted-foreground">
-                            {step.users.toLocaleString()} users
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold text-xs">{step.conversion_rate.toFixed(1)}%</div>
-                          {index > 0 && (
-                            <div className="text-[10px] text-muted-foreground">
-                              Drop: {(data[index - 1].conversion_rate - step.conversion_rate).toFixed(1)}%
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
+                  );
+                }
+                
+                if (isComparing && compareData && displayData && displayData.length > 0) {
+                  // Version comparison view
+                  return (
+                    <ComparisonFunnel
+                      leftData={displayData}
+                      rightData={compareData}
+                      leftLabel={`v${promptVersions.find(v => v.id === selectedVersionId)?.version_number || '?'}`}
+                      rightLabel={`v${promptVersions.find(v => v.id === compareVersionId)?.version_number || '?'}`}
+                      onRemoveRight={stopComparison}
+                    />
+                  );
+                } else if (displayData && displayData.length > 0) {
+                  // Normal single funnel view - Modern Amplitude style
+                  return <ModernFunnel data={displayData} />;
+                } else if (!hasFilters) {
+                  // No data and no filters - show generic message
+                  return (
+                    <div className="flex items-center justify-center h-48 text-muted-foreground">
+                      <p>No funnel data available</p>
+                    </div>
+                  );
+                }
+              })()}
+              
             </>
           ) : (
             <div className="space-y-3">
@@ -732,39 +1314,64 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
                       </Badge>
                       <div className="flex-1 relative">
                         <Input
-                          placeholder={`Event name (e.g., ${index === 0 ? 'start' : index === 1 ? 'end' : 'buy'})`}
+                          placeholder={`Event name (e.g., ${index === 0 ? 'get_prompt' : index === 1 ? 'purchase' : 'signup'})`}
                           value={step}
                           onChange={(e) => updateStep(index, e.target.value)}
                           onFocus={() => setShowSuggestions(index)}
                           onBlur={() => setTimeout(() => setShowSuggestions(null), 200)}
                           className="text-xs h-7"
                         />
-                        {showSuggestions === index && eventDefinitions.length > 0 && (
+                        {showSuggestions === index && (
                           <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border rounded-md shadow-lg max-h-40 overflow-y-auto">
+                            {/* Built-in events */}
                             <div className="p-1.5 border-b bg-gray-50">
                               <div className="flex items-center gap-1 text-[10px] text-gray-600">
                                 <Lightbulb className="w-2.5 h-2.5" />
-                                Event Definitions
+                                Built-in Events
                               </div>
                             </div>
-                            {eventDefinitions
-                              .filter(def => def.event_name.toLowerCase().includes(step.toLowerCase()))
-                              .map((definition) => (
-                                <button
-                                  key={definition.id}
-                                  className="w-full text-left p-1.5 hover:bg-gray-50 border-b last:border-b-0"
-                                  onClick={() => {
-                                    updateStep(index, definition.event_name);
-                                    setShowSuggestions(null);
-                                  }}
-                                >
-                                  <div className="font-medium text-xs">{definition.event_name}</div>
-                                  <div className="text-[10px] text-gray-500">{definition.category}</div>
-                                  {definition.description && (
-                                    <div className="text-[10px] text-gray-400 mt-0.5">{definition.description}</div>
-                                  )}
-                                </button>
-                              ))}
+                            {['get_prompt'].filter(name => name.toLowerCase().includes(step.toLowerCase())).map((eventName) => (
+                              <button
+                                key={eventName}
+                                className="w-full text-left p-1.5 hover:bg-gray-50 border-b"
+                                onClick={() => {
+                                  updateStep(index, eventName);
+                                  setShowSuggestions(null);
+                                }}
+                              >
+                                <div className="font-medium text-xs">{eventName}</div>
+                                <div className="text-[10px] text-gray-500">System event - prompt request</div>
+                              </button>
+                            ))}
+                            {/* Custom event definitions */}
+                            {eventDefinitions.length > 0 && (
+                              <>
+                                <div className="p-1.5 border-b bg-gray-50">
+                                  <div className="flex items-center gap-1 text-[10px] text-gray-600">
+                                    <Lightbulb className="w-2.5 h-2.5" />
+                                    Custom Events
+                                  </div>
+                                </div>
+                                {eventDefinitions
+                                  .filter(def => def.event_name.toLowerCase().includes(step.toLowerCase()))
+                                  .map((definition) => (
+                                    <button
+                                      key={definition.id}
+                                      className="w-full text-left p-1.5 hover:bg-gray-50 border-b last:border-b-0"
+                                      onClick={() => {
+                                        updateStep(index, definition.event_name);
+                                        setShowSuggestions(null);
+                                      }}
+                                    >
+                                      <div className="font-medium text-xs">{definition.event_name}</div>
+                                      <div className="text-[10px] text-gray-500">{definition.category}</div>
+                                      {definition.description && (
+                                        <div className="text-[10px] text-gray-400 mt-0.5">{definition.description}</div>
+                                      )}
+                                    </button>
+                                  ))}
+                              </>
+                            )}
                           </div>
                         )}
                       </div>
@@ -791,9 +1398,9 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
                   Add Step
                 </Button>
               </div>
-              <div className="bg-blue-50 p-2 rounded border">
-                <h4 className="font-medium text-blue-900 mb-1 text-xs">How it works:</h4>
-                <ul className="text-[10px] text-blue-800 space-y-0.5">
+              <div className="bg-blue-50 p-3 rounded border">
+                <h4 className="font-medium text-blue-900 mb-1.5 text-sm">How it works:</h4>
+                <ul className="text-xs text-blue-800 space-y-1">
                   <li>• Define the sequence of events that represent your conversion funnel</li>
                   <li>• Event names should match the event_name field from your tracked events</li>
                   <li>• The system will calculate conversion rates between each step</li>
@@ -806,14 +1413,15 @@ export default function FunnelAnalysis({ data, onFunnelChange }: FunnelAnalysisP
                   disabled={!funnelName || funnelSteps.some(step => !step.trim()) || loading}
                   className="text-xs h-7 px-3"
                 >
-                  {loading ? 'Saving...' : 'Save Funnel'}
+                  {loading ? 'Saving...' : (editingConfiguration ? 'Update Funnel' : 'Save Funnel')}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => {
                     setShowCreateForm(false);
+                    setEditingConfiguration(null);
                     setFunnelName('');
-                    setFunnelSteps(['', '']);
+                    setFunnelSteps(['get_prompt', '']);
                   }}
                   className="text-xs h-7 px-3"
                 >

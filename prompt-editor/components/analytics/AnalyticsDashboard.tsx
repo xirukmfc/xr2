@@ -227,15 +227,15 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
       <div className="space-y-3">
           {/* Conversion Filters */}
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Performance Filters</CardTitle>
-              <CardDescription className="text-xs text-slate-600 mt-1">Filter conversions and date range</CardDescription>
+            <CardHeader className="px-4 py-3">
+              <CardTitle className="text-xs font-medium">Performance Filters</CardTitle>
+              <CardDescription className="text-[10px] text-muted-foreground mt-0.5">Filter conversions and date range</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <CardContent className="px-4 py-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                 {/* Date Range Selector */}
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Date Range</label>
+                  <label className="text-xs font-medium mb-1.5 block">Date Range</label>
                   <Select
                     value={period}
                     onValueChange={(value) => {
@@ -243,33 +243,33 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
                       setShowCustomDates(value === 'custom');
                     }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-8 text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="24h">Last 24 Hours</SelectItem>
-                      <SelectItem value="7d">Last 7 Days</SelectItem>
-                      <SelectItem value="30d">Last 30 Days</SelectItem>
-                      <SelectItem value="custom">Custom Range</SelectItem>
+                      <SelectItem value="24h" className="text-xs">Last 24 Hours</SelectItem>
+                      <SelectItem value="7d" className="text-xs">Last 7 Days</SelectItem>
+                      <SelectItem value="30d" className="text-xs">Last 30 Days</SelectItem>
+                      <SelectItem value="custom" className="text-xs">Custom Range</SelectItem>
                     </SelectContent>
                   </Select>
 
                   {/* Custom Date Range Inputs */}
                   {showCustomDates && (
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex gap-1.5 mt-1.5">
                       <input
                         type="date"
                         placeholder="Start date"
                         value={customDateRange.start}
                         onChange={(e) => setCustomDateRange({ ...customDateRange, start: e.target.value })}
-                        className="px-2 py-1 border rounded text-xs flex-1"
+                        className="px-2 py-1 h-7 border rounded text-[10px] flex-1"
                       />
                       <input
                         type="date"
                         placeholder="End date"
                         value={customDateRange.end}
                         onChange={(e) => setCustomDateRange({ ...customDateRange, end: e.target.value })}
-                        className="px-2 py-1 border rounded text-xs flex-1"
+                        className="px-2 py-1 h-7 border rounded text-[10px] flex-1"
                       />
                     </div>
                   )}
@@ -277,24 +277,24 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
 
                 {/* Active Prompts Filter */}
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Prompts Filter</label>
+                  <label className="text-xs font-medium mb-1.5 block">Prompts Filter</label>
                   <Select
                     value={showActivePrompts ? "active" : "all"}
                     onValueChange={(value) => setShowActivePrompts(value === "active")}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-8 text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">Active Prompts Only</SelectItem>
-                      <SelectItem value="all">All Prompts</SelectItem>
+                      <SelectItem value="active" className="text-xs">Active Prompts Only</SelectItem>
+                      <SelectItem value="all" className="text-xs">All Prompts</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 {/* Conversion Types Filter */}
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Conversions</label>
+                  <label className="text-xs font-medium mb-1.5 block">Conversions</label>
                   <Select
                     value={selectedConversions.length === conversions.length ? "all" : "selected"}
                     onValueChange={(value) => {
@@ -306,12 +306,12 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
                       }
                     }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-8 text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Conversions ({conversions.length})</SelectItem>
-                      <SelectItem value="selected">Selected ({selectedConversions.length})</SelectItem>
+                      <SelectItem value="all" className="text-xs">All Conversions ({conversions.length})</SelectItem>
+                      <SelectItem value="selected" className="text-xs">Selected ({selectedConversions.length})</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -319,11 +319,11 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
 
               {/* Individual Conversion Checkboxes */}
               {conversions.length > 0 && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Select Specific Conversions:</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-32 overflow-y-auto">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium">Select Specific Conversions:</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1.5 max-h-24 overflow-y-auto">
                     {conversions.map((conversion) => (
-                      <label key={conversion.id} className="flex items-center space-x-2 text-sm">
+                      <label key={conversion.id} className="flex items-center space-x-1.5 text-xs">
                         <input
                           type="checkbox"
                           checked={selectedConversions.includes(conversion.id)}
@@ -335,7 +335,7 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
                               setSelectedConversions(selectedConversions.filter(id => id !== conversion.id));
                             }
                           }}
-                          className="h-4 w-4"
+                          className="h-3 w-3"
                         />
                         <span>{conversion.name}</span>
                       </label>
@@ -348,9 +348,9 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
 
           {/* Conversion Metrics Table */}
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Conversion Performance</CardTitle>
-              <CardDescription className="text-xs text-slate-600 mt-1">
+            <CardHeader className="px-4 py-3">
+              <CardTitle className="text-xs font-medium">Conversion Performance</CardTitle>
+              <CardDescription className="text-[10px] text-muted-foreground mt-0.5">
                 {conversionMetrics.length > 0
                   ? `Showing ${conversionMetrics.length} conversions for selected filters`
                   : `No conversion data found for selected filters`

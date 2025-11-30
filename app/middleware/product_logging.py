@@ -52,23 +52,86 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
         response = None
         error_message = None
         status_code = 500  # Default in case of exception
+        response_body = None
 
         try:
             response = await call_next(request)
             status_code = response.status_code
 
+            # Read response body for logging
+            response_body_bytes = None
+            original_headers = dict(response.headers) if hasattr(response, 'headers') else {}
+            original_media_type = getattr(response, 'media_type', 'application/json')
+            
+            try:
+                # For StreamingResponse (which is what FastAPI uses), read body_iterator
+                if hasattr(response, 'body_iterator'):
+                    response_body_bytes = b""
+                    async for chunk in response.body_iterator:
+                        response_body_bytes += chunk
+                    
+                    # Try to parse as JSON
+                    if response_body_bytes:
+                        try:
+                            response_body = json.loads(response_body_bytes.decode('utf-8'))
+                        except (json.JSONDecodeError, UnicodeDecodeError):
+                            # If not JSON, store as string
+                            response_body = response_body_bytes.decode('utf-8', errors='replace')
+                    
+                    # Recreate response with the body we read
+                    from starlette.responses import Response
+                    response = Response(
+                        content=response_body_bytes,
+                        status_code=status_code,
+                        headers=original_headers,
+                        media_type=original_media_type
+                    )
+                # For non-streaming responses, read body directly
+                elif hasattr(response, 'body'):
+                    body_bytes = response.body
+                    if body_bytes:
+                        try:
+                            response_body = json.loads(body_bytes.decode('utf-8'))
+                        except (json.JSONDecodeError, UnicodeDecodeError):
+                            response_body = body_bytes.decode('utf-8', errors='replace')
+                else:
+                    # If we can't read the body, log a warning
+                    print(f"[WARNING] Cannot read response body for {request.method} {request.url.path} - response type: {type(response)}")
+            except Exception as e:
+                print(f"Error reading response body: {e}")
+                import traceback
+                print(traceback.format_exc())
+                # If we can't read the body, continue without it
+                # But still try to recreate response if we consumed it
+                if response_body_bytes:
+                    from starlette.responses import Response
+                    response = Response(
+                        content=response_body_bytes,
+                        status_code=status_code,
+                        headers=original_headers,
+                        media_type=original_media_type
+                    )
+
             # Extract error message from headers if available
             # (Some frameworks set error details in headers)
             if status_code >= 400:
                 error_message = f"HTTP {status_code}"
-                # Could extract from response headers if needed
+                # Try to extract error from response body if available
+                if response_body and isinstance(response_body, dict):
+                    if 'detail' in response_body:
+                        if isinstance(response_body['detail'], str):
+                            error_message = response_body['detail']
+                        elif isinstance(response_body['detail'], dict) and 'message' in response_body['detail']:
+                            error_message = response_body['detail']['message']
+                    elif 'message' in response_body:
+                        error_message = response_body['message']
 
-            # Log the request (no response body, just metadata)
+            # Log the request with response body
             await self._log_request(
                 request=request,
                 api_key=api_key,
                 request_body=request_body,
-                response_body=None,  # Don't log response body
+                response_body=response_body,
                 status_code=status_code,
                 start_time=start_time,
                 error_message=error_message
@@ -83,7 +146,7 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
                 request=request,
                 api_key=api_key,
                 request_body=request_body,
-                response_body=None,  # Don't log response body
+                response_body=None,
                 status_code=status_code,
                 start_time=start_time,
                 error_message=error_message
@@ -170,6 +233,11 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
                 print(f"[EXTERNAL API LOG] Endpoint: {endpoint}")
                 print(f"[EXTERNAL API LOG] Status: {status_code}")
                 print(f"[EXTERNAL API LOG] Latency: {latency_seconds:.3f}s")
+                print(f"[EXTERNAL API LOG] Response body logged: {response_body is not None}")
+                if response_body:
+                    print(f"[EXTERNAL API LOG] Response body type: {type(response_body)}")
+                    if isinstance(response_body, dict):
+                        print(f"[EXTERNAL API LOG] Response body keys: {list(response_body.keys())[:5]}")
                 if error_message:
                     print(f"[EXTERNAL API LOG] Error: {error_message}")
                 

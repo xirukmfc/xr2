@@ -37,6 +37,8 @@ class FunnelAnalysisRequest(BaseModel):
     end_date: Optional[datetime] = None
     segment_by: Optional[str] = None
     ab_test_id: Optional[str] = None
+    version_id: Optional[str] = None  # Filter by specific prompt version
+    prompt_id: Optional[str] = None  # Filter by prompt ID
 
 
 async def get_user_workspace(db: AsyncSession, user: User) -> UUID:
@@ -184,28 +186,40 @@ async def analyze_funnel_test(
         if not ab_test:
             raise HTTPException(404, "Completed A/B test not found")
 
+        from sqlalchemy import or_
+
         # Calculate funnel for Version A
         funnel_a = []
-        previous_count_a = None
+        first_count_a = None
 
         for i, event_name in enumerate(request.event_sequence):
-            # Count events for version A
+            # Count events for version A - check both event_type and event_metadata.event_name
+            ab_conditions_a = [
+                PromptEvent.workspace_id == workspace_id,
+                PromptEvent.prompt_version_id == ab_test.version_a_id,
+                or_(
+                    func.lower(PromptEvent.event_type) == func.lower(event_name),
+                    func.lower(PromptEvent.event_metadata['event_name'].astext) == func.lower(event_name)
+                )
+            ]
+            # Add date filters if provided
+            if request.start_date:
+                ab_conditions_a.append(PromptEvent.created_at >= request.start_date)
+            if request.end_date:
+                ab_conditions_a.append(PromptEvent.created_at <= request.end_date)
+            
             count_result_a = await db.execute(
                 select(func.count(PromptEvent.id.distinct())).where(
-                    and_(
-                        PromptEvent.workspace_id == workspace_id,
-                        PromptEvent.prompt_version_id == ab_test.version_a_id,
-                        PromptEvent.event_type == event_name
-                    )
+                    and_(*ab_conditions_a)
                 )
             )
             count_a = count_result_a.scalar() or 0
 
             if i == 0:
-                previous_count_a = count_a
+                first_count_a = count_a
                 conversion_rate_a = 100.0
             else:
-                conversion_rate_a = (count_a / previous_count_a * 100) if previous_count_a > 0 else 0
+                conversion_rate_a = (count_a / first_count_a * 100) if first_count_a > 0 else 0
 
             funnel_a.append({
                 "step": event_name,
@@ -215,26 +229,36 @@ async def analyze_funnel_test(
 
         # Calculate funnel for Version B
         funnel_b = []
-        previous_count_b = None
+        first_count_b = None
 
         for i, event_name in enumerate(request.event_sequence):
-            # Count events for version B
+            # Count events for version B - check both event_type and event_metadata.event_name
+            ab_conditions_b = [
+                PromptEvent.workspace_id == workspace_id,
+                PromptEvent.prompt_version_id == ab_test.version_b_id,
+                or_(
+                    func.lower(PromptEvent.event_type) == func.lower(event_name),
+                    func.lower(PromptEvent.event_metadata['event_name'].astext) == func.lower(event_name)
+                )
+            ]
+            # Add date filters if provided
+            if request.start_date:
+                ab_conditions_b.append(PromptEvent.created_at >= request.start_date)
+            if request.end_date:
+                ab_conditions_b.append(PromptEvent.created_at <= request.end_date)
+            
             count_result_b = await db.execute(
                 select(func.count(PromptEvent.id.distinct())).where(
-                    and_(
-                        PromptEvent.workspace_id == workspace_id,
-                        PromptEvent.prompt_version_id == ab_test.version_b_id,
-                        PromptEvent.event_type == event_name
-                    )
+                    and_(*ab_conditions_b)
                 )
             )
             count_b = count_result_b.scalar() or 0
 
             if i == 0:
-                previous_count_b = count_b
+                first_count_b = count_b
                 conversion_rate_b = 100.0
             else:
-                conversion_rate_b = (count_b / previous_count_b * 100) if previous_count_b > 0 else 0
+                conversion_rate_b = (count_b / first_count_b * 100) if first_count_b > 0 else 0
 
             funnel_b.append({
                 "step": event_name,
@@ -260,26 +284,113 @@ async def analyze_funnel_test(
 
     # Default: return regular funnel data (simplified calculation)
     from app.models.analytics import PromptEvent
+    from sqlalchemy import or_
+
+    # Aliases for event names
+    aliases = {
+        'get_prompt': ['get_prompt', 'prompt_request'],
+        'prompt_request': ['get_prompt', 'prompt_request'],
+    }
 
     funnel_steps = []
-    previous_count = None
+    first_step_count = None
+
+    # Log request parameters for debugging
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"Funnel analysis request: prompt_id={request.prompt_id}, version_id={request.version_id}, "
+                f"start_date={request.start_date}, end_date={request.end_date}, "
+                f"event_sequence={request.event_sequence}")
 
     for i, event_name in enumerate(request.event_sequence):
-        count_result = await db.execute(
-            select(func.count(PromptEvent.id.distinct())).where(
-                and_(
-                    PromptEvent.workspace_id == workspace_id,
-                    PromptEvent.event_type == event_name
-                )
-            )
+        event_name_lower = event_name.lower()
+        # Get all variants for this event name
+        variants = aliases.get(event_name_lower, [event_name_lower])
+        
+        # Build OR conditions for all variants
+        variant_conditions = []
+        for variant in variants:
+            variant_conditions.append(func.lower(PromptEvent.event_type) == variant)
+            variant_conditions.append(func.lower(PromptEvent.event_metadata['event_name'].astext) == variant)
+        
+        # Base conditions - all filters are applied together (AND)
+        base_conditions = [
+            PromptEvent.workspace_id == workspace_id,
+            or_(*variant_conditions)  # Event type matching (OR within this group)
+        ]
+        
+        # Add prompt filter if provided (AND condition)
+        # IMPORTANT: Filter events by prompt_id OR by prompt_version_id that belongs to this prompt
+        # This handles cases where events are linked via version rather than directly via prompt
+        if request.prompt_id:
+            from uuid import UUID as PyUUID
+            from app.models.prompt import PromptVersion
+            prompt_uuid = PyUUID(request.prompt_id)
+            
+            # Get all version IDs for this prompt
+            versions_query = select(PromptVersion.id).where(PromptVersion.prompt_id == prompt_uuid)
+            versions_result = await db.execute(versions_query)
+            version_ids = [row[0] for row in versions_result.fetchall()]
+            
+            # Filter by prompt_id OR by prompt_version_id that belongs to this prompt
+            # Use OR because events can be linked either way
+            prompt_conditions = []
+            
+            # Direct link via prompt_id
+            prompt_conditions.append(PromptEvent.prompt_id == prompt_uuid)
+            
+            # Indirect link via prompt_version_id (if versions exist)
+            if version_ids:
+                prompt_conditions.append(PromptEvent.prompt_version_id.in_(version_ids))
+            
+            # Combine with OR - event must match prompt_id OR belong to a version of this prompt
+            # This ensures we catch events linked either directly or via versions
+            if len(prompt_conditions) > 1:
+                base_conditions.append(or_(*prompt_conditions))
+            elif len(prompt_conditions) == 1:
+                base_conditions.append(prompt_conditions[0])
+            else:
+                # If no versions found and no direct prompt_id match, this should return 0
+                # But we still add the direct prompt_id check
+                base_conditions.append(PromptEvent.prompt_id == prompt_uuid)
+            
+            logger.info(f"Added prompt_id filter: {prompt_uuid} (found {len(version_ids)} versions) for event '{event_name}'")
+            logger.info(f"Prompt filter conditions: {len(prompt_conditions)} conditions added")
+        
+        # Add version filter if provided (AND condition - filters within selected prompt if prompt also selected)
+        if request.version_id:
+            from uuid import UUID as PyUUID
+            version_uuid = PyUUID(request.version_id)
+            base_conditions.append(PromptEvent.prompt_version_id == version_uuid)
+            logger.info(f"Added version_id filter: {version_uuid} for event '{event_name}'")
+        
+        # Add date filters if provided (AND conditions)
+        if request.start_date:
+            base_conditions.append(PromptEvent.created_at >= request.start_date)
+            logger.info(f"Added start_date filter: {request.start_date} for event '{event_name}'")
+        if request.end_date:
+            base_conditions.append(PromptEvent.created_at <= request.end_date)
+            logger.info(f"Added end_date filter: {request.end_date} for event '{event_name}'")
+        
+        # All conditions are combined with AND - all selected filters must match
+        query = select(func.count(PromptEvent.id.distinct())).where(
+            and_(*base_conditions)
         )
+        
+        # Log the query for debugging (first 100 chars)
+        logger.info(f"Query for event '{event_name}': {str(query)[:200]}...")
+        
+        count_result = await db.execute(query)
         event_count = count_result.scalar() or 0
+        
+        logger.info(f"Event '{event_name}' count: {event_count}")
 
         if i == 0:
-            previous_count = event_count
+            first_step_count = event_count
             conversion_rate = 100.0
         else:
-            conversion_rate = (event_count / previous_count * 100) if previous_count > 0 else 0
+            # Calculate conversion rate relative to FIRST step (not previous step)
+            conversion_rate = (event_count / first_step_count * 100) if first_step_count > 0 else 0
 
         funnel_steps.append({
             "step": event_name,

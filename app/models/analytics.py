@@ -148,6 +148,9 @@ class ABTest(Base):
     version_a_requests = Column(Integer, default=0)  # Requests served with version A
     version_b_requests = Column(Integer, default=0)  # Requests served with version B
 
+    # Success metric configuration - link to funnel for comparison
+    funnel_config_id = Column(UUID(as_uuid=True), ForeignKey("custom_funnel_configurations.id", ondelete="SET NULL"), nullable=True)
+
     # Status
     status = Column(String(50), default='draft')  # draft, running, completed, cancelled
 
@@ -162,6 +165,7 @@ class ABTest(Base):
     prompt = relationship("Prompt", foreign_keys=[prompt_id])
     version_a = relationship("PromptVersion", foreign_keys=[version_a_id])
     version_b = relationship("PromptVersion", foreign_keys=[version_b_id])
+    funnel_config = relationship("CustomFunnelConfiguration", foreign_keys=[funnel_config_id])
 
     __table_args__ = (
         Index('idx_ab_test_workspace_status', 'workspace_id', 'status'),

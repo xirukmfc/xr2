@@ -197,6 +197,63 @@ async def create_test_custom_funnel_configuration(
         raise HTTPException(500, f"Failed to create custom funnel configuration: {str(e)}")
 
 
+@router.put("/test/{config_id}", response_model=CustomFunnelConfigurationResponse)
+async def update_test_custom_funnel_configuration(
+    config_id: str,
+    config_data: CustomFunnelConfigurationUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    """Update a custom funnel configuration for testing (no authentication)"""
+    try:
+        # Get first real workspace_id from the database
+        from app.models.workspace import Workspace
+        workspace_query = await db.execute(
+            select(Workspace.id).limit(1)
+        )
+        workspace_row = workspace_query.first()
+
+        if not workspace_row:
+            raise HTTPException(404, "No workspace found")
+
+        workspace_id = workspace_row.id
+
+        # Find the configuration
+        result = await db.execute(
+            select(CustomFunnelConfiguration).where(
+                CustomFunnelConfiguration.id == config_id,
+                CustomFunnelConfiguration.workspace_id == workspace_id
+            )
+        )
+        config = result.scalar_one_or_none()
+
+        if not config:
+            raise HTTPException(404, "Custom funnel configuration not found")
+
+        # Update fields
+        update_data = config_data.dict(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(config, field, value)
+
+        config.updated_at = datetime.utcnow()
+
+        await db.commit()
+        await db.refresh(config)
+
+        return CustomFunnelConfigurationResponse(
+            id=config.id,
+            name=config.name,
+            description=config.description,
+            event_steps=config.event_steps,
+            is_active=config.is_active,
+            created_at=config.created_at,
+            updated_at=config.updated_at
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, f"Failed to update custom funnel configuration: {str(e)}")
+
+
 @router.delete("/test/{config_id}")
 async def delete_test_custom_funnel_configuration(
     config_id: str,

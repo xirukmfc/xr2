@@ -12,13 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import AnalyticsDashboard from '@/components/analytics/AnalyticsDashboard';
 import ABTestManager from '@/components/analytics/ABTestManager';
 import SimpleABTestManager from '@/components/analytics/SimpleABTestManager';
 import EventDefinitionBuilder from '@/components/analytics/EventDefinitionBuilder';
-import ConversionsManager from '@/components/analytics/ConversionsManager';
 import NewEventModal from '@/components/analytics/NewEventModal';
-import NewConversionModal from '@/components/analytics/NewConversionModal';
 import SimpleEventsTable from '@/components/analytics/SimpleEventsTable';
 import RecentEventsTable from '@/components/analytics/RecentEventsTable';
 import FunnelAnalysis from '@/components/analytics/FunnelAnalysis';
@@ -42,25 +39,27 @@ const subsections = [
   { id: "monthly-events", name: "Monthly Events", icon: TrendingUp },
   { id: "prompt-events", name: "Prompt Events", icon: FileText },
   { id: "events", name: "Define Events", icon: Settings },
-  { id: "conversions", name: "Custom metrics", icon: TrendingUp },
-  { id: "dashboard", name: "Dashboard", icon: BarChart3 },
   { id: "funnel", name: "Funnel Analysis", icon: BarChart3 },
-  { id: "ab-tests", name: "A/B Tests", icon: TestTube },
+  { id: "ab-tests", name: "Run A/B Tests", icon: TestTube },
 ]
 
 export default function AnalyticsPage() {
-  const [activeSubsection, setActiveSubsection] = useLocalStorage<string>("analytics-active-tab", "dashboard")
+  const [activeSubsection, setActiveSubsection] = useLocalStorage<string>("analytics-active-tab", "recent-events")
 
   // Modal states
-  const [showConversionModal, setShowConversionModal] = useState(false)
   const [showEventModal, setShowEventModal] = useState(false)
   const [showABTestModal, setShowABTestModal] = useState(false)
+  const [showFunnelModal, setShowFunnelModal] = useState(false)
 
   // Analytics data state
   const [analyticsData, setAnalyticsData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
   const [customFunnelSteps, setCustomFunnelSteps] = useState<string[]>([])
+  
+  // Funnel filters
+  const [funnelPromptId, setFunnelPromptId] = useState<string | null>(null)
+  const [funnelVersionId, setFunnelVersionId] = useState<string | null>(null)
 
   // Fetch analytics data
   useEffect(() => {
@@ -87,17 +86,54 @@ export default function AnalyticsPage() {
   const funnelData = React.useMemo(() => {
     if (!analyticsData?.recent_events || customFunnelSteps.length === 0) return null;
 
-    const events = analyticsData.recent_events;
+    let events = analyticsData.recent_events;
+    
+    // Apply prompt filter
+    if (funnelPromptId) {
+      events = events.filter((e: any) => e.prompt_id === funnelPromptId);
+    }
+    
+    // Apply version filter
+    if (funnelVersionId) {
+      events = events.filter((e: any) => e.prompt_version_id === funnelVersionId);
+    }
+    
     const result = [];
 
+    // Helper function to match event by name (case-insensitive)
+    // Checks both event_type and event_metadata.event_name
+    // Also handles aliases: get_prompt = prompt_request
+    const matchesEvent = (event: any, stepName: string) => {
+      const stepLower = stepName.toLowerCase();
+      const eventType = event.event_type?.toLowerCase();
+      const metadataEventName = event.event_metadata?.event_name?.toLowerCase();
+      
+      // Handle aliases
+      const aliases: Record<string, string[]> = {
+        'get_prompt': ['get_prompt', 'prompt_request'],
+        'prompt_request': ['get_prompt', 'prompt_request'],
+      };
+      
+      const stepVariants = aliases[stepLower] || [stepLower];
+      
+      const matches = stepVariants.some(variant => 
+        eventType === variant || metadataEventName === variant
+      );
+      return matches;
+    };
+
     // Count events for each step
+    let firstStepCount = 0;
     for (let i = 0; i < customFunnelSteps.length; i++) {
       const stepName = customFunnelSteps[i];
-      const stepEvents = events.filter((e: any) => e.event_metadata?.event_name === stepName).length;
+      const stepEvents = events.filter((e: any) => matchesEvent(e, stepName)).length;
+
+      if (i === 0) {
+        firstStepCount = stepEvents;
+      }
 
       // Calculate conversion rate (percentage from first step)
-      const firstStepEvents = i === 0 ? stepEvents : events.filter((e: any) => e.event_metadata?.event_name === customFunnelSteps[0]).length;
-      const conversionRate = firstStepEvents > 0 ? (stepEvents / firstStepEvents) * 100 : 0;
+      const conversionRate = firstStepCount > 0 ? (stepEvents / firstStepCount) * 100 : 0;
 
       result.push({
         step: stepName.charAt(0).toUpperCase() + stepName.slice(1),
@@ -107,34 +143,8 @@ export default function AnalyticsPage() {
     }
 
     return result;
-  }, [analyticsData, customFunnelSteps]);
+  }, [analyticsData, customFunnelSteps, funnelPromptId, funnelVersionId]);
 
-
-  const renderDashboardSection = () => (
-    <div className="space-y-3">
-      <div>
-        <h2 className="text-base font-semibold">Performance Dashboard</h2>
-        <p className="text-xs text-slate-600">Monitor conversion performance and filter by conversions and date ranges</p>
-      </div>
-      <AnalyticsDashboard />
-    </div>
-  )
-
-  const renderConversionsSection = () => (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-base font-semibold">Conversions</h2>
-          <p className="text-xs text-slate-600">Track conversion rates from prompts to business outcomes</p>
-        </div>
-        <Button onClick={() => setShowConversionModal(true)} className="bg-black hover:bg-gray-800 text-xs h-7 px-2" data-testid="create-conversion-button-main">
-          <Plus className="w-3 h-3 mr-1" />
-          New Conversion
-        </Button>
-      </div>
-      <ConversionsManager showCreateButton={false} />
-    </div>
-  )
 
   const renderABTestsSection = () => (
     <div className="space-y-3">
@@ -388,13 +398,26 @@ export default function AnalyticsPage() {
   const renderFunnelSection = () => {
     return (
       <div className="space-y-3">
-        <div>
-          <h2 className="text-base font-semibold">Funnel Analysis</h2>
-          <p className="text-xs text-slate-600">User journey from start to purchase</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-semibold">Funnel Analysis</h2>
+            <p className="text-xs text-slate-600">User journey from start to purchase</p>
+          </div>
+          <Button onClick={() => setShowFunnelModal(true)} className="bg-black hover:bg-gray-800 text-xs h-7 px-2">
+            <Plus className="w-3 h-3 mr-1" />
+            New Funnel
+          </Button>
         </div>
         <FunnelAnalysis
           data={funnelData}
           onFunnelChange={(steps) => setCustomFunnelSteps(steps)}
+          onFilterChange={(promptId, versionId) => {
+            setFunnelPromptId(promptId);
+            setFunnelVersionId(versionId);
+          }}
+          showCreateButton={false}
+          externalShowCreateForm={showFunnelModal}
+          onCreateFormClose={() => setShowFunnelModal(false)}
         />
       </div>
     );
@@ -415,8 +438,6 @@ export default function AnalyticsPage() {
 
   const renderContent = () => {
     switch (activeSubsection) {
-      case "dashboard":
-        return renderDashboardSection()
       case "recent-events":
         return renderRecentEventsSection()
       case "monthly-events":
@@ -429,10 +450,8 @@ export default function AnalyticsPage() {
         return renderABTestsSection()
       case "events":
         return renderEventsSection()
-      case "conversions":
-        return renderConversionsSection()
       default:
-        return renderDashboardSection()
+        return renderRecentEventsSection()
     }
   }
 
@@ -497,29 +516,6 @@ export default function AnalyticsPage() {
                   window.location.reload()
                 }}
                 onCancel={() => setShowEventModal(false)}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Conversion Modal */}
-        <Dialog open={showConversionModal} onOpenChange={setShowConversionModal}>
-          <DialogContent className="sm:max-w-3xl max-h-[90vh]" data-testid="conversion-modal">
-            <DialogHeader>
-              <DialogTitle>Create New Conversion</DialogTitle>
-              <DialogDescription>
-                Track conversion rates from prompts to business outcomes
-              </DialogDescription>
-            </DialogHeader>
-            <div className="overflow-y-auto flex-1">
-              <NewConversionModal
-                onSave={(conversion) => {
-                  console.log('Saving conversion:', conversion);
-                  setShowConversionModal(false)
-                  // Refresh the conversions list
-                  window.location.reload()
-                }}
-                onCancel={() => setShowConversionModal(false)}
               />
             </div>
           </DialogContent>

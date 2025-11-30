@@ -9,7 +9,7 @@ import json
 from uuid import UUID
 import secrets
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.core.database import get_session
 from app.models.prompt import Prompt, VersionStatus
@@ -435,7 +435,7 @@ async def get_prompt(
             "workspace_id": str(workspace_id),
             "slug": prompt_request.slug,
             "source": request_payload["source_name"],
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
         await redis_client.setex(
             f"trace:{trace_id}",
@@ -488,7 +488,7 @@ async def get_prompt(
             },
             business_metrics=None,
             error_details=None,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
         session.add(prompt_request_event)
         await session.commit()

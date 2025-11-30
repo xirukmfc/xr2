@@ -229,7 +229,7 @@ export default function PromptEventsViewer() {
     });
 
     // Get version numbers for sorting
-    const versionList = Array.from(versionIds).map(vId => {
+    let versionList = Array.from(versionIds).map(vId => {
       const version = versions.find(v => v.id === vId);
       return {
         id: vId,
@@ -237,6 +237,11 @@ export default function PromptEventsViewer() {
         status: version?.status || 'unknown'
       };
     }).sort((a, b) => a.number - b.number);
+
+    // If "All Versions" is selected, limit to last 3 versions
+    if (selectedVersionId === 'all' && versionList.length > 3) {
+      versionList = versionList.slice(-3);
+    }
 
     // Convert to array format for rendering, with prompt_request (get_prompt) always first
     const rows = Object.entries(pivot)

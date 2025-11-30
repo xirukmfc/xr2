@@ -114,13 +114,23 @@ function LogsPageContent() {
   }
 
   const formatResponse = (responseBody: any) => {
+    // Handle null/undefined
+    if (responseBody === null || responseBody === undefined) {
+      return '(empty response)'
+    }
+
     // If it's already an object, stringify it
-    if (typeof responseBody === 'object' && responseBody !== null) {
+    if (typeof responseBody === 'object') {
       return JSON.stringify(responseBody, null, 2)
     }
 
     // If it's a string, try to parse it as JSON
     if (typeof responseBody === 'string') {
+      // Empty string
+      if (responseBody.trim() === '') {
+        return '(empty response)'
+      }
+      
       try {
         // Try to parse as JSON
         const parsed = JSON.parse(responseBody)
@@ -344,7 +354,13 @@ function LogsPageContent() {
                   </div>
                   <div className="bg-slate-50 border border-slate-200 rounded p-4 max-h-[530px] overflow-auto">
                     <pre className="text-xs leading-relaxed whitespace-pre-wrap">
-{selectedLog ? (selectedLog.error_message ? formatResponse(selectedLog.error_message) : formatResponse(selectedLog.response_body)) : ""}
+{selectedLog ? (
+  selectedLog.error_message 
+    ? formatResponse(selectedLog.error_message) 
+    : (selectedLog.response_body !== null && selectedLog.response_body !== undefined
+        ? formatResponse(selectedLog.response_body)
+        : '(no response body recorded)')
+) : ""}
                     </pre>
                   </div>
                 </div>

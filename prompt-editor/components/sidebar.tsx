@@ -13,12 +13,28 @@ import { Progress } from "@/components/ui/progress"
 import { getUserLimits } from "@/lib/api"
 import { useDataPreloader } from "@/lib/preload-data"
 
+const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed'
+
 let sidebarCollapseListeners: ((collapsed: boolean) => void)[] = []
+
+function getStoredCollapseState(): boolean {
+  if (typeof window === 'undefined') return false
+  const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY)
+  return stored === 'true'
+}
+
+function saveCollapseState(collapsed: boolean) {
+  if (typeof window === 'undefined') return
+  localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed))
+}
 
 export function useSidebarCollapse() {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   useEffect(() => {
+    // Initialize from localStorage
+    setIsCollapsed(getStoredCollapseState())
+    
     const listener = (collapsed: boolean) => setIsCollapsed(collapsed)
     sidebarCollapseListeners.push(listener)
 
@@ -31,6 +47,7 @@ export function useSidebarCollapse() {
 }
 
 function notifySidebarCollapse(collapsed: boolean) {
+  saveCollapseState(collapsed)
   sidebarCollapseListeners.forEach((listener) => listener(collapsed))
 }
 
@@ -62,6 +79,14 @@ export function Sidebar() {
   const { preloadPageData } = useDataPreloader()
   const [limits, setLimits] = useState<UserLimits | null>(null)
   const [limitsLoading, setLimitsLoading] = useState(true)
+
+  // Initialize collapse state from localStorage
+  useEffect(() => {
+    const stored = getStoredCollapseState()
+    setIsCollapsed(stored)
+    // Notify listeners so that main content area adjusts
+    sidebarCollapseListeners.forEach((listener) => listener(stored))
+  }, [])
 
   // Fetch user limits
   useEffect(() => {

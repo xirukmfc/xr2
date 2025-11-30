@@ -2,7 +2,7 @@ import json
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from pydantic import BaseModel, Field
 from typing import Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,12 +10,8 @@ from app.models.analytics import PromptEvent, EventDefinition
 from app.services.analytics import process_event
 from app.services.redis import redis_client
 from app.core.database import get_session as get_db
-
-
-# Simple API key validation - replace with your actual auth system
-def get_api_key():
-    """Placeholder for API key validation"""
-    return "valid"
+from app.core.product_auth import get_product_api_key
+from app.models.product_api_key import ProductAPIKey
 
 
 router = APIRouter()
@@ -124,7 +120,8 @@ Before tracking events, define them at https://xr2.uk/analytics/events
 async def track_event(
         event: EventRequest,
         background_tasks: BackgroundTasks,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        api_key: ProductAPIKey = Depends(get_product_api_key)
 ):
     """Track custom events for prompt analytics and conversion funnels"""
 
@@ -232,7 +229,7 @@ async def track_event(
                 event_metadata=event_metadata,
                 business_metrics=business_metrics if business_metrics else None,
                 error_details=None,
-                created_at=datetime.now()
+                created_at=datetime.now(timezone.utc)
             )
 
             db.add(prompt_event)

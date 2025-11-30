@@ -357,47 +357,47 @@ export default function EventDefinitionBuilder({
       {/* Edit/Create Form */}
       {editingEvent && (
         <Card>
-          <CardHeader className="pb-3">
-            <h3 className="font-semibold">
+          <CardHeader className="px-4 py-3">
+            <h3 className="text-xs font-medium">
               {editingEvent.id && eventsList.find(e => e.id === editingEvent.id) ? 'Edit Event' : 'Create New Event'}
             </h3>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="px-4 py-3 space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="event_name" className="text-sm">Event Name</Label>
+                <Label htmlFor="event_name" className="text-xs">Event Name</Label>
                 <Input
                   id="event_name"
                   value={editingEvent.event_name}
                   onChange={(e) => setEditingEvent({ ...editingEvent, event_name: e.target.value })}
                   placeholder="e.g., user_signup"
-                  className="h-8"
+                  className="h-8 text-xs"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="description" className="text-sm">Description</Label>
+              <Label htmlFor="description" className="text-xs">Description</Label>
               <Input
                 id="description"
                 value={editingEvent.description}
                 onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
                 placeholder="Describe when this event should be triggered"
-                className="h-8"
+                className="h-8 text-xs"
               />
             </div>
 
             {/* Standard Fields Info */}
-            <div className="p-3 bg-gray-50 rounded-md space-y-1">
-              <Label className="text-sm font-medium">Standard Fields (automatically available)</Label>
-              <p className="text-xs text-gray-600">These fields are available in all events:</p>
-              <ul className="text-xs text-gray-600 ml-4 list-disc space-y-0.5">
-                <li><code className="bg-white px-1 rounded">event_name</code> - string (required)</li>
-                <li><code className="bg-white px-1 rounded">trace_id</code> - string (required)</li>
-                <li><code className="bg-white px-1 rounded">user_id</code> - string (optional)</li>
-                <li><code className="bg-white px-1 rounded">session_id</code> - string (optional)</li>
-                <li><code className="bg-white px-1 rounded">value</code> - number (optional, for revenue/metrics)</li>
-                <li><code className="bg-white px-1 rounded">currency</code> - string (optional)</li>
+            <div className="p-2 bg-muted rounded-md space-y-1">
+              <Label className="text-xs font-medium">Standard Fields (automatically available)</Label>
+              <p className="text-[10px] text-muted-foreground">These fields are available in all events:</p>
+              <ul className="text-[10px] text-muted-foreground ml-4 list-disc space-y-0.5">
+                <li><code className="bg-background px-1 rounded">event_name</code> - string (required)</li>
+                <li><code className="bg-background px-1 rounded">trace_id</code> - string (required)</li>
+                <li><code className="bg-background px-1 rounded">user_id</code> - string (optional)</li>
+                <li><code className="bg-background px-1 rounded">session_id</code> - string (optional)</li>
+                <li><code className="bg-background px-1 rounded">value</code> - number (optional, for revenue/metrics)</li>
+                <li><code className="bg-background px-1 rounded">currency</code> - string (optional)</li>
               </ul>
             </div>
 
@@ -405,48 +405,48 @@ export default function EventDefinitionBuilder({
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <div>
-                  <Label className="text-sm font-medium">Custom Metadata Fields</Label>
-                  <p className="text-xs text-gray-500">Define custom fields that will be passed in the metadata object</p>
+                  <Label className="text-xs font-medium">Custom Metadata Fields</Label>
+                  <p className="text-[10px] text-muted-foreground">Define custom fields that will be passed in the metadata object</p>
                 </div>
                 <Button
                   onClick={() => handleAddField()}
                   size="sm"
                   variant="outline"
-                  className="h-7 px-2"
+                  className="h-6 px-2 text-[10px]"
                 >
                   <Plus className="h-3 w-3 mr-1" /> Add
                 </Button>
               </div>
               {editingEvent.metadata_schema.map((field, idx) => (
-                <div key={`meta-${idx}`} className="flex gap-2 items-start p-2 bg-gray-50 rounded">
-                  <div className="flex-1 space-y-2">
+                <div key={`meta-${idx}`} className="flex gap-2 items-start p-2 bg-muted rounded">
+                  <div className="flex-1 space-y-1.5">
                     <div className="flex gap-2">
                       <Input
                         placeholder="Field name"
                         value={field.name}
                         onChange={(e) => handleFieldChange(idx, { name: e.target.value })}
-                        className="h-8 text-sm flex-1"
+                        className="h-7 text-xs flex-1"
                       />
                       <Select
                         value={field.type}
                         onValueChange={(value) => handleFieldChange(idx, { type: value as any })}
                       >
-                        <SelectTrigger className="w-24 h-8 text-sm">
+                        <SelectTrigger className="w-20 h-7 text-xs">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="string">String</SelectItem>
-                          <SelectItem value="number">Number</SelectItem>
-                          <SelectItem value="boolean">Boolean</SelectItem>
-                          <SelectItem value="object">Object</SelectItem>
+                          <SelectItem value="string" className="text-xs">String</SelectItem>
+                          <SelectItem value="number" className="text-xs">Number</SelectItem>
+                          <SelectItem value="boolean" className="text-xs">Boolean</SelectItem>
+                          <SelectItem value="object" className="text-xs">Object</SelectItem>
                         </SelectContent>
                       </Select>
-                      <label className="flex items-center gap-1.5 text-sm whitespace-nowrap">
+                      <label className="flex items-center gap-1 text-[10px] whitespace-nowrap">
                         <input
                           type="checkbox"
                           checked={field.required}
                           onChange={(e) => handleFieldChange(idx, { required: e.target.checked })}
-                          className="rounded"
+                          className="rounded h-3 w-3"
                         />
                         Required
                       </label>
@@ -455,21 +455,21 @@ export default function EventDefinitionBuilder({
                       placeholder="Description (optional)"
                       value={field.description || ''}
                       onChange={(e) => handleFieldChange(idx, { description: e.target.value })}
-                      className="h-7 text-xs"
+                      className="h-6 text-[10px]"
                     />
                   </div>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => handleRemoveField(idx)}
-                    className="h-8 w-8 p-0 mt-0"
+                    className="h-7 w-7 p-0 mt-0"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               ))}
               {editingEvent.metadata_schema.length === 0 && (
-                <p className="text-xs text-gray-400 text-center py-2">No custom fields defined. Click "Add" to create one.</p>
+                <p className="text-[10px] text-muted-foreground text-center py-2">No custom fields defined. Click "Add" to create one.</p>
               )}
             </div>
 
@@ -477,14 +477,14 @@ export default function EventDefinitionBuilder({
               <Button
                 onClick={saveEvent}
                 disabled={saving}
-                size="sm"
+                className="h-7 text-xs px-3"
               >
                 {saving ? 'Saving...' : 'Save Event'}
               </Button>
               <Button
                 onClick={() => setEditingEvent(null)}
                 variant="outline"
-                size="sm"
+                className="h-7 text-xs px-3"
               >
                 Cancel
               </Button>

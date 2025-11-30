@@ -1,19 +1,92 @@
 from fastapi import APIRouter, Query, Depends, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
+import math
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, func, text
 from sqlalchemy.orm import selectinload
 
-from app.models.analytics import ABTest
+from app.models.analytics import ABTest, PromptEvent, CustomFunnelConfiguration
 from app.models.prompt import Prompt, PromptVersion
 from app.models.user import User
 from app.core.database import get_session as get_db
 from app.core.auth import get_current_user
 
 router = APIRouter(prefix="/ab-tests-simple", tags=["ab-tests-simple"])
+
+
+def calculate_statistical_significance(
+    conversions_a: int, 
+    total_a: int, 
+    conversions_b: int, 
+    total_b: int
+) -> Dict[str, Any]:
+    """
+    Calculate statistical significance using chi-square test approximation.
+    Returns confidence level and whether result is significant.
+    """
+    if total_a == 0 or total_b == 0:
+        return {
+            "confidence": 0,
+            "is_significant": False,
+            "p_value": 1.0,
+            "message": "Not enough data"
+        }
+    
+    # Calculate conversion rates
+    rate_a = conversions_a / total_a if total_a > 0 else 0
+    rate_b = conversions_b / total_b if total_b > 0 else 0
+    
+    # Pooled conversion rate
+    pooled_rate = (conversions_a + conversions_b) / (total_a + total_b)
+    
+    if pooled_rate == 0 or pooled_rate == 1:
+        return {
+            "confidence": 0,
+            "is_significant": False,
+            "p_value": 1.0,
+            "message": "Conversion rate is 0% or 100%"
+        }
+    
+    # Standard error
+    se = math.sqrt(pooled_rate * (1 - pooled_rate) * (1/total_a + 1/total_b))
+    
+    if se == 0:
+        return {
+            "confidence": 0,
+            "is_significant": False,
+            "p_value": 1.0,
+            "message": "Standard error is zero"
+        }
+    
+    # Z-score
+    z_score = abs(rate_a - rate_b) / se
+    
+    # Convert z-score to confidence (approximation)
+    # 1.645 = 90%, 1.96 = 95%, 2.576 = 99%
+    if z_score >= 2.576:
+        confidence = 99
+    elif z_score >= 1.96:
+        confidence = 95
+    elif z_score >= 1.645:
+        confidence = 90
+    elif z_score >= 1.28:
+        confidence = 80
+    else:
+        confidence = min(int(z_score / 1.96 * 95), 79)
+    
+    # P-value approximation (simplified)
+    p_value = 2 * (1 - min(0.5 + z_score * 0.2, 0.9999))
+    
+    return {
+        "confidence": confidence,
+        "is_significant": confidence >= 95,
+        "p_value": round(p_value, 4),
+        "z_score": round(z_score, 3),
+        "message": "Statistically significant" if confidence >= 95 else f"Need more data for 95% confidence"
+    }
 
 
 async def get_user_workspace(db: AsyncSession, user: User) -> UUID:
@@ -50,6 +123,7 @@ class ABTestCreate(BaseModel):
     version_a_id: UUID  # Control version
     version_b_id: UUID  # Variant version
     total_requests: int = Field(..., ge=1, le=10000)
+    funnel_config_id: Optional[UUID] = None  # Optional funnel for success metric
 
 
 class ABTestResponse(BaseModel):
@@ -93,7 +167,8 @@ async def get_test_ab_tests(db: AsyncSession = Depends(get_db)):
             select(ABTest).options(
                 selectinload(ABTest.prompt),
                 selectinload(ABTest.version_a),
-                selectinload(ABTest.version_b)
+                selectinload(ABTest.version_b),
+                selectinload(ABTest.funnel_config)
             ).where(
                 ABTest.workspace_id == workspace_id
             ).order_by(ABTest.created_at.desc())
@@ -113,6 +188,8 @@ async def get_test_ab_tests(db: AsyncSession = Depends(get_db)):
                 "total_requests": test.total_requests,
                 "version_a_requests": test.version_a_requests,
                 "version_b_requests": test.version_b_requests,
+                "funnel_config_id": str(test.funnel_config_id) if test.funnel_config_id else None,
+                "funnel_config_name": test.funnel_config.name if test.funnel_config else None,
                 "status": test.status,
                 "started_at": test.started_at.isoformat() if test.started_at else None,
                 "ended_at": test.ended_at.isoformat() if test.ended_at else None,
@@ -177,6 +254,17 @@ async def create_test_ab_test(
         if existing.scalar_one_or_none():
             raise HTTPException(400, f"A/B test with name '{test_data.name}' already exists")
 
+        # Validate funnel config if provided
+        if test_data.funnel_config_id:
+            funnel_result = await db.execute(
+                select(CustomFunnelConfiguration).where(
+                    CustomFunnelConfiguration.id == test_data.funnel_config_id
+                )
+            )
+            funnel = funnel_result.scalar_one_or_none()
+            if not funnel:
+                raise HTTPException(404, "Funnel configuration not found")
+
         # Create A/B test
         ab_test = ABTest(
             workspace_id=workspace_id,
@@ -187,6 +275,7 @@ async def create_test_ab_test(
             total_requests=test_data.total_requests,
             version_a_requests=0,
             version_b_requests=0,
+            funnel_config_id=test_data.funnel_config_id,
             status='draft'
         )
 
@@ -204,6 +293,91 @@ async def create_test_ab_test(
         raise
     except Exception as e:
         raise HTTPException(500, f"Failed to create A/B test: {str(e)}")
+
+
+@router.get("/test/funnels")
+async def get_test_funnels(db: AsyncSession = Depends(get_db)):
+    """Get funnel configurations for testing (no authentication)"""
+    try:
+        # Get first real workspace_id from the database
+        from app.models.workspace import Workspace
+        workspace_query = await db.execute(
+            select(Workspace.id).limit(1)
+        )
+        workspace_row = workspace_query.first()
+
+        if not workspace_row:
+            return []
+
+        workspace_id = workspace_row.id
+
+        # Get all active funnels
+        result = await db.execute(
+            select(CustomFunnelConfiguration).where(
+                CustomFunnelConfiguration.workspace_id == workspace_id,
+                CustomFunnelConfiguration.is_active == True
+            ).order_by(CustomFunnelConfiguration.name)
+        )
+        funnels = result.scalars().all()
+
+        return [
+            {
+                "id": str(funnel.id),
+                "name": funnel.name,
+                "description": funnel.description,
+                "event_steps": funnel.event_steps
+            }
+            for funnel in funnels
+        ]
+    except Exception as e:
+        return [{"error": str(e)}]
+
+
+@router.get("/test/prompts")
+async def get_test_prompts_with_versions(db: AsyncSession = Depends(get_db)):
+    """Get prompts with their versions for testing (no authentication)"""
+    try:
+        # Get first real workspace_id from the database
+        from app.models.workspace import Workspace
+        workspace_query = await db.execute(
+            select(Workspace.id).limit(1)
+        )
+        workspace_row = workspace_query.first()
+
+        if not workspace_row:
+            return []
+
+        workspace_id = workspace_row.id
+
+        # Get prompts with their versions
+        result = await db.execute(
+            select(Prompt).options(
+                selectinload(Prompt.versions)
+            ).where(
+                Prompt.workspace_id == workspace_id
+            ).order_by(Prompt.name)
+        )
+        prompts = result.scalars().all()
+
+        return [
+            {
+                "id": str(prompt.id),
+                "name": prompt.name,
+                "slug": prompt.slug,
+                "versions": [
+                    {
+                        "id": str(version.id),
+                        "version_number": version.version_number,
+                        "status": version.status,
+                        "created_at": version.created_at.isoformat()
+                    }
+                    for version in prompt.versions
+                ]
+            }
+            for prompt in prompts if prompt.versions
+        ]
+    except Exception as e:
+        return [{"error": str(e)}]
 
 
 @router.post("/test/{test_id}/start")
@@ -228,7 +402,7 @@ async def start_test_ab_test(
         # Start or resume the test
         ab_test.status = 'running'
         if ab_test.started_at is None:  # Only set started_at if it's the first time
-            ab_test.started_at = datetime.utcnow()
+            ab_test.started_at = datetime.now(timezone.utc)
 
         await db.commit()
         await db.refresh(ab_test)
@@ -302,7 +476,7 @@ async def complete_test_ab_test(
 
         # Complete the test
         ab_test.status = 'completed'
-        ab_test.ended_at = datetime.utcnow()
+        ab_test.ended_at = datetime.now(timezone.utc)
 
         await db.commit()
         await db.refresh(ab_test)
@@ -345,51 +519,218 @@ async def delete_test_ab_test(
         raise HTTPException(500, f"Failed to delete A/B test: {str(e)}")
 
 
-@router.get("/test/prompts")
-async def get_test_prompts_with_versions(db: AsyncSession = Depends(get_db)):
-    """Get prompts with their versions for testing (no authentication)"""
+@router.get("/test/{test_id}/results")
+async def get_test_ab_test_results(
+    test_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get A/B test results with metrics and statistical significance"""
     try:
-        # Get first real workspace_id from the database
-        from app.models.workspace import Workspace
-        workspace_query = await db.execute(
-            select(Workspace.id).limit(1)
-        )
-        workspace_row = workspace_query.first()
-
-        if not workspace_row:
-            return []
-
-        workspace_id = workspace_row.id
-
-        # Get prompts with their versions
+        # Get A/B test with relationships
         result = await db.execute(
-            select(Prompt).options(
-                selectinload(Prompt.versions)
-            ).where(
-                Prompt.workspace_id == workspace_id
-            ).order_by(Prompt.name)
+            select(ABTest).options(
+                selectinload(ABTest.prompt),
+                selectinload(ABTest.version_a),
+                selectinload(ABTest.version_b),
+                selectinload(ABTest.funnel_config)
+            ).where(ABTest.id == test_id)
         )
-        prompts = result.scalars().all()
+        ab_test = result.scalar_one_or_none()
 
-        return [
-            {
-                "id": str(prompt.id),
-                "name": prompt.name,
-                "slug": prompt.slug,
-                "versions": [
-                    {
-                        "id": str(version.id),
-                        "version_number": version.version_number,
-                        "status": version.status,
-                        "created_at": version.created_at.isoformat()
-                    }
-                    for version in prompt.versions
-                ]
+        if not ab_test:
+            raise HTTPException(404, "A/B test not found")
+
+        # Event type aliases - map common names to actual event types
+        EVENT_ALIASES = {
+            "get_prompt": "prompt_request",
+            "prompt_request": "prompt_request",
+        }
+
+        # Build date filter conditions
+        date_conditions_a = [PromptEvent.prompt_version_id == ab_test.version_a_id]
+        date_conditions_b = [PromptEvent.prompt_version_id == ab_test.version_b_id]
+        
+        # Apply date filters for both running and completed tests
+        # PostgreSQL stores timestamps with timezone, so we compare directly
+        # The database handles timezone conversion automatically
+        if ab_test.started_at:
+            # Use the stored timestamp directly - PostgreSQL handles timezone comparison
+            date_conditions_a.append(PromptEvent.created_at >= ab_test.started_at)
+            date_conditions_b.append(PromptEvent.created_at >= ab_test.started_at)
+        
+        if ab_test.ended_at:
+            date_conditions_a.append(PromptEvent.created_at <= ab_test.ended_at)
+            date_conditions_b.append(PromptEvent.created_at <= ab_test.ended_at)
+
+        # Get events for version A
+        events_a_result = await db.execute(
+            select(
+                PromptEvent.event_type,
+                func.count(PromptEvent.id).label('count')
+            ).where(
+                and_(*date_conditions_a)
+            ).group_by(PromptEvent.event_type)
+        )
+        events_a_raw = {row.event_type: row.count for row in events_a_result}
+        
+        # Apply aliases - merge aliased events
+        events_a = {}
+        for event_type, count in events_a_raw.items():
+            events_a[event_type] = count
+        # Also add alias mappings for lookups
+        for alias, actual in EVENT_ALIASES.items():
+            if actual in events_a_raw and alias not in events_a:
+                events_a[alias] = events_a_raw[actual]
+
+        # Get events for version B
+        events_b_result = await db.execute(
+            select(
+                PromptEvent.event_type,
+                func.count(PromptEvent.id).label('count')
+            ).where(
+                and_(*date_conditions_b)
+            ).group_by(PromptEvent.event_type)
+        )
+        events_b_raw = {row.event_type: row.count for row in events_b_result}
+        
+        # Apply aliases for version B
+        events_b = {}
+        for event_type, count in events_b_raw.items():
+            events_b[event_type] = count
+        for alias, actual in EVENT_ALIASES.items():
+            if actual in events_b_raw and alias not in events_b:
+                events_b[alias] = events_b_raw[actual]
+
+        # Calculate funnel metrics if funnel is configured
+        funnel_results = None
+        if ab_test.funnel_config and ab_test.funnel_config.event_steps:
+            funnel_steps = ab_test.funnel_config.event_steps
+            
+            # Calculate funnel for version A
+            funnel_a = []
+            for step in funnel_steps:
+                # For get_prompt/prompt_request, use the A/B test request counters
+                if step in ('get_prompt', 'prompt_request'):
+                    count = ab_test.version_a_requests
+                else:
+                    count = events_a.get(step, 0)
+                funnel_a.append({
+                    "step": step,
+                    "count": count,
+                    "conversion_rate": (count / ab_test.version_a_requests * 100) if ab_test.version_a_requests > 0 else 0
+                })
+            
+            # Calculate funnel for version B
+            funnel_b = []
+            for step in funnel_steps:
+                # For get_prompt/prompt_request, use the A/B test request counters
+                if step in ('get_prompt', 'prompt_request'):
+                    count = ab_test.version_b_requests
+                else:
+                    count = events_b.get(step, 0)
+                funnel_b.append({
+                    "step": step,
+                    "count": count,
+                    "conversion_rate": (count / ab_test.version_b_requests * 100) if ab_test.version_b_requests > 0 else 0
+                })
+            
+            # Final conversion rate (last step / first step)
+            final_step = funnel_steps[-1]
+            conversions_a = events_a.get(final_step, 0)
+            conversions_b = events_b.get(final_step, 0)
+            
+            funnel_results = {
+                "funnel_name": ab_test.funnel_config.name,
+                "steps": funnel_steps,
+                "version_a": funnel_a,
+                "version_b": funnel_b,
+                "final_conversion_a": conversions_a,
+                "final_conversion_b": conversions_b,
+                "conversion_rate_a": (conversions_a / ab_test.version_a_requests * 100) if ab_test.version_a_requests > 0 else 0,
+                "conversion_rate_b": (conversions_b / ab_test.version_b_requests * 100) if ab_test.version_b_requests > 0 else 0,
             }
-            for prompt in prompts if prompt.versions
-        ]
+            
+            # Calculate statistical significance for funnel
+            statistical_significance = calculate_statistical_significance(
+                conversions_a, ab_test.version_a_requests,
+                conversions_b, ab_test.version_b_requests
+            )
+            funnel_results["statistical_significance"] = statistical_significance
+            
+            # Determine winner
+            if statistical_significance["is_significant"]:
+                if funnel_results["conversion_rate_b"] > funnel_results["conversion_rate_a"]:
+                    funnel_results["winner"] = "B"
+                    funnel_results["lift"] = ((funnel_results["conversion_rate_b"] - funnel_results["conversion_rate_a"]) / funnel_results["conversion_rate_a"] * 100) if funnel_results["conversion_rate_a"] > 0 else 0
+                else:
+                    funnel_results["winner"] = "A"
+                    funnel_results["lift"] = ((funnel_results["conversion_rate_a"] - funnel_results["conversion_rate_b"]) / funnel_results["conversion_rate_b"] * 100) if funnel_results["conversion_rate_b"] > 0 else 0
+            else:
+                funnel_results["winner"] = None
+                funnel_results["lift"] = None
+
+        # Build all events breakdown ONLY if no funnel is configured
+        # (show either funnel OR events breakdown, not both)
+        events_breakdown = []
+        if not funnel_results:
+            # Get unique event types from raw events
+            all_event_types = set(events_a_raw.keys()) | set(events_b_raw.keys())
+            
+            # Rename prompt_request to get_prompt for display
+            if 'prompt_request' in all_event_types:
+                all_event_types.discard('prompt_request')
+                all_event_types.add('get_prompt')
+            
+            for event_type in sorted(all_event_types):
+                # For get_prompt (which is prompt_request internally), use A/B test request counters
+                if event_type == 'get_prompt':
+                    count_a = ab_test.version_a_requests
+                    count_b = ab_test.version_b_requests
+                else:
+                    count_a = events_a_raw.get(event_type, 0)
+                    count_b = events_b_raw.get(event_type, 0)
+                
+                rate_a = (count_a / ab_test.version_a_requests * 100) if ab_test.version_a_requests > 0 else 0
+                rate_b = (count_b / ab_test.version_b_requests * 100) if ab_test.version_b_requests > 0 else 0
+                
+                events_breakdown.append({
+                    "event_type": event_type,
+                    "version_a_count": count_a,
+                    "version_b_count": count_b,
+                    "version_a_rate": round(rate_a, 2),
+                    "version_b_rate": round(rate_b, 2),
+                    "diff_rate": round(rate_b - rate_a, 2),
+                    "winner": "B" if rate_b > rate_a else ("A" if rate_a > rate_b else None)
+                })
+
+        return {
+            "test_id": str(ab_test.id),
+            "test_name": ab_test.name,
+            "status": ab_test.status,
+            "prompt_name": ab_test.prompt.name if ab_test.prompt else "Unknown",
+            "version_a": {
+                "id": str(ab_test.version_a_id),
+                "name": f"v{ab_test.version_a.version_number}" if ab_test.version_a else "Unknown",
+                "requests": ab_test.version_a_requests
+            },
+            "version_b": {
+                "id": str(ab_test.version_b_id),
+                "name": f"v{ab_test.version_b.version_number}" if ab_test.version_b else "Unknown",
+                "requests": ab_test.version_b_requests
+            },
+            "total_requests": ab_test.total_requests,
+            "progress": ((ab_test.version_a_requests + ab_test.version_b_requests) / ab_test.total_requests * 100) if ab_test.total_requests > 0 else 0,
+            "started_at": ab_test.started_at.isoformat() if ab_test.started_at else None,
+            "ended_at": ab_test.ended_at.isoformat() if ab_test.ended_at else None,
+            "funnel_results": funnel_results,
+            "events_breakdown": events_breakdown
+        }
+    except HTTPException:
+        raise
     except Exception as e:
-        return [{"error": str(e)}]
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(500, f"Failed to get A/B test results: {str(e)}")
 
 
 # Authenticated endpoints
