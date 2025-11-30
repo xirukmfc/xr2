@@ -24,36 +24,46 @@ router = APIRouter()
 class EventRequest(BaseModel):
     trace_id: str = Field(..., description="Trace ID from GET /get-prompt response", examples=["evt_abc123_1634567890_xyz"])
     event_name: str = Field(..., description="Event name as defined in dashboard event definitions", examples=["user_signup"])
-    category: str = Field(..., description="Event category", examples=["conversion"])
-    fields: Dict[str, Any] = Field(
+    source_name: str = Field(..., description="Source identifier for tracking where events come from", examples=["web_app", "mobile_app", "john_doe"])
+
+    # Standard fields (optional)
+    user_id: str | None = Field(None, description="User identifier")
+    session_id: str | None = Field(None, description="Session identifier")
+    value: float | None = Field(None, description="Numeric value for analytics (revenue, order amount, etc.)")
+    currency: str | None = Field(None, description="Currency code (USD, EUR, etc.)")
+
+    # Custom fields go in metadata
+    metadata: Dict[str, Any] = Field(
         default_factory=dict,
-        description="Event data fields (must include all required fields from event definition)",
-        examples=[{"user_id": "user_12345", "plan": "premium", "revenue": 29.99}]
+        description="Custom event fields as defined in event definition metadata_schema",
+        examples=[{"product_id": "prod_123", "subscription_tier": "premium"}]
     )
 
     model_config = {
-        "extra": "allow",  # Allow additional fields
+        "extra": "allow",
         "json_schema_extra": {
             "examples": [
                 {
                     "trace_id": "evt_abc123_1634567890_xyz",
                     "event_name": "user_signup",
-                    "category": "conversion",
-                    "fields": {
-                        "user_id": "user_12345",
+                    "source_name": "john_doe",
+                    "user_id": "user_12345",
+                    "metadata": {
                         "plan": "premium",
-                        "revenue": 29.99
+                        "referral_code": "ABC123"
                     }
                 },
                 {
                     "trace_id": "evt_abc123_1634567890_xyz",
                     "event_name": "purchase_completed",
-                    "category": "revenue",
-                    "fields": {
-                        "user_id": "user_12345",
+                    "source_name": "web_app",
+                    "user_id": "user_12345",
+                    "value": 99.99,
+                    "currency": "USD",
+                    "metadata": {
                         "order_id": "order_67890",
-                        "amount": 99.99,
-                        "currency": "USD"
+                        "product_id": "prod_456",
+                        "subscription_tier": "premium"
                     }
                 }
             ]
@@ -138,7 +148,6 @@ async def track_event(
             select(EventDefinition).where(
                 EventDefinition.workspace_id == workspace_id,
                 EventDefinition.event_name == event.event_name,
-                EventDefinition.category == event.category,
                 EventDefinition.is_active == True
             )
         )
@@ -147,32 +156,61 @@ async def track_event(
         if not event_def:
             raise HTTPException(
                 status_code=404,
-                detail=f"Event definition not found for event_name='{event.event_name}' and category='{event.category}'"
+                detail=f"Event definition not found for event_name='{event.event_name}'"
             )
 
-        # Validate required fields
-        required_fields = event_def.required_fields or []
-        for field_def in required_fields:
+        # Validate required metadata fields from schema
+        metadata_schema = event_def.metadata_schema or []
+        for field_def in metadata_schema:
             field_name = field_def.get("name")
-            if field_name not in event.fields:
+            is_required = field_def.get("required", False)
+
+            if is_required and field_name not in event.metadata:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Required field '{field_name}' is missing"
+                    detail=f"Required metadata field '{field_name}' is missing"
                 )
 
-        # Prepare event metadata
+            # Type validation
+            if field_name in event.metadata:
+                field_value = event.metadata[field_name]
+                field_type = field_def.get("type", "string")
+
+                if field_type == "number" and not isinstance(field_value, (int, float)):
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Field '{field_name}' should be a number"
+                    )
+                elif field_type == "boolean" and not isinstance(field_value, bool):
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Field '{field_name}' should be a boolean"
+                    )
+                elif field_type == "string" and not isinstance(field_value, str):
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Field '{field_name}' should be a string"
+                    )
+
+        # Prepare event metadata (includes both source info and custom metadata)
         event_metadata = {
             "event_name": event.event_name,
-            "category": event.category,
-            "fields": event.fields
+            "source_name": event.source_name,
+            "metadata": event.metadata
         }
 
-        # Check if event with this trace_id + event_name + category already exists
+        # Prepare business metrics from standard fields
+        business_metrics = {}
+        if event.value is not None:
+            business_metrics["value"] = event.value
+        if event.currency is not None:
+            business_metrics["currency"] = event.currency
+
+        # Check if event with this trace_id + event_name already exists
         existing_event = await db.execute(
             select(PromptEvent).where(
                 PromptEvent.trace_id == event.trace_id,
-                PromptEvent.event_metadata['event_name'].astext == event.event_name,
-                PromptEvent.event_metadata['category'].astext == event.category
+                PromptEvent.event_metadata['event_name'].astext == event.event_name
             )
         )
         existing_event = existing_event.scalar_one_or_none()
@@ -189,10 +227,10 @@ async def track_event(
                 prompt_version_id=prompt_version_id,
                 event_type="custom_event",
                 outcome="success",  # Default outcome for custom events
-                session_id=event.fields.get("session_id"),
-                user_id=event.fields.get("user_id"),
+                session_id=event.session_id,
+                user_id=event.user_id,
                 event_metadata=event_metadata,
-                business_metrics=event.fields.get("business_metrics"),
+                business_metrics=business_metrics if business_metrics else None,
                 error_details=None,
                 created_at=datetime.now()
             )
@@ -208,7 +246,6 @@ async def track_event(
             "event_id": str(prompt_event.id),
             "trace_id": event.trace_id,
             "event_name": event.event_name,
-            "category": event.category,
             "timestamp": prompt_event.created_at.isoformat(),
             "is_duplicate": existing_event is not None
         }

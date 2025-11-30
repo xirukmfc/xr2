@@ -11,13 +11,6 @@ import {AuthProvider} from "@/contexts/auth-context"
 import {DataPreloader} from "@/lib/preload-data"
 import "./globals.css"
 
-// Service Worker for caching - register on client
-if (typeof window !== 'undefined') {
-  import('@/lib/sw-register').then(({ registerServiceWorker }) => {
-    registerServiceWorker()
-  })
-}
-
 export const metadata: Metadata = {
     title: "xR2",
     description: "Advanced prompt editor for AI workflows",

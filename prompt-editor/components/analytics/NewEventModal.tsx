@@ -6,19 +6,17 @@ import { Label } from '@/components/ui/label';
 import { Plus, Trash2 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 
-interface EventField {
+interface MetadataField {
   name: string;
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  type: 'string' | 'number' | 'boolean' | 'object';
   required: boolean;
   description?: string;
 }
 
 interface EventDefinition {
   event_name: string;
-  category: string;
   description: string;
-  required_fields: EventField[];
-  optional_fields: EventField[];
+  metadata_schema: MetadataField[];
   validation_rules: any[];
   success_criteria: any;
   alert_thresholds: any;
@@ -60,10 +58,8 @@ interface NewEventModalProps {
 export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) {
   const [formData, setFormData] = useState<EventDefinition>({
     event_name: '',
-    category: '',
     description: '',
-    required_fields: [],
-    optional_fields: [],
+    metadata_schema: [],
     validation_rules: [],
     success_criteria: {},
     alert_thresholds: {}
@@ -72,60 +68,36 @@ export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>('');
 
-  const addField = (required: boolean) => {
-    const field: EventField = {
+  const addField = () => {
+    const field: MetadataField = {
       name: '',
       type: 'string',
-      required,
+      required: false,
       description: ''
     };
 
-    if (required) {
-      setFormData({
-        ...formData,
-        required_fields: [...formData.required_fields, field]
-      });
-    } else {
-      setFormData({
-        ...formData,
-        optional_fields: [...formData.optional_fields, field]
-      });
-    }
+    setFormData({
+      ...formData,
+      metadata_schema: [...formData.metadata_schema, field]
+    });
   };
 
-  const removeField = (fieldIndex: number, required: boolean) => {
-    if (required) {
-      setFormData({
-        ...formData,
-        required_fields: formData.required_fields.filter((_, i) => i !== fieldIndex)
-      });
-    } else {
-      setFormData({
-        ...formData,
-        optional_fields: formData.optional_fields.filter((_, i) => i !== fieldIndex)
-      });
-    }
+  const removeField = (fieldIndex: number) => {
+    setFormData({
+      ...formData,
+      metadata_schema: formData.metadata_schema.filter((_, i) => i !== fieldIndex)
+    });
   };
 
-  const updateField = (fieldIndex: number, required: boolean, field: Partial<EventField>) => {
-    if (required) {
-      const updatedFields = [...formData.required_fields];
-      updatedFields[fieldIndex] = { ...updatedFields[fieldIndex], ...field };
-      setFormData({ ...formData, required_fields: updatedFields });
-    } else {
-      const updatedFields = [...formData.optional_fields];
-      updatedFields[fieldIndex] = { ...updatedFields[fieldIndex], ...field };
-      setFormData({ ...formData, optional_fields: updatedFields });
-    }
+  const updateField = (fieldIndex: number, field: Partial<MetadataField>) => {
+    const updatedFields = [...formData.metadata_schema];
+    updatedFields[fieldIndex] = { ...updatedFields[fieldIndex], ...field };
+    setFormData({ ...formData, metadata_schema: updatedFields });
   };
 
   const handleSave = async () => {
     if (!formData.event_name.trim()) {
       setError('Event name is required');
-      return;
-    }
-    if (!formData.category.trim()) {
-      setError('Category is required');
       return;
     }
 
@@ -167,22 +139,6 @@ export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) 
             className="h-8"
           />
         </div>
-        <div>
-          <Label htmlFor="category" className="text-sm">Category</Label>
-          <Select
-            value={formData.category}
-            onValueChange={(value) => setFormData({ ...formData, category: value })}
-          >
-            <SelectTrigger className="h-8">
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.keys(EVENT_TEMPLATES).map(cat => (
-                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
       <div>
@@ -196,68 +152,29 @@ export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) 
         />
       </div>
 
-      {/* Required Fields */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <Label className="text-sm font-medium">Required Fields</Label>
-          <Button
-            onClick={() => addField(true)}
-            size="sm"
-            variant="outline"
-            className="h-7 px-2"
-            type="button"
-          >
-            <Plus className="h-3 w-3 mr-1" /> Add
-          </Button>
-        </div>
-        {formData.required_fields.map((field, idx) => (
-          <div key={`req-${idx}`} className="flex gap-2 items-center">
-            <Input
-              placeholder="Name"
-              value={field.name}
-              onChange={(e) => updateField(idx, true, { name: e.target.value })}
-              className="h-8 text-sm flex-1"
-            />
-            <Select
-              value={field.type}
-              onValueChange={(value) => updateField(idx, true, { type: value as any })}
-            >
-              <SelectTrigger className="w-20 h-8 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="string">String</SelectItem>
-                <SelectItem value="number">Number</SelectItem>
-                <SelectItem value="boolean">Boolean</SelectItem>
-                <SelectItem value="object">Object</SelectItem>
-                <SelectItem value="array">Array</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input
-              placeholder="Description"
-              value={field.description || ''}
-              onChange={(e) => updateField(idx, true, { description: e.target.value })}
-              className="h-8 text-sm flex-1"
-            />
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => removeField(idx, true)}
-              className="h-8 w-8 p-0"
-              type="button"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          </div>
-        ))}
+      {/* Standard Fields Info */}
+      <div className="p-3 bg-gray-50 rounded-md space-y-1">
+        <Label className="text-sm font-medium">Standard Fields (automatically available)</Label>
+        <p className="text-xs text-gray-600">These fields are available in all events:</p>
+        <ul className="text-xs text-gray-600 ml-4 list-disc space-y-0.5">
+          <li><code className="bg-white px-1 rounded">event_name</code> - string (required)</li>
+          <li><code className="bg-white px-1 rounded">trace_id</code> - string (required)</li>
+          <li><code className="bg-white px-1 rounded">user_id</code> - string (optional)</li>
+          <li><code className="bg-white px-1 rounded">session_id</code> - string (optional)</li>
+          <li><code className="bg-white px-1 rounded">value</code> - number (optional, for revenue/metrics)</li>
+          <li><code className="bg-white px-1 rounded">currency</code> - string (optional)</li>
+        </ul>
       </div>
 
-      {/* Optional Fields */}
+      {/* Custom Metadata Fields */}
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <Label className="text-sm font-medium">Optional Fields</Label>
+          <div>
+            <Label className="text-sm font-medium">Custom Metadata Fields</Label>
+            <p className="text-xs text-gray-500">Define custom fields that will be passed in the metadata object</p>
+          </div>
           <Button
-            onClick={() => addField(false)}
+            onClick={addField}
             size="sm"
             variant="outline"
             className="h-7 px-2"
@@ -266,46 +183,61 @@ export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) 
             <Plus className="h-3 w-3 mr-1" /> Add
           </Button>
         </div>
-        {formData.optional_fields.map((field, idx) => (
-          <div key={`opt-${idx}`} className="flex gap-2 items-center">
-            <Input
-              placeholder="Name"
-              value={field.name}
-              onChange={(e) => updateField(idx, false, { name: e.target.value })}
-              className="h-8 text-sm flex-1"
-            />
-            <Select
-              value={field.type}
-              onValueChange={(value) => updateField(idx, false, { type: value as any })}
-            >
-              <SelectTrigger className="w-20 h-8 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="string">String</SelectItem>
-                <SelectItem value="number">Number</SelectItem>
-                <SelectItem value="boolean">Boolean</SelectItem>
-                <SelectItem value="object">Object</SelectItem>
-                <SelectItem value="array">Array</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input
-              placeholder="Description"
-              value={field.description || ''}
-              onChange={(e) => updateField(idx, false, { description: e.target.value })}
-              className="h-8 text-sm flex-1"
-            />
+        {formData.metadata_schema.map((field, idx) => (
+          <div key={`meta-${idx}`} className="flex gap-2 items-start p-2 bg-gray-50 rounded">
+            <div className="flex-1 space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Field name"
+                  value={field.name}
+                  onChange={(e) => updateField(idx, { name: e.target.value })}
+                  className="h-8 text-sm flex-1"
+                />
+                <Select
+                  value={field.type}
+                  onValueChange={(value) => updateField(idx, { type: value as any })}
+                >
+                  <SelectTrigger className="w-24 h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="string">String</SelectItem>
+                    <SelectItem value="number">Number</SelectItem>
+                    <SelectItem value="boolean">Boolean</SelectItem>
+                    <SelectItem value="object">Object</SelectItem>
+                  </SelectContent>
+                </Select>
+                <label className="flex items-center gap-1.5 text-sm whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    checked={field.required}
+                    onChange={(e) => updateField(idx, { required: e.target.checked })}
+                    className="rounded"
+                  />
+                  Required
+                </label>
+              </div>
+              <Input
+                placeholder="Description (optional)"
+                value={field.description || ''}
+                onChange={(e) => updateField(idx, { description: e.target.value })}
+                className="h-7 text-xs"
+              />
+            </div>
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => removeField(idx, false)}
-              className="h-8 w-8 p-0"
+              onClick={() => removeField(idx)}
+              className="h-8 w-8 p-0 mt-0"
               type="button"
             >
               <Trash2 className="h-3 w-3" />
             </Button>
           </div>
         ))}
+        {formData.metadata_schema.length === 0 && (
+          <p className="text-xs text-gray-400 text-center py-2">No custom fields defined. Click "Add" to create one.</p>
+        )}
       </div>
 
       <div className="flex gap-2 pt-2">

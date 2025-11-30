@@ -10,9 +10,9 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
 
-interface EventField {
+interface MetadataField {
   name: string;
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  type: 'string' | 'number' | 'boolean' | 'object';
   required: boolean;
   description?: string;
   validation?: any;
@@ -21,10 +21,8 @@ interface EventField {
 interface EventDefinition {
   id?: string;
   event_name: string;
-  category: string;
   description: string;
-  required_fields: EventField[];
-  optional_fields: EventField[];
+  metadata_schema: MetadataField[];
   validation_rules: any[];
   success_criteria: any;
   alert_thresholds: any;
@@ -102,7 +100,7 @@ export default function EventDefinitionBuilder({
       console.log('Loaded events from server:', data);
 
       if (Array.isArray(data)) {
-        console.log('Event categories:', data.map((e: any) => ({ id: e.id, name: e.event_name, category: e.category })));
+        console.log('Events:', data.map((e: any) => ({ id: e.id, name: e.event_name })));
 
         // Preserve collapsed state
         const currentCollapsedState = eventsList.reduce((acc, event) => {
@@ -133,10 +131,8 @@ export default function EventDefinitionBuilder({
 
   const createNewEvent = (): EventDefinition => ({
     event_name: '',
-    category: '',
     description: '',
-    required_fields: [],
-    optional_fields: [],
+    metadata_schema: [],
     validation_rules: [],
     success_criteria: {},
     alert_thresholds: {},
@@ -144,40 +140,28 @@ export default function EventDefinitionBuilder({
     collapsed: false
   });
 
-  const addField = (event: EventDefinition, required: boolean) => {
-    const field: EventField = {
+  const addField = (event: EventDefinition) => {
+    const field: MetadataField = {
       name: '',
       type: 'string',
-      required,
+      required: false,
       description: ''
     };
 
     const updated = { ...event };
-    if (required) {
-      updated.required_fields = [...updated.required_fields, field];
-    } else {
-      updated.optional_fields = [...updated.optional_fields, field];
-    }
+    updated.metadata_schema = [...updated.metadata_schema, field];
     setEditingEvent(updated);
   };
 
-  const removeField = (event: EventDefinition, fieldIndex: number, required: boolean) => {
+  const removeField = (event: EventDefinition, fieldIndex: number) => {
     const updated = { ...event };
-    if (required) {
-      updated.required_fields = updated.required_fields.filter((_, i) => i !== fieldIndex);
-    } else {
-      updated.optional_fields = updated.optional_fields.filter((_, i) => i !== fieldIndex);
-    }
+    updated.metadata_schema = updated.metadata_schema.filter((_, i) => i !== fieldIndex);
     setEditingEvent(updated);
   };
 
-  const updateField = (event: EventDefinition, fieldIndex: number, required: boolean, field: Partial<EventField>) => {
+  const updateField = (event: EventDefinition, fieldIndex: number, field: Partial<MetadataField>) => {
     const updated = { ...event };
-    if (required) {
-      updated.required_fields[fieldIndex] = { ...updated.required_fields[fieldIndex], ...field };
-    } else {
-      updated.optional_fields[fieldIndex] = { ...updated.optional_fields[fieldIndex], ...field };
-    }
+    updated.metadata_schema[fieldIndex] = { ...updated.metadata_schema[fieldIndex], ...field };
     setEditingEvent(updated);
   };
 
@@ -192,26 +176,19 @@ export default function EventDefinitionBuilder({
         setSaveMessage('Event name is required');
         return;
       }
-      if (!editingEvent.category.trim()) {
-        setSaveMessage('Category is required');
-        return;
-      }
 
       const isUpdate = editingEvent.id && eventsList.find(e => e.id === editingEvent.id);
 
       const requestData = {
         event_name: editingEvent.event_name,
-        category: editingEvent.category,
         description: editingEvent.description,
-        required_fields: editingEvent.required_fields,
-        optional_fields: editingEvent.optional_fields,
+        metadata_schema: editingEvent.metadata_schema,
         validation_rules: editingEvent.validation_rules,
         success_criteria: editingEvent.success_criteria,
         alert_thresholds: editingEvent.alert_thresholds
       };
 
       console.log('Sending request data:', requestData);
-      console.log('Current editingEvent category:', editingEvent.category);
 
       if (isUpdate) {
         // Update existing event
@@ -247,44 +224,28 @@ export default function EventDefinitionBuilder({
   };
 
   const generateCodeSnippet = (event: EventDefinition) => {
-    const requiredFields: any = {};
-    const optionalFields: any = {};
+    const metadata: any = {};
 
-    // Add required fields with example values
-    event.required_fields?.forEach(field => {
+    // Add metadata fields with example values
+    event.metadata_schema?.forEach(field => {
       switch (field.type) {
         case 'string':
-          requiredFields[field.name] = `example_${field.name}`;
+          metadata[field.name] = `example_${field.name}`;
           break;
         case 'number':
-          requiredFields[field.name] = 123;
+          metadata[field.name] = 123;
           break;
         case 'boolean':
-          requiredFields[field.name] = true;
+          metadata[field.name] = true;
+          break;
+        case 'object':
+          metadata[field.name] = { key: "value" };
           break;
         default:
-          requiredFields[field.name] = `value`;
+          metadata[field.name] = `value`;
       }
     });
 
-    // Add optional fields with example values
-    event.optional_fields?.forEach(field => {
-      switch (field.type) {
-        case 'string':
-          optionalFields[field.name] = `example_${field.name}`;
-          break;
-        case 'number':
-          optionalFields[field.name] = 456;
-          break;
-        case 'boolean':
-          optionalFields[field.name] = false;
-          break;
-        default:
-          optionalFields[field.name] = `optional_value`;
-      }
-    });
-
-    const allFields = { ...requiredFields, ...optionalFields };
     const traceId = `evt_${Math.random().toString(36).substring(2, 11)}_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
 
     return `curl -X 'POST' \\
@@ -294,8 +255,11 @@ export default function EventDefinitionBuilder({
   -d '{
   "trace_id": "${traceId}",
   "event_name": "${event.event_name}",
-  "category": "${event.category}",
-  "fields": ${JSON.stringify(allFields, null, 4)}
+  "source_name": "your_source_name",
+  "user_id": "user_123",
+  "value": 99.99,
+  "currency": "USD",
+  "metadata": ${JSON.stringify(metadata, null, 4)}
 }'`;
   };
 
@@ -335,19 +299,19 @@ export default function EventDefinitionBuilder({
     ));
   };
 
-  const handleFieldChange = useCallback((fieldIndex: number, required: boolean, fieldUpdate: Partial<EventField>) => {
+  const handleFieldChange = useCallback((fieldIndex: number, fieldUpdate: Partial<MetadataField>) => {
     if (!editingEvent) return;
-    updateField(editingEvent, fieldIndex, required, fieldUpdate);
+    updateField(editingEvent, fieldIndex, fieldUpdate);
   }, [editingEvent]);
 
-  const handleAddField = useCallback((required: boolean) => {
+  const handleAddField = useCallback(() => {
     if (!editingEvent) return;
-    addField(editingEvent, required);
+    addField(editingEvent);
   }, [editingEvent]);
 
-  const handleRemoveField = useCallback((fieldIndex: number, required: boolean) => {
+  const handleRemoveField = useCallback((fieldIndex: number) => {
     if (!editingEvent) return;
-    removeField(editingEvent, fieldIndex, required);
+    removeField(editingEvent, fieldIndex);
   }, [editingEvent]);
 
   // Loading State
@@ -410,25 +374,6 @@ export default function EventDefinitionBuilder({
                   className="h-8"
                 />
               </div>
-              <div>
-                <Label htmlFor="category" className="text-sm">Category</Label>
-                <Select
-                  value={editingEvent.category}
-                  onValueChange={(value) => {
-                    console.log('Category changed from', editingEvent.category, 'to', value);
-                    setEditingEvent({ ...editingEvent, category: value });
-                  }}
-                >
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.keys(EVENT_TEMPLATES).map(cat => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
             <div>
@@ -442,66 +387,29 @@ export default function EventDefinitionBuilder({
               />
             </div>
 
-            {/* Required Fields */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label className="text-sm font-medium">Required Fields</Label>
-                <Button
-                  onClick={() => handleAddField(true)}
-                  size="sm"
-                  variant="outline"
-                  className="h-7 px-2"
-                >
-                  <Plus className="h-3 w-3 mr-1" /> Add
-                </Button>
-              </div>
-              {editingEvent.required_fields.map((field, idx) => (
-                <div key={`req-${idx}`} className="flex gap-2 items-center">
-                  <Input
-                    placeholder="Name"
-                    value={field.name}
-                    onChange={(e) => handleFieldChange(idx, true, { name: e.target.value })}
-                    className="h-8 text-sm flex-1"
-                  />
-                  <Select
-                    value={field.type}
-                    onValueChange={(value) => handleFieldChange(idx, true, { type: value as any })}
-                  >
-                    <SelectTrigger className="w-20 h-8 text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="string">String</SelectItem>
-                      <SelectItem value="number">Number</SelectItem>
-                      <SelectItem value="boolean">Boolean</SelectItem>
-                      <SelectItem value="object">Object</SelectItem>
-                      <SelectItem value="array">Array</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    placeholder="Description"
-                    value={field.description || ''}
-                    onChange={(e) => handleFieldChange(idx, true, { description: e.target.value })}
-                    className="h-8 text-sm flex-1"
-                  />
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleRemoveField(idx, true)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              ))}
+            {/* Standard Fields Info */}
+            <div className="p-3 bg-gray-50 rounded-md space-y-1">
+              <Label className="text-sm font-medium">Standard Fields (automatically available)</Label>
+              <p className="text-xs text-gray-600">These fields are available in all events:</p>
+              <ul className="text-xs text-gray-600 ml-4 list-disc space-y-0.5">
+                <li><code className="bg-white px-1 rounded">event_name</code> - string (required)</li>
+                <li><code className="bg-white px-1 rounded">trace_id</code> - string (required)</li>
+                <li><code className="bg-white px-1 rounded">user_id</code> - string (optional)</li>
+                <li><code className="bg-white px-1 rounded">session_id</code> - string (optional)</li>
+                <li><code className="bg-white px-1 rounded">value</code> - number (optional, for revenue/metrics)</li>
+                <li><code className="bg-white px-1 rounded">currency</code> - string (optional)</li>
+              </ul>
             </div>
 
-            {/* Optional Fields */}
+            {/* Custom Metadata Fields */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <Label className="text-sm font-medium">Optional Fields</Label>
+                <div>
+                  <Label className="text-sm font-medium">Custom Metadata Fields</Label>
+                  <p className="text-xs text-gray-500">Define custom fields that will be passed in the metadata object</p>
+                </div>
                 <Button
-                  onClick={() => handleAddField(false)}
+                  onClick={() => handleAddField()}
                   size="sm"
                   variant="outline"
                   className="h-7 px-2"
@@ -509,45 +417,60 @@ export default function EventDefinitionBuilder({
                   <Plus className="h-3 w-3 mr-1" /> Add
                 </Button>
               </div>
-              {editingEvent.optional_fields.map((field, idx) => (
-                <div key={`opt-${idx}`} className="flex gap-2 items-center">
-                  <Input
-                    placeholder="Name"
-                    value={field.name}
-                    onChange={(e) => handleFieldChange(idx, false, { name: e.target.value })}
-                    className="h-8 text-sm flex-1"
-                  />
-                  <Select
-                    value={field.type}
-                    onValueChange={(value) => handleFieldChange(idx, false, { type: value as any })}
-                  >
-                    <SelectTrigger className="w-20 h-8 text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="string">String</SelectItem>
-                      <SelectItem value="number">Number</SelectItem>
-                      <SelectItem value="boolean">Boolean</SelectItem>
-                      <SelectItem value="object">Object</SelectItem>
-                      <SelectItem value="array">Array</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    placeholder="Description"
-                    value={field.description || ''}
-                    onChange={(e) => handleFieldChange(idx, false, { description: e.target.value })}
-                    className="h-8 text-sm flex-1"
-                  />
+              {editingEvent.metadata_schema.map((field, idx) => (
+                <div key={`meta-${idx}`} className="flex gap-2 items-start p-2 bg-gray-50 rounded">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Field name"
+                        value={field.name}
+                        onChange={(e) => handleFieldChange(idx, { name: e.target.value })}
+                        className="h-8 text-sm flex-1"
+                      />
+                      <Select
+                        value={field.type}
+                        onValueChange={(value) => handleFieldChange(idx, { type: value as any })}
+                      >
+                        <SelectTrigger className="w-24 h-8 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="string">String</SelectItem>
+                          <SelectItem value="number">Number</SelectItem>
+                          <SelectItem value="boolean">Boolean</SelectItem>
+                          <SelectItem value="object">Object</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <label className="flex items-center gap-1.5 text-sm whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={field.required}
+                          onChange={(e) => handleFieldChange(idx, { required: e.target.checked })}
+                          className="rounded"
+                        />
+                        Required
+                      </label>
+                    </div>
+                    <Input
+                      placeholder="Description (optional)"
+                      value={field.description || ''}
+                      onChange={(e) => handleFieldChange(idx, { description: e.target.value })}
+                      className="h-7 text-xs"
+                    />
+                  </div>
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => handleRemoveField(idx, false)}
-                    className="h-8 w-8 p-0"
+                    onClick={() => handleRemoveField(idx)}
+                    className="h-8 w-8 p-0 mt-0"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               ))}
+              {editingEvent.metadata_schema.length === 0 && (
+                <p className="text-xs text-gray-400 text-center py-2">No custom fields defined. Click "Add" to create one.</p>
+              )}
             </div>
 
             <div className="flex gap-2 pt-2">
@@ -593,7 +516,9 @@ export default function EventDefinitionBuilder({
                   </div>
                   <div>
                     <h3 className="font-medium text-sm">{event.event_name}</h3>
-                    <p className="text-xs text-muted-foreground">{event.category}</p>
+                    {event.description && (
+                      <p className="text-xs text-muted-foreground">{event.description}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
@@ -627,12 +552,23 @@ export default function EventDefinitionBuilder({
 
               {!event.collapsed && (
                 <div className="mt-3 pt-3 border-t text-sm space-y-2">
-                  <p><strong>Description:</strong> {event.description}</p>
-                  {event.required_fields && event.required_fields.length > 0 && (
-                    <p><strong>Required:</strong> {event.required_fields.map(f => f.name).join(', ')}</p>
-                  )}
-                  {event.optional_fields && event.optional_fields.length > 0 && (
-                    <p><strong>Optional:</strong> {event.optional_fields.map(f => f.name).join(', ')}</p>
+                  <p><strong>Description:</strong> {event.description || 'No description'}</p>
+                  {event.metadata_schema && event.metadata_schema.length > 0 ? (
+                    <div>
+                      <p className="font-medium mb-1">Custom Metadata Fields:</p>
+                      <ul className="ml-4 list-disc text-xs space-y-1">
+                        {event.metadata_schema.map((field, idx) => (
+                          <li key={idx}>
+                            <code className="bg-gray-100 px-1 rounded">{field.name}</code>
+                            {' '}({field.type})
+                            {field.required && <span className="text-red-600"> *</span>}
+                            {field.description && <span className="text-gray-600"> - {field.description}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-xs">No custom fields defined</p>
                   )}
                 </div>
               )}

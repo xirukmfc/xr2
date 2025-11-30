@@ -14,10 +14,8 @@ from app.core.auth import get_current_user
 
 class EventDefinitionRequest(BaseModel):
     event_name: str
-    category: str
     description: str
-    required_fields: List[Dict[str, Any]]
-    optional_fields: List[Dict[str, Any]]
+    metadata_schema: List[Dict[str, Any]]  # Custom fields schema
     validation_rules: Optional[List[Dict[str, Any]]] = None
     success_criteria: Optional[Dict[str, Any]] = None
     alert_thresholds: Optional[Dict[str, Any]] = None
@@ -53,7 +51,6 @@ async def get_user_workspace(db: AsyncSession, user: User) -> UUID:
 
 @router.get("")
 async def get_event_definitions(
-        category: Optional[str] = None,
         active_only: bool = True,
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
@@ -67,9 +64,6 @@ async def get_event_definitions(
         EventDefinition.workspace_id == workspace_id
     )
 
-    if category:
-        query = query.where(EventDefinition.category == category)
-
     if active_only:
         query = query.where(EventDefinition.is_active == True)
 
@@ -80,10 +74,8 @@ async def get_event_definitions(
         {
             "id": str(definition.id),
             "event_name": definition.event_name,
-            "category": definition.category,
             "description": definition.description,
-            "required_fields": definition.required_fields,
-            "optional_fields": definition.optional_fields,
+            "metadata_schema": definition.metadata_schema or [],
             "validation_rules": definition.validation_rules,
             "success_criteria": definition.success_criteria,
             "alert_thresholds": definition.alert_thresholds,
@@ -123,7 +115,6 @@ async def create_event_definition(
                 "id": str(existing.id),
                 "status": "already_exists",
                 "event_name": existing.event_name,
-                "category": existing.category,
                 "created_at": existing.created_at.isoformat() if existing.created_at else None
             }
 
@@ -131,10 +122,8 @@ async def create_event_definition(
         definition = EventDefinition(
             workspace_id=workspace_id,
             event_name=request.event_name,
-            category=request.category,
             description=request.description,
-            required_fields=request.required_fields,
-            optional_fields=request.optional_fields,
+            metadata_schema=request.metadata_schema or [],
             validation_rules=request.validation_rules or [],
             success_criteria=request.success_criteria or {},
             alert_thresholds=request.alert_thresholds or {},
@@ -151,7 +140,6 @@ async def create_event_definition(
             "id": str(definition.id),
             "status": "created",
             "event_name": definition.event_name,
-            "category": definition.category,
             "created_at": definition.created_at.isoformat() if definition.created_at else None
         }
     except Exception as e:
@@ -167,10 +155,8 @@ async def create_event_definition(
 
 class UpdateEventDefinitionRequest(BaseModel):
     event_name: Optional[str] = None
-    category: Optional[str] = None
     description: Optional[str] = None
-    required_fields: Optional[List[Dict[str, Any]]] = None
-    optional_fields: Optional[List[Dict[str, Any]]] = None
+    metadata_schema: Optional[List[Dict[str, Any]]] = None
     validation_rules: Optional[List[Dict[str, Any]]] = None
     success_criteria: Optional[Dict[str, Any]] = None
     alert_thresholds: Optional[Dict[str, Any]] = None
@@ -198,14 +184,10 @@ async def update_event_definition(
     # Update fields if provided
     if request.event_name is not None:
         definition.event_name = request.event_name
-    if request.category is not None:
-        definition.category = request.category
     if request.description is not None:
         definition.description = request.description
-    if request.required_fields is not None:
-        definition.required_fields = request.required_fields
-    if request.optional_fields is not None:
-        definition.optional_fields = request.optional_fields
+    if request.metadata_schema is not None:
+        definition.metadata_schema = request.metadata_schema
     if request.validation_rules is not None:
         definition.validation_rules = request.validation_rules
     if request.success_criteria is not None:
@@ -268,10 +250,8 @@ async def get_test_event_definitions(db: AsyncSession = Depends(get_db)):
             {
                 "id": str(definition.id),
                 "event_name": definition.event_name,
-                "category": definition.category,
                 "description": definition.description,
-                "required_fields": definition.required_fields,
-                "optional_fields": definition.optional_fields,
+                "metadata_schema": definition.metadata_schema or [],
                 "validation_rules": definition.validation_rules,
                 "success_criteria": definition.success_criteria,
                 "alert_thresholds": definition.alert_thresholds,
@@ -282,7 +262,7 @@ async def get_test_event_definitions(db: AsyncSession = Depends(get_db)):
         ]
     except Exception as e:
         return [
-            { "id": "start", "event_name": "start", "category": "User Onboarding", "description": "User started onboarding" },
-            { "id": "end", "event_name": "end", "category": "User Onboarding", "description": "User completed onboarding" },
-            { "id": "buy", "event_name": "buy", "category": "User Onboarding", "description": "User made a purchase" }
+            { "id": "start", "event_name": "start", "description": "User started onboarding" },
+            { "id": "end", "event_name": "end", "description": "User completed onboarding" },
+            { "id": "buy", "event_name": "buy", "description": "User made a purchase" }
         ]

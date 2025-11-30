@@ -141,6 +141,14 @@ export default function PromptEventsViewer() {
     }
   };
 
+  const formatEventType = (eventType: string) => {
+    const typeMap: Record<string, string> = {
+      'custom_event': 'track_event',
+      'prompt_request': 'get_prompt'
+    };
+    return typeMap[eventType] || eventType;
+  };
+
   const processChartData = (eventsData: PromptEvent[], startDate: Date, endDate: Date) => {
     // Group events by date and event type
     const eventsByDate: { [key: string]: { [key: string]: number } } = {};
@@ -160,18 +168,19 @@ export default function PromptEventsViewer() {
       eventsByDate[date][eventType] = (eventsByDate[date][eventType] || 0) + 1;
     });
 
-    // Generate date range
-    const dates: string[] = [];
-    const currentDate = new Date(startDate);
-    while (currentDate <= endDate) {
-      dates.push(currentDate.toISOString().split('T')[0]);
-      currentDate.setDate(currentDate.getDate() + 1);
+    // Use only dates that have events (sorted)
+    const dates = Object.keys(eventsByDate).sort();
+
+    // If no events, return empty data
+    if (dates.length === 0) {
+      setChartData({ dates: [], series: [] });
+      return;
     }
 
     // Create series data
     const series = Array.from(eventTypes).map((eventType, index) => ({
       name: eventType,
-      event_name: eventType,
+      event_name: formatEventType(eventType),
       category: 'event',
       data: dates.map(date => eventsByDate[date]?.[eventType] || 0),
       color: `hsl(${(index * 137.5) % 360}, 70%, 50%)`
@@ -198,42 +207,50 @@ export default function PromptEventsViewer() {
     });
   };
 
-  // Create pivot table: rows = event types, columns = dates
+  // Create pivot table: rows = event types, columns = versions
   const getPivotData = () => {
-    const pivot: { [eventType: string]: { [date: string]: number } } = {};
-    const dates = new Set<string>();
+    const pivot: { [eventType: string]: { [versionId: string]: number } } = {};
+    const versionIds = new Set<string>();
 
     events.forEach(event => {
-      const date = new Date(event.created_at).toISOString().split('T')[0];
       const eventType = event.event_type === 'custom_event'
         ? (event.event_metadata?.event_name || 'custom_event')
         : event.event_type;
 
-      dates.add(date);
+      const versionId = event.prompt_version_id || 'unknown';
+
+      versionIds.add(versionId);
 
       if (!pivot[eventType]) {
         pivot[eventType] = {};
       }
 
-      pivot[eventType][date] = (pivot[eventType][date] || 0) + 1;
+      pivot[eventType][versionId] = (pivot[eventType][versionId] || 0) + 1;
     });
 
-    // Sort dates descending (newest first)
-    const sortedDates = Array.from(dates).sort((a, b) => b.localeCompare(a));
+    // Get version numbers for sorting
+    const versionList = Array.from(versionIds).map(vId => {
+      const version = versions.find(v => v.id === vId);
+      return {
+        id: vId,
+        number: version?.version_number || 0,
+        status: version?.status || 'unknown'
+      };
+    }).sort((a, b) => a.number - b.number);
 
-    // Convert to array format for rendering, with prompt_request always first
+    // Convert to array format for rendering, with prompt_request (get_prompt) always first
     const rows = Object.entries(pivot)
       .sort(([eventTypeA], [eventTypeB]) => {
         if (eventTypeA === 'prompt_request') return -1;
         if (eventTypeB === 'prompt_request') return 1;
         return eventTypeA.localeCompare(eventTypeB);
       })
-      .map(([eventType, dateCounts]) => ({
-        eventType,
-        dateCounts
+      .map(([eventType, versionCounts]) => ({
+        eventType: formatEventType(eventType),
+        versionCounts
       }));
 
-    return { rows, dates: sortedDates };
+    return { rows, versions: versionList };
   };
 
   const pivotData = getPivotData();
@@ -245,65 +262,53 @@ export default function PromptEventsViewer() {
     <div className="space-y-4">
       {/* Filters */}
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium">Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardContent className="pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Prompt Selector */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Prompt</label>
-              <Select value={selectedPromptId} onValueChange={setSelectedPromptId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select prompt" />
-                </SelectTrigger>
-                <SelectContent>
-                  {prompts.map(prompt => (
-                    <SelectItem key={prompt.id} value={prompt.id}>
-                      {prompt.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={selectedPromptId} onValueChange={setSelectedPromptId}>
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder="Select prompt" />
+              </SelectTrigger>
+              <SelectContent>
+                {prompts.map(prompt => (
+                  <SelectItem key={prompt.id} value={prompt.id}>
+                    {prompt.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             {/* Version Selector */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Version</label>
-              <Select
-                value={selectedVersionId}
-                onValueChange={setSelectedVersionId}
-                disabled={!selectedPromptId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select version" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Versions</SelectItem>
-                  {versions.map(version => (
-                    <SelectItem key={version.id} value={version.id}>
-                      v{version.version_number} ({version.status})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Select
+              value={selectedVersionId}
+              onValueChange={setSelectedVersionId}
+              disabled={!selectedPromptId}
+            >
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder="Select version" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Versions</SelectItem>
+                {versions.map(version => (
+                  <SelectItem key={version.id} value={version.id}>
+                    v{version.version_number} ({version.status})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             {/* Period Selector */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Time Period</label>
-              <Select value={period} onValueChange={setPeriod}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="week">This Week</SelectItem>
-                  <SelectItem value="month">This Month</SelectItem>
-                  <SelectItem value="year">This Year</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={period} onValueChange={setPeriod}>
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+                <SelectItem value="year">This Year</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -412,9 +417,12 @@ export default function PromptEventsViewer() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-xs font-medium sticky left-0 bg-white z-10 py-2 px-3">Event Type</TableHead>
-                    {pivotData.dates.map(date => (
-                      <TableHead key={date} className="text-xs text-center min-w-[80px] py-2 px-2">
-                        {formatDateOnly(date)}
+                    {pivotData.versions.map(version => (
+                      <TableHead key={version.id} className="text-xs text-center min-w-[100px] py-2 px-2">
+                        v{version.number}
+                        {version.status !== 'unknown' && (
+                          <span className="text-[10px] text-muted-foreground ml-1">({version.status})</span>
+                        )}
                       </TableHead>
                     ))}
                     <TableHead className="text-xs text-right font-medium py-2 px-3">Total</TableHead>
@@ -422,16 +430,16 @@ export default function PromptEventsViewer() {
                 </TableHeader>
                 <TableBody>
                   {pivotData.rows.map((row) => {
-                    const total = Object.values(row.dateCounts).reduce((sum, count) => sum + count, 0);
+                    const total = Object.values(row.versionCounts).reduce((sum: number, count) => sum + (count as number), 0);
                     return (
                       <TableRow key={row.eventType}>
                         <TableCell className="text-xs font-medium sticky left-0 bg-white z-10 py-2 px-3">
                           {row.eventType}
                         </TableCell>
-                        {pivotData.dates.map(date => {
-                          const count = row.dateCounts[date] || 0;
+                        {pivotData.versions.map(version => {
+                          const count = row.versionCounts[version.id] || 0;
                           return (
-                            <TableCell key={date} className="text-xs text-center py-2 px-2">
+                            <TableCell key={version.id} className="text-xs text-center py-2 px-2">
                               {count > 0 ? count : <span className="text-muted-foreground">—</span>}
                             </TableCell>
                           );
@@ -447,10 +455,10 @@ export default function PromptEventsViewer() {
                     <TableCell className="text-xs font-bold sticky left-0 bg-muted/30 z-10 py-2 px-3">
                       Total
                     </TableCell>
-                    {pivotData.dates.map(date => {
-                      const total = pivotData.rows.reduce((sum, row) => sum + (row.dateCounts[date] || 0), 0);
+                    {pivotData.versions.map(version => {
+                      const total = pivotData.rows.reduce((sum, row) => sum + (row.versionCounts[version.id] || 0), 0);
                       return (
-                        <TableCell key={date} className="text-xs text-center font-bold py-2 px-2">
+                        <TableCell key={version.id} className="text-xs text-center font-bold py-2 px-2">
                           {total}
                         </TableCell>
                       );

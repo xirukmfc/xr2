@@ -14,22 +14,32 @@ def validate_event_against_definition(event, event_definition):
     """Validate event data against event definition"""
     errors = []
 
-    if not event.metadata:
+    # Get metadata from event_metadata if present
+    event_custom_metadata = {}
+    if event.event_metadata and isinstance(event.event_metadata, dict):
+        event_custom_metadata = event.event_metadata.get('metadata', {})
+
+    if not event_custom_metadata:
         return errors
 
-    # Check required fields
-    for field in event_definition.required_fields or []:
+    # Check required fields from metadata_schema
+    metadata_schema = event_definition.metadata_schema or []
+    for field in metadata_schema:
         field_name = field.get('name')
         if not field_name:
             continue
 
-        if field_name not in event.metadata:
+        is_required = field.get('required', False)
+        if is_required and field_name not in event_custom_metadata:
             errors.append(f"Required field '{field_name}' is missing")
+            continue
+
+        if field_name not in event_custom_metadata:
             continue
 
         # Basic type validation
         field_type = field.get('type', 'string')
-        field_value = event.metadata[field_name]
+        field_value = event_custom_metadata[field_name]
 
         if field_type == 'number' and not isinstance(field_value, (int, float)):
             errors.append(f"Field '{field_name}' should be a number")
@@ -89,30 +99,41 @@ async def update_hourly_metrics(db: AsyncSession, event: PromptEvent):
             workspace_id=event.workspace_id,
             prompt_id=event.prompt_id,
             prompt_version_id=event.prompt_version_id,
-            hour_bucket=hour_bucket
+            hour_bucket=hour_bucket,
+            total_requests=0,
+            successful_outcomes=0,
+            failed_outcomes=0,
+            partial_outcomes=0,
+            abandoned_outcomes=0,
+            total_revenue=0,
+            total_value=0,
+            conversion_count=0,
+            unique_users=0,
+            error_count=0,
+            token_cost=0
         )
         db.add(metrics)
 
     # Update counts
-    metrics.total_requests += 1
+    metrics.total_requests = (metrics.total_requests or 0) + 1
 
     if event.outcome == 'success':
-        metrics.successful_outcomes += 1
+        metrics.successful_outcomes = (metrics.successful_outcomes or 0) + 1
     elif event.outcome == 'failure':
-        metrics.failed_outcomes += 1
+        metrics.failed_outcomes = (metrics.failed_outcomes or 0) + 1
     elif event.outcome == 'partial':
-        metrics.partial_outcomes += 1
+        metrics.partial_outcomes = (metrics.partial_outcomes or 0) + 1
     elif event.outcome == 'abandoned':
-        metrics.abandoned_outcomes += 1
+        metrics.abandoned_outcomes = (metrics.abandoned_outcomes or 0) + 1
 
     # Update business metrics
     if event.business_metrics:
         if 'revenue' in event.business_metrics:
-            metrics.total_revenue += float(event.business_metrics['revenue'])
+            metrics.total_revenue = (metrics.total_revenue or 0) + float(event.business_metrics['revenue'])
         if 'value' in event.business_metrics:
-            metrics.total_value += float(event.business_metrics['value'])
+            metrics.total_value = (metrics.total_value or 0) + float(event.business_metrics['value'])
         if event.business_metrics.get('conversion'):
-            metrics.conversion_count += 1
+            metrics.conversion_count = (metrics.conversion_count or 0) + 1
 
     # Update unique users (this is simplified, in production use HyperLogLog)
     if event.user_id:
@@ -486,7 +507,6 @@ async def get_monthly_events_chart_data(db: AsyncSession, workspace_id: UUID):
          func.coalesce(PromptEvent.event_metadata['event_name'].astext, 'unknown')),
         else_=PromptEvent.event_type
     )
-    category_field = func.coalesce(PromptEvent.event_metadata['category'].astext, 'general')
     # Use date_trunc to avoid timezone issues
     date_field = func.date_trunc('day', PromptEvent.created_at)
 
@@ -494,7 +514,6 @@ async def get_monthly_events_chart_data(db: AsyncSession, workspace_id: UUID):
         select(
             date_field.label('date'),
             event_name_field.label('event_name'),
-            category_field.label('category'),
             func.count(PromptEvent.id).label('count')
         ).where(
             and_(
@@ -504,12 +523,10 @@ async def get_monthly_events_chart_data(db: AsyncSession, workspace_id: UUID):
             )
         ).group_by(
             date_field,
-            event_name_field,
-            category_field
+            event_name_field
         ).order_by(
             date_field,
-            event_name_field,
-            category_field
+            event_name_field
         )
     )
 
@@ -518,14 +535,13 @@ async def get_monthly_events_chart_data(db: AsyncSession, workspace_id: UUID):
     for row in events_data:
         # row.date is now a timestamp from date_trunc, extract date part
         date_str = row.date.date().strftime('%Y-%m-%d') if hasattr(row.date, 'date') else row.date.strftime('%Y-%m-%d')
-        group_key = f"{row.event_name}_{row.category}"
-        print(f"[MONTHLY_EVENTS] Row: date={date_str}, event_name={row.event_name}, category={row.category}, count={row.count}")
+        group_key = row.event_name
+        print(f"[MONTHLY_EVENTS] Row: date={date_str}, event_name={row.event_name}, count={row.count}")
 
         if group_key not in chart_data:
             chart_data[group_key] = {
-                'name': f"{row.event_name} ({row.category})",
+                'name': row.event_name,
                 'event_name': row.event_name,
-                'category': row.category,
                 'data': {}
             }
 
@@ -544,14 +560,22 @@ async def get_monthly_events_chart_data(db: AsyncSession, workspace_id: UUID):
             if date_str not in group_data['data']:
                 group_data['data'][date_str] = 0
 
+    # Format event names for display
+    def format_event_name(event_name: str) -> str:
+        """Format event type names for frontend display"""
+        type_map = {
+            'custom_event': 'track_event',
+            'prompt_request': 'get_prompt'
+        }
+        return type_map.get(event_name, event_name)
+
     # Convert to list format suitable for charts
     return {
         'dates': date_range,
         'series': [
             {
                 'name': group_data['name'],
-                'event_name': group_data['event_name'],
-                'category': group_data['category'],
+                'event_name': format_event_name(group_data['event_name']),
                 'data': [group_data['data'][date] for date in date_range]
             }
             for group_data in chart_data.values()

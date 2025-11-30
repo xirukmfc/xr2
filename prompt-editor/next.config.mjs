@@ -35,48 +35,6 @@ const nextConfig = {
         path: false,
         crypto: false,
       }
-
-      // Упрощенное разделение чанков для development
-      if (dev) {
-        config.optimization = {
-          ...config.optimization,
-          splitChunks: {
-            chunks: 'all',
-            cacheGroups: {
-              vendor: {
-                test: /[\\/]node_modules[\\/]/,
-                name: 'vendors',
-                priority: 10,
-                chunks: 'all',
-                enforce: true,
-              }
-            },
-          },
-        }
-      } else {
-        // Упрощенное разделение чанков для production (быстрая сборка)
-        config.optimization = {
-          ...config.optimization,
-          splitChunks: {
-            chunks: 'all',
-            cacheGroups: {
-              vendor: {
-                test: /[\\/]node_modules[\\/]/,
-                name: 'vendors',
-                priority: -10,
-                chunks: 'all',
-              },
-              monaco: {
-                test: /[\\/]node_modules[\\/](monaco-editor|@monaco-editor)[\\/]/,
-                name: 'monaco',
-                priority: 10,
-                chunks: 'async',
-                enforce: true,
-              },
-            },
-          },
-        }
-      }
     }
 
     // Оптимизация шрифтов с предзагрузкой
@@ -87,7 +45,6 @@ const nextConfig = {
         filename: 'static/fonts/[name].[contenthash:8][ext]',
       },
     })
-
 
     return config
   },

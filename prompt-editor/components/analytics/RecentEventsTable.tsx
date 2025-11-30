@@ -27,6 +27,7 @@ interface PromptEvent {
     prompt_name?: string;
     prompt_slug?: string;
     version_number?: number;
+    source_name?: string;
     [key: string]: any;
   };
   metadata?: any;
@@ -38,7 +39,7 @@ export default function RecentEventsTable() {
   const [events, setEvents] = useState<PromptEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [outcomeFilter, setOutcomeFilter] = useState('all');
+  const [eventTypeFilter, setEventTypeFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [eventsPerPage] = useState(20);
 
@@ -88,14 +89,22 @@ export default function RecentEventsTable() {
     );
   };
 
+  const formatEventType = (eventType: string) => {
+    const typeMap: Record<string, string> = {
+      'custom_event': 'track_event',
+      'prompt_request': 'get_prompt'
+    };
+    return typeMap[eventType] || eventType;
+  };
+
   const filteredEvents = events.filter(event => {
     const matchesSearch =
       event.trace_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.prompt_id.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesOutcome = outcomeFilter === 'all' || event.outcome === outcomeFilter;
+    const matchesEventType = eventTypeFilter === 'all' || event.event_type === eventTypeFilter;
 
-    return matchesSearch && matchesOutcome;
+    return matchesSearch && matchesEventType;
   });
 
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
@@ -113,17 +122,10 @@ export default function RecentEventsTable() {
   }
 
   return (
-    <Card className="border-0 shadow-none">
+    <Card>
       <CardHeader className="px-4 py-3">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-base font-semibold">Recent Events</CardTitle>
-          <Button variant="ghost" size="sm" onClick={fetchEvents} className="h-7 text-xs">
-            Refresh
-          </Button>
-        </div>
-
         {/* Filters */}
-        <div className="flex gap-2 mt-3">
+        <div className="flex gap-2 items-center">
           <div className="relative flex-1">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
@@ -133,19 +135,20 @@ export default function RecentEventsTable() {
               className="pl-8 h-8 text-xs"
             />
           </div>
-          <Select value={outcomeFilter} onValueChange={setOutcomeFilter}>
-            <SelectTrigger className="w-32 h-8 text-xs">
+          <Select value={eventTypeFilter} onValueChange={setEventTypeFilter}>
+            <SelectTrigger className="w-40 h-8 text-xs">
               <Filter className="h-3.5 w-3.5 mr-1" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="text-xs">All</SelectItem>
-              <SelectItem value="success" className="text-xs">Success</SelectItem>
-              <SelectItem value="failure" className="text-xs">Failure</SelectItem>
-              <SelectItem value="partial" className="text-xs">Partial</SelectItem>
-              <SelectItem value="abandoned" className="text-xs">Abandoned</SelectItem>
+              <SelectItem value="all" className="text-xs">All Events</SelectItem>
+              <SelectItem value="prompt_request" className="text-xs">get_prompt</SelectItem>
+              <SelectItem value="custom_event" className="text-xs">track_event</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="ghost" size="sm" onClick={fetchEvents} className="h-8 text-xs px-3">
+            Refresh
+          </Button>
         </div>
       </CardHeader>
 
@@ -156,10 +159,11 @@ export default function RecentEventsTable() {
               <TableRow className="hover:bg-transparent border-b">
                 <TableHead className="h-8 px-2 text-xs font-medium">Time</TableHead>
                 <TableHead className="h-8 px-2 text-xs font-medium">Trace ID</TableHead>
-                <TableHead className="h-8 px-2 text-xs font-medium">Version</TableHead>
                 <TableHead className="h-8 px-2 text-xs font-medium">Prompt</TableHead>
+                <TableHead className="h-8 px-2 text-xs font-medium">Version</TableHead>
+                <TableHead className="h-8 px-2 text-xs font-medium">Type</TableHead>
+                <TableHead className="h-8 px-2 text-xs font-medium">Source</TableHead>
                 <TableHead className="h-8 px-2 text-xs font-medium">Event</TableHead>
-                <TableHead className="h-8 px-2 text-xs font-medium">Details</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -179,11 +183,6 @@ export default function RecentEventsTable() {
                       {event.trace_id}
                     </code>
                   </TableCell>
-                  <TableCell className="px-2 py-1.5 text-xs">
-                    {event.event_metadata?.version_number
-                      ? `v${event.event_metadata.version_number}`
-                      : '—'}
-                  </TableCell>
                   <TableCell className="px-2 py-1.5">
                     {event.event_metadata?.prompt_name ? (
                       <span className="text-xs">{event.event_metadata.prompt_name}</span>
@@ -191,10 +190,24 @@ export default function RecentEventsTable() {
                       <span className="text-muted-foreground text-xs">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="px-2 py-1.5 text-xs">{event.event_type}</TableCell>
-                  <TableCell className="px-2 py-1.5">
-                    {event.event_metadata?.event_name && (
-                      <span className="text-xs">{event.event_metadata.event_name}</span>
+                  <TableCell className="px-2 py-1.5 text-xs">
+                    {event.event_metadata?.version_number
+                      ? `v${event.event_metadata.version_number}`
+                      : '—'}
+                  </TableCell>
+                  <TableCell className="px-2 py-1.5 text-xs">{formatEventType(event.event_type)}</TableCell>
+                  <TableCell className="px-2 py-1.5 text-xs">
+                    {event.event_metadata?.source_name ? (
+                      <span>{event.event_metadata.source_name}</span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="px-2 py-1.5 text-xs">
+                    {event.event_type === 'custom_event' && event.event_metadata?.event_name ? (
+                      <span>{event.event_metadata.event_name}</span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
                     )}
                   </TableCell>
                 </TableRow>

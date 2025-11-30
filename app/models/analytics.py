@@ -72,10 +72,9 @@ class EventDefinition(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     workspace_id = Column(UUID(as_uuid=True), ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False)
     event_name = Column(String(100), nullable=False)
-    category = Column(String(100))
     description = Column(String)
-    required_fields = Column(JSONB)
-    optional_fields = Column(JSONB)
+    # metadata_schema defines custom fields that will be passed in metadata object
+    metadata_schema = Column(JSONB)  # List of {name, type, required, description}
     validation_rules = Column(JSONB)
     success_criteria = Column(JSONB)
     alert_thresholds = Column(JSONB)

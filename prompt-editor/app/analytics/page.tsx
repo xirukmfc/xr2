@@ -27,17 +27,25 @@ import { apiClient } from '@/lib/api';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
 import { BarChart3, TestTube, Settings, FileText, TrendingUp, Plus } from 'lucide-react';
 
 const subsections = [
-  { id: "dashboard", name: "Dashboard", icon: BarChart3 },
   { id: "recent-events", name: "Recent Events", icon: FileText },
   { id: "monthly-events", name: "Monthly Events", icon: TrendingUp },
   { id: "prompt-events", name: "Prompt Events", icon: FileText },
+  { id: "events", name: "Define Events", icon: Settings },
+  { id: "conversions", name: "Custom metrics", icon: TrendingUp },
+  { id: "dashboard", name: "Dashboard", icon: BarChart3 },
   { id: "funnel", name: "Funnel Analysis", icon: BarChart3 },
   { id: "ab-tests", name: "A/B Tests", icon: TestTube },
-  { id: "events", name: "Events define", icon: Settings },
-  { id: "conversions", name: "Custom metrics", icon: TrendingUp },
 ]
 
 export default function AnalyticsPage() {
@@ -157,9 +165,62 @@ export default function AnalyticsPage() {
 
   const renderRecentEventsSection = () => (
     <div className="space-y-3">
+      <div>
+        <h2 className="text-base font-semibold">Recent Events</h2>
+        <p className="text-xs text-slate-600">Latest events tracked across all prompts</p>
+      </div>
       <RecentEventsTable />
     </div>
   )
+
+  // Memoize CustomTooltip to avoid recreating it on every render
+  const CustomTooltip = React.useMemo(() => {
+    return ({ active, payload, label }: any) => {
+      if (active && payload && payload.length) {
+        return (
+          <div className="bg-white p-3 border rounded-lg shadow-lg">
+            <p className="text-xs font-medium mb-2">{label}</p>
+            {payload.map((entry: any, index: number) => {
+              // Find the series to get event_name
+              const series = analyticsData?.monthly_events_chart?.series.find((s: any) => s.name === entry.dataKey);
+              const displayName = series?.event_name || entry.dataKey;
+              return (
+                <div key={index} className="flex items-center gap-2 text-xs">
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: entry.color }}
+                  />
+                  <span className="font-medium">{displayName}:</span>
+                  <span>{entry.value}</span>
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+      return null;
+    };
+  }, [analyticsData?.monthly_events_chart?.series]);
+
+  // Memoize chart data transformation
+  const chartData = React.useMemo(() => {
+    if (!analyticsData?.monthly_events_chart?.dates) return [];
+    return analyticsData.monthly_events_chart.dates.map((date: string, index: number) => {
+      const dataPoint: any = { date };
+      analyticsData.monthly_events_chart.series.forEach((series: any) => {
+        dataPoint[series.name] = series.data[index] || 0;
+      });
+      return dataPoint;
+    });
+  }, [analyticsData?.monthly_events_chart]);
+
+  // Memoize total events count
+  const totalEventsCount = React.useMemo(() => {
+    if (!analyticsData?.monthly_events_chart?.series) return 0;
+    return analyticsData.monthly_events_chart.series.reduce((total: number, series: any) =>
+      total + series.data.reduce((sum: number, count: number) => sum + count, 0), 0
+    );
+  }, [analyticsData?.monthly_events_chart?.series]);
 
   const renderMonthlyEventsSection = () => {
     if (loading) {
@@ -187,20 +248,12 @@ export default function AnalyticsPage() {
           <div className="space-y-3">
             {/* Monthly Events Chart */}
             <div className="bg-white p-4 rounded-lg border">
-              <h3 className="text-sm font-medium mb-2">Monthly Event Trends</h3>
-              <p className="text-xs text-slate-600 mb-3">Events grouped by event_name + category over the last 30 days</p>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={analyticsData.monthly_events_chart.dates.map((date: string, index: number) => {
-                  const dataPoint: any = { date };
-                  analyticsData.monthly_events_chart.series.forEach((series: any) => {
-                    dataPoint[series.name] = series.data[index] || 0;
-                  });
-                  return dataPoint;
-                })}>
+                <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip content={<CustomTooltip />} />
                   {analyticsData.monthly_events_chart.series.map((series: any, index: number) => {
                     const isHidden = hiddenSeries.has(series.name);
                     return (
@@ -224,6 +277,8 @@ export default function AnalyticsPage() {
                 {analyticsData.monthly_events_chart.series.map((series: any, index: number) => {
                   const isHidden = hiddenSeries.has(series.name);
                   const color = `hsl(${(index * 137.5) % 360}, 70%, 50%)`;
+                  // Use event_name if available, otherwise fall back to name
+                  const displayName = series.event_name || series.name;
 
                   return (
                     <button
@@ -249,7 +304,7 @@ export default function AnalyticsPage() {
                         }}
                       ></div>
                       <span className={isHidden ? 'line-through text-gray-500' : 'text-gray-700'}>
-                        {series.event_name}
+                        {displayName}
                       </span>
                       <span className="text-[10px] text-gray-500">
                         ({series.data.reduce((sum: number, count: number) => sum + count, 0)})
@@ -260,26 +315,61 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            {/* Event Series Summary */}
+            {/* Events Summary Table */}
             <div className="bg-white p-4 rounded-lg border">
-              <h3 className="text-sm font-medium mb-2">Event Series Summary</h3>
-              <p className="text-xs text-slate-600 mb-3">Overview of tracked event types</p>
-              <div className="grid gap-2 md:grid-cols-3 lg:grid-cols-4">
-                {analyticsData.monthly_events_chart.series.map((series: any, index: number) => (
-                  <div key={series.name} className="flex items-center space-x-2 p-2 border rounded-lg">
-                    <div
-                      className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: `hsl(${(index * 137.5) % 360}, 70%, 50%)` }}
-                    ></div>
-                    <div className="min-w-0">
-                      <p className="font-medium text-xs truncate">{series.event_name}</p>
-                      <p className="text-[10px] text-slate-600 truncate">{series.category}</p>
-                      <p className="text-[10px]">
-                        Total: {series.data.reduce((sum: number, count: number) => sum + count, 0)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+              <h3 className="text-sm font-medium mb-2">
+                Events Summary ({totalEventsCount} total events)
+              </h3>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs font-medium py-2 px-3">Event Name</TableHead>
+                      <TableHead className="text-xs text-right font-medium py-2 px-3">Total Count</TableHead>
+                      <TableHead className="text-xs text-right font-medium py-2 px-3">Percentage</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {analyticsData.monthly_events_chart.series.map((series: any, index: number) => {
+                      const total = series.data.reduce((sum: number, count: number) => sum + count, 0);
+                      const displayName = series.event_name || series.name;
+                      const color = `hsl(${(index * 137.5) % 360}, 70%, 50%)`;
+                      const percentage = totalEventsCount > 0 ? ((total / totalEventsCount) * 100).toFixed(1) : 0;
+
+                      return (
+                        <TableRow key={series.name}>
+                          <TableCell className="text-xs font-medium py-2 px-3">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="w-2 h-2 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: color }}
+                              />
+                              {displayName}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs text-right font-bold py-2 px-3">
+                            {total.toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-xs text-right text-muted-foreground py-2 px-3">
+                            {percentage}%
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    {/* Totals row */}
+                    <TableRow className="border-t-2 font-medium bg-muted/30">
+                      <TableCell className="text-xs font-bold py-2 px-3">
+                        Total
+                      </TableCell>
+                      <TableCell className="text-xs text-right font-bold py-2 px-3">
+                        {totalEventsCount.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-xs text-right font-bold py-2 px-3">
+                        100%
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </div>
             </div>
           </div>
