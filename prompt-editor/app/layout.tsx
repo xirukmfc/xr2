@@ -12,9 +12,12 @@ import {DataPreloader} from "@/lib/preload-data"
 import "./globals.css"
 
 export const metadata: Metadata = {
-    title: "xR2",
+    title: "Prompt manager",
     description: "Advanced prompt editor for AI workflows",
     generator: "xR2",
+    icons: {
+        icon: "/favicon.ico",
+    },
 }
 
 export default function RootLayout({

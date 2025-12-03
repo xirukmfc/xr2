@@ -519,6 +519,112 @@ async def delete_test_ab_test(
         raise HTTPException(500, f"Failed to delete A/B test: {str(e)}")
 
 
+async def get_metadata_aggregations(
+    db: AsyncSession,
+    version_a_id: UUID,
+    version_b_id: UUID,
+    started_at,
+    ended_at
+) -> dict:
+    """Calculate metadata aggregations for A/B test comparison"""
+    
+    # Get all events with metadata for both versions
+    conditions_a = [PromptEvent.prompt_version_id == version_a_id]
+    conditions_b = [PromptEvent.prompt_version_id == version_b_id]
+    
+    if started_at:
+        conditions_a.append(PromptEvent.created_at >= started_at)
+        conditions_b.append(PromptEvent.created_at >= started_at)
+    if ended_at:
+        conditions_a.append(PromptEvent.created_at <= ended_at)
+        conditions_b.append(PromptEvent.created_at <= ended_at)
+    
+    # Fetch events with metadata
+    events_a_result = await db.execute(
+        select(PromptEvent.event_metadata, PromptEvent.business_metrics).where(and_(*conditions_a))
+    )
+    events_a = events_a_result.all()
+    
+    events_b_result = await db.execute(
+        select(PromptEvent.event_metadata, PromptEvent.business_metrics).where(and_(*conditions_b))
+    )
+    events_b = events_b_result.all()
+    
+    # Skip these internal fields
+    skip_fields = {'event_name', 'category', 'prompt_name', 'prompt_slug', 'version_number', 'source_name'}
+    
+    def extract_numeric_fields(events_list):
+        """Extract numeric values from metadata and business_metrics"""
+        field_values = {}
+        for event_metadata, business_metrics in events_list:
+            # Process event_metadata
+            if event_metadata:
+                for key, value in event_metadata.items():
+                    if key in skip_fields:
+                        continue
+                    if isinstance(value, (int, float)) and not isinstance(value, bool):
+                        if key not in field_values:
+                            field_values[key] = []
+                        field_values[key].append(float(value))
+            
+            # Process business_metrics (usually contains revenue, etc.)
+            if business_metrics:
+                for key, value in business_metrics.items():
+                    if isinstance(value, (int, float)) and not isinstance(value, bool):
+                        if key not in field_values:
+                            field_values[key] = []
+                        field_values[key].append(float(value))
+        
+        return field_values
+    
+    fields_a = extract_numeric_fields(events_a)
+    fields_b = extract_numeric_fields(events_b)
+    
+    # Get all unique numeric fields
+    all_fields = set(fields_a.keys()) | set(fields_b.keys())
+    
+    # Calculate aggregations for each field
+    numeric_comparisons = []
+    for field_name in sorted(all_fields):
+        values_a = fields_a.get(field_name, [])
+        values_b = fields_b.get(field_name, [])
+        
+        def calc_stats(values):
+            if not values:
+                return {"sum": 0, "avg": 0, "min": 0, "max": 0, "count": 0}
+            return {
+                "sum": round(sum(values), 2),
+                "avg": round(sum(values) / len(values), 2),
+                "min": round(min(values), 2),
+                "max": round(max(values), 2),
+                "count": len(values)
+            }
+        
+        stats_a = calc_stats(values_a)
+        stats_b = calc_stats(values_b)
+        
+        # Determine winner based on average (higher is better for revenue/amount)
+        winner = None
+        if stats_a["count"] > 0 and stats_b["count"] > 0:
+            if stats_b["avg"] > stats_a["avg"]:
+                winner = "B"
+            elif stats_a["avg"] > stats_b["avg"]:
+                winner = "A"
+        
+        numeric_comparisons.append({
+            "field": field_name,
+            "version_a": stats_a,
+            "version_b": stats_b,
+            "diff_avg": round(stats_b["avg"] - stats_a["avg"], 2) if stats_a["count"] > 0 else 0,
+            "diff_percent": round(((stats_b["avg"] - stats_a["avg"]) / stats_a["avg"] * 100), 1) if stats_a["avg"] > 0 else 0,
+            "winner": winner
+        })
+    
+    return {
+        "numeric_comparisons": numeric_comparisons
+    }
+
+
 @router.get("/test/{test_id}/results")
 async def get_test_ab_test_results(
     test_id: str,
@@ -703,6 +809,12 @@ async def get_test_ab_test_results(
                     "winner": "B" if rate_b > rate_a else ("A" if rate_a > rate_b else None)
                 })
 
+        # Get metadata aggregations for A/B comparison
+        metadata_insights = await get_metadata_aggregations(
+            db, ab_test.version_a_id, ab_test.version_b_id,
+            ab_test.started_at, ab_test.ended_at
+        )
+
         return {
             "test_id": str(ab_test.id),
             "test_name": ab_test.name,
@@ -723,7 +835,8 @@ async def get_test_ab_test_results(
             "started_at": ab_test.started_at.isoformat() if ab_test.started_at else None,
             "ended_at": ab_test.ended_at.isoformat() if ab_test.ended_at else None,
             "funnel_results": funnel_results,
-            "events_breakdown": events_breakdown
+            "events_breakdown": events_breakdown,
+            "metadata_insights": metadata_insights
         }
     except HTTPException:
         raise

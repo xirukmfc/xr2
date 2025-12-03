@@ -142,7 +142,7 @@ export function NewPromptModal({ isOpen, onClose, onPromptCreated }: NewPromptMo
           </Button>
           <Button
             onClick={handleSubmit}
-            className="bg-blue-600 hover:bg-blue-700"
+            variant="primary"
             disabled={isCreating || !name.trim() || !currentWorkspaceId}
             title={!currentWorkspaceId ? "No workspace" : undefined}
           >

@@ -154,16 +154,24 @@ export function Sidebar() {
           <Tooltip>
             <TooltipTrigger asChild>
               <div className={`flex items-center ${isCollapsed ? "justify-center" : "space-x-3"} w-full cursor-pointer`}>
-                <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-4 h-4 text-slate-600" />
-                </div>
-                {!isCollapsed && (
-                  <div className="min-w-0">
-                    <div className="text-sm font-medium text-slate-900 truncate">
-                      {user?.full_name || user?.username || 'User'}
+                {isCollapsed ? (
+                  <img
+                    src="/logo-compact.svg"
+                    alt="xR2"
+                    className="h-8 w-8 flex-shrink-0"
+                  />
+                ) : (
+                  <>
+                    <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <User className="w-4 h-4 text-slate-600" />
                     </div>
-                    <div className="text-xs text-slate-500 truncate">{user?.email || 'PromptHub'}</div>
-                  </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-slate-900 truncate">
+                        {user?.full_name || user?.username || 'User'}
+                      </div>
+                      <div className="text-xs text-slate-500 truncate">{user?.email || 'PromptHub'}</div>
+                    </div>
+                  </>
                 )}
               </div>
             </TooltipTrigger>

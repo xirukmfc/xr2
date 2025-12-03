@@ -6,6 +6,7 @@ from .llm import LLMProvider, UserAPIKey
 from .user_limits import UserLimits, GlobalLimits, UserAPIUsage
 from .public_share import PublicShare
 from .analytics import PromptEvent, ConversionFunnel, CustomFunnelConfiguration, ABTest
+from .refresh_token import RefreshToken
 
 __all__ = [
     "User",
@@ -23,4 +24,5 @@ __all__ = [
     "ConversionFunnel",
     "CustomFunnelConfiguration",
     "ABTest",
+    "RefreshToken",
 ]

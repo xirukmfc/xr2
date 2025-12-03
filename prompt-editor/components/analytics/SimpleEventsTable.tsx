@@ -46,9 +46,9 @@ export default function SimpleEventsTable({ events = [] }: SimpleEventsTableProp
       case 'partial':
         return <AlertTriangle className="h-3 w-3 text-yellow-500" />;
       case 'abandoned':
-        return <Clock className="h-3 w-3 text-gray-500" />;
+        return <Clock className="w-3.5 h-3.5 text-muted-foreground" />;
       default:
-        return <Clock className="h-3 w-3 text-gray-500" />;
+        return <Clock className="h-3 w-3 text-muted-foreground" />;
     }
   };
 
@@ -69,7 +69,7 @@ export default function SimpleEventsTable({ events = [] }: SimpleEventsTableProp
 
   return (
     <Card>
-      <CardContent className="p-3">
+      <CardContent className="px-4 py-3">
         {events.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             <p>No recent events found</p>
@@ -109,7 +109,7 @@ export default function SimpleEventsTable({ events = [] }: SimpleEventsTableProp
                           </Button>
                         </td>
                         <td className="p-2">
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-2">
                             {getOutcomeIcon(event.outcome)}
                             <span className="font-medium text-xs">
                               {event.event_metadata?.event_name || event.event_type}
@@ -118,19 +118,19 @@ export default function SimpleEventsTable({ events = [] }: SimpleEventsTableProp
                         </td>
                         <td className="p-2">
                           {event.event_metadata?.category && (
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                            <Badge variant="outline" className="text-xs px-2 py-0.5">
                               {event.event_metadata.category}
                             </Badge>
                           )}
                         </td>
                         <td className="p-2">
                           {event.event_metadata?.fields && (
-                            <div className="flex flex-wrap gap-1">
+                            <div className="flex flex-wrap gap-2">
                               {Object.entries(event.event_metadata.fields)
                                 .filter(([key]) => key !== 'amount')
                                 .slice(0, 2)
                                 .map(([key, value]) => (
-                                <div key={key} className="bg-blue-50 px-1.5 py-0.5 rounded text-[10px] truncate max-w-[120px]">
+                                <div key={key} className="bg-blue-50 px-1.5 py-0.5 rounded text-xs truncate max-w-[120px]">
                                   <span className="font-medium text-blue-700">{key}:</span>
                                   <span className="text-blue-600 ml-1" title={String(value)}>
                                     {String(value).length > 12 ? String(value).substring(0, 12) + '...' : String(value)}
@@ -138,7 +138,7 @@ export default function SimpleEventsTable({ events = [] }: SimpleEventsTableProp
                                 </div>
                               ))}
                               {Object.keys(event.event_metadata.fields).filter((key) => key !== 'amount').length > 2 && (
-                                <span className="text-[10px] text-gray-500">+{Object.keys(event.event_metadata.fields).filter((key) => key !== 'amount').length - 2}</span>
+                                <span className="text-xs text-muted-foreground">+{Object.keys(event.event_metadata.fields).filter((key) => key !== 'amount').length - 2}</span>
                               )}
                             </div>
                           )}
@@ -149,10 +149,10 @@ export default function SimpleEventsTable({ events = [] }: SimpleEventsTableProp
                               {Number(event.event_metadata.fields.amount).toLocaleString()}
                             </span>
                           ) : (
-                            <span className="text-gray-400 text-xs">-</span>
+                            <span className="text-muted-foreground text-xs">-</span>
                           )}
                         </td>
-                        <td className="p-2 text-[10px] text-gray-600 whitespace-nowrap">
+                        <td className="p-2 text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(event.created_at).toLocaleString('en-US', {
                             month: 'short',
                             day: 'numeric',
@@ -168,35 +168,35 @@ export default function SimpleEventsTable({ events = [] }: SimpleEventsTableProp
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
                                   <h4 className="font-semibold mb-1.5 text-xs">Event Details</h4>
-                                  <div className="space-y-1.5 text-xs">
-                                    <div><span className="font-medium">ID:</span> <span className="text-gray-600">{event.id}</span></div>
-                                    <div><span className="font-medium">Type:</span> <span className="text-gray-600">{event.event_type}</span></div>
+                                  <div className="space-y-2 text-xs">
+                                    <div><span className="font-medium">ID:</span> <span className="text-muted-foreground">{event.id}</span></div>
+                                    <div><span className="font-medium">Type:</span> <span className="text-muted-foreground">{event.event_type}</span></div>
                                     <div className="flex items-center gap-2"><span className="font-medium">Outcome:</span> {getOutcomeBadge(event.outcome)}</div>
-                                    <div><span className="font-medium">User ID:</span> <span className="text-gray-600">{event.user_id || 'N/A'}</span></div>
+                                    <div><span className="font-medium">User ID:</span> <span className="text-muted-foreground">{event.user_id || 'N/A'}</span></div>
                                     <div className="flex items-start gap-2">
                                       <span className="font-medium whitespace-nowrap">Full Trace ID:</span>
-                                      <code className="text-[10px] bg-gray-200 px-2 py-1 rounded break-all">{event.trace_id}</code>
+                                      <code className="text-xs bg-muted px-2 py-1 rounded break-all">{event.trace_id}</code>
                                     </div>
                                   </div>
                                 </div>
                                 <div>
                                   <h4 className="font-semibold mb-1.5 text-xs">Event Metadata</h4>
                                   {event.event_metadata ? (
-                                    <div className="space-y-1.5 text-xs">
+                                    <div className="space-y-2 text-xs">
                                       {event.event_metadata.event_name && (
-                                        <div><span className="font-medium">Event Name:</span> <span className="text-gray-600">{event.event_metadata.event_name}</span></div>
+                                        <div><span className="font-medium">Event Name:</span> <span className="text-muted-foreground">{event.event_metadata.event_name}</span></div>
                                       )}
                                       {event.event_metadata.category && (
-                                        <div><span className="font-medium">Category:</span> <span className="text-gray-600">{event.event_metadata.category}</span></div>
+                                        <div><span className="font-medium">Category:</span> <span className="text-muted-foreground">{event.event_metadata.category}</span></div>
                                       )}
                                       {event.event_metadata.fields && (
                                         <div>
                                           <span className="font-medium">All Fields:</span>
-                                          <div className="mt-1 space-y-1">
+                                          <div className="mt-1 space-y-2">
                                             {Object.entries(event.event_metadata.fields).map(([key, value]) => (
-                                              <div key={key} className="bg-white px-2 py-1 rounded border text-[10px]">
+                                              <div key={key} className="bg-white px-2 py-1 rounded border text-xs">
                                                 <span className="font-medium text-blue-700">{key}:</span>
-                                                <span className="ml-2 text-gray-600">{String(value)}</span>
+                                                <span className="ml-2 text-muted-foreground">{String(value)}</span>
                                               </div>
                                             ))}
                                           </div>
@@ -204,7 +204,7 @@ export default function SimpleEventsTable({ events = [] }: SimpleEventsTableProp
                                       )}
                                     </div>
                                   ) : (
-                                    <div className="text-gray-500 text-xs">No metadata available</div>
+                                    <div className="text-muted-foreground text-xs">No metadata available</div>
                                   )}
                                 </div>
                               </div>
@@ -212,7 +212,7 @@ export default function SimpleEventsTable({ events = [] }: SimpleEventsTableProp
                                 <div>
                                   <h4 className="font-semibold mb-1.5 text-xs">Business Metrics</h4>
                                   <div className="text-xs">
-                                    <pre className="bg-white p-2 rounded border text-[10px] overflow-x-auto">
+                                    <pre className="bg-white p-2 rounded border text-xs overflow-x-auto">
                                       {JSON.stringify(event.business_metrics, null, 2)}
                                     </pre>
                                   </div>

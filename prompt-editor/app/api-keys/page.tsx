@@ -307,9 +307,9 @@ function ApiKeysPageContent() {
               </Button>
               <Button
                 onClick={() => setIsNewApiKeyModalOpen(true)}
-                className="bg-blue-600/90 hover:bg-blue-600 text-white h-[35px]"
+                className="bg-black hover:bg-gray-800 text-white h-[35px]"
               >
-                + Create Keys
+                + Create Key
               </Button>
             </div>
 
@@ -389,7 +389,9 @@ function ApiKeysPageContent() {
             <Button variant="outline" onClick={() => setRenameKeyId(null)}>
               Cancel
             </Button>
-            <Button onClick={handleRename}>Save Changes</Button>
+            <Button onClick={handleRename} className="bg-black hover:bg-gray-800">
+              Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

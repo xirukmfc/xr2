@@ -232,7 +232,8 @@ export function EditorHeader({
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className={`h-9 px-3 gap-1 transition-all duration-200 ${isSaving ? "bg-green-600 hover:bg-green-700 scale-95" : "bg-blue-600/90 hover:bg-blue-600 scale-100"} text-white`}
+            variant="primary"
+            className={`h-9 px-3 gap-1 transition-all duration-200 ${isSaving ? "bg-success hover:bg-success/90 scale-95" : "scale-100"}`}
           >
             {isSaving ? (
               <Loader2 className="w-4 h-4 animate-spin" />

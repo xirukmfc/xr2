@@ -12,54 +12,112 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog"
+import { NotificationProvider, useNotification } from "@/components/notification-provider"
 import ABTestManager from '@/components/analytics/ABTestManager';
 import SimpleABTestManager from '@/components/analytics/SimpleABTestManager';
-import EventDefinitionBuilder from '@/components/analytics/EventDefinitionBuilder';
+import EventDefinitionBuilder, { type EventDefinition } from '@/components/analytics/EventDefinitionBuilder';
 import NewEventModal from '@/components/analytics/NewEventModal';
 import SimpleEventsTable from '@/components/analytics/SimpleEventsTable';
 import RecentEventsTable from '@/components/analytics/RecentEventsTable';
 import FunnelAnalysis from '@/components/analytics/FunnelAnalysis';
 import PromptEventsViewer from '@/components/analytics/PromptEventsViewer';
 import { apiClient } from '@/lib/api';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-} from 'recharts';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table';
-import { BarChart3, TestTube, Settings, FileText, TrendingUp, Plus } from 'lucide-react';
+import { BarChart3, TestTube, Settings, FileText, Plus } from 'lucide-react';
 
 const subsections = [
   { id: "recent-events", name: "Recent Events", icon: FileText },
-  { id: "monthly-events", name: "Monthly Events", icon: TrendingUp },
-  { id: "prompt-events", name: "Prompt Events", icon: FileText },
-  { id: "events", name: "Define Events", icon: Settings },
-  { id: "funnel", name: "Funnel Analysis", icon: BarChart3 },
-  { id: "ab-tests", name: "Run A/B Tests", icon: TestTube },
+  { id: "prompt-events", name: "Prompts", icon: FileText },
+  { id: "funnel", name: "Funnels", icon: BarChart3 },
+  { id: "ab-tests", name: "A/B Tests", icon: TestTube },
+  { id: "events", name: "Define Events", icon: Settings },  
 ]
 
-export default function AnalyticsPage() {
+function AnalyticsPageContent() {
   const [activeSubsection, setActiveSubsection] = useLocalStorage<string>("analytics-active-tab", "recent-events")
+  const { showNotification } = useNotification()
 
   // Modal states
   const [showEventModal, setShowEventModal] = useState(false)
+  const [editingEvent, setEditingEvent] = useState<any>(null)
+  const [showDeleteEventModal, setShowDeleteEventModal] = useState(false)
+  const [deletingEventId, setDeletingEventId] = useState<string | null>(null)
+  const [showDeleteFunnelModal, setShowDeleteFunnelModal] = useState(false)
+  const [deletingFunnelId, setDeletingFunnelId] = useState<string | null>(null)
   const [showABTestModal, setShowABTestModal] = useState(false)
+  const [showDeleteABTestModal, setShowDeleteABTestModal] = useState(false)
+  const [deletingABTestId, setDeletingABTestId] = useState<string | null>(null)
   const [showFunnelModal, setShowFunnelModal] = useState(false)
+  const [showEditFunnelModal, setShowEditFunnelModal] = useState(false)
+  const [editingFunnelConfig, setEditingFunnelConfig] = useState<any>(null)
+  const [funnelKey, setFunnelKey] = useState(0) // Key to force re-render
+  const [abTestKey, setAbTestKey] = useState(0) // Key to force re-render A/B tests
+  const [eventsKey, setEventsKey] = useState(0) // Key to force re-render events
 
   // Analytics data state
   const [analyticsData, setAnalyticsData] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
   const [customFunnelSteps, setCustomFunnelSteps] = useState<string[]>([])
   
   // Funnel filters
   const [funnelPromptId, setFunnelPromptId] = useState<string | null>(null)
   const [funnelVersionId, setFunnelVersionId] = useState<string | null>(null)
+
+  // Handle event deletion
+  const handleDeleteEvent = async () => {
+    if (!deletingEventId) return;
+
+    try {
+      await apiClient.request(`/event-definitions/${deletingEventId}`, {
+        method: 'DELETE'
+      });
+      setShowDeleteEventModal(false);
+      setDeletingEventId(null);
+      showNotification('Event deleted successfully', 'success');
+      // Force re-render to reload events
+      setEventsKey(prev => prev + 1);
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+      showNotification('Failed to delete event', 'error');
+    }
+  }
+
+  // Handle funnel deletion
+  const handleDeleteFunnel = async () => {
+    if (!deletingFunnelId) return;
+
+    try {
+      await apiClient.request(`/custom-funnel-configurations/test/${deletingFunnelId}`, {
+        method: 'DELETE'
+      });
+      setShowDeleteFunnelModal(false);
+      setDeletingFunnelId(null);
+      showNotification('Funnel deleted successfully', 'success');
+      // Refresh to reload funnels
+      setFunnelKey(prev => prev + 1);
+    } catch (error) {
+      console.error('Failed to delete funnel:', error);
+      showNotification('Failed to delete funnel', 'error');
+    }
+  }
+
+  // Handle A/B test deletion
+  const handleDeleteABTest = async () => {
+    if (!deletingABTestId) return;
+
+    try {
+      await apiClient.request(`/ab-tests-simple/test/${deletingABTestId}`, {
+        method: 'DELETE'
+      });
+      setShowDeleteABTestModal(false);
+      setDeletingABTestId(null);
+      showNotification('A/B test deleted successfully', 'success');
+      // Refresh to reload tests
+      setAbTestKey(prev => prev + 1);
+    } catch (error) {
+      console.error('Failed to delete A/B test:', error);
+      showNotification('Failed to delete A/B test', 'error');
+    }
+  }
 
   // Fetch analytics data
   useEffect(() => {
@@ -71,11 +129,8 @@ export default function AnalyticsPage() {
         console.error('Failed to fetch analytics data:', error);
         // Set empty data as fallback
         setAnalyticsData({
-          recent_events: [],
-          monthly_events_chart: { dates: [], series: [] }
+          recent_events: []
         });
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -87,52 +142,59 @@ export default function AnalyticsPage() {
     if (!analyticsData?.recent_events || customFunnelSteps.length === 0) return null;
 
     let events = analyticsData.recent_events;
-    
-    // Apply prompt filter
+
+    // Apply filters first
     if (funnelPromptId) {
       events = events.filter((e: any) => e.prompt_id === funnelPromptId);
     }
-    
-    // Apply version filter
+
     if (funnelVersionId) {
       events = events.filter((e: any) => e.prompt_version_id === funnelVersionId);
     }
-    
-    const result = [];
 
-    // Helper function to match event by name (case-insensitive)
-    // Checks both event_type and event_metadata.event_name
-    // Also handles aliases: get_prompt = prompt_request
-    const matchesEvent = (event: any, stepName: string) => {
-      const stepLower = stepName.toLowerCase();
-      const eventType = event.event_type?.toLowerCase();
-      const metadataEventName = event.event_metadata?.event_name?.toLowerCase();
-      
-      // Handle aliases
-      const aliases: Record<string, string[]> = {
-        'get_prompt': ['get_prompt', 'prompt_request'],
-        'prompt_request': ['get_prompt', 'prompt_request'],
-      };
-      
-      const stepVariants = aliases[stepLower] || [stepLower];
-      
-      const matches = stepVariants.some(variant => 
-        eventType === variant || metadataEventName === variant
-      );
-      return matches;
+    // OPTIMIZATION: Group events by type once, instead of filtering for each step
+    const eventsByType: Record<string, number> = {};
+
+    // Handle aliases upfront
+    const aliases: Record<string, string[]> = {
+      'get_prompt': ['get_prompt', 'prompt_request'],
+      'prompt_request': ['get_prompt', 'prompt_request'],
     };
 
-    // Count events for each step
+    events.forEach((event: any) => {
+      const eventType = event.event_type?.toLowerCase();
+      const metadataEventName = event.event_metadata?.event_name?.toLowerCase();
+
+      // Count by event_type
+      if (eventType) {
+        eventsByType[eventType] = (eventsByType[eventType] || 0) + 1;
+      }
+
+      // Count by metadata event_name
+      if (metadataEventName && metadataEventName !== eventType) {
+        eventsByType[metadataEventName] = (eventsByType[metadataEventName] || 0) + 1;
+      }
+    });
+
+    // Build result using pre-computed counts
+    const result = [];
     let firstStepCount = 0;
+
     for (let i = 0; i < customFunnelSteps.length; i++) {
       const stepName = customFunnelSteps[i];
-      const stepEvents = events.filter((e: any) => matchesEvent(e, stepName)).length;
+      const stepLower = stepName.toLowerCase();
+
+      // Get count using aliases
+      const stepVariants = aliases[stepLower] || [stepLower];
+      const stepEvents = stepVariants.reduce((sum, variant) =>
+        sum + (eventsByType[variant] || 0), 0
+      );
 
       if (i === 0) {
         firstStepCount = stepEvents;
       }
 
-      // Calculate conversion rate (percentage from first step)
+      // Calculate conversion rate
       const conversionRate = firstStepCount > 0 ? (stepEvents / firstStepCount) * 100 : 0;
 
       result.push({
@@ -147,268 +209,56 @@ export default function AnalyticsPage() {
 
 
   const renderABTestsSection = () => (
-    <div className="space-y-3">
-      <SimpleABTestManager />
+    <div className="space-y-4">
+      <SimpleABTestManager
+        key={abTestKey}
+        showCreateButton={true}
+        onNewClick={() => setShowABTestModal(true)}
+        showNotification={showNotification}
+        onDeleteClick={(testId: string) => {
+          setDeletingABTestId(testId);
+          setShowDeleteABTestModal(true);
+        }}
+      />
     </div>
   )
 
   const renderEventsSection = () => (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-base font-semibold">Event Definitions</h2>
-          <p className="text-xs text-slate-600">Define custom events to track business outcomes from prompts</p>
-        </div>
-        <Button onClick={() => setShowEventModal(true)} className="bg-black hover:bg-gray-800 text-xs h-7 px-2">
-          <Plus className="w-3 h-3 mr-1" />
-          New Event
-        </Button>
-      </div>
+    <div className="space-y-4">
       <EventDefinitionBuilder
+        key={eventsKey}
         onSave={(definition) => {
           console.log('Saving event definition:', definition);
         }}
-        showCreateButton={false}
+        showCreateButton={true}
+        onNewClick={() => {
+          setEditingEvent(null);
+          setShowEventModal(true);
+        }}
+        onEditClick={(event: EventDefinition) => {
+          setEditingEvent(event);
+          setShowEventModal(true);
+        }}
+        onDeleteClick={(eventId: string) => {
+          setDeletingEventId(eventId);
+          setShowDeleteEventModal(true);
+        }}
+        showNotification={showNotification}
       />
     </div>
   )
 
   const renderRecentEventsSection = () => (
-    <div className="space-y-3">
-      <div>
-        <h2 className="text-base font-semibold">Recent Events</h2>
-        <p className="text-xs text-slate-600">Latest events tracked across all prompts</p>
-      </div>
+    <div className="space-y-4">
       <RecentEventsTable />
     </div>
   )
 
-  // Memoize CustomTooltip to avoid recreating it on every render
-  const CustomTooltip = React.useMemo(() => {
-    return ({ active, payload, label }: any) => {
-      if (active && payload && payload.length) {
-        return (
-          <div className="bg-white p-3 border rounded-lg shadow-lg">
-            <p className="text-xs font-medium mb-2">{label}</p>
-            {payload.map((entry: any, index: number) => {
-              // Find the series to get event_name
-              const series = analyticsData?.monthly_events_chart?.series.find((s: any) => s.name === entry.dataKey);
-              const displayName = series?.event_name || entry.dataKey;
-              return (
-                <div key={index} className="flex items-center gap-2 text-xs">
-                  <div
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: entry.color }}
-                  />
-                  <span className="font-medium">{displayName}:</span>
-                  <span>{entry.value}</span>
-                </div>
-              );
-            })}
-          </div>
-        );
-      }
-      return null;
-    };
-  }, [analyticsData?.monthly_events_chart?.series]);
-
-  // Memoize chart data transformation
-  const chartData = React.useMemo(() => {
-    if (!analyticsData?.monthly_events_chart?.dates) return [];
-    return analyticsData.monthly_events_chart.dates.map((date: string, index: number) => {
-      const dataPoint: any = { date };
-      analyticsData.monthly_events_chart.series.forEach((series: any) => {
-        dataPoint[series.name] = series.data[index] || 0;
-      });
-      return dataPoint;
-    });
-  }, [analyticsData?.monthly_events_chart]);
-
-  // Memoize total events count
-  const totalEventsCount = React.useMemo(() => {
-    if (!analyticsData?.monthly_events_chart?.series) return 0;
-    return analyticsData.monthly_events_chart.series.reduce((total: number, series: any) =>
-      total + series.data.reduce((sum: number, count: number) => sum + count, 0), 0
-    );
-  }, [analyticsData?.monthly_events_chart?.series]);
-
-  const renderMonthlyEventsSection = () => {
-    if (loading) {
-      return (
-        <div className="space-y-3">
-          <div>
-            <h2 className="text-base font-semibold">Monthly Events</h2>
-            <p className="text-xs text-slate-600">Event trends and patterns over time</p>
-          </div>
-          <div className="flex items-center justify-center h-48">Loading events...</div>
-        </div>
-      );
-    }
-
-    const hasData = analyticsData?.monthly_events_chart?.series.length > 0;
-
-    return (
-      <div className="space-y-3">
-        <div>
-          <h2 className="text-base font-semibold">Monthly Events</h2>
-          <p className="text-xs text-slate-600">Event trends and patterns over time</p>
-        </div>
-
-        {hasData ? (
-          <div className="space-y-3">
-            {/* Monthly Events Chart */}
-            <div className="bg-white p-4 rounded-lg border">
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip content={<CustomTooltip />} />
-                  {analyticsData.monthly_events_chart.series.map((series: any, index: number) => {
-                    const isHidden = hiddenSeries.has(series.name);
-                    return (
-                      <Line
-                        key={series.name}
-                        type="monotone"
-                        dataKey={series.name}
-                        stroke={`hsl(${(index * 137.5) % 360}, 70%, 50%)`}
-                        activeDot={{ r: 6 }}
-                        strokeOpacity={isHidden ? 0 : 1}
-                        dot={false}
-                        hide={isHidden}
-                      />
-                    );
-                  })}
-                </LineChart>
-              </ResponsiveContainer>
-
-              {/* Custom Interactive Legend */}
-              <div className="flex flex-wrap gap-1.5 mt-3 justify-center">
-                {analyticsData.monthly_events_chart.series.map((series: any, index: number) => {
-                  const isHidden = hiddenSeries.has(series.name);
-                  const color = `hsl(${(index * 137.5) % 360}, 70%, 50%)`;
-                  // Use event_name if available, otherwise fall back to name
-                  const displayName = series.event_name || series.name;
-
-                  return (
-                    <button
-                      key={series.name}
-                      onClick={() => {
-                        const newHidden = new Set(hiddenSeries);
-                        if (isHidden) {
-                          newHidden.delete(series.name);
-                        } else {
-                          newHidden.add(series.name);
-                        }
-                        setHiddenSeries(newHidden);
-                      }}
-                      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs transition-all hover:bg-gray-100 ${
-                        isHidden ? 'opacity-50' : 'opacity-100'
-                      }`}
-                    >
-                      <div
-                        className="w-2 h-2 rounded-full border-2"
-                        style={{
-                          backgroundColor: isHidden ? 'transparent' : color,
-                          borderColor: color
-                        }}
-                      ></div>
-                      <span className={isHidden ? 'line-through text-gray-500' : 'text-gray-700'}>
-                        {displayName}
-                      </span>
-                      <span className="text-[10px] text-gray-500">
-                        ({series.data.reduce((sum: number, count: number) => sum + count, 0)})
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Events Summary Table */}
-            <div className="bg-white p-4 rounded-lg border">
-              <h3 className="text-sm font-medium mb-2">
-                Events Summary ({totalEventsCount} total events)
-              </h3>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-xs font-medium py-2 px-3">Event Name</TableHead>
-                      <TableHead className="text-xs text-right font-medium py-2 px-3">Total Count</TableHead>
-                      <TableHead className="text-xs text-right font-medium py-2 px-3">Percentage</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {analyticsData.monthly_events_chart.series.map((series: any, index: number) => {
-                      const total = series.data.reduce((sum: number, count: number) => sum + count, 0);
-                      const displayName = series.event_name || series.name;
-                      const color = `hsl(${(index * 137.5) % 360}, 70%, 50%)`;
-                      const percentage = totalEventsCount > 0 ? ((total / totalEventsCount) * 100).toFixed(1) : 0;
-
-                      return (
-                        <TableRow key={series.name}>
-                          <TableCell className="text-xs font-medium py-2 px-3">
-                            <div className="flex items-center gap-2">
-                              <div
-                                className="w-2 h-2 rounded-full flex-shrink-0"
-                                style={{ backgroundColor: color }}
-                              />
-                              {displayName}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-xs text-right font-bold py-2 px-3">
-                            {total.toLocaleString()}
-                          </TableCell>
-                          <TableCell className="text-xs text-right text-muted-foreground py-2 px-3">
-                            {percentage}%
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                    {/* Totals row */}
-                    <TableRow className="border-t-2 font-medium bg-muted/30">
-                      <TableCell className="text-xs font-bold py-2 px-3">
-                        Total
-                      </TableCell>
-                      <TableCell className="text-xs text-right font-bold py-2 px-3">
-                        {totalEventsCount.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-xs text-right font-bold py-2 px-3">
-                        100%
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-48 text-slate-500">
-            <div className="text-center">
-              <p className="text-sm font-medium mb-1">No event data available</p>
-              <p className="text-xs">Start tracking events to see analytics here</p>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   const renderFunnelSection = () => {
     return (
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold">Funnel Analysis</h2>
-            <p className="text-xs text-slate-600">User journey from start to purchase</p>
-          </div>
-          <Button onClick={() => setShowFunnelModal(true)} className="bg-black hover:bg-gray-800 text-xs h-7 px-2">
-            <Plus className="w-3 h-3 mr-1" />
-            New Funnel
-          </Button>
-        </div>
+      <>
         <FunnelAnalysis
+          key={funnelKey}
           data={funnelData}
           onFunnelChange={(steps) => setCustomFunnelSteps(steps)}
           onFilterChange={(promptId, versionId) => {
@@ -416,20 +266,32 @@ export default function AnalyticsPage() {
             setFunnelVersionId(versionId);
           }}
           showCreateButton={false}
-          externalShowCreateForm={showFunnelModal}
-          onCreateFormClose={() => setShowFunnelModal(false)}
+          renderFiltersSeparately={true}
+          onNewClick={() => setShowFunnelModal(true)}
+          externalShowEditForm={showEditFunnelModal}
+          onEditFormClose={() => {
+            setShowEditFunnelModal(false);
+            setEditingFunnelConfig(null);
+            setFunnelKey(prev => prev + 1); // Force re-render to refresh funnel list
+          }}
+          onEditClick={(config) => {
+            setEditingFunnelConfig(config);
+            setShowEditFunnelModal(true);
+          }}
+          showNotification={showNotification}
+          onDeleteClick={(configId) => {
+            setDeletingFunnelId(configId);
+            setShowDeleteFunnelModal(true);
+          }}
         />
-      </div>
+      </>
     );
   }
 
   const renderPromptEventsSection = () => {
     return (
-      <div className="space-y-3">
-        <div>
-          <h2 className="text-base font-semibold">Prompt Events</h2>
-          <p className="text-xs text-slate-600">View events by prompt and version over time</p>
-        </div>
+      <div className="space-y-4">
+
         <PromptEventsViewer />
       </div>
     );
@@ -440,8 +302,6 @@ export default function AnalyticsPage() {
     switch (activeSubsection) {
       case "recent-events":
         return renderRecentEventsSection()
-      case "monthly-events":
-        return renderMonthlyEventsSection()
       case "prompt-events":
         return renderPromptEventsSection()
       case "funnel":
@@ -462,31 +322,32 @@ export default function AnalyticsPage() {
         <div className="px-4 pt-[12px] pb-[12px] h-[65px] bg-white border-b border-slate-200 flex items-center justify-between flex-shrink-0">
           <div>
             <h1 className="text-base font-semibold">Performance Analytics</h1>
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-muted-foreground">
               Track business outcomes, measure ROI, and optimize your prompts
             </p>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 flex bg-gray-50 overflow-hidden">
-          {/* Subsection navigation sidebar */}
-          <div className="w-48 bg-white border-r border-slate-200 p-2 overflow-y-auto">
-            <div className="space-y-0.5">
+        <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
+          {/* Horizontal tabs navigation */}
+          <div className="bg-white border-b border-slate-200 px-4 h-10">
+            <div className="flex items-center gap-1 -mb-px">
               {subsections.map((subsection) => {
                 const Icon = subsection.icon
+                const isActive = activeSubsection === subsection.id
                 return (
                   <button
                     key={subsection.id}
                     onClick={() => setActiveSubsection(subsection.id)}
-                    className={`w-full flex items-center space-x-2 px-2 py-1.5 text-left rounded-md transition-colors ${
-                      activeSubsection === subsection.id
-                        ? "bg-slate-100 text-slate-900"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    className={`flex items-center gap-1.5 px-3 py-[11px] text-xs font-medium border-b-2 transition-colors ${
+                      isActive
+                        ? "border-slate-900 text-slate-900"
+                        : "border-transparent text-muted-foreground hover:text-foreground hover:border-slate-300"
                     }`}
                   >
-                    <Icon className="w-3 h-3" />
-                    <span className="text-xs font-medium">{subsection.name}</span>
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{subsection.name}</span>
                   </button>
                 )
               })}
@@ -499,23 +360,86 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Event Definition Modal */}
-        <Dialog open={showEventModal} onOpenChange={setShowEventModal}>
+        <Dialog open={showEventModal} onOpenChange={(open) => {
+          setShowEventModal(open);
+          if (!open) setEditingEvent(null);
+        }}>
           <DialogContent className="sm:max-w-4xl max-h-[90vh]">
             <DialogHeader>
-              <DialogTitle>Create New Event Definition</DialogTitle>
+              <DialogTitle>{editingEvent ? 'Edit Event Definition' : 'Create New Event Definition'}</DialogTitle>
               <DialogDescription>
-                Define a custom event to track business outcomes from your prompts
+                {editingEvent ? 'Update your event definition' : 'Define a custom event to track business outcomes from your prompts'}
               </DialogDescription>
             </DialogHeader>
             <div className="overflow-y-auto flex-1">
               <NewEventModal
+                initialData={editingEvent}
                 onSave={(definition) => {
                   console.log('Saving event definition:', definition);
-                  setShowEventModal(false)
-                  // Refresh the events list
-                  window.location.reload()
+                  setShowEventModal(false);
+                  setEditingEvent(null);
+                  showNotification(editingEvent ? 'Event updated successfully' : 'Event created successfully', 'success');
+                  // Force re-render to reload events
+                  setEventsKey(prev => prev + 1);
                 }}
-                onCancel={() => setShowEventModal(false)}
+                onCancel={() => {
+                  setShowEventModal(false);
+                  setEditingEvent(null);
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Funnel Modal - Create */}
+        <Dialog open={showFunnelModal} onOpenChange={setShowFunnelModal}>
+          <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>Create New Funnel</DialogTitle>
+              <DialogDescription>
+                Define a conversion funnel to track user journey through your prompts
+              </DialogDescription>
+            </DialogHeader>
+            <div className="overflow-y-auto px-1 flex-1 min-h-[600px]">
+              <FunnelAnalysis
+                data={null}
+                onFunnelChange={() => {}}
+                onFilterChange={() => {}}
+                showCreateButton={false}
+                externalShowCreateForm={true}
+                onCreateFormClose={() => {
+                  setShowFunnelModal(false);
+                  setFunnelKey(prev => prev + 1); // Force re-render to refresh funnel list
+                }}
+                showNotification={showNotification}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Funnel Modal - Edit */}
+        <Dialog open={showEditFunnelModal} onOpenChange={setShowEditFunnelModal}>
+          <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>Edit Funnel</DialogTitle>
+              <DialogDescription>
+                Update your funnel configuration
+              </DialogDescription>
+            </DialogHeader>
+            <div className="overflow-y-auto px-1 flex-1 min-h-[600px]">
+              <FunnelAnalysis
+                data={null}
+                onFunnelChange={() => {}}
+                onFilterChange={() => {}}
+                showCreateButton={false}
+                externalShowEditForm={true}
+                onEditFormClose={() => {
+                  setShowEditFunnelModal(false);
+                  setEditingFunnelConfig(null);
+                  setFunnelKey(prev => prev + 1); // Force re-render to refresh funnel list
+                }}
+                externalEditingConfiguration={editingFunnelConfig}
+                showNotification={showNotification}
               />
             </div>
           </DialogContent>
@@ -523,19 +447,73 @@ export default function AnalyticsPage() {
 
         {/* A/B Test Modal */}
         <Dialog open={showABTestModal} onOpenChange={setShowABTestModal}>
-          <DialogContent className="sm:max-w-2xl">
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
             <DialogHeader>
               <DialogTitle>Create New A/B Test</DialogTitle>
               <DialogDescription>
-                Compare different prompt versions to optimize performance
+                Compare two prompt versions with 50/50 traffic split
               </DialogDescription>
             </DialogHeader>
-            <div className="max-h-96 overflow-y-auto">
-              <SimpleABTestManager />
+            <div className="overflow-y-auto px-1">
+              <SimpleABTestManager
+                showCreateButton={false}
+                showTestsList={false}
+                externalShowCreateForm={true}
+                showNotification={showNotification}
+                onCreateFormClose={() => {
+                  setShowABTestModal(false);
+                  // Force re-render of the main A/B tests list
+                  setAbTestKey(prev => prev + 1);
+                }}
+              />
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Event Confirmation Modal */}
+        <DeleteConfirmationDialog
+          open={showDeleteEventModal}
+          onOpenChange={(open) => {
+            setShowDeleteEventModal(open);
+            if (!open) setDeletingEventId(null);
+          }}
+          onConfirm={handleDeleteEvent}
+          title="Delete Event Definition"
+          description="Are you sure you want to delete this event definition? This action cannot be undone."
+        />
+
+        {/* Delete Funnel Confirmation Modal */}
+        <DeleteConfirmationDialog
+          open={showDeleteFunnelModal}
+          onOpenChange={(open) => {
+            setShowDeleteFunnelModal(open);
+            if (!open) setDeletingFunnelId(null);
+          }}
+          onConfirm={handleDeleteFunnel}
+          title="Delete Funnel"
+          description="Are you sure you want to delete this funnel configuration? This action cannot be undone."
+        />
+
+        {/* Delete A/B Test Confirmation Modal */}
+        <DeleteConfirmationDialog
+          open={showDeleteABTestModal}
+          onOpenChange={(open) => {
+            setShowDeleteABTestModal(open);
+            if (!open) setDeletingABTestId(null);
+          }}
+          onConfirm={handleDeleteABTest}
+          title="Delete A/B Test"
+          description="Are you sure you want to delete this A/B test? This action cannot be undone."
+        />
       </>
     </ProtectedRoute>
+  );
+}
+
+export default function AnalyticsPage() {
+  return (
+    <NotificationProvider>
+      <AnalyticsPageContent />
+    </NotificationProvider>
   );
 }

@@ -31,6 +31,20 @@ export interface ApiLog {
   created_at: string
 }
 
+// Helper function to clean text display (remove "new" markers and normalize whitespace)
+function cleanText(text: string): string {
+  if (!text) return ''
+  // Remove (new) from anywhere in the string, including with line breaks and newlines
+  return text
+    .replace(/[\r\n]+/g, ' ') // Replace line breaks with space
+    .replace(/\s*\(new\)\s*/gi, '') // Remove (new)
+    .replace(/\s+/g, ' ') // Normalize multiple spaces
+    .trim()
+}
+
+// Alias for backward compatibility
+const cleanEndpoint = cleanText
+
 function LogsPageContent() {
   const [logs, setLogs] = useState<ApiLog[]>([])
   const [loading, setLoading] = useState(false)
@@ -179,9 +193,8 @@ function LogsPageContent() {
           <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getStatusDot(log.is_success)}`}></div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center space-x-1 text-xs truncate">
-              <span className="font-medium text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded flex-shrink-0">{log.method}</span>
-              <span className="text-slate-500 truncate">{log.endpoint}</span>
-              <span className="text-slate-400 flex-shrink-0">({log.api_key_name})</span>
+              <span className="font-medium text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded flex-shrink-0 whitespace-nowrap">{cleanText(log.method)}</span>
+              <span className="text-slate-500 truncate whitespace-nowrap">{cleanEndpoint(log.endpoint)}</span>
             </div>
           </div>
         </div>
@@ -308,10 +321,10 @@ function LogsPageContent() {
               <div className="flex items-start justify-between">
                 <div>
                   <DialogTitle className="text-base">
-                    <span className="mr-2 inline-flex items-center text-xs font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-                      {selectedLog?.method}
+                    <span className="mr-2 inline-flex items-center text-xs font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded whitespace-nowrap">
+                      {selectedLog ? cleanText(selectedLog.method) : ''}
                     </span>
-                    {selectedLog?.endpoint}
+                    <span className="whitespace-nowrap">{selectedLog ? cleanEndpoint(selectedLog.endpoint) : ''}</span>
                   </DialogTitle>
                   <div className="mt-2 text-xs text-slate-600">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-md font-medium border mr-2 ${selectedLog ? getStatusBadge(selectedLog.status_code, selectedLog.is_success) : ""}`}>

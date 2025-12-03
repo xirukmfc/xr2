@@ -229,7 +229,7 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
           <Card>
             <CardHeader className="px-4 py-3">
               <CardTitle className="text-xs font-medium">Performance Filters</CardTitle>
-              <CardDescription className="text-[10px] text-muted-foreground mt-0.5">Filter conversions and date range</CardDescription>
+              <CardDescription className="text-xs text-muted-foreground mt-1">Filter conversions and date range</CardDescription>
             </CardHeader>
             <CardContent className="px-4 py-3">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
@@ -256,7 +256,7 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
 
                   {/* Custom Date Range Inputs */}
                   {showCustomDates && (
-                    <div className="flex gap-1.5 mt-1.5">
+                    <div className="flex gap-2 mt-2">
                       <input
                         type="date"
                         placeholder="Start date"
@@ -319,9 +319,9 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
 
               {/* Individual Conversion Checkboxes */}
               {conversions.length > 0 && (
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <label className="text-xs font-medium">Select Specific Conversions:</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1.5 max-h-24 overflow-y-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-24 overflow-y-auto">
                     {conversions.map((conversion) => (
                       <label key={conversion.id} className="flex items-center space-x-1.5 text-xs">
                         <input
@@ -350,7 +350,7 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
           <Card>
             <CardHeader className="px-4 py-3">
               <CardTitle className="text-xs font-medium">Conversion Performance</CardTitle>
-              <CardDescription className="text-[10px] text-muted-foreground mt-0.5">
+              <CardDescription className="text-xs text-muted-foreground mt-1">
                 {conversionMetrics.length > 0
                   ? `Showing ${conversionMetrics.length} conversions for selected filters`
                   : `No conversion data found for selected filters`
@@ -385,7 +385,7 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
                               {(metric.conversion_rate || metric.rate || 0)?.toFixed(2)}%
                             </span>
                           </td>
-                          <td className="p-2 text-xs text-gray-500">
+                          <td className="p-2 text-xs text-muted-foreground">
                             {(metric.period_start && metric.period_end)
                               ? `${formatDate(metric.period_start)} - ${formatDate(metric.period_end)}`
                               : 'Current period'
@@ -400,7 +400,7 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
                 <div className="text-center py-8 text-muted-foreground">
                   <div className="mb-4">
                     <p className="text-lg font-medium">No conversion data available</p>
-                    <div className="text-sm mt-2 space-y-1">
+                    <div className="text-sm mt-2 space-y-2">
                       <p>Selected period: <strong>{period === 'custom' && customDateRange.start && customDateRange.end
                         ? `${formatDate(customDateRange.start)} - ${formatDate(customDateRange.end)}`
                         : period}

@@ -17,8 +17,8 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (username: string, password: string) => Promise<void>
-  googleLogin: (credential: string) => Promise<void>
+  login: (username: string, password: string, rememberMe?: boolean) => Promise<void>
+  googleLogin: (credential: string, rememberMe?: boolean) => Promise<void>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
 }
@@ -82,14 +82,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth()
   }, [])
 
-  const login = async (username: string, password: string) => {
+  const login = async (username: string, password: string, rememberMe: boolean = false) => {
     setIsLoading(true)
     try {
-      console.log('[AuthContext] Logging in...');
-      const response = await apiClient.login(username, password)
+      console.log('[AuthContext] Logging in with remember_me:', rememberMe);
+      const response = await apiClient.login(username, password, rememberMe)
       console.log('[AuthContext] Login successful, setting user:', response.user);
       setUser(response.user)
-      
+
+      // Store refresh token if remember_me is true
+      if (rememberMe && response.refresh_token && typeof window !== 'undefined') {
+        console.log('[AuthContext] Storing refresh token');
+        localStorage.setItem('refresh_token', response.refresh_token);
+      }
+
       // Sync localStorage with server onboarding_completed value
       if (typeof window !== 'undefined' && response.user.onboarding_completed !== undefined) {
         if (response.user.onboarding_completed) {
@@ -106,12 +112,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  const googleLogin = async (credential: string) => {
+  const googleLogin = async (credential: string, rememberMe: boolean = false) => {
     setIsLoading(true)
     try {
-      const response = await apiClient.googleLogin(credential)
+      console.log('[AuthContext] Google logging in with remember_me:', rememberMe);
+      const response = await apiClient.googleLogin(credential, rememberMe)
+      console.log('[AuthContext] Google login successful, setting user:', response.user);
       setUser(response.user)
-      
+
+      // Store refresh token if remember_me is true
+      if (rememberMe && response.refresh_token && typeof window !== 'undefined') {
+        console.log('[AuthContext] Storing refresh token');
+        localStorage.setItem('refresh_token', response.refresh_token);
+      }
+
       // Sync localStorage with server onboarding_completed value
       if (typeof window !== 'undefined' && response.user.onboarding_completed !== undefined) {
         if (response.user.onboarding_completed) {

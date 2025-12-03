@@ -18,9 +18,12 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DataTable } from "@/components/ui/data-table"
 import type { Column } from "@/components/ui/data-table"
-import { Trash2, Edit2, Plus, Eye, EyeOff, Search, User, Tag, Key } from "lucide-react"
+import { Trash2, Edit2, Plus, Eye, EyeOff, Search, User, Tag, Key, Loader2 } from "lucide-react"
 import { apiClient } from "@/lib/api"
 import { useAuth } from "@/contexts/auth-context"
+import { NotificationProvider, useNotification } from "@/components/notification-provider"
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog"
+import { logger } from "@/lib/logger"
 
 interface LLMApiKey {
   id: string
@@ -68,8 +71,9 @@ const subsections = [
   { id: "llm-keys", name: "LLM API Keys", icon: Key },
 ]
 
-export default function SettingsPage() {
+function SettingsPageContent() {
   const { user, refreshUser } = useAuth()
+  const { showNotification } = useNotification()
   const [activeSubsection, setActiveSubsection] = useState<string>("profile")
   const [tags, setTags] = useState<UserTag[]>([])
   const [tagsLoading, setTagsLoading] = useState<boolean>(true)
@@ -94,6 +98,12 @@ export default function SettingsPage() {
   const [editingLLM, setEditingLLM] = useState<LLMApiKey | null>(null)
 
   const [tagSearch, setTagSearch] = useState("")
+
+  // Delete confirmation dialogs
+  const [showDeleteTagDialog, setShowDeleteTagDialog] = useState(false)
+  const [deletingTagId, setDeletingTagId] = useState<string | null>(null)
+  const [showDeleteLLMDialog, setShowDeleteLLMDialog] = useState(false)
+  const [deletingLLMId, setDeletingLLMId] = useState<string | null>(null)
 
   const [tagForm, setTagForm] = useState({ name: "", color: "#3B82F6" })
   const [llmForm, setLlmForm] = useState({ name: "", provider_id: "", api_key: "" })
@@ -127,10 +137,10 @@ export default function SettingsPage() {
       try {
         setTagsLoading(true)
         setTagsError(null)
-        console.log('[Settings] Loading user tags...')
+        logger.log('[Settings] Loading user tags...')
         
         const data = await apiClient.getUserTags()
-        console.log('[Settings] Received tags from API:', data)
+        logger.log('[Settings] Received tags from API:', data)
         
         // Process the tags data similar to left-panel.tsx
         let tagsArray: UserTag[] = []
@@ -155,10 +165,10 @@ export default function SettingsPage() {
           }))
         }
         
-        console.log('[Settings] Processed tags array:', tagsArray)
+        logger.log('[Settings] Processed tags array:', tagsArray)
         setTags(tagsArray)
       } catch (error) {
-        console.error('[Settings] Failed to load user tags:', error)
+        logger.error('[Settings] Failed to load user tags:', error)
         setTagsError('Failed to load tags')
         setTags([])
       } finally {
@@ -179,10 +189,10 @@ export default function SettingsPage() {
         // Load providers first
         setProvidersLoading(true)
         setProvidersError(null)
-        console.log('[Settings] Loading LLM providers...')
+        logger.log('[Settings] Loading LLM providers...')
         
         const providersData = await apiClient.request('/llm/providers')
-        console.log('[Settings] Received providers from API:', providersData)
+        logger.log('[Settings] Received providers from API:', providersData)
         
         let providersArray: LLMProvider[] = []
         if (Array.isArray(providersData)) {
@@ -197,10 +207,10 @@ export default function SettingsPage() {
         // Then load user API keys
         setLlmKeysLoading(true)
         setLlmKeysError(null)
-        console.log('[Settings] Loading user API keys...')
+        logger.log('[Settings] Loading user API keys...')
         
         const keysData = await apiClient.request('/llm/api-keys')
-        console.log('[Settings] Received API keys from API:', keysData)
+        logger.log('[Settings] Received API keys from API:', keysData)
         
         let keysArray: LLMApiKey[] = []
         if (Array.isArray(keysData)) {
@@ -213,7 +223,7 @@ export default function SettingsPage() {
         setLlmKeysLoading(false)
         
       } catch (error) {
-        console.error('[Settings] Failed to load LLM data:', error)
+        logger.error('[Settings] Failed to load LLM data:', error)
         setProvidersError('Failed to load providers')
         setLlmKeysError('Failed to load API keys')
         setProvidersLoading(false)
@@ -232,8 +242,10 @@ export default function SettingsPage() {
         body: JSON.stringify(profileForm),
       })
       await refreshUser()
-    } catch (error) {
-      console.error('Failed to save profile:', error)
+      showNotification('Profile updated successfully', 'success')
+    } catch (error: any) {
+      logger.error('Failed to save profile:', error)
+      showNotification(error?.message || 'Failed to save profile', 'error')
     } finally {
       setProfileLoading(false)
     }
@@ -247,11 +259,14 @@ export default function SettingsPage() {
         body: JSON.stringify({ confirmation: deleteConfirmation }),
       })
       // Account deleted successfully - clear token and redirect
+      showNotification('Account deleted successfully', 'success')
       apiClient.clearToken()
-      window.location.href = '/login'
+      setTimeout(() => {
+        window.location.href = '/login'
+      }, 1000)
     } catch (error: any) {
-      console.error('Failed to delete account:', error)
-      alert(error.message || 'Failed to delete account. Please try again.')
+      logger.error('Failed to delete account:', error)
+      showNotification(error?.message || 'Failed to delete account. Please try again.', 'error')
     } finally {
       setDeleteAccountLoading(false)
       setShowDeleteConfirmDialog(false)
@@ -268,40 +283,42 @@ export default function SettingsPage() {
     try {
       if (editingTag) {
         // Update existing tag
-        console.log('[Settings] Updating tag:', editingTag.id, tagForm)
+        logger.log('[Settings] Updating tag:', editingTag.id, tagForm)
         await apiClient.updateTag(editingTag.id, {
           name: tagForm.name,
           color: tagForm.color
         })
-        
+
         // Update local state
-        setTags(tags.map((tag) => 
+        setTags(tags.map((tag) =>
           tag.id === editingTag.id ? { ...tag, ...tagForm } : tag
         ))
+        showNotification('Tag updated successfully', 'success')
       } else {
         // Create new tag
-        console.log('[Settings] Creating new tag:', tagForm)
+        logger.log('[Settings] Creating new tag:', tagForm)
         const newTag = await apiClient.createTag({
           name: tagForm.name,
           color: tagForm.color
         })
-        
-        console.log('[Settings] Created tag:', newTag)
-        
+
+        logger.log('[Settings] Created tag:', newTag)
+
         // Add to local state
         setTags([...tags, {
           id: newTag.id,
           name: newTag.name,
           color: newTag.color
         }])
+        showNotification('Tag created successfully', 'success')
       }
-      
+
       setShowTagModal(false)
       setEditingTag(null)
       setTagForm({ name: "", color: "#3B82F6" })
     } catch (error) {
-      console.error('[Settings] Failed to save tag:', error)
-      // You might want to show an error toast here
+      logger.error('[Settings] Failed to save tag:', error)
+      showNotification('Failed to save tag', 'error')
     }
   }
 
@@ -309,8 +326,8 @@ export default function SettingsPage() {
     try {
       if (editingLLM) {
         // Update existing API key
-        console.log('[Settings] Updating API key:', editingLLM.id)
-        
+        logger.log('[Settings] Updating API key:', editingLLM.id)
+
         // Only include api_key if it's not empty
         const updateData: any = {
           name: llmForm.name
@@ -318,7 +335,7 @@ export default function SettingsPage() {
         if (llmForm.api_key && llmForm.api_key.trim() !== '') {
           updateData.api_key = llmForm.api_key
         }
-        
+
         const updatedKey = await apiClient.request(`/llm/api-keys/${editingLLM.id}`, {
           method: 'PUT',
           body: JSON.stringify(updateData)
@@ -328,9 +345,10 @@ export default function SettingsPage() {
 
         // Update local state
         setLlmKeys(llmKeys.map((key) => (key.id === editingLLM.id ? typedUpdatedKey : key)))
+        showNotification('API key updated successfully', 'success')
       } else {
         // Create new API key
-        console.log('[Settings] Creating new API key')
+        logger.log('[Settings] Creating new API key')
         const newKey = await apiClient.request('/llm/api-keys', {
           method: 'POST',
           body: JSON.stringify({
@@ -344,42 +362,53 @@ export default function SettingsPage() {
 
         // Update local state
         setLlmKeys([...llmKeys, typedNewKey])
+        showNotification('API key created successfully', 'success')
       }
-      
+
       setShowLLMModal(false)
       setEditingLLM(null)
       setLlmForm({ name: "", provider_id: "", api_key: "" })
     } catch (error) {
-      console.error('[Settings] Failed to save API key:', error)
-      // You might want to show an error toast here
+      logger.error('[Settings] Failed to save API key:', error)
+      showNotification('Failed to save API key', 'error')
     }
   }
 
-  const handleDeleteTag = async (id: string) => {
+  const handleDeleteTag = async () => {
+    if (!deletingTagId) return
+
     try {
-      console.log('[Settings] Deleting tag:', id)
-      await apiClient.deleteTag(id)
-      
+      logger.log('[Settings] Deleting tag:', deletingTagId)
+      await apiClient.deleteTag(deletingTagId)
+
       // Update local state
-      setTags(tags.filter((tag) => tag.id !== id))
+      setTags(tags.filter((tag) => tag.id !== deletingTagId))
+      showNotification('Tag deleted successfully', 'success')
+      setShowDeleteTagDialog(false)
+      setDeletingTagId(null)
     } catch (error) {
-      console.error('[Settings] Failed to delete tag:', error)
-      // You might want to show an error toast here
+      logger.error('[Settings] Failed to delete tag:', error)
+      showNotification('Failed to delete tag', 'error')
     }
   }
 
-  const handleDeleteLLM = async (id: string) => {
+  const handleDeleteLLM = async () => {
+    if (!deletingLLMId) return
+
     try {
-      console.log('[Settings] Deleting API key:', id)
-      await apiClient.request(`/llm/api-keys/${id}`, {
+      logger.log('[Settings] Deleting API key:', deletingLLMId)
+      await apiClient.request(`/llm/api-keys/${deletingLLMId}`, {
         method: 'DELETE'
       })
-      
+
       // Update local state
-      setLlmKeys(llmKeys.filter((key) => key.id !== id))
+      setLlmKeys(llmKeys.filter((key) => key.id !== deletingLLMId))
+      showNotification('API key deleted successfully', 'success')
+      setShowDeleteLLMDialog(false)
+      setDeletingLLMId(null)
     } catch (error) {
-      console.error('[Settings] Failed to delete API key:', error)
-      // You might want to show an error toast here
+      logger.error('[Settings] Failed to delete API key:', error)
+      showNotification('Failed to delete API key', 'error')
     }
   }
 
@@ -409,25 +438,10 @@ export default function SettingsPage() {
     setShowLLMModal(true)
   }
 
-  const getColorClass = (color: string) => {
-    const option = colorOptions.find((option) => option.value === color)
-    return option?.class || colorOptions[0].class
-  }
-
-  const getColorDot = (color: string) => {
-    // For hex colors, use inline styles
-    if (color.startsWith('#')) {
-      return ''
-    }
-    const option = colorOptions.find((option) => option.value === color)
-    return option?.dot || colorOptions[0].dot
-  }
-
-  const getInlineColorStyle = (color: string) => {
-    if (color.startsWith('#')) {
-      return { backgroundColor: color }
-    }
-    return {}
+  const getColorStyle = (color: string) => {
+    return {
+      '--tag-custom-color': color,
+    } as React.CSSProperties
   }
 
   const filteredTags = tags.filter((tag) => tag.name.toLowerCase().includes(tagSearch.toLowerCase()))
@@ -463,9 +477,8 @@ export default function SettingsPage() {
               disabled={profileLoading}
             />
           </div>
-          <Button 
-            onClick={handleSaveProfile} 
-            className="bg-black hover:bg-gray-800"
+          <Button
+            onClick={handleSaveProfile}
             disabled={profileLoading}
             size="sm"
           >
@@ -502,38 +515,18 @@ export default function SettingsPage() {
   const renderTagsSection = () => {
     if (tagsLoading) {
       return (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Tags Management</CardTitle>
-            <CardDescription className="mt-1 text-sm">
-              Create and manage tags for organizing your prompts
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-              <span className="ml-3">Loading tags...</span>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
+          <span className="text-sm text-muted-foreground">Loading tags...</span>
+        </div>
       )
     }
 
     if (tagsError) {
       return (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Tags Management</CardTitle>
-            <CardDescription className="mt-1 text-sm">
-              Create and manage tags for organizing your prompts
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center py-8 text-red-600">
-              <span>{tagsError}</span>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center justify-center py-12 text-red-600">
+          <span>{tagsError}</span>
+        </div>
       )
     }
 
@@ -544,9 +537,9 @@ export default function SettingsPage() {
         width: "col-span-6",
         render: (tag) => (
           <div className="flex items-center space-x-3">
-            <div 
-              className={`w-2 h-2 rounded-full ${getColorDot(tag.color)}`}
-              style={getInlineColorStyle(tag.color)}
+            <div
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: tag.color }}
             />
             <div>
               <span className="font-medium text-slate-900 text-sm">{tag.name}</span>
@@ -560,9 +553,9 @@ export default function SettingsPage() {
         width: "col-span-3",
         render: (tag) => (
           <div className="flex items-center space-x-2">
-            <div 
-              className={`w-4 h-4 rounded-full ${getColorDot(tag.color)}`}
-              style={getInlineColorStyle(tag.color)}
+            <div
+              className="w-4 h-4 rounded-full"
+              style={{ backgroundColor: tag.color }}
             />
             <span className="text-sm text-slate-600 font-mono">{tag.color}</span>
           </div>
@@ -580,7 +573,10 @@ export default function SettingsPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDeleteTag(tag.id)}
+              onClick={() => {
+                setDeletingTagId(tag.id)
+                setShowDeleteTagDialog(true)
+              }}
               className="p-1 h-auto"
               title="Delete"
             >
@@ -592,43 +588,50 @@ export default function SettingsPage() {
     ]
 
     return (
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-lg">Tags Management</CardTitle>
-              <CardDescription className="mt-1 text-sm">
-                Create and manage tags for organizing your prompts
-              </CardDescription>
+      <div className="space-y-0">
+        {/* Filters Block */}
+        <Card>
+          <CardContent className="px-4 py-3">
+            <div className="flex gap-2 items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Search tags..."
+                  value={tagSearch}
+                  onChange={(e) => setTagSearch(e.target.value)}
+                  className="pl-8 h-9 text-xs"
+                />
+              </div>
+              <Button
+                onClick={() => openTagModal()}
+                size="sm"
+                className="text-xs h-9 px-3 gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                New
+              </Button>
             </div>
-            <Button onClick={() => openTagModal()} className="bg-black hover:bg-gray-800 text-sm" size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Tag
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-            <Input
-              placeholder="Search tags..."
-              value={tagSearch}
-              onChange={(e) => setTagSearch(e.target.value)}
-              className="pl-10 text-sm"
-            />
-          </div>
+          </CardContent>
+        </Card>
 
-          <DataTable
-            data={filteredTags}
-            columns={tagColumns}
-            emptyState={{
-              icon: <Tag className="w-6 h-6 text-slate-400" />,
-              title: tagSearch ? "No tags found" : "No tags yet",
-              description: tagSearch ? "Try adjusting your search terms." : "Create your first tag to get started.",
-            }}
-          />
-        </CardContent>
-      </Card>
+        {/* Spacing between filters and content */}
+        <div className="h-4"></div>
+
+        {/* Table */}
+        <Card>
+          <CardContent className="p-4">
+            <DataTable
+              data={filteredTags}
+              columns={tagColumns}
+              emptyState={{
+                icon: <Tag className="w-6 h-6 text-slate-400" />,
+                title: tagSearch ? "No tags found" : "No tags yet",
+                description: tagSearch ? "Try adjusting your search terms." : "Create your first tag to get started.",
+              }}
+            />
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
@@ -682,7 +685,10 @@ export default function SettingsPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDeleteLLM(llm.id)}
+              onClick={() => {
+                setDeletingLLMId(llm.id)
+                setShowDeleteLLMDialog(true)
+              }}
               className="p-1 h-auto"
               title="Delete"
             >
@@ -695,103 +701,76 @@ export default function SettingsPage() {
 
     if (llmKeysLoading || providersLoading) {
       return (
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle className="text-lg">LLM API Keys</CardTitle>
-                <CardDescription className="mt-1 text-sm">
-                  Manage API keys for different language models used in prompt testing
-                </CardDescription>
-              </div>
-              <Button disabled className="bg-gray-300 text-sm" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Add API Key
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center py-8">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto mb-4"></div>
-                <p className="text-sm text-slate-500">Loading API keys...</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-sm text-muted-foreground">Loading API keys...</p>
+          </div>
+        </div>
       )
     }
 
     if (llmKeysError || providersError) {
       return (
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle className="text-lg">LLM API Keys</CardTitle>
-                <CardDescription className="mt-1 text-sm">
-                  Manage API keys for different language models used in prompt testing
-                </CardDescription>
-              </div>
-              <Button onClick={() => openLLMModal()} className="bg-black hover:bg-gray-800 text-sm" disabled={!llmProviders.length} size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Add API Key
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center py-8">
-              <div className="text-center">
-                <div className="text-red-500 mb-2">⚠️</div>
-                <p className="text-sm text-red-600 mb-2">
-                  {llmKeysError || providersError}
-                </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => {
-                    window.location.reload()
-                  }}
-                >
-                  Retry
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="text-red-500 mb-2">⚠️</div>
+            <p className="text-sm text-red-600 mb-2">
+              {llmKeysError || providersError}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                window.location.reload()
+              }}
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
       )
     }
 
     return (
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-lg">LLM API Keys</CardTitle>
-              <CardDescription className="mt-1 text-sm">
-                Manage API keys for different language models used in prompt testing
-              </CardDescription>
+      <div className="space-y-0">
+        {/* Filters Block */}
+        <Card>
+          <CardContent className="px-4 py-3">
+            <div className="flex gap-2 items-center justify-end">
+              <Button
+                onClick={() => openLLMModal()}
+                size="sm"
+                className="text-xs h-9 px-3 gap-1.5"
+                disabled={!llmProviders.length}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                New
+              </Button>
             </div>
-            <Button onClick={() => openLLMModal()} className="bg-black hover:bg-gray-800 text-sm" disabled={!llmProviders.length} size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Add API Key
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            data={llmKeys}
-            columns={llmColumns}
-            emptyState={{
-              icon: <Key className="w-6 h-6 text-slate-400" />,
-              title: "No API keys yet",
-              description: llmProviders.length === 0 
-                ? "No LLM providers are available. Please contact your administrator."
-                : "Add your first API key to get started with LLM testing.",
-            }}
-          />
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        {/* Spacing between filters and content */}
+        <div className="h-4"></div>
+
+        {/* Table */}
+        <Card>
+          <CardContent className="p-4">
+            <DataTable
+              data={llmKeys}
+              columns={llmColumns}
+              emptyState={{
+                icon: <Key className="w-6 h-6 text-slate-400" />,
+                title: "No API keys yet",
+                description: llmProviders.length === 0
+                  ? "No LLM providers are available. Please contact your administrator."
+                  : "Add your first API key to get started with LLM testing.",
+              }}
+            />
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
@@ -812,27 +791,35 @@ export default function SettingsPage() {
     <ProtectedRoute>
       <>
       {/* EditorHeader */}
-      <div className="p-4 py-4 pt-[12px] pb-[12px] h-[65px] bg-white border-b border-slate-200 flex-shrink-0"></div>
+      <div className="px-4 pt-[12px] pb-[12px] h-[65px] bg-white border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+        <div>
+          <h1 className="text-base font-semibold">Settings</h1>
+          <p className="text-xs text-muted-foreground">
+            Manage your account, tags, and API configurations
+          </p>
+        </div>
+      </div>
 
       {/* Content */}
-      <div className="flex-1 flex bg-gray-50 overflow-hidden">
-        {/* Subsection navigation sidebar */}
-        <div className="w-48 bg-white border-r border-slate-200 p-2 overflow-y-auto">
-          <div className="space-y-0.5">
+      <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
+        {/* Horizontal tabs navigation */}
+        <div className="bg-white border-b border-slate-200 px-4 h-10">
+          <div className="flex items-center gap-1 -mb-px">
             {subsections.map((subsection) => {
               const Icon = subsection.icon
+              const isActive = activeSubsection === subsection.id
               return (
                 <button
                   key={subsection.id}
                   onClick={() => setActiveSubsection(subsection.id)}
-                  className={`w-full flex items-center space-x-2 px-2 py-1.5 text-left rounded-md transition-colors ${
-                    activeSubsection === subsection.id
-                      ? "bg-slate-100 text-slate-900"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  className={`flex items-center gap-1.5 px-3 py-[11px] text-xs font-medium border-b-2 transition-colors ${
+                    isActive
+                      ? "border-slate-900 text-slate-900"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-slate-300"
                   }`}
                 >
-                  <Icon className="w-3 h-3" />
-                  <span className="text-xs font-medium">{subsection.name}</span>
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{subsection.name}</span>
                 </button>
               )
             })}
@@ -903,7 +890,7 @@ export default function SettingsPage() {
             <Button variant="outline" onClick={() => setShowTagModal(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveTag} disabled={!tagForm.name} className="bg-black hover:bg-gray-800">
+            <Button onClick={handleSaveTag} disabled={!tagForm.name}>
               {editingTag ? "Update Tag" : "Create Tag"}
             </Button>
           </DialogFooter>
@@ -968,7 +955,6 @@ export default function SettingsPage() {
             <Button
               onClick={handleSaveLLM}
               disabled={!llmForm.name || !llmForm.provider_id || (!editingLLM && !llmForm.api_key)}
-              className="bg-black hover:bg-gray-800"
             >
               {editingLLM ? "Update Key" : "Add Key"}
             </Button>
@@ -1033,7 +1019,39 @@ export default function SettingsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Tag Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={showDeleteTagDialog}
+        onOpenChange={(open) => {
+          setShowDeleteTagDialog(open)
+          if (!open) setDeletingTagId(null)
+        }}
+        onConfirm={handleDeleteTag}
+        title="Delete Tag"
+        description="Are you sure you want to delete this tag? This action cannot be undone."
+      />
+
+      {/* Delete LLM API Key Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={showDeleteLLMDialog}
+        onOpenChange={(open) => {
+          setShowDeleteLLMDialog(open)
+          if (!open) setDeletingLLMId(null)
+        }}
+        onConfirm={handleDeleteLLM}
+        title="Delete API Key"
+        description="Are you sure you want to delete this API key? This action cannot be undone."
+      />
       </>
     </ProtectedRoute>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <NotificationProvider>
+      <SettingsPageContent />
+    </NotificationProvider>
   )
 }

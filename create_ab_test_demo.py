@@ -3,6 +3,7 @@
 Create a demo A/B test with real events and different conversion rates
 """
 import random
+import json
 from datetime import datetime, timezone
 from uuid import uuid4
 import psycopg2
@@ -15,9 +16,13 @@ VERSION_B_ID = "739db5d3-5ff7-4ded-8b5f-9555c37beee9"  # v2
 FUNNEL_ID = "ef72c7a1-e30a-40de-93ee-b0d1bec50abc"  # Sales funnel
 
 # Test config
-TOTAL_REQUESTS = 500  # Larger sample for better statistical significance
-VERSION_A_CONVERSION_RATE = 0.20  # 20% conversion for version A
-VERSION_B_CONVERSION_RATE = 0.35  # 35% conversion for version B (winner!)
+TOTAL_REQUESTS = 200  # Good sample size
+VERSION_A_CONVERSION_RATE = 0.25  # 25% conversion for version A
+VERSION_B_CONVERSION_RATE = 0.20  # 20% conversion for version B (lower!)
+
+# BUT Version B has HIGHER average purchase amount!
+VERSION_A_AVG_AMOUNT = 45.0   # Lower average order value
+VERSION_B_AVG_AMOUNT = 89.0   # Higher average order value - better LTV!
 
 
 def main():
@@ -45,11 +50,13 @@ def main():
          funnel_config_id, status, started_at, created_at, updated_at)
         VALUES (%s, %s, %s, %s, %s, %s, %s, 0, 0, %s, 'running', %s, %s, %s)
     """, (
-        test_id, WORKSPACE_ID, f"Demo 500 requests: High confidence test",
+        test_id, WORKSPACE_ID, f"Demo: Conversion vs LTV comparison",
         PROMPT_ID, VERSION_A_ID, VERSION_B_ID,
         TOTAL_REQUESTS, FUNNEL_ID, now, now, now
     ))
     print(f"   Created test: {test_id}")
+    print(f"   Version A: {VERSION_A_CONVERSION_RATE*100}% conversion, avg ${VERSION_A_AVG_AMOUNT}")
+    print(f"   Version B: {VERSION_B_CONVERSION_RATE*100}% conversion, avg ${VERSION_B_AVG_AMOUNT}")
     
     # Step 2: Simulate requests and events
     print(f"\n2. Simulating {TOTAL_REQUESTS} requests with events...")
@@ -61,18 +68,23 @@ def main():
     
     events_to_insert = []
     
+    version_a_total_amount = 0
+    version_b_total_amount = 0
+    
     for i in range(TOTAL_REQUESTS):
         # Alternate between versions (50/50 split)
         if i % 2 == 0:
             version_id = VERSION_A_ID
             version_a_requests += 1
             convert = random.random() < VERSION_A_CONVERSION_RATE
+            avg_amount = VERSION_A_AVG_AMOUNT
             if convert:
                 version_a_conversions += 1
         else:
             version_id = VERSION_B_ID
             version_b_requests += 1
             convert = random.random() < VERSION_B_CONVERSION_RATE
+            avg_amount = VERSION_B_AVG_AMOUNT
             if convert:
                 version_b_conversions += 1
         
@@ -98,8 +110,15 @@ def main():
             event_time
         ))
         
-        # If converted, add post_message and sign_up events
+        # If converted, add post_message and sign_up events with amount
         if convert:
+            # Generate amount with some variance around the average
+            amount = round(avg_amount * random.uniform(0.7, 1.3), 2)
+            if version_id == VERSION_A_ID:
+                version_a_total_amount += amount
+            else:
+                version_b_total_amount += amount
+            
             # post_message event
             events_to_insert.append((
                 str(uuid4()),
@@ -118,7 +137,15 @@ def main():
                 event_time
             ))
             
-            # sign_up event (final conversion)
+            # sign_up/purchase event with amount in metadata AND business_metrics
+            metadata = json.dumps({
+                "event_name": "sign_up", 
+                "category": "conversion",
+                "amount": amount,
+                "product": random.choice(["Basic", "Premium", "Enterprise"])
+            })
+            business_metrics = json.dumps({"revenue": amount})
+            
             events_to_insert.append((
                 str(uuid4()),
                 WORKSPACE_ID,
@@ -129,8 +156,8 @@ def main():
                 "success",
                 session_id,
                 None,
-                '{"event_name": "sign_up", "category": "conversion"}',
-                '{"revenue": 10.0}',
+                metadata,  # Contains amount
+                business_metrics,  # Contains revenue
                 None,
                 event_time,
                 event_time
@@ -161,7 +188,11 @@ def main():
     
     print(f"\n   Results:")
     print(f"   Version A (v1): {version_a_requests} requests, {version_a_conversions} conversions ({version_a_conversions/version_a_requests*100:.1f}%)")
+    print(f"                   Total revenue: ${version_a_total_amount:.2f}, Avg: ${version_a_total_amount/version_a_conversions:.2f}" if version_a_conversions > 0 else "")
     print(f"   Version B (v2): {version_b_requests} requests, {version_b_conversions} conversions ({version_b_conversions/version_b_requests*100:.1f}%)")
+    print(f"                   Total revenue: ${version_b_total_amount:.2f}, Avg: ${version_b_total_amount/version_b_conversions:.2f}" if version_b_conversions > 0 else "")
+    print(f"\n   💡 Version A has HIGHER conversion but LOWER avg order value")
+    print(f"   💡 Version B has LOWER conversion but HIGHER avg order value (better LTV!)")
     
     print("\n" + "=" * 60)
     print("Done! Check the A/B test results in the UI at:")

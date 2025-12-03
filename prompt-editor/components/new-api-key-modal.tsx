@@ -105,7 +105,7 @@ export function NewApiKeyModal({ isOpen, onClose, onCreateApiKey }: NewApiKeyMod
               <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={!name.trim() || loading}>
+              <Button type="submit" disabled={!name.trim() || loading} className="bg-black hover:bg-gray-800">
                 {loading ? "Creating..." : "Create API Key"}
               </Button>
             </div>
@@ -132,7 +132,7 @@ export function NewApiKeyModal({ isOpen, onClose, onCreateApiKey }: NewApiKeyMod
               </div>
             </div>
             <div className="flex justify-end pt-4">
-              <Button onClick={handleClose}>Done</Button>
+              <Button onClick={handleClose} className="bg-black hover:bg-gray-800">Done</Button>
             </div>
           </div>
         )}

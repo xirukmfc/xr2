@@ -6,17 +6,40 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, LogIn } from 'lucide-react'
+import { Eye, EyeOff, LogIn, Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  
+  const [sessionExpired, setSessionExpired] = useState(false)
+  const [showSplash, setShowSplash] = useState(true)
+
   const { login, googleLogin, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
+
+  // Splash screen animation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false)
+    }, 1500) // Show splash for 1.5 seconds
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Check if user was redirected due to session expiration
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('expired') === 'true') {
+        setSessionExpired(true);
+        setError('Your session has expired. Please log in again.');
+      }
+    }
+  }, []);
 
   // Redirect authenticated users to prompts page
   useEffect(() => {
@@ -83,7 +106,7 @@ export default function LoginPage() {
     try {
       console.log('Google OAuth response received:', response);
       setIsLoading(true);
-      await googleLogin(response.credential)
+      await googleLogin(response.credential, rememberMe)
       router.push('/prompts')
     } catch (error: any) {
       console.error('Google sign-in error:', error);
@@ -167,7 +190,7 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      await login(username, password)
+      await login(username, password, rememberMe)
       router.push('/prompts') // Redirect to prompts page after login
     } catch (error: any) {
       setError(error?.message || 'Login failed. Please check your credentials.')
@@ -180,7 +203,7 @@ export default function LoginPage() {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-8 h-8 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }
@@ -190,16 +213,28 @@ export default function LoginPage() {
     return null
   }
 
+  // Splash screen
+  if (showSplash) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <img
+          src="/logo.svg"
+          alt="xR2 Prompt Manager"
+          className="h-24 w-auto animate-fade-in"
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-md w-full space-y-8 animate-slide-up">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Sign in to xR2
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Access your prompt management platform
-          </p>
+          <img
+            src="/logo.svg"
+            alt="xR2 Prompt Manager"
+            className="mx-auto h-6 w-auto mb-6"
+          />
         </div>
 
         <Card>
@@ -259,21 +294,34 @@ export default function LoginPage() {
                 <div className="text-red-600 text-sm">{error}</div>
               )}
 
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 text-primary border-input rounded focus:ring-primary"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                  remember me for 90 days
+                </label>
+              </div>
+
               <Button
                 type="submit"
-                className="w-full bg-black hover:bg-gray-800"
+                className="w-full"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <span className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Signing in...
-                  </span>
+                  </>
                 ) : (
-                  <span className="flex items-center">
-                    <LogIn className="h-4 w-4 mr-2" />
+                  <>
+                    <LogIn className="h-4 w-4" />
                     Sign in
-                  </span>
+                  </>
                 )}
               </Button>
             </form>

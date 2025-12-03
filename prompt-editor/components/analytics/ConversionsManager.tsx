@@ -113,7 +113,7 @@ export default function ConversionsManager({ showCreateButton = true }: { showCr
       }
 
       if (results[2].status === 'fulfilled') {
-        setEventDefinitions(results[2].value || []);
+        setEventDefinitions((results[2].value as EventDefinition[]) || []);
       } else {
         console.warn('Failed to load event definitions:', results[2].reason);
         setEventDefinitions([]);
@@ -474,7 +474,7 @@ export default function ConversionsManager({ showCreateButton = true }: { showCr
                   </p>
                 </div>
               </div>
-              <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+              <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                 <Button
                   variant="ghost"
                   size="sm"

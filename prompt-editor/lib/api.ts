@@ -203,7 +203,7 @@ class ApiClient {
 
     constructor(baseUrl: string = API_BASE_URL) {
         this.baseUrl = baseUrl;
-        
+
         // Load token from localStorage on initialization
         if (typeof window !== 'undefined') {
             this.token = localStorage.getItem('auth_token');
@@ -265,12 +265,52 @@ class ApiClient {
             console.log('[API Client] Response status:', response.status, response.statusText);
             if (!response.ok) {
                 const errorText = await response.text();
-                
-                // If it's a 401 error and we have a token, the token is likely invalid
-                if (response.status === 401 && this.token) {
-                    this.clearToken();
+
+                // If it's a 401 error and we have a token, the session may have expired
+                if (response.status === 401 && this.token && endpoint !== '/auth/login' && endpoint !== '/auth/refresh') {
+                    console.log('[API Client] Got 401 - access token expired, attempting refresh...');
+
+                    // Check if we have a refresh token
+                    const hasRefreshToken = typeof window !== 'undefined' && localStorage.getItem('refresh_token');
+
+                    if (hasRefreshToken) {
+                        try {
+                            // Try to refresh the access token
+                            console.log('[API Client] Attempting to refresh access token...');
+                            await this.refreshToken();
+
+                            // Retry the original request with new access token
+                            console.log('[API Client] Access token refreshed, retrying original request...');
+                            return this.request<T>(endpoint, options);
+                        } catch (refreshError) {
+                            console.error('[API Client] Refresh token failed:', refreshError);
+                            // Clear all tokens
+                            this.clearToken();
+                            if (typeof window !== 'undefined') {
+                                localStorage.removeItem('refresh_token');
+                            }
+
+                            // Redirect to login page
+                            if (typeof window !== 'undefined') {
+                                window.location.href = '/login?expired=true';
+                            }
+
+                            throw new Error('Session expired. Please log in again.');
+                        }
+                    } else {
+                        // No refresh token available, just redirect to login
+                        console.log('[API Client] No refresh token available, clearing token and redirecting to login');
+                        this.clearToken();
+
+                        if (typeof window !== 'undefined') {
+                            window.location.href = '/login?expired=true';
+                        }
+
+                        throw new Error('Session expired. Please log in again.');
+                    }
                 }
-                
+
+                // For non-401 errors or login endpoint
                 // Try to parse error as JSON to get structured error details
                 let errorMessage = `API request failed: ${response.status} ${response.statusText}`;
                 try {
@@ -288,7 +328,7 @@ class ApiClient {
                     // Fallback to original text if JSON parsing fails
                     errorMessage = errorText || errorMessage;
                 }
-                
+
                 throw new Error(errorMessage);
             }
             
@@ -438,12 +478,12 @@ class ApiClient {
     }
 
     // Authentication API methods
-    async login(username: string, password: string): Promise<{access_token: string, token_type: string, user: any, api_key?: string}> {
-        const response = await this.request<{access_token: string, token_type: string, user: any, api_key?: string}>('/auth/login', {
+    async login(username: string, password: string, rememberMe: boolean = false): Promise<{access_token: string, refresh_token?: string, token_type: string, user: any, api_key?: string}> {
+        const response = await this.request<{access_token: string, refresh_token?: string, token_type: string, user: any, api_key?: string}>('/auth/login', {
             method: 'POST',
-            body: JSON.stringify({ username, password }),
+            body: JSON.stringify({ username, password, remember_me: rememberMe }),
         });
-        
+
         // Store token automatically
         this.setToken(response.access_token);
         
@@ -455,12 +495,12 @@ class ApiClient {
         return response;
     }
 
-    async googleLogin(credential: string): Promise<{access_token: string, token_type: string, user: any, api_key?: string}> {
-        const response = await this.request<{access_token: string, token_type: string, user: any, api_key?: string}>('/auth/google', {
+    async googleLogin(credential: string, rememberMe: boolean = false): Promise<{access_token: string, refresh_token?: string, token_type: string, user: any, api_key?: string}> {
+        const response = await this.request<{access_token: string, refresh_token?: string, token_type: string, user: any, api_key?: string}>('/auth/google', {
             method: 'POST',
-            body: JSON.stringify({ credential }),
+            body: JSON.stringify({ credential, remember_me: rememberMe }),
         });
-        
+
         // Store API key if provided (for new users)
         if (response.api_key && typeof window !== 'undefined') {
             console.log('[API Client] Saving API key to localStorage:', response.api_key.substring(0, 20) + '...');
@@ -468,10 +508,10 @@ class ApiClient {
         } else {
             console.log('[API Client] No API key in response');
         }
-        
+
         // Store token automatically
         this.setToken(response.access_token);
-        
+
         return response;
     }
 
@@ -503,16 +543,34 @@ class ApiClient {
             method: 'POST',
         });
         this.clearToken();
+
+        // Clear refresh token
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('refresh_token');
+        }
     }
 
-    async refreshToken(): Promise<{access_token: string, token_type: string, user: any}> {
-        const response = await this.request<{access_token: string, token_type: string, user: any}>('/auth/refresh', {
+    async refreshToken(): Promise<{access_token: string, refresh_token?: string, token_type: string, user: any}> {
+        // Get refresh token from localStorage
+        const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
+
+        if (!refreshToken) {
+            throw new Error('No refresh token available');
+        }
+
+        const response = await this.request<{access_token: string, refresh_token?: string, token_type: string, user: any}>('/auth/refresh', {
             method: 'POST',
+            body: JSON.stringify({ refresh_token: refreshToken }),
         });
-        
-        // Update stored token
+
+        // Update stored access token
         this.setToken(response.access_token);
-        
+
+        // Update refresh token if a new one was provided (token rotation)
+        if (response.refresh_token && typeof window !== 'undefined') {
+            localStorage.setItem('refresh_token', response.refresh_token);
+        }
+
         return response;
     }
 

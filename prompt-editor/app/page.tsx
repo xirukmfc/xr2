@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Zap, Shield, Workflow } from "lucide-react"
+import { ArrowRight, Zap, Shield, Workflow, Loader2 } from "lucide-react"
 
 export default function LandingPage() {
   const router = useRouter()
@@ -20,8 +20,8 @@ export default function LandingPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="mt-2 text-muted-foreground">Loading...</p>
         </div>
       </div>
     )
@@ -64,10 +64,10 @@ export default function LandingPage() {
             <Button
               onClick={() => router.push("/login")}
               size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg"
+              className="px-8 py-6 text-lg"
             >
               Get Started
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <ArrowRight className="h-5 w-5" />
             </Button>
           </div>
         </div>

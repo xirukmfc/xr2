@@ -85,7 +85,8 @@ export function DataFilters({
                     <div className="max-w-7xl mx-auto flex items-center justify-between">
                         <Button
                             onClick={onNewPromptClick}
-                            className="bg-blue-600/90 hover:bg-blue-600 text-white h-[35px]"
+                            variant="primary"
+                            className="h-[35px]"
                         >
                             + New Prompt
                         </Button>

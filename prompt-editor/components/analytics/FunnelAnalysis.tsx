@@ -3,7 +3,7 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, X, Trash2, Lightbulb, Pencil, ArrowRight, TrendingDown, GitCompare, ArrowUpRight, ArrowDownRight, Calendar } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 
@@ -41,9 +41,9 @@ const ComparisonFunnel = ({
           <span className="text-xs font-semibold text-green-600">{rightLabel}</span>
           <button 
             onClick={onRemoveRight}
-            className="ml-1 p-0.5 rounded hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors"
+            className="ml-1 p-0.5 rounded hover:bg-red-100 text-muted-foreground hover:text-red-500 transition-colors"
           >
-            <X className="w-3 h-3" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
         <div className="w-16 text-center flex-shrink-0">
@@ -121,8 +121,8 @@ const ComparisonFunnel = ({
                   <span className={`text-[10px] font-semibold flex items-center justify-end gap-0.5 ${
                     isPositive ? 'text-green-600' : isNegative ? 'text-red-500' : 'text-muted-foreground'
                   }`}>
-                    {isPositive && <ArrowUpRight className="w-3 h-3" />}
-                    {isNegative && <ArrowDownRight className="w-3 h-3" />}
+                    {isPositive && <ArrowUpRight className="w-3.5 h-3.5" />}
+                    {isNegative && <ArrowDownRight className="w-3.5 h-3.5" />}
                     {isPositive ? '+' : ''}{conversionDiff.toFixed(1)}%
                   </span>
                 ) : (
@@ -138,6 +138,11 @@ const ComparisonFunnel = ({
                   <div className="w-px h-1.5 bg-border" />
                 </div>
               </div>
+            )}
+
+            {/* Bottom spacing after last step to match top spacing */}
+            {index === leftData.length - 1 && (
+              <div className="h-0.5" />
             )}
           </div>
         );
@@ -248,10 +253,15 @@ const ModernFunnel = ({ data, color = "#6366f1" }: { data: FunnelStep[], color?:
                 </div>
               </div>
             )}
+
+            {/* Bottom spacing after last step to match top spacing */}
+            {index === data.length - 1 && (
+              <div className="h-1" />
+            )}
           </div>
         );
       })}
-      
+
       {/* Summary footer */}
       {data.length >= 2 && (
         <div className="mt-3 pt-3 border-t flex items-center justify-between">
@@ -312,18 +322,34 @@ interface FunnelAnalysisProps {
   showCreateButton?: boolean;
   externalShowCreateForm?: boolean;
   onCreateFormClose?: () => void;
+  renderFiltersSeparately?: boolean;
+  onNewClick?: () => void;
+  externalShowEditForm?: boolean;
+  onEditFormClose?: () => void;
+  onEditClick?: (config: CustomFunnelConfiguration) => void;
+  externalEditingConfiguration?: CustomFunnelConfiguration | null;
+  showNotification?: (message: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
+  onDeleteClick?: (configId: string) => void;
 }
 
-export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, showCreateButton = true, externalShowCreateForm, onCreateFormClose }: FunnelAnalysisProps) {
+export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, showCreateButton = true, externalShowCreateForm, onCreateFormClose, renderFiltersSeparately = false, onNewClick, externalShowEditForm, onEditFormClose, onEditClick, externalEditingConfiguration, showNotification, onDeleteClick }: FunnelAnalysisProps) {
   const [internalShowCreateForm, setInternalShowCreateForm] = useState(false);
+  const [internalShowEditForm, setInternalShowEditForm] = useState(false);
   // Combine external and internal state - show form if either is true
   const showCreateForm = externalShowCreateForm || internalShowCreateForm;
+  const showEditForm = externalShowEditForm || internalShowEditForm;
   const setShowCreateForm = (value: boolean) => {
     // Always update internal state
     setInternalShowCreateForm(value);
     // If closing and external callback exists, call it
     if (!value && onCreateFormClose) {
       onCreateFormClose();
+    }
+  };
+  const setShowEditForm = (value: boolean) => {
+    setInternalShowEditForm(value);
+    if (!value && onEditFormClose) {
+      onEditFormClose();
     }
   };
   const [funnelName, setFunnelName] = useState('');
@@ -357,6 +383,15 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
     loadEventDefinitions();
     loadPrompts();
   }, []);
+
+  // Initialize editing configuration when externalEditingConfiguration is provided
+  useEffect(() => {
+    if (externalEditingConfiguration) {
+      setEditingConfiguration(externalEditingConfiguration);
+      setFunnelName(externalEditingConfiguration.name);
+      setFunnelSteps(externalEditingConfiguration.event_steps.length > 0 ? externalEditingConfiguration.event_steps : ['get_prompt', '']);
+    }
+  }, [externalEditingConfiguration]);
   
   // Load versions when prompt is selected
   useEffect(() => {
@@ -533,9 +568,23 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
 
       // Load the first active configuration if available
       const activeConfig = configurations.find((config: CustomFunnelConfiguration) => config.is_active);
-      if (activeConfig && onFunnelChange) {
+      if (activeConfig) {
         setCurrentConfiguration(activeConfig);
-        onFunnelChange(activeConfig.event_steps);
+        if (onFunnelChange) {
+          onFunnelChange(activeConfig.event_steps);
+        }
+      } else if (configurations.length > 0 && !currentConfiguration) {
+        // If no active config but configs exist, load the first one
+        setCurrentConfiguration(configurations[0]);
+        if (onFunnelChange) {
+          onFunnelChange(configurations[0].event_steps);
+        }
+      } else if (configurations.length === 0) {
+        // No configurations at all
+        setCurrentConfiguration(null);
+        if (onFunnelChange) {
+          onFunnelChange([]);
+        }
       }
     } catch (error) {
       console.error('Failed to load saved funnel configurations:', error);
@@ -580,12 +629,20 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
 
     // Validate
     if (!funnelName.trim()) {
-      alert('Please enter a funnel name');
+      if (showNotification) {
+        showNotification('Please enter a funnel name', 'error');
+      } else {
+        alert('Please enter a funnel name');
+      }
       return;
     }
 
     if (validSteps.length < 2) {
-      alert('Please enter at least 2 funnel steps');
+      if (showNotification) {
+        showNotification('Please enter at least 2 funnel steps', 'error');
+      } else {
+        alert('Please enter at least 2 funnel steps');
+      }
       return;
     }
 
@@ -593,25 +650,36 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
     try {
       const newConfiguration = await apiClient.request<CustomFunnelConfiguration>('/custom-funnel-configurations/test', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           name: funnelName.trim(),
           description: `Custom funnel with steps: ${validSteps.join(' → ')}`,
           event_steps: validSteps
-        },
+        }),
       });
 
-      setSavedConfigurations(prev => [...prev, newConfiguration]);
-      setCurrentConfiguration(newConfiguration);
-
-      // Notify parent component to use new steps
-      if (onFunnelChange) {
-        onFunnelChange(newConfiguration.event_steps);
+      // Reload configurations to get updated list
+      const configurations = await apiClient.request<CustomFunnelConfiguration[]>('/custom-funnel-configurations/test');
+      setSavedConfigurations(configurations);
+      
+      // Find and set the newly created configuration
+      const createdConfig = configurations.find(c => c.id === newConfiguration.id);
+      if (createdConfig) {
+        setCurrentConfiguration(createdConfig);
+        // Notify parent component to use new steps
+        if (onFunnelChange) {
+          onFunnelChange(createdConfig.event_steps);
+        }
       }
 
       // Reset form
       setShowCreateForm(false);
       setFunnelName('');
-      setFunnelSteps(['', '']);
+      setFunnelSteps(['get_prompt', '']);
+
+      // Show success notification
+      if (showNotification) {
+        showNotification('Funnel created successfully', 'success');
+      }
     } catch (error: any) {
       console.error('Failed to save funnel configuration:', error);
       console.error('Request data:', {
@@ -634,7 +702,11 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
         }
       }
 
-      alert(`Failed to save funnel configuration: ${errorMessage}`);
+      if (showNotification) {
+        showNotification(`Failed to save funnel: ${errorMessage}`, 'error');
+      } else {
+        alert(`Failed to save funnel configuration: ${errorMessage}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -651,7 +723,14 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
     setEditingConfiguration(config);
     setFunnelName(config.name);
     setFunnelSteps(config.event_steps.length > 0 ? config.event_steps : ['get_prompt', '']);
-    setShowCreateForm(true);
+    if (renderFiltersSeparately && externalShowEditForm !== undefined) {
+      // External form handling - trigger external edit form
+      if (onEditFormClose) {
+        // This will be handled by parent component
+      }
+    } else {
+      setShowEditForm(true);
+    }
   };
 
   const updateFunnelConfiguration = async () => {
@@ -660,12 +739,20 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
     const validSteps = funnelSteps.filter(step => step.trim());
 
     if (!funnelName.trim()) {
-      alert('Please enter a funnel name');
+      if (showNotification) {
+        showNotification('Please enter a funnel name', 'error');
+      } else {
+        alert('Please enter a funnel name');
+      }
       return;
     }
 
     if (validSteps.length < 2) {
-      alert('Please enter at least 2 funnel steps');
+      if (showNotification) {
+        showNotification('Please enter at least 2 funnel steps', 'error');
+      } else {
+        alert('Please enter at least 2 funnel steps');
+      }
       return;
     }
 
@@ -673,57 +760,111 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
     try {
       const updatedConfiguration = await apiClient.request<CustomFunnelConfiguration>(`/custom-funnel-configurations/test/${editingConfiguration.id}`, {
         method: 'PUT',
-        body: {
+        body: JSON.stringify({
           name: funnelName.trim(),
           description: `Custom funnel with steps: ${validSteps.join(' → ')}`,
           event_steps: validSteps
-        },
+        }),
       });
 
-      setSavedConfigurations(prev => prev.map(c => c.id === editingConfiguration.id ? updatedConfiguration : c));
-      setCurrentConfiguration(updatedConfiguration);
+      // Reload configurations to get updated list
+      const configurations = await apiClient.request<CustomFunnelConfiguration[]>('/custom-funnel-configurations/test');
+      setSavedConfigurations(configurations);
 
-      if (onFunnelChange) {
-        onFunnelChange(updatedConfiguration.event_steps);
+      // Find and set the updated configuration
+      const updatedConfig = configurations.find(c => c.id === updatedConfiguration.id);
+      if (updatedConfig) {
+        setCurrentConfiguration(updatedConfig);
+        if (onFunnelChange) {
+          onFunnelChange(updatedConfig.event_steps);
+        }
       }
 
       // Reset form
       setShowCreateForm(false);
+      setShowEditForm(false);
       setEditingConfiguration(null);
       setFunnelName('');
       setFunnelSteps(['get_prompt', '']);
+      if (onCreateFormClose) onCreateFormClose();
+      if (onEditFormClose) onEditFormClose();
+
+      // Show success notification
+      if (showNotification) {
+        showNotification('Funnel updated successfully', 'success');
+      }
     } catch (error: any) {
       console.error('Failed to update funnel configuration:', error);
-      alert(`Failed to update funnel configuration: ${error.message || 'Please try again.'}`);
+      if (showNotification) {
+        showNotification(`Failed to update funnel: ${error.message || 'Unknown error'}`, 'error');
+      } else {
+        alert(`Failed to update funnel configuration: ${error.message || 'Please try again.'}`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const deleteFunnelConfiguration = async (configId: string) => {
+    // If onDeleteClick is provided, use it (will trigger confirmation modal)
+    if (onDeleteClick) {
+      onDeleteClick(configId);
+      return;
+    }
+
+    // Fallback to confirm dialog if onDeleteClick is not provided
     if (!confirm('Are you sure you want to delete this funnel configuration?')) {
       return;
     }
 
+    await performDelete(configId);
+  };
+
+  const performDelete = async (configId: string) => {
     setLoading(true);
     try {
       await apiClient.request(`/custom-funnel-configurations/test/${configId}`, {
         method: 'DELETE',
       });
 
-      // Remove from local state
-      setSavedConfigurations(prev => prev.filter(config => config.id !== configId));
+      // Reload configurations to get updated list
+      const configurations = await apiClient.request<CustomFunnelConfiguration[]>('/custom-funnel-configurations/test');
+      setSavedConfigurations(configurations);
 
-      // If this was the current configuration, clear it
+      // If this was the current configuration, select another one or clear
       if (currentConfiguration?.id === configId) {
-        setCurrentConfiguration(null);
-        if (onFunnelChange) {
-          onFunnelChange([]); // Clear funnel steps
+        if (configurations.length > 0) {
+          // Select the first available configuration
+          setCurrentConfiguration(configurations[0]);
+          if (onFunnelChange) {
+            onFunnelChange(configurations[0].event_steps);
+          }
+        } else {
+          // No configurations left
+          setCurrentConfiguration(null);
+          if (onFunnelChange) {
+            onFunnelChange([]); // Clear funnel steps
+          }
         }
+      } else if (configurations.length > 0 && !currentConfiguration) {
+        // If no current config but configs exist, load the first one
+        setCurrentConfiguration(configurations[0]);
+        if (onFunnelChange) {
+          onFunnelChange(configurations[0].event_steps);
+        }
+      }
+
+      // Show notification if available
+      if (showNotification) {
+        showNotification('Funnel deleted successfully', 'success');
       }
     } catch (error: any) {
       console.error('Failed to delete funnel configuration:', error);
-      alert(`Failed to delete funnel configuration: ${error.message || 'Please try again.'}`);
+      if (showNotification) {
+        showNotification('Failed to delete funnel', 'error');
+      } else {
+        alert(`Failed to delete funnel configuration: ${error.message || 'Please try again.'}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -756,20 +897,20 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
   if (!data || data.length === 0) {
     return (
       <div className="space-y-6">
-        {/* Saved Configurations Section */}
-        {savedConfigurations.length > 0 && (
+        {/* Saved Configurations Section - only show when NOT using separate filters */}
+        {!showCreateForm && !showEditForm && !renderFiltersSeparately && savedConfigurations.length > 0 && (
           <Card>
-            <CardHeader>
-              <CardTitle>Saved Funnel Configurations</CardTitle>
-              <p className="text-sm text-muted-foreground">Load a previously saved funnel configuration</p>
+            <CardHeader className="px-4 py-3">
+              <h3 className="text-xs font-medium">Saved Funnel Configurations</h3>
+              <p className="text-xs text-muted-foreground mt-1">Load a previously saved funnel configuration</p>
             </CardHeader>
-            <CardContent>
-              <div className="grid gap-3">
+            <CardContent className="px-4 py-3">
+              <div className="grid gap-2">
                 {savedConfigurations.map((config) => (
-                  <div key={config.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div key={config.id} className="flex items-center justify-between p-2 border rounded">
                     <div>
-                      <div className="font-medium">{config.name}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-medium text-xs">{config.name}</div>
+                      <div className="text-xs text-muted-foreground">
                         Steps: {config.event_steps.join(' → ')}
                       </div>
                       <div className="text-xs text-muted-foreground">
@@ -781,6 +922,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                         onClick={() => loadConfiguration(config)}
                         variant={currentConfiguration?.id === config.id ? "default" : "outline"}
                         size="sm"
+                        className="text-xs"
                       >
                         {currentConfiguration?.id === config.id ? "Active" : "Load"}
                       </Button>
@@ -788,17 +930,18 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                         onClick={() => startEditConfiguration(config)}
                         variant="outline"
                         size="sm"
+                        className="h-8 w-8 p-0"
                       >
-                        <Pencil className="w-4 h-4" />
+                        <Pencil className="w-3.5 h-3.5" />
                       </Button>
                       <Button
                         onClick={() => deleteFunnelConfiguration(config.id)}
                         variant="outline"
                         size="sm"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
                         disabled={loading}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
                   </div>
@@ -808,159 +951,168 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
           </Card>
         )}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            {showCreateButton && (
-              <Button onClick={() => setShowCreateForm(true)} className="bg-black hover:bg-gray-800" data-testid="open-create-funnel" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Funnel
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent>
-            {showCreateForm ? (
-              <div className="space-y-4">
+        <div className="space-y-4">
+          {(showCreateForm || showEditForm) ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="funnel-name">Funnel Name</Label>
+                  <Label htmlFor="funnel-name" className="text-sm">Funnel Name</Label>
                   <Input
                     id="funnel-name"
                     data-testid="funnel-name-input"
                     placeholder="e.g., User Onboarding"
                     value={funnelName}
                     onChange={(e) => setFunnelName(e.target.value)}
+                    className="h-9 text-sm mt-2"
                   />
                 </div>
-                <div>
-                  <Label>Funnel Steps (in order)</Label>
-                  <div className="space-y-2 mt-2">
-                    {funnelSteps.map((step, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <Badge variant="outline" className="w-12 justify-center">
-                          {index + 1}
-                        </Badge>
-                        <div className="flex-1 relative">
-                          <Input
-                            data-testid={`funnel-step-${index}`}
-                            placeholder={`Event name (e.g., ${index === 0 ? 'get_prompt' : index === 1 ? 'purchase' : 'signup'})`}
-                            value={step}
-                            onChange={(e) => updateStep(index, e.target.value)}
-                            onFocus={() => setShowSuggestions(index)}
-                            onBlur={() => setTimeout(() => setShowSuggestions(null), 200)}
-                          />
-                          {showSuggestions === index && (
-                            <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-y-auto">
-                              {/* Built-in events */}
-                              <div className="p-2 border-b bg-gray-50">
-                                <div className="flex items-center gap-1 text-xs text-gray-600">
-                                  <Lightbulb className="w-3 h-3" />
-                                  Built-in Events
-                                </div>
-                              </div>
-                              {['get_prompt'].filter(name => name.toLowerCase().includes(step.toLowerCase())).map((eventName) => (
-                                <button
-                                  key={eventName}
-                                  className="w-full text-left p-2 hover:bg-gray-50 border-b"
-                                  onClick={() => {
-                                    updateStep(index, eventName);
-                                    setShowSuggestions(null);
-                                  }}
-                                >
-                                  <div className="font-medium text-sm">{eventName}</div>
-                                  <div className="text-xs text-gray-500">System event - prompt request</div>
-                                </button>
-                              ))}
-                              {/* Custom event definitions */}
-                              {eventDefinitions.length > 0 && (
-                                <>
-                                  <div className="p-2 border-b bg-gray-50">
-                                    <div className="flex items-center gap-1 text-xs text-gray-600">
-                                      <Lightbulb className="w-3 h-3" />
-                                      Custom Events
-                                    </div>
-                                  </div>
-                                  {eventDefinitions
-                                    .filter(def => def.event_name.toLowerCase().includes(step.toLowerCase()))
-                                    .map((definition) => (
-                                      <button
-                                        key={definition.id}
-                                        className="w-full text-left p-2 hover:bg-gray-50 border-b last:border-b-0"
-                                        onClick={() => {
-                                          updateStep(index, definition.event_name);
-                                          setShowSuggestions(null);
-                                        }}
-                                      >
-                                        <div className="font-medium text-sm">{definition.event_name}</div>
-                                        <div className="text-xs text-gray-500">{definition.category}</div>
-                                        {definition.description && (
-                                          <div className="text-xs text-gray-400 mt-1">{definition.description}</div>
-                                        )}
-                                      </button>
-                                    ))}
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        {funnelSteps.length > 2 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeStep(index)}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <Label className="text-sm font-medium">Funnel Steps</Label>
+                    <p className="text-xs text-muted-foreground mt-1">Define the sequence of events for your conversion funnel</p>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={addStep}
-                    className="mt-2"
+                    className="text-xs"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Step
+                    <Plus className="w-3.5 h-3.5 mr-1" />
+                    Add
                   </Button>
                 </div>
-                <div className="bg-blue-50 p-4 rounded border">
-                  <h4 className="font-medium text-blue-900 mb-2">How it works:</h4>
-                  <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Define the sequence of events that represent your conversion funnel</li>
-                    <li>• Event names should match the event_name field from your tracked events</li>
-                    <li>• The system will calculate conversion rates between each step</li>
-                  </ul>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    data-testid="create-funnel-button"
-                    onClick={handleCreateFunnel}
-                    disabled={!funnelName || funnelSteps.some(step => !step.trim()) || loading}
-                  >
-                    {loading ? 'Saving...' : (editingConfiguration ? 'Update Funnel' : 'Create Funnel')}
-                  </Button>
-                  <Button
-                    data-testid="cancel-funnel-button"
-                    variant="outline"
-                    onClick={() => {
-                      setShowCreateForm(false);
-                      setEditingConfiguration(null);
-                      setFunnelName('');
-                      setFunnelSteps(['get_prompt', '']);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
+
+                {funnelSteps.map((step, index) => {
+                  // Always open dropdown downwards for first 4 items, then upwards for the rest
+                  const openDownwards = index < 4;
+
+                  return (
+                    <div key={index} className="flex items-start gap-2">
+                      <div className="flex-shrink-0 w-7 h-9 flex items-center justify-center bg-muted rounded text-xs font-medium">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 relative">
+                        <Input
+                          data-testid={`funnel-step-${index}`}
+                          placeholder={`Event name (e.g., ${index === 0 ? 'get_prompt' : index === 1 ? 'purchase' : 'signup'})`}
+                          value={step}
+                          onChange={(e) => updateStep(index, e.target.value)}
+                          onFocus={() => setShowSuggestions(index)}
+                          onBlur={() => setTimeout(() => setShowSuggestions(null), 200)}
+                          className="h-9 text-sm"
+                        />
+                        {showSuggestions === index && (
+                          <div className={`absolute left-0 right-0 z-50 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto ${
+                            openDownwards ? 'top-full mt-1' : 'bottom-full mb-1'
+                          }`}>
+                            {/* Built-in events */}
+                            <div className="px-3 py-2 border-b bg-gray-50">
+                              <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                                <Lightbulb className="w-3.5 h-3.5" />
+                                Built-in Events
+                              </div>
+                            </div>
+                            {['get_prompt'].filter(name => name.toLowerCase().includes(step.toLowerCase())).map((eventName) => (
+                              <button
+                                key={eventName}
+                                className="w-full text-left px-3 py-2.5 hover:bg-gray-50 border-b transition-colors"
+                                onClick={() => {
+                                  updateStep(index, eventName);
+                                  setShowSuggestions(null);
+                                }}
+                              >
+                                <div className="font-medium text-sm">{eventName}</div>
+                                <div className="text-xs text-muted-foreground mt-1">System event - prompt request</div>
+                              </button>
+                            ))}
+                            {/* Custom event definitions */}
+                            {eventDefinitions.length > 0 && (
+                              <>
+                                <div className="px-3 py-2 border-b bg-gray-50">
+                                  <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                                    <Lightbulb className="w-3.5 h-3.5" />
+                                    Custom Events
+                                  </div>
+                                </div>
+                                {eventDefinitions
+                                  .filter(def => def.event_name.toLowerCase().includes(step.toLowerCase()))
+                                  .map((definition) => (
+                                    <button
+                                      key={definition.id}
+                                      className="w-full text-left px-3 py-2.5 hover:bg-gray-50 border-b last:border-b-0 transition-colors"
+                                      onClick={() => {
+                                        updateStep(index, definition.event_name);
+                                        setShowSuggestions(null);
+                                      }}
+                                    >
+                                      <div className="font-medium text-sm">{definition.event_name}</div>
+                                      <div className="text-xs text-muted-foreground mt-1">{definition.category}</div>
+                                      {definition.description && (
+                                        <div className="text-xs text-muted-foreground mt-1">{definition.description}</div>
+                                      )}
+                                    </button>
+                                  ))}
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {funnelSteps.length > 2 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeStep(index)}
+                          className="h-9 w-9 p-0 flex-shrink-0"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {funnelSteps.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-3">No steps defined. Click "Add" to create one.</p>
+                )}
               </div>
-            ) : (
-              <div className="text-center text-muted-foreground py-8">
-                <p>No funnel data available.</p>
-                <p className="text-sm">Create a custom funnel to track conversion rates between specific events.</p>
+
+              <div className="flex gap-2 pt-2">
+                <Button
+                  data-testid="create-funnel-button"
+                  onClick={handleCreateFunnel}
+                  disabled={!funnelName || funnelSteps.some(step => !step.trim()) || loading}
+                  className="h-9 text-sm px-4 bg-black hover:bg-gray-800 text-white"
+                >
+                  {loading ? 'Saving...' : (editingConfiguration ? 'Update Funnel' : 'Save Funnel')}
+                </Button>
+                <Button
+                  data-testid="cancel-funnel-button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowCreateForm(false);
+                    setShowEditForm(false);
+                    setEditingConfiguration(null);
+                    setFunnelName('');
+                    setFunnelSteps(['get_prompt', '']);
+                    if (onCreateFormClose) onCreateFormClose();
+                    if (onEditFormClose) onEditFormClose();
+                  }}
+                  className="h-9 text-sm px-4"
+                >
+                  Cancel
+                </Button>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground py-8">
+              <p>No funnel data available.</p>
+              <p className="text-sm">Create a custom funnel to track conversion rates between specific events.</p>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -995,30 +1147,310 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
     }
   };
 
-  return (
-    <div className="space-y-3">
+  // Render filters separately if requested
+  const renderFiltersBlock = () => {
+    // Always show filters block, even if no configuration selected
+    
+    // Convert date presets to period format for Select
+    const getPeriodFromDates = () => {
+      if (!startDate && !endDate) return 'today';
+      // Check if dates match presets
+      const today = new Date();
+      const formatDate = (d: Date) => d.toISOString().split('T')[0];
+      const todayStr = formatDate(today);
+      
+      if (startDate === todayStr && endDate === todayStr) return 'today';
+      
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      if (startDate === formatDate(weekAgo) && endDate === todayStr) return '7days';
+      
+      const monthAgo = new Date(today);
+      monthAgo.setDate(monthAgo.getDate() - 30);
+      if (startDate === formatDate(monthAgo) && endDate === todayStr) return '30days';
+      
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      if (startDate === formatDate(firstDay) && endDate === todayStr) return 'thisMonth';
+      
+      return 'custom';
+    };
+
+    const handlePeriodChange = (period: string) => {
+      if (period === 'custom') {
+        // Don't clear dates, just mark as custom
+        return;
+      }
+      if (period === 'today' || period === '7days' || period === '30days' || period === 'thisMonth') {
+        applyDatePreset(period);
+      }
+    };
+    
+    return (
       <Card>
-        <CardHeader className="p-4">
-          {!showCreateForm && (
-            <div className="flex flex-col gap-2">
-              {/* Row 1: Funnel + Edit/Delete + Prompt + Version + Compare */}
-              <div className="flex items-center gap-2 flex-wrap">
-                {savedConfigurations.length > 0 && (
-                  <select
-                    className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[140px] h-8"
+        <CardContent className="px-4 py-3">
+          <div className="space-y-2">
+            {/* Row 1: Funnel selector + Edit/Delete + Period + New */}
+            <div className="flex items-center gap-2">
+              {savedConfigurations.length > 0 && (
+                <>
+                  <Select
                     value={currentConfiguration?.id || ''}
-                    onChange={(e) => {
-                      const config = savedConfigurations.find(c => c.id === e.target.value);
+                    onValueChange={(value) => {
+                      const config = savedConfigurations.find(c => c.id === value);
                       if (config) loadConfiguration(config);
                     }}
                   >
-                    <option value="">Select funnel...</option>
-                    {savedConfigurations.map((config) => (
-                      <option key={config.id} value={config.id}>
-                        {config.name}
-                      </option>
+                    <SelectTrigger className="h-9 w-[200px]">
+                      <SelectValue placeholder="Select funnel..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {savedConfigurations.map((config) => (
+                        <SelectItem key={config.id} value={config.id}>
+                          {config.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {currentConfiguration && (
+                    <>
+                      <Button
+                        onClick={() => {
+                          if (onEditClick) {
+                            onEditClick(currentConfiguration);
+                          } else {
+                            startEditConfiguration(currentConfiguration);
+                            setShowEditForm(true);
+                          }
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="h-9 w-9 p-0"
+                        title="Edit funnel configuration"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        onClick={() => deleteFunnelConfiguration(currentConfiguration.id)}
+                        variant="outline"
+                        size="sm"
+                        className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        disabled={loading}
+                        title="Delete funnel configuration"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* Period selector */}
+              {currentConfiguration && (
+                <>
+                  <div className="w-px h-5 bg-gray-200 mx-1" />
+                  <Select value={getPeriodFromDates()} onValueChange={handlePeriodChange}>
+                    <SelectTrigger className="h-9 w-[120px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="7days">7 days</SelectItem>
+                      <SelectItem value="30days">30 days</SelectItem>
+                      <SelectItem value="thisMonth">This month</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {(startDate || endDate || getPeriodFromDates() === 'custom') && (
+                    <>
+                      <Input
+                        id="start-date"
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="text-xs h-9 w-[130px]"
+                      />
+                      <span className="text-xs text-muted-foreground">—</span>
+                      <Input
+                        id="end-date"
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="text-xs h-9 w-[130px]"
+                      />
+                      {(startDate || endDate) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setStartDate('');
+                            setEndDate('');
+                          }}
+                          className="h-9 w-9 p-0 text-muted-foreground hover:text-foreground"
+                          title="Clear date filter"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+
+              <div className="flex-1"></div>
+
+              {/* New button at the end */}
+              {(onNewClick || showCreateButton) && (
+                <Button
+                  onClick={() => onNewClick ? onNewClick() : setShowCreateForm(true)}
+                  size="sm"
+                  className="bg-black hover:bg-gray-800 text-xs h-9"
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1" />
+                  New
+                </Button>
+              )}
+            </div>
+
+            {/* Row 2: Prompt + Version + Compare */}
+            {currentConfiguration && prompts.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Select
+                  value={selectedPromptId || "all"}
+                  onValueChange={(value) => {
+                    setSelectedPromptId(value === "all" ? "" : value);
+                    setSelectedVersionId('');
+                  }}
+                >
+                  <SelectTrigger className="h-9 w-[200px]">
+                    <SelectValue placeholder="All Prompts" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Prompts</SelectItem>
+                    {prompts.map((prompt) => (
+                      <SelectItem key={prompt.id} value={prompt.id}>
+                        {prompt.name}
+                      </SelectItem>
                     ))}
-                  </select>
+                  </SelectContent>
+                </Select>
+
+                {/* Version Selector */}
+                {selectedPromptId && promptVersions.length > 0 && (
+                  <>
+                    <Select
+                      value={selectedVersionId || "all"}
+                      onValueChange={(value) => {
+                        setSelectedVersionId(value === "all" ? "" : value);
+                        if (isComparing) {
+                          setCompareVersionId('');
+                          setCompareData(null);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="h-9 w-[160px]">
+                        <SelectValue placeholder="All Versions" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Versions</SelectItem>
+                        {promptVersions.map((version) => (
+                          <SelectItem key={version.id} value={version.id}>
+                            v{version.version_number} ({version.status})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {selectedVersionId && !isComparing && (
+                      <Button
+                        onClick={startComparison}
+                        variant="outline"
+                        size="sm"
+                        className="h-9 px-2 text-xs gap-1"
+                        title="Compare with another version"
+                      >
+                        <GitCompare className="w-3.5 h-3.5" />
+                        Compare
+                      </Button>
+                    )}
+
+                    {/* Compare version selector */}
+                    {isComparing && selectedVersionId && (
+                      <>
+                        <span className="text-xs text-muted-foreground">vs</span>
+                        <Select
+                          value={compareVersionId}
+                          onValueChange={(value) => setCompareVersionId(value)}
+                        >
+                          <SelectTrigger className="h-9 w-[160px]">
+                            <SelectValue placeholder="Select version..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {promptVersions
+                              .filter(v => v.id !== selectedVersionId)
+                              .map((version) => (
+                                <SelectItem key={version.id} value={version.id}>
+                                  v{version.version_number} ({version.status})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          onClick={stopComparison}
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 w-9 p-0 text-muted-foreground hover:text-red-500"
+                          title="Cancel comparison"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </Button>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  return (
+    <div className="space-y-0">
+      {renderFiltersSeparately && renderFiltersBlock()}
+      {renderFiltersSeparately && <div className="h-4"></div>}
+      <div className="space-y-4">
+        <Card>
+          <CardHeader className="px-4 py-3">
+            {(showCreateForm || (showEditForm && !renderFiltersSeparately)) ? (
+              <h3 className="text-xs font-medium">
+                {editingConfiguration ? 'Edit Funnel' : 'Create New Funnel'}
+              </h3>
+            ) : !renderFiltersSeparately ? (
+              <div className="space-y-2 pt-4">
+                <div className="flex flex-col gap-2">
+                  {/* Row 1: Funnel + Edit/Delete + Prompt + Version + Compare */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                {savedConfigurations.length > 0 && (
+                  <>
+                    <TrendingDown className="w-3.5 h-3.5 text-muted-foreground" />
+                    <select
+                      className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[140px] h-9"
+                      value={currentConfiguration?.id || ''}
+                      onChange={(e) => {
+                        const config = savedConfigurations.find(c => c.id === e.target.value);
+                        if (config) loadConfiguration(config);
+                      }}
+                    >
+                      <option value="">Select funnel...</option>
+                      {savedConfigurations.map((config) => (
+                        <option key={config.id} value={config.id}>
+                          {config.name}
+                        </option>
+                      ))}
+                    </select>
+                  </>
                 )}
                 {currentConfiguration && (
                   <>
@@ -1042,7 +1474,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                   </>
                 )}
                 {showCreateButton && (
-                  <Button onClick={() => setShowCreateForm(true)} variant="outline" className="text-xs h-8 px-2">
+                  <Button onClick={() => setShowCreateForm(true)} variant="outline" size="sm" className="text-xs">
                     <Plus className="w-3.5 h-3.5 mr-1" />
                     New
                   </Button>
@@ -1056,7 +1488,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                 {/* Prompt filter */}
                 {currentConfiguration && prompts.length > 0 && (
                   <select
-                    className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[140px] h-8"
+                    className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[140px] h-9"
                     value={selectedPromptId}
                     onChange={(e) => {
                       setSelectedPromptId(e.target.value);
@@ -1075,7 +1507,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                 {currentConfiguration && selectedPromptId && promptVersions.length > 0 && (
                   <>
                     <select
-                      className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[100px] h-8"
+                      className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[100px] h-9"
                       value={selectedVersionId}
                       onChange={(e) => {
                         setSelectedVersionId(e.target.value);
@@ -1111,7 +1543,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                       <>
                         <span className="text-xs text-muted-foreground">vs</span>
                         <select
-                          className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[100px] h-8"
+                          className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[100px] h-9"
                           value={compareVersionId}
                           onChange={(e) => setCompareVersionId(e.target.value)}
                         >
@@ -1127,7 +1559,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                         <Button
                           onClick={stopComparison}
                           variant="ghost"
-                          className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
+                          className="h-8 w-8 p-0 text-muted-foreground hover:text-red-500"
                           title="Cancel comparison"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -1141,10 +1573,10 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
               {/* Row 2: Date range with quick presets */}
               {currentConfiguration && (
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                   
                   {/* Quick presets */}
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => applyDatePreset('today')}
                       className="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
@@ -1174,13 +1606,13 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                   <div className="w-px h-5 bg-gray-200 mx-1" />
                   
                   {/* Custom date range */}
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     <Input
                       id="start-date"
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="text-xs h-8 w-[130px]"
+                      className="text-xs h-9 w-[130px]"
                     />
                     <span className="text-xs text-muted-foreground">—</span>
                     <Input
@@ -1188,7 +1620,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="text-xs h-8 w-[130px]"
+                      className="text-xs h-9 w-[130px]"
                     />
                   </div>
                   
@@ -1200,21 +1632,34 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                         setStartDate('');
                         setEndDate('');
                       }}
-                      className="h-8 w-8 p-0 text-muted-foreground hover:text-gray-900"
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                       title="Clear date filter"
                     >
                       <X className="w-3.5 h-3.5" />
                     </Button>
                   )}
+                  </div>
+                )}
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            ) : null}
         </CardHeader>
-        <CardContent>
-          {!showCreateForm ? (
+        <CardContent className="px-4 py-3">
+          {!(showCreateForm || (showEditForm && !renderFiltersSeparately)) ? (
             <>
               {(() => {
+                // If renderFiltersSeparately and no configuration selected, show empty state
+                if (renderFiltersSeparately && !currentConfiguration) {
+                  return (
+                    <div className="flex items-center justify-center py-12 text-muted-foreground">
+                      <div className="text-center">
+                        <p className="text-sm font-medium mb-1">No funnel selected</p>
+                        <p className="text-xs">Select a funnel from the dropdown above to view data</p>
+                      </div>
+                    </div>
+                  );
+                }
+
                 // Check if any filters are selected (prompt, version, or dates)
                 const hasFilters = selectedPromptId || selectedVersionId || startDate || endDate;
                 
@@ -1293,25 +1738,46 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
               
             </>
           ) : (
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="funnel-name-replace" className="text-xs">Funnel Name</Label>
-                <Input
-                  id="funnel-name-replace"
-                  placeholder="e.g., Purchase Journey"
-                  value={funnelName}
-                  onChange={(e) => setFunnelName(e.target.value)}
-                  className="text-xs h-8"
-                />
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="funnel-name-replace" className="text-sm">Funnel Name</Label>
+                  <Input
+                    id="funnel-name-replace"
+                    placeholder="e.g., Purchase Journey"
+                    value={funnelName}
+                    onChange={(e) => setFunnelName(e.target.value)}
+                    className="text-sm h-9 mt-1.5"
+                  />
+                </div>
               </div>
-              <div>
-                <Label className="text-xs">Funnel Steps (in order)</Label>
-                <div className="space-y-1.5 mt-2">
-                  {funnelSteps.map((step, index) => (
-                    <div key={index} className="flex items-center gap-1.5">
-                      <Badge variant="outline" className="w-8 justify-center text-[10px] h-6">
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <Label className="text-sm font-medium">Funnel Steps</Label>
+                    <p className="text-xs text-muted-foreground mt-1">Define the sequence of events for your conversion funnel</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={addStep}
+                    className="text-xs"
+                  >
+                    <Plus className="w-3.5 h-3.5 mr-1" />
+                    Add
+                  </Button>
+                </div>
+
+                {funnelSteps.map((step, index) => {
+                  // Open dropdown upwards for last 2 items to prevent cut-off
+                  const isNearBottom = index >= funnelSteps.length - 2;
+
+                  return (
+                    <div key={index} className="flex items-start gap-2">
+                      <div className="flex-shrink-0 w-7 h-9 flex items-center justify-center bg-muted rounded text-xs font-medium">
                         {index + 1}
-                      </Badge>
+                      </div>
                       <div className="flex-1 relative">
                         <Input
                           placeholder={`Event name (e.g., ${index === 0 ? 'get_prompt' : index === 1 ? 'purchase' : 'signup'})`}
@@ -1319,36 +1785,38 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                           onChange={(e) => updateStep(index, e.target.value)}
                           onFocus={() => setShowSuggestions(index)}
                           onBlur={() => setTimeout(() => setShowSuggestions(null), 200)}
-                          className="text-xs h-7"
+                          className="text-sm h-9"
                         />
                         {showSuggestions === index && (
-                          <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border rounded-md shadow-lg max-h-40 overflow-y-auto">
+                          <div className={`absolute left-0 right-0 z-50 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto ${
+                            isNearBottom ? 'bottom-full mb-1' : 'top-full mt-1'
+                          }`}>
                             {/* Built-in events */}
-                            <div className="p-1.5 border-b bg-gray-50">
-                              <div className="flex items-center gap-1 text-[10px] text-gray-600">
-                                <Lightbulb className="w-2.5 h-2.5" />
+                            <div className="px-3 py-2 border-b bg-gray-50">
+                              <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                                <Lightbulb className="w-3.5 h-3.5" />
                                 Built-in Events
                               </div>
                             </div>
                             {['get_prompt'].filter(name => name.toLowerCase().includes(step.toLowerCase())).map((eventName) => (
                               <button
                                 key={eventName}
-                                className="w-full text-left p-1.5 hover:bg-gray-50 border-b"
+                                className="w-full text-left px-3 py-2.5 hover:bg-gray-50 border-b transition-colors"
                                 onClick={() => {
                                   updateStep(index, eventName);
                                   setShowSuggestions(null);
                                 }}
                               >
-                                <div className="font-medium text-xs">{eventName}</div>
-                                <div className="text-[10px] text-gray-500">System event - prompt request</div>
+                                <div className="font-medium text-sm">{eventName}</div>
+                                <div className="text-xs text-muted-foreground mt-1">System event - prompt request</div>
                               </button>
                             ))}
                             {/* Custom event definitions */}
                             {eventDefinitions.length > 0 && (
                               <>
-                                <div className="p-1.5 border-b bg-gray-50">
-                                  <div className="flex items-center gap-1 text-[10px] text-gray-600">
-                                    <Lightbulb className="w-2.5 h-2.5" />
+                                <div className="px-3 py-2 border-b bg-gray-50">
+                                  <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                                    <Lightbulb className="w-3.5 h-3.5" />
                                     Custom Events
                                   </div>
                                 </div>
@@ -1357,16 +1825,16 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                                   .map((definition) => (
                                     <button
                                       key={definition.id}
-                                      className="w-full text-left p-1.5 hover:bg-gray-50 border-b last:border-b-0"
+                                      className="w-full text-left px-3 py-2.5 hover:bg-gray-50 border-b last:border-b-0 transition-colors"
                                       onClick={() => {
                                         updateStep(index, definition.event_name);
                                         setShowSuggestions(null);
                                       }}
                                     >
-                                      <div className="font-medium text-xs">{definition.event_name}</div>
-                                      <div className="text-[10px] text-gray-500">{definition.category}</div>
+                                      <div className="font-medium text-sm">{definition.event_name}</div>
+                                      <div className="text-xs text-muted-foreground mt-1">{definition.category}</div>
                                       {definition.description && (
-                                        <div className="text-[10px] text-gray-400 mt-0.5">{definition.description}</div>
+                                        <div className="text-xs text-muted-foreground mt-1">{definition.description}</div>
                                       )}
                                     </button>
                                   ))}
@@ -1377,41 +1845,28 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                       </div>
                       {funnelSteps.length > 2 && (
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => removeStep(index)}
-                          className="h-7 w-7 p-0"
+                          className="h-9 w-9 p-0 flex-shrink-0"
                         >
-                          <X className="w-3 h-3" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </Button>
                       )}
                     </div>
-                  ))}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={addStep}
-                  className="mt-1.5 text-xs h-7 px-2"
-                >
-                  <Plus className="w-3 h-3 mr-1" />
-                  Add Step
-                </Button>
+                  );
+                })}
+
+                {funnelSteps.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-3">No steps defined. Click "Add" to create one.</p>
+                )}
               </div>
-              <div className="bg-blue-50 p-3 rounded border">
-                <h4 className="font-medium text-blue-900 mb-1.5 text-sm">How it works:</h4>
-                <ul className="text-xs text-blue-800 space-y-1">
-                  <li>• Define the sequence of events that represent your conversion funnel</li>
-                  <li>• Event names should match the event_name field from your tracked events</li>
-                  <li>• The system will calculate conversion rates between each step</li>
-                  <li>• This will replace your current funnel configuration</li>
-                </ul>
-              </div>
-              <div className="flex gap-2">
+
+              <div className="flex gap-2 pt-2">
                 <Button
                   onClick={handleCreateFunnel}
                   disabled={!funnelName || funnelSteps.some(step => !step.trim()) || loading}
-                  className="text-xs h-7 px-3"
+                  className="text-sm h-9 px-4 bg-black hover:bg-gray-800 text-white"
                 >
                   {loading ? 'Saving...' : (editingConfiguration ? 'Update Funnel' : 'Save Funnel')}
                 </Button>
@@ -1419,11 +1874,14 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                   variant="outline"
                   onClick={() => {
                     setShowCreateForm(false);
+                    setShowEditForm(false);
                     setEditingConfiguration(null);
                     setFunnelName('');
                     setFunnelSteps(['get_prompt', '']);
+                    if (onCreateFormClose) onCreateFormClose();
+                    if (onEditFormClose) onEditFormClose();
                   }}
-                  className="text-xs h-7 px-3"
+                  className="text-sm h-9 px-4"
                 >
                   Cancel
                 </Button>
@@ -1432,6 +1890,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

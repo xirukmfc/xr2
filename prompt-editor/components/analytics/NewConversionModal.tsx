@@ -130,7 +130,7 @@ export default function NewConversionModal({ onSave, onCancel }: NewConversionMo
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-slate-600">Loading...</div>
+        <div className="text-muted-foreground">Loading...</div>
       </div>
     );
   }

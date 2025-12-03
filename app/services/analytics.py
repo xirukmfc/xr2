@@ -536,7 +536,6 @@ async def get_monthly_events_chart_data(db: AsyncSession, workspace_id: UUID):
         # row.date is now a timestamp from date_trunc, extract date part
         date_str = row.date.date().strftime('%Y-%m-%d') if hasattr(row.date, 'date') else row.date.strftime('%Y-%m-%d')
         group_key = row.event_name
-        print(f"[MONTHLY_EVENTS] Row: date={date_str}, event_name={row.event_name}, count={row.count}")
 
         if group_key not in chart_data:
             chart_data[group_key] = {

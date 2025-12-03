@@ -15,7 +15,8 @@ class Settings(BaseSettings):
     # Security
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30 days (30 * 24 * 60 = 43200 minutes)
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 90  # 90 days for refresh token
 
     # Admin
     ADMIN_USERNAME: str

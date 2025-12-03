@@ -3,15 +3,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 from typing import Optional
 from pydantic import BaseModel, EmailStr
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from app.core.database import get_session
 from app.core.security import (
     create_access_token,
+    create_refresh_token,
     verify_password,
     get_password_hash
 )
 from app.models.user import User
+from app.models.refresh_token import RefreshToken
 from app.models.workspace import Workspace
 from app.models.prompt import Prompt, PromptVersion, Tag, prompt_tags
 from app.models.llm import UserAPIKey
@@ -34,6 +36,7 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
+    remember_me: bool = False  # If true, include refresh token in response
 
 
 class UserResponse(BaseModel):
@@ -49,6 +52,7 @@ class UserResponse(BaseModel):
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: Optional[str] = None  # Only included if "remember_me" is true
     token_type: str
     user: UserResponse
     api_key: Optional[str] = None  # API key for new users (only shown once)
@@ -61,10 +65,15 @@ class UserUpdate(BaseModel):
 
 class GoogleLoginRequest(BaseModel):
     credential: str  # Google ID token
+    remember_me: bool = False  # If true, include refresh token in response
 
 
 class DeleteAccountRequest(BaseModel):
     confirmation: str  # Require typing "delete" to confirm
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
 
 
 # Import centralized auth dependency
@@ -205,11 +214,96 @@ async def login_user(
     # Create access token
     access_token = create_access_token(subject=str(user.id))
 
+    # Create refresh token if remember_me is true
+    refresh_token_value = None
+    if user_data.remember_me:
+        refresh_token_value = create_refresh_token()
+        expires_at = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
+        # Store refresh token in database
+        refresh_token_obj = RefreshToken(
+            user_id=user.id,
+            token=refresh_token_value,
+            expires_at=expires_at
+        )
+        session.add(refresh_token_obj)
+        await session.commit()
+
     return Token(
         access_token=access_token,
+        refresh_token=refresh_token_value,
         token_type="bearer",
         user=UserResponse(**user.to_dict()),
         api_key=api_key_value
+    )
+
+
+@router.post("/refresh", response_model=Token)
+async def refresh_access_token(
+        request_data: RefreshTokenRequest,
+        session: AsyncSession = Depends(get_session)
+):
+    """Refresh access token using refresh token"""
+
+    # Find refresh token in database
+    result = await session.execute(
+        select(RefreshToken).where(RefreshToken.token == request_data.refresh_token)
+    )
+    refresh_token = result.scalar_one_or_none()
+
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Check if token is valid (not revoked and not expired)
+    if not refresh_token.is_valid():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token has expired or been revoked",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Get user
+    user_result = await session.execute(
+        select(User).where(User.id == refresh_token.user_id)
+    )
+    user = user_result.scalar_one_or_none()
+
+    if not user or not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found or inactive",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Create new access token
+    access_token = create_access_token(subject=str(user.id))
+
+    # Optionally: Create a new refresh token (token rotation for security)
+    new_refresh_token_value = create_refresh_token()
+    new_expires_at = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
+    # Revoke old refresh token
+    refresh_token.revoked_at = datetime.now(timezone.utc)
+
+    # Create new refresh token
+    new_refresh_token = RefreshToken(
+        user_id=user.id,
+        token=new_refresh_token_value,
+        expires_at=new_expires_at
+    )
+    session.add(new_refresh_token)
+    await session.commit()
+
+    return Token(
+        access_token=access_token,
+        refresh_token=new_refresh_token_value,
+        token_type="bearer",
+        user=UserResponse(**user.to_dict()),
+        api_key=None  # Don't return API key on refresh
     )
 
 
@@ -371,11 +465,27 @@ async def google_login(
         # Create access token
         access_token = create_access_token(subject=str(user.id))
 
+        # Create refresh token if remember_me is true
+        refresh_token_value = None
+        if google_data.remember_me:
+            refresh_token_value = create_refresh_token()
+            expires_at = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
+            # Store refresh token in database
+            refresh_token_obj = RefreshToken(
+                user_id=user.id,
+                token=refresh_token_value,
+                expires_at=expires_at
+            )
+            session.add(refresh_token_obj)
+            await session.commit()
+
         # Refresh user to ensure all fields are loaded
         await session.refresh(user)
 
         return Token(
             access_token=access_token,
+            refresh_token=refresh_token_value,
             token_type="bearer",
             user=UserResponse(**user.to_dict()),
             api_key=api_key_value

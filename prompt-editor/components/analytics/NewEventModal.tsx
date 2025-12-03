@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,6 +14,7 @@ interface MetadataField {
 }
 
 interface EventDefinition {
+  id?: string;
   event_name: string;
   description: string;
   metadata_schema: MetadataField[];
@@ -53,10 +54,11 @@ const EVENT_TEMPLATES = {
 interface NewEventModalProps {
   onSave: (definition: EventDefinition) => void;
   onCancel: () => void;
+  initialData?: EventDefinition | null;
 }
 
-export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) {
-  const [formData, setFormData] = useState<EventDefinition>({
+export default function NewEventModal({ onSave, onCancel, initialData }: NewEventModalProps) {
+  const [formData, setFormData] = useState<EventDefinition>(initialData || {
     event_name: '',
     description: '',
     metadata_schema: [],
@@ -67,6 +69,22 @@ export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) 
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>('');
+
+  // Update formData when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    } else {
+      setFormData({
+        event_name: '',
+        description: '',
+        metadata_schema: [],
+        validation_rules: [],
+        success_criteria: {},
+        alert_thresholds: {}
+      });
+    }
+  }, [initialData]);
 
   const addField = () => {
     const field: MetadataField = {
@@ -105,8 +123,12 @@ export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) 
     setError('');
 
     try {
-      await apiClient.request('/event-definitions', {
-        method: 'POST',
+      const isUpdate = formData.id;
+      const method = isUpdate ? 'PUT' : 'POST';
+      const url = isUpdate ? `/event-definitions/${formData.id}` : '/event-definitions';
+
+      await apiClient.request(url, {
+        method,
         body: JSON.stringify(formData)
       });
 
@@ -153,10 +175,10 @@ export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) 
       </div>
 
       {/* Standard Fields Info */}
-      <div className="p-3 bg-gray-50 rounded-md space-y-1">
+      <div className="p-3 bg-muted/50 rounded-md space-y-2">
         <Label className="text-sm font-medium">Standard Fields (automatically available)</Label>
-        <p className="text-xs text-gray-600">These fields are available in all events:</p>
-        <ul className="text-xs text-gray-600 ml-4 list-disc space-y-0.5">
+        <p className="text-xs text-muted-foreground">These fields are available in all events:</p>
+        <ul className="text-xs text-muted-foreground ml-4 list-disc space-y-0.5">
           <li><code className="bg-white px-1 rounded">event_name</code> - string (required)</li>
           <li><code className="bg-white px-1 rounded">trace_id</code> - string (required)</li>
           <li><code className="bg-white px-1 rounded">user_id</code> - string (optional)</li>
@@ -171,7 +193,7 @@ export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) 
         <div className="flex justify-between items-center">
           <div>
             <Label className="text-sm font-medium">Custom Metadata Fields</Label>
-            <p className="text-xs text-gray-500">Define custom fields that will be passed in the metadata object</p>
+            <p className="text-xs text-muted-foreground">Define custom fields that will be passed in the metadata object</p>
           </div>
           <Button
             onClick={addField}
@@ -207,7 +229,7 @@ export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) 
                     <SelectItem value="object">Object</SelectItem>
                   </SelectContent>
                 </Select>
-                <label className="flex items-center gap-1.5 text-sm whitespace-nowrap">
+                <label className="flex items-center gap-2 text-sm whitespace-nowrap">
                   <input
                     type="checkbox"
                     checked={field.required}
@@ -236,7 +258,7 @@ export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) 
           </div>
         ))}
         {formData.metadata_schema.length === 0 && (
-          <p className="text-xs text-gray-400 text-center py-2">No custom fields defined. Click "Add" to create one.</p>
+          <p className="text-xs text-muted-foreground text-center py-2">No custom fields defined. Click "Add" to create one.</p>
         )}
       </div>
 
@@ -247,7 +269,7 @@ export default function NewEventModal({ onSave, onCancel }: NewEventModalProps) 
           size="sm"
           className="bg-black hover:bg-gray-800"
         >
-          {saving ? 'Creating...' : 'Create Event'}
+          {saving ? (formData.id ? 'Updating...' : 'Creating...') : (formData.id ? 'Update Event' : 'Create Event')}
         </Button>
         <Button
           onClick={onCancel}

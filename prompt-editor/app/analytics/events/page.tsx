@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
-import EventDefinitionBuilder from '@/components/analytics/EventDefinitionBuilder';
+import EventDefinitionBuilder, { type EventDefinition as BuilderEventDefinition } from '@/components/analytics/EventDefinitionBuilder';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+// Legacy interface for this page - kept for backwards compatibility
 interface EventDefinition {
   event_name: string;
   category: string;
@@ -26,8 +27,19 @@ export default function EventsPage() {
   const [savedEvents, setSavedEvents] = useState<EventDefinition[]>([]);
   const [activeTab, setActiveTab] = useLocalStorage<string>("events-active-tab", "list");
 
-  const handleSaveEvent = (definition: EventDefinition) => {
-    setSavedEvents([...savedEvents, definition]);
+  const handleSaveEvent = (definition: BuilderEventDefinition) => {
+    // Convert new format to legacy format for this page
+    const legacyEvent: EventDefinition = {
+      event_name: definition.event_name,
+      category: '', // Not in new format
+      description: definition.description,
+      required_fields: definition.metadata_schema?.filter(f => f.required) || [],
+      optional_fields: definition.metadata_schema?.filter(f => !f.required) || [],
+      validation_rules: definition.validation_rules,
+      success_criteria: definition.success_criteria,
+      alert_thresholds: definition.alert_thresholds,
+    };
+    setSavedEvents([...savedEvents, legacyEvent]);
     console.log('Event definition saved:', definition);
   };
 

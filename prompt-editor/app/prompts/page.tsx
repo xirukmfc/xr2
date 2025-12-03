@@ -21,6 +21,8 @@ import { EmptyState } from "@/components/ui/empty-state"
 import {useNotification, NotificationProvider} from "@/components/notification-provider"
 import {OnboardingWelcome} from "@/components/onboarding-welcome"
 import {useAuth} from "@/contexts/auth-context"
+import {getStatusBadgeClasses, getStatusDotClasses} from "@/lib/design-tokens"
+import {logger} from "@/lib/logger"
 
 // UI model expected by design components
 export interface UIPrompt {
@@ -51,7 +53,7 @@ const transformApiPromptToUIPrompt = (apiPrompt: ApiPrompt): UIPrompt => {
 
     const creatorDisplayName = getDisplayName(apiPrompt.creator_full_name, apiPrompt.creator_name)
     const updaterDisplayName = getDisplayName(apiPrompt.updater_full_name, apiPrompt.updater_name)
-    console.log("apiPrompt:", apiPrompt)
+    logger.log("apiPrompt:", apiPrompt)
     const displayName = apiPrompt.updater_name && apiPrompt.updater_name.trim()
         ? updaterDisplayName
         : creatorDisplayName
@@ -125,16 +127,16 @@ function PromptsPageContent() {
 
     // Check if user needs onboarding and fetch API key if needed
     useEffect(() => {
-        console.log('[PromptsPage] useEffect triggered, user:', user)
+        logger.log('[PromptsPage] useEffect triggered, user:', user)
         if (typeof window !== 'undefined' && user) {
             const checkOnboarding = async () => {
-                console.log('[PromptsPage] checkOnboarding called, user.onboarding_completed:', user.onboarding_completed, 'type:', typeof user.onboarding_completed)
+                logger.log('[PromptsPage] checkOnboarding called, user.onboarding_completed:', user.onboarding_completed, 'type:', typeof user.onboarding_completed)
                 
                 // Use ONLY server-side onboarding_completed flag - ignore localStorage completely
                 // Convert to boolean to handle any edge cases (string "true", etc.)
                 const onboardingCompleted = Boolean(user.onboarding_completed === true || user.onboarding_completed === 'true')
                 
-                console.log('[PromptsPage] Calculated onboardingCompleted:', onboardingCompleted, 'from server value:', user.onboarding_completed)
+                logger.log('[PromptsPage] Calculated onboardingCompleted:', onboardingCompleted, 'from server value:', user.onboarding_completed)
                 
                 // Sync localStorage with server value (for backward compatibility only)
                 if (onboardingCompleted) {
@@ -158,13 +160,13 @@ function PromptsPageContent() {
                             setUserApiKey(apiKey)
                         }
                     } catch (error) {
-                        console.error('[PromptsPage] Failed to fetch API keys:', error)
+                        logger.error('[PromptsPage] Failed to fetch API keys:', error)
                     }
                 } else if (apiKey) {
                     setUserApiKey(apiKey)
                 }
                 
-                console.log('[PromptsPage] Onboarding check:', {
+                logger.log('[PromptsPage] Onboarding check:', {
                     userOnboardingCompleted: user.onboarding_completed,
                     calculatedOnboardingCompleted: onboardingCompleted,
                     localStorageCompleted: localStorage.getItem('onboarding_completed'),
@@ -176,39 +178,39 @@ function PromptsPageContent() {
                 
                 // Show onboarding if onboarding is not completed yet (regardless of API key)
                 if (!onboardingCompleted) {
-                    console.log('[PromptsPage] ✅ Setting showOnboarding to TRUE (onboarding_completed = false)')
+                    logger.log('[PromptsPage] ✅ Setting showOnboarding to TRUE (onboarding_completed = false)')
                     setShowOnboarding(true)
                 } else {
-                    console.log('[PromptsPage] ❌ NOT showing onboarding (onboarding_completed = true)')
+                    logger.log('[PromptsPage] ❌ NOT showing onboarding (onboarding_completed = true)')
                     setShowOnboarding(false)
                 }
             }
             
             checkOnboarding()
         } else {
-            console.log('[PromptsPage] User not available yet, user:', user)
+            logger.log('[PromptsPage] User not available yet, user:', user)
         }
     }, [user])
 
     // Load data
     const loadData = useCallback(async () => {
-        console.log('[PromptsPage] loadData called:', { currentWorkspaceId, workspaceLoading });
+        logger.log('[PromptsPage] loadData called:', { currentWorkspaceId, workspaceLoading });
         if (!currentWorkspaceId || workspaceLoading) {
-            console.log('[PromptsPage] Skipping load - no workspace or still loading');
+            logger.log('[PromptsPage] Skipping load - no workspace or still loading');
             return;
         }
         
-        console.log('[PromptsPage] Starting to load prompts...');
+        logger.log('[PromptsPage] Starting to load prompts...');
         setLoading(true)
         try {
             const promptsData = await getPrompts({workspace_id: currentWorkspaceId})
-            console.log('[PromptsPage] Loaded prompts:', promptsData.length, 'items');
+            logger.log('[PromptsPage] Loaded prompts:', promptsData.length, 'items');
             setPrompts(promptsData)
             setError(null)
             // Invalidate cache to update counts after data changes
             await invalidateAndRefetch()
         } catch (err) {
-            console.error('[PromptsPage] Error loading prompts:', err);
+            logger.error('[PromptsPage] Error loading prompts:', err);
             setError(err instanceof Error ? err.message : "Failed to load prompts.")
         } finally {
             setLoading(false)
@@ -231,9 +233,9 @@ function PromptsPageContent() {
                     await deletePrompt(promptId)
                     successCount++
                 } catch (error) {
-                    console.error(`Failed to delete prompt ${promptId}:`, error)
+                    logger.error(`Failed to delete prompt ${promptId}:`, error)
                     const errorMessage = error instanceof Error ? error.message : String(error)
-                    console.error(`Error details:`, errorMessage)
+                    logger.error(`Error details:`, errorMessage)
                     errorCount++
                 }
             }
@@ -251,14 +253,14 @@ function PromptsPageContent() {
                 await invalidatePromptsCache()
                 await loadData()
             } catch (error) {
-                console.error('Failed to refresh data after delete:', error)
+                logger.error('Failed to refresh data after delete:', error)
                 const errorMessage = error instanceof Error ? error.message : String(error)
                 showNotification(`Warning: Could not refresh data: ${errorMessage}`, "error")
             }
 
             setSelectedPrompts([])
         } catch (error) {
-            console.error('Unexpected error in handleBulkDelete:', error)
+            logger.error('Unexpected error in handleBulkDelete:', error)
             const errorMessage = error instanceof Error ? error.message : String(error)
             showNotification(`Unexpected error: ${errorMessage}`, "error")
         } finally {
@@ -278,10 +280,10 @@ function PromptsPageContent() {
                 try {
                     // Get all versions for this prompt
                     const versions = await getPromptVersions(promptId)
-                    console.log(`Deploy: Found ${versions.length} versions for prompt ${promptId}`, versions)
+                    logger.log(`Deploy: Found ${versions.length} versions for prompt ${promptId}`, versions)
 
                     if (versions.length === 0) {
-                        console.warn(`No versions found for prompt ${promptId}`)
+                        logger.warn(`No versions found for prompt ${promptId}`)
                         errorCount++
                         continue
                     }
@@ -291,17 +293,17 @@ function PromptsPageContent() {
                         current.version_number > latest.version_number ? current : latest
                     )
 
-                    console.log(`Deploy: Latest version for prompt ${promptId}:`, latestVersion)
+                    logger.log(`Deploy: Latest version for prompt ${promptId}:`, latestVersion)
 
                     if (latestVersion) {
                         const result = await deployPromptVersion(promptId, latestVersion.id)
-                        console.log(`Deploy result for ${promptId}:`, result)
+                        logger.log(`Deploy result for ${promptId}:`, result)
                         successCount++
                     } else {
                         errorCount++
                     }
                 } catch (error) {
-                    console.error(`Failed to deploy prompt ${promptId}:`, error)
+                    logger.error(`Failed to deploy prompt ${promptId}:`, error)
                     errorCount++
                 }
             }
@@ -339,29 +341,29 @@ function PromptsPageContent() {
                 try {
                     // Get all versions for this prompt
                     const versions = await getPromptVersions(promptId)
-                    console.log(`Undeploy: Found ${versions.length} versions for prompt ${promptId}`, versions)
+                    logger.log(`Undeploy: Found ${versions.length} versions for prompt ${promptId}`, versions)
 
                     if (versions.length === 0) {
-                        console.warn(`No versions found for prompt ${promptId}`)
+                        logger.warn(`No versions found for prompt ${promptId}`)
                         errorCount++
                         continue
                     }
 
                     // Find the deployed version (status === 'production')
                     const deployedVersion = versions.find(v => v.status === 'production')
-                    console.log(`Undeploy: Deployed version for prompt ${promptId}:`, deployedVersion)
+                    logger.log(`Undeploy: Deployed version for prompt ${promptId}:`, deployedVersion)
 
                     if (deployedVersion) {
                         const result = await undeployPromptVersion(promptId, deployedVersion.id)
-                        console.log(`Undeploy result for ${promptId}:`, result)
+                        logger.log(`Undeploy result for ${promptId}:`, result)
                         successCount++
                     } else {
                         // No deployed version found - skip silently or count as error?
-                        console.warn(`No deployed version found for prompt ${promptId}`)
+                        logger.warn(`No deployed version found for prompt ${promptId}`)
                         errorCount++
                     }
                 } catch (error) {
-                    console.error(`Failed to undeploy prompt ${promptId}:`, error)
+                    logger.error(`Failed to undeploy prompt ${promptId}:`, error)
                     errorCount++
                 }
             }
@@ -388,32 +390,13 @@ function PromptsPageContent() {
     }
 
     useEffect(() => {
-        console.log('[PromptsPage] Effect triggered:', { currentWorkspaceId, workspaceLoading });
+        logger.log('[PromptsPage] Effect triggered:', { currentWorkspaceId, workspaceLoading });
         loadData()
     }, [loadData])
 
     // Actions with prompts
     const handleEdit = (id: string) => {
         router.push(`/editor/${id}`)
-    }
-
-
-    const getStatusBadge = (status: string) => {
-        const styles = {
-            active: "bg-green-50 text-green-700 border-green-200",
-            draft: "bg-orange-50 text-orange-700 border-orange-200",
-            archived: "bg-slate-50 text-slate-600 border-slate-200",
-        } as const
-        return styles[status as keyof typeof styles] || styles.draft
-    }
-
-    const getStatusDot = (status: string) => {
-        const styles = {
-            active: "bg-green-500",
-            draft: "bg-orange-500",
-            archived: "bg-slate-400",
-        } as const
-        return styles[status as keyof typeof styles] || styles.draft
     }
 
     // Helpers to style tag pills by hex color from API
@@ -447,7 +430,7 @@ function PromptsPageContent() {
         {value: "name", label: "Sort by: Name"},
         {value: "usage", label: "Sort by: Usage"},
     ]
-    console.log("Prompts:", prompts)
+    logger.log("Prompts:", prompts)
     // Columns for table
     const columns: Column<UIPrompt>[] = [
         {
@@ -456,7 +439,7 @@ function PromptsPageContent() {
             width: "col-span-4",
             render: (prompt) => (
                 <div className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getStatusDot(prompt.status)}`}></div>
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getStatusDotClasses(prompt.status as 'active' | 'draft' | 'archived')}`}></div>
                     <div className="min-w-0 flex-1">
                         <div className="font-medium text-slate-800 text-sm truncate">
                             {prompt.name}
@@ -490,7 +473,7 @@ function PromptsPageContent() {
             width: "col-span-1",
             render: (prompt) => (
                 <span
-                    className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getStatusBadge(prompt.status)}`}>
+                    className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getStatusBadgeClasses(prompt.status as 'active' | 'draft' | 'archived')}`}>
           {prompt.status.charAt(0).toUpperCase() + prompt.status.slice(1)}
         </span>
             ),
@@ -632,7 +615,7 @@ function PromptsPageContent() {
             {(() => {
               // Force check onboarding status on every render
               const shouldShow = user && (user.onboarding_completed === false || user.onboarding_completed === undefined || user.onboarding_completed === null)
-              console.log('[PromptsPage] Rendering OnboardingWelcome:', {
+              logger.log('[PromptsPage] Rendering OnboardingWelcome:', {
                 showOnboarding,
                 userOnboardingCompleted: user?.onboarding_completed,
                 shouldShow,
@@ -641,7 +624,7 @@ function PromptsPageContent() {
               
               // Force show if server says onboarding is not completed
               if (shouldShow && !showOnboarding) {
-                console.log('[PromptsPage] 🔴 FORCING showOnboarding to TRUE based on server value')
+                logger.log('[PromptsPage] 🔴 FORCING showOnboarding to TRUE based on server value')
                 setTimeout(() => setShowOnboarding(true), 0)
               }
               
@@ -656,7 +639,7 @@ function PromptsPageContent() {
                 user.onboarding_completed === null
               )
               
-              console.log('[PromptsPage] 🔥 RENDERING OnboardingWelcome component:', {
+              logger.log('[PromptsPage] 🔥 RENDERING OnboardingWelcome component:', {
                 userId: user?.id,
                 onboarding_completed: user?.onboarding_completed,
                 onboarding_completed_type: typeof user?.onboarding_completed,
@@ -667,7 +650,7 @@ function PromptsPageContent() {
               
               // Force show if user needs onboarding
               if (needsOnboarding && !showOnboarding) {
-                console.log('[PromptsPage] 🚨 FORCING showOnboarding to TRUE!')
+                logger.log('[PromptsPage] 🚨 FORCING showOnboarding to TRUE!')
                 setTimeout(() => setShowOnboarding(true), 0)
               }
               
@@ -676,7 +659,7 @@ function PromptsPageContent() {
             <OnboardingWelcome
               isOpen={showOnboarding || (user && (user.onboarding_completed === false || user.onboarding_completed === undefined || user.onboarding_completed === null))}
               onClose={() => {
-                console.log('[PromptsPage] OnboardingWelcome onClose called')
+                logger.log('[PromptsPage] OnboardingWelcome onClose called')
                 setShowOnboarding(false)
               }}
               apiKey={userApiKey || undefined}

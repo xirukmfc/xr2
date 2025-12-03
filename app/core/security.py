@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Union, Optional
 from jose import jwt, JWTError
 from passlib.context import CryptContext
+import secrets
 from .config import settings
 
 # Password context for hashing
@@ -18,9 +19,14 @@ def create_access_token(
         expire = datetime.now(timezone.utc) + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
-    to_encode = {"exp": expire, "sub": str(subject)}
+    to_encode = {"exp": expire, "sub": str(subject), "type": "access"}
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
+
+
+def create_refresh_token() -> str:
+    """Create a secure random refresh token"""
+    return secrets.token_urlsafe(64)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -38,6 +44,12 @@ def decode_access_token(token: str) -> Optional[str]:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         username: str = payload.get("sub")
+        token_type: str = payload.get("type")
+
+        # Ensure it's an access token
+        if token_type != "access":
+            return None
+
         return username
     except JWTError:
         return None
