@@ -454,7 +454,7 @@ function SettingsPageContent() {
     setShowLLMModal(true)
   }
 
-  const filteredTags = tags.filter((tag) => tag.name.toLowerCase().includes(tagSearch.toLowerCase()))
+  const filteredTags = tags.filter((tag) => tag.name?.toLowerCase().includes(tagSearch.toLowerCase()))
 
   const renderProfileSection = () => (
     <div className="space-y-6">

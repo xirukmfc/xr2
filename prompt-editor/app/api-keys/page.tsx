@@ -282,7 +282,7 @@ function ApiKeysPageContent() {
             <div className="max-w-7xl mx-auto flex items-center gap-2">
               <Button
                 variant="outline"
-                onClick={() => window.open('http://localhost:8000/docs', '_blank')}
+                onClick={() => window.open(`${window.location.origin}/docs`, '_blank')}
                 className="h-[35px] border-slate-300 text-slate-600 hover:bg-slate-50"
               >
                 <BookOpen className="w-4 h-4 mr-2" />
