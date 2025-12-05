@@ -1,0 +1,852 @@
+{
+  "common": {
+    "language": "Language",
+    "en": "EN",
+    "ru": "RU"
+  },
+  "sidebar": {
+    "prompts": "Prompts",
+    "analytics": "Analytics",
+    "apiKeys": "API Keys",
+    "apiLogs": "Api Logs",
+    "settings": "Settings",
+    "fullDocs": "Full Docs",
+    "logout": "Logout",
+    "collapse": "Collapse",
+    "usageLimits": "Usage Limits",
+    "availablePrompts": "Available Prompts",
+    "dailyApiRequests": "Daily API Requests",
+    "remaining": "remaining",
+    "resetsAt": "Resets at"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Enter your credentials to access your account",
+      "usernameLabel": "Username or Email",
+      "usernamePlaceholder": "Enter your username or email",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "remember": "Remember me for 90 days",
+      "button": "Sign in",
+      "buttonLoading": "Signing in...",
+      "divider": "Or continue with",
+      "googleButton": "Sign in with Google",
+      "demo": {
+        "title": "Demo credentials:",
+        "username": "Username",
+        "password": "Password"
+      },
+      "errors": {
+        "sessionExpired": "Your session has expired. Please log in again.",
+        "googleInitFailed": "Failed to initialize Google Sign-In. Please refresh the page.",
+        "googleUnavailable": "Google Sign-In service unavailable. Please refresh the page.",
+        "googleLoadFailed": "Failed to load Google Sign-In. Please check your internet connection.",
+        "googleSignInFailedWithMessage": "Google sign-in failed: {message}",
+        "googleNotAvailable": "Google sign-in is not available. Please refresh the page.",
+        "googleUserInfoFailed": "Failed to get user information from Google.",
+        "googleAuthFailed": "Failed to authenticate with Google. Please try again.",
+        "googleNoToken": "No access token received from Google.",
+        "googlePopupFailed": "Google sign-in failed. Please try again.",
+        "googlePopupUnavailable": "Google OAuth popup not available. Please refresh the page.",
+        "googlePopupShowFailed": "Failed to show Google sign-in. Please try again.",
+        "loginFailed": "Login failed. Please check your credentials.",
+        "tryAgain": "Please try again."
+      }
+    }
+  },
+  "onboarding": {
+    "title": "Get started with xR2",
+    "subtitle": "Quick tour of prompts, API, analytics, and tests",
+    "progress": "Step {current} of {total}",
+    "goToStep": "Go to step {step}",
+    "skip": "Skip",
+    "prev": "Prev",
+    "next": "Next",
+    "getStarted": "Get Started",
+    "visual": {
+      "variantA": "Variant A",
+      "variantB": "Variant B",
+      "winner": "Winner",
+      "traffic": "{percent}% traffic",
+      "conversion": "Conversion: +12% improvement",
+      "sdk": {
+        "makeModule": "xR2 Get Prompt module",
+        "n8nNode": "Custom node installed",
+        "connected": "Connected & Ready"
+      },
+      "analytics": {
+        "requestsTitle": "Requests by Source",
+        "mobile": "mobile-app",
+        "web": "web",
+        "revenueTitle": "Revenue by Prompt",
+        "versionPerformance": "Version Performance",
+        "latency": "Latency",
+        "avgCost": "Avg Cost"
+      }
+    },
+    "steps": {
+      "prompts": {
+        "title": "Manage prompts and versions",
+        "description": "Create prompts with variables, keep versions, and update without redeploying.",
+        "features": {
+          "history": "Version history for every change",
+          "variables": "Variables for dynamic content",
+          "instantUpdates": "Update prompts instantly across apps",
+          "collaboration": "Share and edit with your team"
+        }
+      },
+      "api": {
+        "title": "Call prompts via REST",
+        "description": "Fetch prompts from any service with a simple HTTP call.",
+        "features": {
+          "rest": "REST API for any stack",
+          "examples": "Copy/paste code snippets",
+          "auth": "API key authentication",
+          "platforms": "Works for web, mobile, backend"
+        }
+      },
+      "sdk": {
+        "title": "Use SDKs and no-code integrations",
+        "description": "Connect xR2 to Make, n8n, and other tools without custom code.",
+        "features": {
+          "make": "Make.com module",
+          "n8n": "n8n custom node",
+          "nocode": "Zapier integration",
+          "templates": "Ready configs and examples"
+        }
+      },
+      "analytics": {
+        "title": "Monitor usage and cost",
+        "description": "Track events, latency, cost, and outcomes in one place.",
+        "features": {
+          "realtime": "Usage and event stats",
+          "costs": "Cost per prompt",
+          "performance": "Latency and performance metrics",
+          "trends": "Trends and breakdowns"
+        }
+      },
+      "ab": {
+        "title": "Run A/B tests",
+        "description": "Compare prompt versions and measure conversions.",
+        "features": {
+          "multiple": "Test multiple versions",
+          "traffic": "Split traffic and track conversions",
+          "significance": "Check statistical significance",
+          "decisions": "Pick winners based on data"
+        }
+      }
+    }
+  },
+  "prompts": {
+    "title": "Prompts",
+    "searchPlaceholder": "Search prompts...",
+    "newPrompt": "New Prompt",
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "draft": "Draft",
+      "archived": "Archived"
+    },
+    "sort": {
+      "lastUpdated": "Sort by: Last Updated",
+      "name": "Sort by: Name",
+      "usage": "Sort by: Usage"
+    },
+    "columns": {
+      "name": "Name",
+      "status": "Status",
+      "lastUpdated": "Last Updated",
+      "usage24h": "Usage (24H)",
+      "owner": "Owner"
+    },
+    "noDescription": "No description",
+    "by": "by",
+    "loading": "Loading your prompts...",
+    "error": {
+      "title": "Failed to load prompts",
+      "retry": "Retry"
+    },
+    "empty": {
+      "title": "No prompts found",
+      "message": "Create a prompt to begin"
+    },
+    "itemsPerPage": "prompts",
+    "pagination": {
+      "showing": "Showing",
+      "to": "to",
+      "of": "of",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "analytics": {
+    "title": "Performance Analytics",
+    "subtitle": "Usage, events, and experiments for your prompts",
+    "tabs": {
+      "recentEvents": "Recent Events",
+      "prompts": "Prompts",
+      "funnels": "Funnels",
+      "abTests": "A/B Tests",
+      "defineEvents": "Define Events"
+    },
+    "notifications": {
+      "eventDeletedSuccess": "Event deleted successfully",
+      "eventDeletedError": "Failed to delete event",
+      "funnelDeletedSuccess": "Funnel deleted successfully",
+      "funnelDeletedError": "Failed to delete funnel",
+      "funnelCreatedSuccess": "Funnel created successfully",
+      "funnelUpdatedSuccess": "Funnel updated successfully",
+      "abTestDeletedSuccess": "A/B test deleted successfully",
+      "abTestDeletedError": "Failed to delete A/B test",
+      "eventCreatedSuccess": "Event created successfully",
+      "eventUpdatedSuccess": "Event updated successfully"
+    },
+    "modals": {
+      "event": {
+        "titleCreate": "Create New Event Definition",
+        "titleEdit": "Edit Event Definition",
+        "descriptionCreate": "Define a custom event to track prompt behavior",
+        "descriptionEdit": "Update the event definition"
+      },
+      "funnel": {
+        "createTitle": "Create New Funnel",
+        "createDescription": "Set up a funnel to measure steps between events",
+        "editTitle": "Edit Funnel",
+        "editDescription": "Update the funnel configuration"
+      },
+      "abTest": {
+        "createTitle": "Create New A/B Test",
+        "createDescription": "Compare two prompt versions with a 50/50 split"
+      },
+      "delete": {
+        "eventTitle": "Delete Event Definition",
+        "eventDescription": "Are you sure you want to delete this event definition? This action cannot be undone.",
+        "funnelTitle": "Delete Funnel",
+        "funnelDescription": "Are you sure you want to delete this funnel configuration? This action cannot be undone.",
+        "abTestTitle": "Delete A/B Test",
+        "abTestDescription": "Are you sure you want to delete this A/B test? This action cannot be undone."
+      }
+    },
+    "funnelForm": {
+      "savedConfigs": "Saved Funnel Configurations",
+      "savedConfigsDescription": "Load a previously saved funnel configuration",
+      "nameLabel": "Funnel Name",
+      "namePlaceholder": "e.g., User Onboarding",
+      "stepsLabel": "Funnel Steps",
+      "stepsDescription": "Define the sequence of events for your conversion funnel",
+      "add": "Add",
+      "stepPlaceholder": "Event name (e.g., {example})",
+      "noSteps": "No steps defined. Click \"Add\" to create one.",
+      "saving": "Saving...",
+      "save": "Save Funnel",
+      "update": "Update Funnel",
+      "edit": "Edit Funnel",
+      "create": "Create New Funnel",
+      "createdDate": "Created:",
+      "systemEventNote": "System event - prompt request",
+      "builtInEvents": "Built-in Events",
+      "cancel": "Cancel",
+      "noData": "No funnel data available.",
+      "active": "Active",
+      "load": "Load",
+      "noFunnelTitle": "No funnel selected",
+      "noFunnelSubtitle": "Select a funnel from the dropdown above to view data",
+      "loadingData": "Loading funnel data...",
+      "customFunnelCta": "Create a custom funnel to track conversion rates between specific events.",
+      "selectFunnelPlaceholder": "Select funnel...",
+      "allPrompts": "All Prompts",
+      "allVersions": "All Versions",
+      "vs": "vs",
+      "periodToday": "Today",
+      "period7days": "7 days",
+      "period30days": "30 days",
+      "periodThisMonth": "This month",
+      "periodCustom": "Custom",
+      "noDataFilters": "No data found for the selected filters",
+      "customEvents": "Custom Events"
+    },
+    "abTests": {
+      "title": "A/B Tests",
+      "searchPlaceholder": "Search by test name or prompt name...",
+      "new": "New",
+      "form": {
+        "nameLabel": "Test Name",
+        "namePlaceholder": "e.g., Welcome Message Test",
+        "totalRequestsLabel": "Total Requests",
+        "promptLabel": "Select Prompt",
+        "promptPlaceholder": "Choose a prompt...",
+        "versionA": "Version A (Control)",
+        "versionB": "Version B (Variant)",
+        "versionPlaceholder": "Choose version...",
+        "successMetric": "Success Metric (optional)",
+        "noFunnel": "No funnel - show all events",
+        "funnelHint": "Select a funnel to compare conversion rates between versions",
+        "create": "Create Test",
+        "creating": "Creating...",
+        "cancel": "Cancel"
+      },
+      "notifications": {
+        "created": "A/B test created successfully",
+        "createError": "Failed to create A/B test",
+        "deleteSuccess": "A/B test deleted successfully",
+        "deleteError": "Failed to delete A/B test",
+        "startError": "Failed to start test",
+        "stopError": "Failed to stop test",
+        "completeConfirm": "Are you sure you want to complete this A/B test? This action cannot be undone.",
+        "completeError": "Failed to complete test",
+        "deleteConfirm": "Are you sure you want to delete this A/B test?",
+        "startTooltip": "Start",
+        "resumeTooltip": "Resume",
+        "pauseTooltip": "Pause",
+        "completeTooltip": "Complete",
+        "deleteTooltip": "Delete",
+        "editFunnelTooltip": "Edit funnel configuration",
+        "deleteFunnelTooltip": "Delete funnel configuration",
+        "compareTooltip": "Compare with another version",
+        "clearDateTooltip": "Clear date filter",
+        "cancelComparison": "Cancel comparison"
+      },
+      "filters": {
+        "selectFunnel": "Select funnel...",
+        "allPrompts": "All Prompts",
+        "allVersions": "All Versions",
+        "vs": "vs",
+        "periodToday": "Today",
+        "period7days": "7 days",
+        "period30days": "30 days",
+        "periodThisMonth": "This month",
+        "periodCustom": "Custom",
+        "presetToday": "Today",
+        "preset7days": "7 days",
+        "preset30days": "30 days",
+        "presetThisMonth": "This month",
+        "from": "From",
+        "to": "To"
+      },
+      "empty": {
+        "noTests": "No A/B tests created yet.",
+        "noMatch": "No tests found matching your search.",
+        "cta": "Create your first test to start comparing prompt versions."
+      },
+      "table": {
+        "name": "Test Name",
+        "prompt": "Prompt",
+        "status": "Status",
+        "progress": "Progress",
+        "versions": "Versions",
+        "confidence": "Confidence",
+        "winner": "Winner",
+        "actions": "Actions",
+        "metric": "Metric",
+        "activeFunnel": "Metric:",
+        "confidenceLabel": "Statistical Confidence",
+        "threshold95": "95% threshold",
+        "overall": "Overall",
+        "funnelComparison": "Funnel Comparison",
+        "step": "Step",
+        "diff": "Diff",
+        "eventsBreakdown": "All Events Breakdown",
+        "event": "Event",
+        "winnerShort": "Winner",
+        "noData": "No events recorded yet for this test.",
+        "loading": "Loading test results..."
+      },
+      "statuses": {
+        "running": "Running",
+        "paused": "Paused",
+        "completed": "Completed",
+        "draft": "Draft",
+        "cancelled": "Cancelled"
+      }
+    },
+    "recentEvents": {
+      "title": "Recent Events",
+      "loading": "Loading events...",
+      "searchPlaceholder": "Search by trace ID or prompt ID...",
+      "filterAll": "All Events",
+      "filterPromptRequest": "get_prompt",
+      "filterCustomEvent": "track_event",
+      "refresh": "Refresh",
+      "columns": {
+        "time": "Time",
+        "traceId": "Trace ID",
+        "prompt": "Prompt",
+        "version": "Version",
+        "type": "Type",
+        "source": "Source",
+        "event": "Event"
+      },
+      "noPrompt": "—",
+      "noSource": "—",
+      "noEvent": "—",
+      "empty": "No events found matching your filters.",
+      "pagination": "{from}-{to} of {total}"
+      ,
+      "prev": "Prev",
+      "next": "Next"
+    },
+    "promptEvents": {
+      "selectPromptPlaceholder": "Select prompt",
+      "selectVersionPlaceholder": "Select version",
+      "allVersions": "All Versions",
+      "periodToday": "Today",
+      "periodWeek": "This Week",
+      "periodMonth": "This Month",
+      "periodYear": "This Year",
+      "chartEmpty": "No events found for the selected period",
+      "loading": "Loading events...",
+      "selectPromptHint": "Please select a prompt to view events",
+      "table": {
+        "eventType": "Event Type",
+        "total": "Total"
+      },
+      "metadata": {
+        "title": "Metadata Insights",
+        "events": "events",
+        "avg": "Avg",
+        "range": "Range",
+        "more": "{count} more",
+        "empty": "No custom metadata fields found"
+      }
+    },
+    "eventsTable": {
+      "emptyTitle": "No recent events found",
+      "emptySubtitle": "Events will appear here as they are tracked",
+      "headers": {
+        "event": "Event",
+        "category": "Category",
+        "data": "Data",
+        "amount": "Amount",
+        "created": "Created"
+      },
+      "details": {
+        "title": "Event Details",
+        "id": "ID",
+        "type": "Type",
+        "outcome": "Outcome",
+        "userId": "User ID",
+        "trace": "Full Trace ID",
+        "metadataTitle": "Event Metadata",
+        "metadataMissing": "No metadata available",
+        "eventName": "Event Name",
+        "category": "Category",
+        "allFields": "All Fields",
+        "business": "Business Metrics"
+      }
+    },
+    "eventsBuilder": {
+      "searchPlaceholder": "Search by event name...",
+      "new": "New",
+      "form": {
+        "titleCreate": "Create New Event",
+        "titleEdit": "Edit Event",
+        "eventName": "Event Name",
+        "description": "Description",
+        "descriptionPlaceholder": "Add a short description",
+        "fieldsTitle": "Custom Fields",
+        "addField": "Add",
+        "noFields": "No custom fields defined. Click \"Add\" to create one.",
+        "saving": "Saving...",
+        "save": "Save Event",
+        "cancel": "Cancel"
+      },
+      "empty": {
+        "title": "No event definitions yet",
+        "description": "Create your first event definition to start tracking user actions."
+      },
+      "card": {
+        "description": "Description:",
+        "noDescription": "No description",
+        "noFields": "No custom fields defined",
+        "customFieldsTitle": "Custom Metadata Fields:",
+        "codeTitle": "Code Example",
+        "copyCode": "Copy code to clipboard"
+      }
+    },
+    "eventForm": {
+      "errorRequired": "Event name is required",
+      "errorSave": "Failed to save event",
+      "eventNameLabel": "Event Name",
+      "eventNamePlaceholder": "e.g., user_signup",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Describe when this event should be triggered",
+      "standardFieldsTitle": "Standard Fields (automatically available)",
+      "standardFieldsInfo": "These fields are available in all events:",
+      "standardFields": {
+        "eventName": "event_name — string (required)",
+        "traceId": "trace_id — string (required)",
+        "userId": "user_id — string (optional)",
+        "sessionId": "session_id — string (optional)",
+        "value": "value — number (optional, for revenue/metrics)",
+        "currency": "currency — string (optional)"
+      },
+      "customFieldsTitle": "Custom Metadata Fields",
+      "customFieldsDescription": "Define custom fields that will be passed in the metadata object",
+      "add": "Add",
+      "noFields": "No custom fields defined. Click \"Add\" to create one.",
+      "fieldNamePlaceholder": "Field name",
+      "fieldDescriptionPlaceholder": "Description (optional)",
+      "typeString": "String",
+      "typeNumber": "Number",
+      "typeBoolean": "Boolean",
+      "typeObject": "Object",
+      "required": "Required",
+      "creating": "Creating...",
+      "updating": "Updating...",
+      "createEvent": "Create Event",
+      "updateEvent": "Update Event",
+      "cancel": "Cancel"
+    }
+  },
+  "leftPanel": {
+    "settings": "Settings",
+    "performanceStats": "Performance Stats",
+    "variables": "Variables",
+    "versions": "Versions",
+    "promptName": "Prompt Name",
+    "slug": "Slug",
+    "description": "Description",
+    "tags": "Tags",
+    "addTag": "Add tag...",
+    "totalRequests": "Total Requests",
+    "successRate": "Success Rate",
+    "avgResponse": "Avg Response",
+    "bySource": "By Source",
+    "noDataAvailable": "No data available",
+    "addVariable": "Add Variable",
+    "noVariablesDefined": "No variables defined",
+    "defineVariable": "Define variable",
+    "editVariable": "Edit variable",
+    "removeVariable": "Remove variable",
+    "newVersion": "New Version",
+    "noVersions": "No versions",
+    "shareVersion": "Share version",
+    "deleteVersion": "Delete version",
+    "deleteVersionConfirm": "Are you sure you want to delete version"
+  },
+  "bulkActions": {
+    "selected": "selected",
+    "delete": "Delete",
+    "deploy": "Deploy",
+    "undeploy": "Undeploy",
+    "clearSelection": "Clear Selection",
+    "deleteConfirm": "Are you sure you want to delete {count} prompt(s)? This action cannot be undone.",
+    "successDelete": "Successfully deleted {count} prompt(s)",
+    "failedDelete": "Failed to delete {count} prompt(s)",
+    "successDeploy": "Successfully deployed {count} prompt(s)",
+    "failedDeploy": "Failed to deploy {count} prompt(s)",
+    "successUndeploy": "Successfully undeployed {count} prompt(s)",
+    "failedUndeploy": "Failed to undeploy {count} prompt(s)"
+  },
+  "time": {
+    "justNow": "just now",
+    "minutesAgo": "minutes ago",
+    "hoursAgo": "hours ago",
+    "daysAgo": "days ago",
+    "monthsAgo": "months ago",
+    "yearsAgo": "years ago",
+    "unknown": "Unknown"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account settings and preferences",
+    "tabs": {
+      "profile": "Profile",
+      "tags": "Tags",
+      "llmKeys": "LLM API Keys"
+    },
+    "profile": {
+      "title": "Profile",
+      "name": "Name",
+      "email": "Email",
+      "save": "Save Changes",
+      "namePlaceholder": "Enter your full name",
+      "emailPlaceholder": "Enter your email",
+      "saving": "Saving..."
+    },
+    "account": {
+      "title": "Account",
+      "subtitle": "Irreversible actions that affect your account",
+      "changePassword": "Change Password",
+      "deleteAccount": "Delete Account",
+      "deleteAccountDescription": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "deleteDialog": {
+        "title": "Delete Account",
+        "description": "This action cannot be undone. This will permanently delete your account and remove all your data including workspaces, prompts, tags, and API keys.",
+        "warningTitle": "Warning",
+        "warningDescription": "All of your data will be permanently deleted, including:",
+        "items": {
+          "workspaces": "All workspaces and prompts",
+          "promptVersions": "All prompt versions and test data",
+          "tags": "All tags and categorizations",
+          "apiKeys": "All API keys and configurations",
+          "history": "All usage history and analytics"
+        },
+        "confirmationLabel": "Type \"delete\" to confirm",
+        "confirmationPlaceholder": "Type 'delete' to confirm",
+        "cancel": "Cancel",
+        "confirm": "Delete My Account",
+        "confirmLoading": "Deleting..."
+      }
+    },
+    "tags": {
+      "title": "Tags",
+      "subtitle": "Manage your tags",
+      "newTag": "New Tag",
+      "loading": "Loading tags...",
+      "loadError": "Failed to load tags",
+      "searchPlaceholder": "Search tags...",
+      "empty": {
+        "title": "No tags yet",
+        "description": "Create your first tag to get started.",
+        "filteredTitle": "No tags found",
+        "filteredDescription": "Try adjusting your search terms."
+      },
+      "columns": {
+        "name": "Name",
+        "color": "Color",
+        "usageCount": "Usage Count",
+        "actions": "Actions"
+      },
+      "modal": {
+        "titleCreate": "Create New Tag",
+        "titleEdit": "Edit Tag",
+        "descriptionCreate": "Create a new tag for organizing your prompts.",
+        "descriptionEdit": "Update the tag details below.",
+        "nameLabel": "Tag Name",
+        "namePlaceholder": "Enter tag name",
+        "colorLabel": "Color",
+        "previewLabel": "Preview",
+        "previewPlaceholder": "Tag Preview",
+        "cancel": "Cancel",
+        "saveCreate": "Create Tag",
+        "saveEdit": "Update Tag"
+      },
+      "colors": {
+        "blue": "Blue",
+        "green": "Green",
+        "purple": "Purple",
+        "orange": "Orange",
+        "pink": "Pink",
+        "teal": "Teal",
+        "indigo": "Indigo",
+        "red": "Red"
+      },
+      "deleteDialog": {
+        "title": "Delete Tag",
+        "description": "Are you sure you want to delete this tag? This action cannot be undone."
+      }
+    },
+    "llmKeys": {
+      "title": "LLM API Keys",
+      "subtitle": "Manage your LLM provider API keys",
+      "newKey": "New LLM Key",
+      "loading": "Loading API keys...",
+      "providersLoadError": "Failed to load providers",
+      "loadError": "Failed to load API keys",
+      "retry": "Retry",
+      "unknownProvider": "Unknown Provider",
+      "columns": {
+        "name": "Name",
+        "provider": "Provider",
+        "key": "API Key",
+        "created": "Created",
+        "preview": "Key Preview",
+        "hidden": "Hidden",
+        "actions": "Actions"
+      },
+      "empty": {
+        "title": "No API keys yet",
+        "description": "Add your first API key to get started with LLM testing.",
+        "noProviders": "No LLM providers are available. Please contact your administrator."
+      },
+      "modal": {
+        "titleCreate": "Add New API Key",
+        "titleEdit": "Edit API Key",
+        "descriptionCreate": "Add a new API key for LLM model testing.",
+        "descriptionEdit": "Update the API key details below.",
+        "fields": {
+          "name": "Name",
+          "namePlaceholder": "Enter a name for this API key",
+          "provider": "Provider",
+          "providerPlaceholder": "Select provider",
+          "apiKey": "API Key",
+          "apiKeyPlaceholder": "Enter your API key",
+          "apiKeyEditPlaceholder": "Enter new API key (leave blank to keep current)"
+        },
+        "cancel": "Cancel",
+        "saveCreate": "Add Key",
+        "saveEdit": "Update Key"
+      },
+      "deleteDialog": {
+        "title": "Delete API Key",
+        "description": "Are you sure you want to delete this API key? This action cannot be undone."
+      }
+    },
+    "notifications": {
+      "profileSaved": "Profile updated successfully",
+      "profileSaveError": "Failed to save profile",
+      "accountDeleted": "Account deleted successfully",
+      "accountDeleteError": "Failed to delete account. Please try again.",
+      "tagCreated": "Tag created successfully",
+      "tagUpdated": "Tag updated successfully",
+      "tagSaveError": "Failed to save tag",
+      "tagDeleted": "Tag deleted successfully",
+      "tagDeleteError": "Failed to delete tag",
+      "llmKeyCreated": "API key created successfully",
+      "llmKeyUpdated": "API key updated successfully",
+      "llmKeySaveError": "Failed to save API key",
+      "llmKeyDeleted": "API key deleted successfully",
+      "llmKeyDeleteError": "Failed to delete API key"
+    }
+  },
+  "logs": {
+    "title": "API Logs",
+    "subtitle": "View and monitor API request logs",
+    "searchPlaceholder": "Search logs...",
+    "filters": {
+      "all": "All",
+      "success": "Success",
+      "error": "Error",
+      "sortCreated": "Sort by: Request Time",
+      "sortLatency": "Sort by: Duration",
+      "sortStatus": "Sort by: Status Code",
+      "sortEndpoint": "Sort by: Endpoint",
+      "refresh": "Refresh",
+      "showRequest": "Show Request",
+      "showResponse": "Show Response"
+    },
+    "columns": {
+      "timestamp": "Timestamp",
+      "endpoint": "Endpoint",
+      "method": "Method",
+      "status": "Status",
+      "duration": "Duration"
+    }
+  },
+  "apiKeys": {
+    "title": "API Keys",
+    "subtitle": "Manage your API keys",
+    "newKey": "New API Key",
+    "searchPlaceholder": "Search API keys...",
+    "columns": {
+      "name": "Name",
+      "key": "Key",
+      "created": "Created",
+      "lastUsed": "Last Used",
+      "actions": "Actions"
+    },
+    "modal": {
+      "create": "Create New API Key",
+      "edit": "Edit API Key",
+      "delete": "Delete API Key",
+      "name": "API Key Name",
+      "namePlaceholder": "e.g., Production API Key",
+      "nameHelper": "Choose a descriptive name to help you identify this key later.",
+      "description": "Description (Optional)",
+      "descriptionPlaceholder": "What will this key be used for?",
+      "cancel": "Cancel",
+      "create_button": "Create API Key",
+      "save": "Save",
+      "deleteConfirm": "Are you sure you want to delete this API key? This action cannot be undone."
+    }
+  },
+  "newPromptModal": {
+    "title": "Create New Prompt",
+    "name": "Prompt Name",
+    "namePlaceholder": "Enter prompt name",
+    "slug": "Slug",
+    "slugPlaceholder": "prompt-slug",
+    "description": "Description",
+    "descriptionPlaceholder": "Enter prompt description",
+    "tags": "Tags",
+    "tagsPlaceholder": "Type to search or create new",
+    "tagsAvailable": "tags available",
+    "cancel": "Cancel",
+    "create": "Create Prompt"
+  },
+  "editor": {
+    "title": "Prompt Editor",
+    "save": "Save",
+    "test": "Test",
+    "deploy": "Deploy",
+    "share": "Share",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "systemPrompt": "System Prompt",
+    "userPrompt": "User Prompt",
+    "assistantPrompt": "Assistant Prompt",
+    "back": "Back",
+    "edit": "Edit",
+    "preview": "Preview",
+    "previewMode": "Preview Mode",
+    "testWithAI": "Test with AI",
+    "saveChanges": "Save Changes",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "saveSuccess": "Draft saved successfully!",
+    "editModeEnabled": "Switched to edit mode",
+    "previewModeEnabled": "Switched to preview mode",
+    "cannotPublishUndefined": "Cannot publish: there are undefined variables that need to be defined first",
+    "tagsInput": {
+      "available": "tags available",
+      "typeToSearch": "Type to search or create new"
+    },
+    "createTag": {
+      "title": "Create Tag",
+      "chooseColor": "Choose color for",
+      "create": "Create Tag",
+      "cancel": "Cancel"
+    },
+    "addVariable": {
+      "title": "Add Variable",
+      "name": "Variable Name",
+      "namePlaceholder": "e.g. user_role",
+      "type": "Type",
+      "defaultValue": "Default Value",
+      "defaultValuePlaceholder": "Optional default value",
+      "cancel": "Cancel",
+      "add": "Add Variable"
+    },
+    "createVersion": {
+      "title": "Create New Version",
+      "copyCurrentVersion": "Copy current version",
+      "startFromScratch": "Start from scratch",
+      "cancel": "Cancel",
+      "create": "Create Version"
+    },
+    "testModal": {
+      "title": "Test with AI",
+      "model": "Model",
+      "advancedSettings": "Advanced Settings",
+      "run": "Run Test",
+      "aiResponse": "AI Response",
+      "noResponse": "No response yet. Click \"Run Test\" to generate.",
+      "responseTime": "Response Time",
+      "totalTokens": "Total Tokens",
+      "inputTokens": "Input Tokens",
+      "outputTokens": "Output Tokens",
+      "cost": "Cost",
+      "close": "Close"
+    },
+    "shareModal": {
+      "title": "Share Prompt Template",
+      "shareVersion": "Share version",
+      "of": "of",
+      "withOthers": "with others via a public link",
+      "description": "Create a public, read-only link that anyone can access without logging in.",
+      "createLink": "Create Share Link",
+      "link": "Share Link",
+      "copy": "Copy Link",
+      "close": "Close",
+      "copied": "Link copied to clipboard!"
+    },
+    "statsPanel": {
+      "characters": "Characters",
+      "variables": "Variables",
+      "tokens": "Tokens",
+      "models": "Models"
+    }
+  }
+}

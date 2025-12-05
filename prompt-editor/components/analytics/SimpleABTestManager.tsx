@@ -10,6 +10,7 @@ import {
   Trophy, TrendingUp, TrendingDown, BarChart3, ChevronDown, ChevronUp, Info, TestTube, Search
 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
+import { useLocale } from '@/contexts/locale-context';
 
 interface ABTest {
   id: string;
@@ -110,6 +111,7 @@ export default function SimpleABTestManager({
   showNotification,
   onDeleteClick
 }: SimpleABTestManagerProps = {}) {
+  const { t } = useLocale();
   const [tests, setTests] = useState<ABTest[]>([]);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [funnels, setFunnels] = useState<FunnelConfig[]>([]);
@@ -219,12 +221,12 @@ export default function SimpleABTestManager({
 
   const createTest = async () => {
     if (!formData.name || !formData.prompt_id || !formData.version_a_id || !formData.version_b_id) {
-      alert('Please fill all fields');
+      alert(t('analytics.abTests.notifications.createError'));
       return;
     }
 
     if (formData.version_a_id === formData.version_b_id) {
-      alert('Version A and Version B must be different');
+      alert(t('analytics.abTests.notifications.createError'));
       return;
     }
 
@@ -261,16 +263,10 @@ export default function SimpleABTestManager({
       });
 
       // Show success notification
-      if (showNotification) {
-        showNotification('A/B test created successfully', 'success');
-      }
+      showNotification?.(t('analytics.abTests.notifications.created'), 'success');
     } catch (error: any) {
       console.error('Failed to create A/B test:', error);
-      if (showNotification) {
-        showNotification(`Failed to create A/B test: ${error.message || 'Unknown error'}`, 'error');
-      } else {
-        alert(`Failed to create A/B test: ${error.message || 'Unknown error'}`);
-      }
+      showNotification?.(`${t('analytics.abTests.notifications.createError')}: ${error.message || 'Unknown error'}`, 'error');
     } finally {
       setLoading(false);
     }
@@ -283,7 +279,7 @@ export default function SimpleABTestManager({
       await loadTests();
     } catch (error: any) {
       console.error('Failed to start test:', error);
-      alert(`Failed to start test: ${error.message || 'Unknown error'}`);
+      alert(`${t('analytics.abTests.notifications.startError')}: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -296,14 +292,14 @@ export default function SimpleABTestManager({
       await loadTests();
     } catch (error: any) {
       console.error('Failed to stop test:', error);
-      alert(`Failed to stop test: ${error.message || 'Unknown error'}`);
+      alert(`${t('analytics.abTests.notifications.stopError')}: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
   };
 
   const completeTest = async (testId: string) => {
-    if (!confirm('Are you sure you want to complete this A/B test? This action cannot be undone.')) {
+    if (!confirm(t('analytics.abTests.notifications.completeConfirm'))) {
       return;
     }
 
@@ -313,7 +309,7 @@ export default function SimpleABTestManager({
       await loadTests();
     } catch (error: any) {
       console.error('Failed to complete test:', error);
-      alert(`Failed to complete test: ${error.message || 'Unknown error'}`);
+      alert(`${t('analytics.abTests.notifications.completeError')}: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -327,7 +323,7 @@ export default function SimpleABTestManager({
     }
 
     // Fallback to confirm dialog if onDeleteClick is not provided
-    if (!confirm('Are you sure you want to delete this A/B test?')) {
+    if (!confirm(t('analytics.abTests.notifications.deleteConfirm'))) {
       return;
     }
 
@@ -337,16 +333,10 @@ export default function SimpleABTestManager({
       await loadTests();
 
       // Show success notification
-      if (showNotification) {
-        showNotification('A/B test deleted successfully', 'success');
-      }
+      showNotification?.(t('analytics.abTests.notifications.deleteSuccess'), 'success');
     } catch (error: any) {
       console.error('Failed to delete test:', error);
-      if (showNotification) {
-        showNotification('Failed to delete A/B test', 'error');
-      } else {
-        alert(`Failed to delete test: ${error.message || 'Unknown error'}`);
-      }
+      showNotification?.(t('analytics.abTests.notifications.deleteError'), 'error');
     } finally {
       setLoading(false);
     }
@@ -403,7 +393,7 @@ export default function SimpleABTestManager({
               <div className="relative flex-1">
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <Input
-                  placeholder="Search by test name or prompt name..."
+                  placeholder={t('analytics.abTests.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-8 h-9 text-xs"
@@ -416,7 +406,7 @@ export default function SimpleABTestManager({
                 className="bg-black hover:bg-gray-800 text-xs h-9 px-3 gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
-                New
+                {t('analytics.abTests.new')}
               </Button>
             </div>
           </CardContent>
@@ -429,24 +419,24 @@ export default function SimpleABTestManager({
       {/* Create Form */}
       {showCreateForm && (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="test-name" className="text-sm">Test Name</Label>
-              <Input
-                id="test-name"
-                data-testid="ab-test-name-input"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="e.g., Welcome Message Test"
-                className="h-9 text-sm mt-2"
-              />
-            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="test-name" className="text-sm">{t('analytics.abTests.form.nameLabel')}</Label>
+                <Input
+                  id="test-name"
+                  data-testid="ab-test-name-input"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder={t('analytics.abTests.form.namePlaceholder')}
+                  className="h-9 text-sm mt-2"
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="total-requests" className="text-sm">Total Requests</Label>
-              <Input
-                id="total-requests"
-                data-testid="ab-test-total-requests-input"
+              <div>
+                <Label htmlFor="total-requests" className="text-sm">{t('analytics.abTests.form.totalRequestsLabel')}</Label>
+                <Input
+                  id="total-requests"
+                  data-testid="ab-test-total-requests-input"
                 type="number"
                 value={formData.total_requests}
                 onChange={(e) => setFormData(prev => ({ ...prev, total_requests: parseInt(e.target.value) || 100 }))}
@@ -459,7 +449,7 @@ export default function SimpleABTestManager({
           </div>
 
           <div>
-            <Label htmlFor="prompt-select" className="text-sm">Select Prompt</Label>
+            <Label htmlFor="prompt-select" className="text-sm">{t('analytics.abTests.form.promptLabel')}</Label>
             <select
               id="prompt-select"
               data-testid="ab-test-prompt-select"
@@ -472,7 +462,7 @@ export default function SimpleABTestManager({
                 version_b_id: ''
               }))}
             >
-              <option value="">Choose a prompt...</option>
+              <option value="">{t('analytics.abTests.form.promptPlaceholder')}</option>
               {prompts.map(prompt => (
                 <option key={prompt.id} value={prompt.id}>
                   {prompt.name} ({prompt.versions.length} versions)
@@ -484,7 +474,7 @@ export default function SimpleABTestManager({
           {formData.prompt_id && getSelectedPrompt() && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="version-a" className="text-sm">Version A (Control)</Label>
+                <Label htmlFor="version-a" className="text-sm">{t('analytics.abTests.form.versionA')}</Label>
                 <select
                   id="version-a"
                   data-testid="ab-test-version-a-select"
@@ -492,7 +482,7 @@ export default function SimpleABTestManager({
                   value={formData.version_a_id}
                   onChange={(e) => setFormData(prev => ({ ...prev, version_a_id: e.target.value }))}
                 >
-                  <option value="">Choose Version A...</option>
+                  <option value="">{t('analytics.abTests.form.versionPlaceholder')}</option>
                   {getSelectedPrompt()?.versions.map(version => (
                     <option key={version.id} value={version.id}>
                       Version {version.version_number} ({version.status})
@@ -502,7 +492,7 @@ export default function SimpleABTestManager({
               </div>
 
               <div>
-                <Label htmlFor="version-b" className="text-sm">Version B (Variant)</Label>
+                <Label htmlFor="version-b" className="text-sm">{t('analytics.abTests.form.versionB')}</Label>
                 <select
                   id="version-b"
                   data-testid="ab-test-version-b-select"
@@ -510,7 +500,7 @@ export default function SimpleABTestManager({
                   value={formData.version_b_id}
                   onChange={(e) => setFormData(prev => ({ ...prev, version_b_id: e.target.value }))}
                 >
-                  <option value="">Choose Version B...</option>
+                  <option value="">{t('analytics.abTests.form.versionPlaceholder')}</option>
                   {getSelectedPrompt()?.versions.map(version => (
                     <option key={version.id} value={version.id}>
                       Version {version.version_number} ({version.status})
@@ -524,7 +514,7 @@ export default function SimpleABTestManager({
           <div>
             <Label htmlFor="funnel-select" className="text-sm font-medium flex items-center gap-2">
               <BarChart3 className="w-3.5 h-3.5" />
-              Success Metric (optional)
+              {t('analytics.abTests.form.successMetric')}
             </Label>
             <select
               id="funnel-select"
@@ -532,7 +522,7 @@ export default function SimpleABTestManager({
               value={formData.funnel_config_id}
               onChange={(e) => setFormData(prev => ({ ...prev, funnel_config_id: e.target.value }))}
             >
-              <option value="">No funnel - show all events</option>
+              <option value="">{t('analytics.abTests.form.noFunnel')}</option>
               {funnels.map(funnel => (
                 <option key={funnel.id} value={funnel.id}>
                   {funnel.name} ({funnel.event_steps.join(' → ')})
@@ -540,7 +530,7 @@ export default function SimpleABTestManager({
               ))}
             </select>
             <p className="text-xs text-muted-foreground mt-2">
-              Select a funnel to compare conversion rates between versions
+              {t('analytics.abTests.form.funnelHint')}
             </p>
           </div>
 
@@ -552,7 +542,7 @@ export default function SimpleABTestManager({
               size="default"
               className="bg-black hover:bg-gray-800 text-white"
             >
-              {loading ? 'Creating...' : 'Create Test'}
+              {loading ? t('analytics.abTests.form.creating') : t('analytics.abTests.form.create')}
             </Button>
             <Button
               data-testid="ab-test-cancel-button"
@@ -560,7 +550,7 @@ export default function SimpleABTestManager({
               onClick={() => setShowCreateForm(false)}
               size="default"
             >
-              Cancel
+              {t('analytics.abTests.form.cancel')}
             </Button>
           </div>
         </div>
@@ -574,11 +564,11 @@ export default function SimpleABTestManager({
             <CardContent className="text-center py-6">
               <p className="text-sm text-muted-foreground">
                 {tests.length === 0
-                  ? 'No A/B tests created yet.'
-                  : 'No tests found matching your search.'}
+                  ? t('analytics.abTests.empty.noTests')
+                  : t('analytics.abTests.empty.noMatch')}
               </p>
               {tests.length === 0 && (
-                <p className="text-xs text-muted-foreground">Create your first test to start comparing prompt versions.</p>
+                <p className="text-xs text-muted-foreground">{t('analytics.abTests.empty.cta')}</p>
               )}
             </CardContent>
           </Card>
@@ -588,14 +578,14 @@ export default function SimpleABTestManager({
               <table className="w-full">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Test Name</th>
-                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Prompt</th>
-                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Status</th>
-                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Progress</th>
-                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Versions</th>
-                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Confidence</th>
-                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Winner</th>
-                    <th className="text-right text-xs font-medium text-muted-foreground px-4 py-3">Actions</th>
+                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{t('analytics.abTests.table.name')}</th>
+                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{t('analytics.abTests.table.prompt')}</th>
+                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{t('analytics.abTests.table.status')}</th>
+                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{t('analytics.abTests.table.progress')}</th>
+                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{t('analytics.abTests.table.versions')}</th>
+                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{t('analytics.abTests.table.confidence')}</th>
+                    <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">{t('analytics.abTests.table.winner')}</th>
+                    <th className="text-right text-xs font-medium text-muted-foreground px-4 py-3">{t('analytics.abTests.table.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -610,13 +600,13 @@ export default function SimpleABTestManager({
                           <td className="px-4 py-3">
                             <div className="text-sm font-medium">{test.name}</div>
                             {test.funnel_config_name && (
-                              <div className="text-xs text-muted-foreground">Metric: {test.funnel_config_name}</div>
+                              <div className="text-xs text-muted-foreground">{t('analytics.abTests.table.activeFunnel')} {test.funnel_config_name}</div>
                             )}
                           </td>
                           <td className="px-4 py-3 text-sm">{test.prompt_name}</td>
                           <td className="px-4 py-3">
                             <Badge className={`${getStatusColor(test.status)} text-xs px-2 py-0.5`}>
-                              {test.status}
+                              {t(`analytics.abTests.statuses.${test.status}` as const)}
                             </Badge>
                           </td>
                           <td className="px-4 py-3">
@@ -667,21 +657,21 @@ export default function SimpleABTestManager({
                           <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                             <div className="flex gap-0.5 justify-end">
                               {(test.status === 'draft' || test.status === 'paused') && (
-                                <Button data-testid="ab-test-start-button" onClick={() => startTest(test.id)} size="sm" variant="ghost" disabled={loading} className="h-7 w-7 p-0" title={test.status === 'paused' ? 'Resume' : 'Start'}>
+                                <Button data-testid="ab-test-start-button" onClick={() => startTest(test.id)} size="sm" variant="ghost" disabled={loading} className="h-7 w-7 p-0" title={test.status === 'paused' ? t('analytics.abTests.notifications.resumeTooltip') : t('analytics.abTests.notifications.startTooltip')}>
                                   <PlayCircle className="w-3.5 h-3.5" />
                                 </Button>
                               )}
                               {test.status === 'running' && getProgress(test) < 100 && (
-                                <Button onClick={() => stopTest(test.id)} size="sm" variant="ghost" disabled={loading} className="h-7 w-7 p-0" title="Pause">
+                                <Button onClick={() => stopTest(test.id)} size="sm" variant="ghost" disabled={loading} className="h-7 w-7 p-0" title={t('analytics.abTests.notifications.pauseTooltip')}>
                                   <PauseCircle className="w-3.5 h-3.5" />
                                 </Button>
                               )}
                               {(test.status === 'running' || test.status === 'paused') && getProgress(test) < 100 && (
-                                <Button onClick={() => completeTest(test.id)} size="sm" variant="ghost" className="h-7 w-7 p-0" disabled={loading} title="Complete">
+                                <Button onClick={() => completeTest(test.id)} size="sm" variant="ghost" className="h-7 w-7 p-0" disabled={loading} title={t('analytics.abTests.notifications.completeTooltip')}>
                                   <StopCircle className="w-3.5 h-3.5" />
                                 </Button>
                               )}
-                              <Button onClick={() => deleteTest(test.id)} size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50" disabled={loading} title="Delete">
+                              <Button onClick={() => deleteTest(test.id)} size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50" disabled={loading} title={t('analytics.abTests.notifications.deleteTooltip')}>
                                 <Trash2 className="w-3.5 h-3.5" />
                               </Button>
                             </div>
@@ -700,13 +690,13 @@ export default function SimpleABTestManager({
                           <Trophy className="w-5 h-5" />
                           <div>
                             <div className="text-sm font-semibold">
-                              Winner: Version {testResults[test.id].funnel_results?.winner}
+                              {t('analytics.abTests.table.winner')}: Version {testResults[test.id].funnel_results?.winner}
                             </div>
                             <div className="text-xs text-muted-foreground">
                               {testResults[test.id].funnel_results?.lift !== null && testResults[test.id].funnel_results?.lift !== undefined && (
                                 <span className="flex items-center gap-2">
                                   <TrendingUp className="w-3.5 h-3.5" />
-                                  +{testResults[test.id].funnel_results!.lift!.toFixed(1)}% lift in conversion
+                                  +{testResults[test.id].funnel_results!.lift!.toFixed(1)}% {t('analytics.abTests.table.diff')}
                                 </span>
                               )}
                             </div>
@@ -721,7 +711,7 @@ export default function SimpleABTestManager({
                         <div className="flex items-center justify-between text-xs">
                           <span className="font-medium flex items-center gap-2">
                             <Info className="w-3.5 h-3.5" />
-                            Statistical Confidence
+                            {t('analytics.abTests.table.confidenceLabel')}
                           </span>
                           <span className={`font-semibold ${testResults[test.id].funnel_results!.statistical_significance.is_significant ? 'text-green-600' : 'text-yellow-600'}`}>
                             {testResults[test.id].funnel_results!.statistical_significance.confidence}%
@@ -743,7 +733,7 @@ export default function SimpleABTestManager({
                         </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>0%</span>
-                          <span className="text-black/50">95% threshold</span>
+                          <span className="text-black/50">{t('analytics.abTests.table.threshold95')}</span>
                           <span>100%</span>
                         </div>
                         <p className="text-xs text-muted-foreground">
@@ -755,15 +745,15 @@ export default function SimpleABTestManager({
                     {/* Funnel Comparison */}
                     {testResults[test.id].funnel_results && (
                       <div className="space-y-2">
-                        <div className="text-xs font-medium">Funnel Comparison: {testResults[test.id].funnel_results!.funnel_name}</div>
+                        <div className="text-xs font-medium">{t('analytics.abTests.table.funnelComparison')}: {testResults[test.id].funnel_results!.funnel_name}</div>
                         <div className="overflow-x-auto">
                           <table className="w-full text-xs">
                             <thead>
                               <tr className="border-b">
-                                <th className="text-left py-1.5 font-medium">Step</th>
+                                <th className="text-left py-1.5 font-medium">{t('analytics.abTests.table.step')}</th>
                                 <th className="text-right py-1.5 font-medium text-blue-600">Version A</th>
                                 <th className="text-right py-1.5 font-medium text-green-600">Version B</th>
-                                <th className="text-right py-1.5 font-medium">Diff</th>
+                                <th className="text-right py-1.5 font-medium">{t('analytics.abTests.table.diff')}</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -791,15 +781,15 @@ export default function SimpleABTestManager({
                     {/* All Events Breakdown */}
                     {testResults[test.id].events_breakdown.length > 0 && (
                       <div className="space-y-2">
-                        <div className="text-xs font-medium">All Events Breakdown</div>
+                        <div className="text-xs font-medium">{t('analytics.abTests.table.eventsBreakdown')}</div>
                         <div className="overflow-x-auto">
                           <table className="w-full text-xs">
                             <thead>
                               <tr className="border-b">
-                                <th className="text-left py-1.5 font-medium">Event</th>
+                                <th className="text-left py-1.5 font-medium">{t('analytics.abTests.table.event')}</th>
                                 <th className="text-right py-1.5 font-medium text-blue-600">A</th>
                                 <th className="text-right py-1.5 font-medium text-green-600">B</th>
-                                <th className="text-right py-1.5 font-medium">Winner</th>
+                                <th className="text-right py-1.5 font-medium">{t('analytics.abTests.table.winnerShort')}</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -826,7 +816,7 @@ export default function SimpleABTestManager({
                     {/* No data message */}
                     {testResults[test.id].events_breakdown.length === 0 && !testResults[test.id].funnel_results && (
                       <div className="text-center py-4 text-xs text-muted-foreground">
-                        No events recorded yet for this test.
+                        {t('analytics.abTests.table.noData')}
                       </div>
                     )}
                   </div>

@@ -24,18 +24,20 @@ import FunnelAnalysis from '@/components/analytics/FunnelAnalysis';
 import PromptEventsViewer from '@/components/analytics/PromptEventsViewer';
 import { apiClient } from '@/lib/api';
 import { BarChart3, TestTube, Settings, FileText, Plus } from 'lucide-react';
+import { useLocale } from '@/contexts/locale-context';
 
 const subsections = [
-  { id: "recent-events", name: "Recent Events", icon: FileText },
-  { id: "prompt-events", name: "Prompts", icon: FileText },
-  { id: "funnel", name: "Funnels", icon: BarChart3 },
-  { id: "ab-tests", name: "A/B Tests", icon: TestTube },
-  { id: "events", name: "Define Events", icon: Settings },  
+  { id: "recent-events", labelKey: "analytics.tabs.recentEvents", icon: FileText },
+  { id: "prompt-events", labelKey: "analytics.tabs.prompts", icon: FileText },
+  { id: "funnel", labelKey: "analytics.tabs.funnels", icon: BarChart3 },
+  { id: "ab-tests", labelKey: "analytics.tabs.abTests", icon: TestTube },
+  { id: "events", labelKey: "analytics.tabs.defineEvents", icon: Settings },
 ]
 
 function AnalyticsPageContent() {
   const [activeSubsection, setActiveSubsection] = useLocalStorage<string>("analytics-active-tab", "recent-events")
   const { showNotification } = useNotification()
+  const { t } = useLocale()
 
   // Modal states
   const [showEventModal, setShowEventModal] = useState(false)
@@ -72,12 +74,12 @@ function AnalyticsPageContent() {
       });
       setShowDeleteEventModal(false);
       setDeletingEventId(null);
-      showNotification('Event deleted successfully', 'success');
+      showNotification(t('analytics.notifications.eventDeletedSuccess'), 'success');
       // Force re-render to reload events
       setEventsKey(prev => prev + 1);
     } catch (error) {
       console.error('Failed to delete event:', error);
-      showNotification('Failed to delete event', 'error');
+      showNotification(t('analytics.notifications.eventDeletedError'), 'error');
     }
   }
 
@@ -91,12 +93,12 @@ function AnalyticsPageContent() {
       });
       setShowDeleteFunnelModal(false);
       setDeletingFunnelId(null);
-      showNotification('Funnel deleted successfully', 'success');
+      showNotification(t('analytics.notifications.funnelDeletedSuccess'), 'success');
       // Refresh to reload funnels
       setFunnelKey(prev => prev + 1);
     } catch (error) {
       console.error('Failed to delete funnel:', error);
-      showNotification('Failed to delete funnel', 'error');
+      showNotification(t('analytics.notifications.funnelDeletedError'), 'error');
     }
   }
 
@@ -110,12 +112,12 @@ function AnalyticsPageContent() {
       });
       setShowDeleteABTestModal(false);
       setDeletingABTestId(null);
-      showNotification('A/B test deleted successfully', 'success');
+      showNotification(t('analytics.notifications.abTestDeletedSuccess'), 'success');
       // Refresh to reload tests
       setAbTestKey(prev => prev + 1);
     } catch (error) {
       console.error('Failed to delete A/B test:', error);
-      showNotification('Failed to delete A/B test', 'error');
+      showNotification(t('analytics.notifications.abTestDeletedError'), 'error');
     }
   }
 
@@ -321,9 +323,9 @@ function AnalyticsPageContent() {
         {/* EditorHeader */}
         <div className="px-4 pt-[12px] pb-[12px] h-[65px] bg-white border-b border-slate-200 flex items-center justify-between flex-shrink-0">
           <div>
-            <h1 className="text-base font-semibold">Performance Analytics</h1>
+            <h1 className="text-base font-semibold">{t('analytics.title')}</h1>
             <p className="text-xs text-muted-foreground">
-              Track business outcomes, measure ROI, and optimize your prompts
+              {t('analytics.subtitle')}
             </p>
           </div>
         </div>
@@ -347,7 +349,7 @@ function AnalyticsPageContent() {
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5" />
-                    <span>{subsection.name}</span>
+                    <span>{t(subsection.labelKey)}</span>
                   </button>
                 )
               })}
@@ -366,9 +368,9 @@ function AnalyticsPageContent() {
         }}>
           <DialogContent className="sm:max-w-4xl max-h-[90vh]">
             <DialogHeader>
-              <DialogTitle>{editingEvent ? 'Edit Event Definition' : 'Create New Event Definition'}</DialogTitle>
+              <DialogTitle>{editingEvent ? t('analytics.modals.event.titleEdit') : t('analytics.modals.event.titleCreate')}</DialogTitle>
               <DialogDescription>
-                {editingEvent ? 'Update your event definition' : 'Define a custom event to track business outcomes from your prompts'}
+                {editingEvent ? t('analytics.modals.event.descriptionEdit') : t('analytics.modals.event.descriptionCreate')}
               </DialogDescription>
             </DialogHeader>
             <div className="overflow-y-auto flex-1">
@@ -378,7 +380,10 @@ function AnalyticsPageContent() {
                   console.log('Saving event definition:', definition);
                   setShowEventModal(false);
                   setEditingEvent(null);
-                  showNotification(editingEvent ? 'Event updated successfully' : 'Event created successfully', 'success');
+                  showNotification(
+                    editingEvent ? t('analytics.notifications.eventUpdatedSuccess') : t('analytics.notifications.eventCreatedSuccess'),
+                    'success'
+                  );
                   // Force re-render to reload events
                   setEventsKey(prev => prev + 1);
                 }}
@@ -395,9 +400,9 @@ function AnalyticsPageContent() {
         <Dialog open={showFunnelModal} onOpenChange={setShowFunnelModal}>
           <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col">
             <DialogHeader>
-              <DialogTitle>Create New Funnel</DialogTitle>
+              <DialogTitle>{t('analytics.modals.funnel.createTitle')}</DialogTitle>
               <DialogDescription>
-                Define a conversion funnel to track user journey through your prompts
+                {t('analytics.modals.funnel.createDescription')}
               </DialogDescription>
             </DialogHeader>
             <div className="overflow-y-auto px-1 flex-1 min-h-[600px]">
@@ -421,9 +426,9 @@ function AnalyticsPageContent() {
         <Dialog open={showEditFunnelModal} onOpenChange={setShowEditFunnelModal}>
           <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col">
             <DialogHeader>
-              <DialogTitle>Edit Funnel</DialogTitle>
+              <DialogTitle>{t('analytics.modals.funnel.editTitle')}</DialogTitle>
               <DialogDescription>
-                Update your funnel configuration
+                {t('analytics.modals.funnel.editDescription')}
               </DialogDescription>
             </DialogHeader>
             <div className="overflow-y-auto px-1 flex-1 min-h-[600px]">
@@ -449,9 +454,9 @@ function AnalyticsPageContent() {
         <Dialog open={showABTestModal} onOpenChange={setShowABTestModal}>
           <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
             <DialogHeader>
-              <DialogTitle>Create New A/B Test</DialogTitle>
+              <DialogTitle>{t('analytics.modals.abTest.createTitle')}</DialogTitle>
               <DialogDescription>
-                Compare two prompt versions with 50/50 traffic split
+                {t('analytics.modals.abTest.createDescription')}
               </DialogDescription>
             </DialogHeader>
             <div className="overflow-y-auto px-1">
@@ -478,8 +483,8 @@ function AnalyticsPageContent() {
             if (!open) setDeletingEventId(null);
           }}
           onConfirm={handleDeleteEvent}
-          title="Delete Event Definition"
-          description="Are you sure you want to delete this event definition? This action cannot be undone."
+          title={t('analytics.modals.delete.eventTitle')}
+          description={t('analytics.modals.delete.eventDescription')}
         />
 
         {/* Delete Funnel Confirmation Modal */}
@@ -490,8 +495,8 @@ function AnalyticsPageContent() {
             if (!open) setDeletingFunnelId(null);
           }}
           onConfirm={handleDeleteFunnel}
-          title="Delete Funnel"
-          description="Are you sure you want to delete this funnel configuration? This action cannot be undone."
+          title={t('analytics.modals.delete.funnelTitle')}
+          description={t('analytics.modals.delete.funnelDescription')}
         />
 
         {/* Delete A/B Test Confirmation Modal */}
@@ -502,8 +507,8 @@ function AnalyticsPageContent() {
             if (!open) setDeletingABTestId(null);
           }}
           onConfirm={handleDeleteABTest}
-          title="Delete A/B Test"
-          description="Are you sure you want to delete this A/B test? This action cannot be undone."
+          title={t('analytics.modals.delete.abTestTitle')}
+          description={t('analytics.modals.delete.abTestDescription')}
         />
       </>
     </ProtectedRoute>

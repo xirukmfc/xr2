@@ -1,11 +1,12 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { ChevronLeft, ChevronRight, Sparkles, Code, BarChart3, TestTubes, GitBranch, Zap, TrendingUp, GitCompare, Puzzle } from 'lucide-react'
 import { apiClient } from '@/lib/api'
 import { useAuth } from '@/contexts/auth-context'
+import { useLocale } from '@/contexts/locale-context'
 
 interface OnboardingWelcomeProps {
   isOpen: boolean
@@ -13,6 +14,77 @@ interface OnboardingWelcomeProps {
   apiKey?: string
   onCreatePrompt?: () => void
 }
+
+type OnboardingStep = {
+  icon: any
+  title: string
+  description: string
+  features: string[]
+  visual: string
+}
+
+const getSteps = (t: (key: string, params?: Record<string, string | number>) => string): OnboardingStep[] => [
+  {
+    icon: Sparkles,
+    title: t('onboarding.steps.prompts.title'),
+    description: t('onboarding.steps.prompts.description'),
+    features: [
+      t('onboarding.steps.prompts.features.history'),
+      t('onboarding.steps.prompts.features.variables'),
+      t('onboarding.steps.prompts.features.instantUpdates'),
+      t('onboarding.steps.prompts.features.collaboration')
+    ],
+    visual: "prompt-editor"
+  },
+  {
+    icon: Code,
+    title: t('onboarding.steps.api.title'),
+    description: t('onboarding.steps.api.description'),
+    features: [
+      t('onboarding.steps.api.features.rest'),
+      t('onboarding.steps.api.features.examples'),
+      t('onboarding.steps.api.features.auth'),
+      t('onboarding.steps.api.features.platforms')
+    ],
+    visual: "api-integration"
+  },
+  {
+    icon: Puzzle,
+    title: t('onboarding.steps.sdk.title'),
+    description: t('onboarding.steps.sdk.description'),
+    features: [
+      t('onboarding.steps.sdk.features.make'),
+      t('onboarding.steps.sdk.features.n8n'),
+      t('onboarding.steps.sdk.features.nocode'),
+      t('onboarding.steps.sdk.features.templates')
+    ],
+    visual: "sdk-integration"
+  },
+  {
+    icon: BarChart3,
+    title: t('onboarding.steps.analytics.title'),
+    description: t('onboarding.steps.analytics.description'),
+    features: [
+      t('onboarding.steps.analytics.features.realtime'),
+      t('onboarding.steps.analytics.features.costs'),
+      t('onboarding.steps.analytics.features.performance'),
+      t('onboarding.steps.analytics.features.trends')
+    ],
+    visual: "analytics"
+  },
+  {
+    icon: TestTubes,
+    title: t('onboarding.steps.ab.title'),
+    description: t('onboarding.steps.ab.description'),
+    features: [
+      t('onboarding.steps.ab.features.multiple'),
+      t('onboarding.steps.ab.features.traffic'),
+      t('onboarding.steps.ab.features.significance'),
+      t('onboarding.steps.ab.features.decisions')
+    ],
+    visual: "ab-testing"
+  }
+]
 
 const steps = [
   {
@@ -78,7 +150,7 @@ const steps = [
 ]
 
 // Visual illustration components for each step
-const VisualIllustration = ({ type }: { type: string }) => {
+const VisualIllustration = ({ type, t }: { type: string, t: (key: string, params?: Record<string, string | number>) => string }) => {
   switch (type) {
     case "prompt-editor":
       return (
@@ -148,7 +220,7 @@ const VisualIllustration = ({ type }: { type: string }) => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-medium text-slate-900">Make.com</div>
-                  <div className="text-[10px] text-slate-600">xR2 Get Prompt module</div>
+                  <div className="text-[10px] text-slate-600">{t('onboarding.visual.sdk.makeModule')}</div>
                 </div>
               </div>
               {/* n8n block */}
@@ -158,13 +230,13 @@ const VisualIllustration = ({ type }: { type: string }) => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-medium text-slate-900">n8n</div>
-                  <div className="text-[10px] text-slate-600">Custom node installed</div>
+                  <div className="text-[10px] text-slate-600">{t('onboarding.visual.sdk.n8nNode')}</div>
                 </div>
               </div>
               {/* Connection status */}
               <div className="flex items-center gap-1.5 pt-1 border-t border-slate-200">
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                <span className="text-[10px] text-slate-600">Connected & Ready</span>
+                <span className="text-[10px] text-slate-600">{t('onboarding.visual.sdk.connected')}</span>
               </div>
             </div>
             <div className="flex gap-2">
@@ -180,54 +252,54 @@ const VisualIllustration = ({ type }: { type: string }) => {
           <div className="absolute inset-0 p-3 flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-slate-400" />
-              <div className="h-2 bg-slate-300 rounded w-24"></div>
+              <div className="text-[10px] font-medium text-slate-600 truncate">{t('onboarding.visual.analytics.requestsTitle')}</div>
             </div>
-            <div className="flex-1 bg-white rounded border border-slate-200 p-3 space-y-2">
-              {/* Requests by Source */}
-              <div className="space-y-1">
-                <div className="text-[10px] font-medium text-slate-600">Requests by Source</div>
+              <div className="flex-1 bg-white rounded border border-slate-200 p-3 space-y-2">
+                {/* Requests by Source */}
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-700">mobile-app</span>
-                    <span className="text-[10px] font-semibold text-slate-900">842</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-700">web</span>
-                    <span className="text-[10px] font-semibold text-slate-900">356</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Revenue by Prompt */}
-              <div className="space-y-1 pt-1 border-t border-slate-200">
-                <div className="text-[10px] font-medium text-slate-600">Revenue by Prompt</div>
-                <div className="space-y-0.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-700 truncate">welcome-message</span>
-                    <span className="text-[10px] font-semibold text-green-600">$1,240</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-700 truncate">checkout-assistant</span>
-                    <span className="text-[10px] font-semibold text-green-600">$890</span>
+                  <div className="text-[10px] font-medium text-slate-600">{t('onboarding.visual.analytics.requestsTitle')}</div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-700">{t('onboarding.visual.analytics.mobile')}</span>
+                      <span className="text-[10px] font-semibold text-slate-900">842</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-700">{t('onboarding.visual.analytics.web')}</span>
+                      <span className="text-[10px] font-semibold text-slate-900">356</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+                
+                {/* Revenue by Prompt */}
+                <div className="space-y-1 pt-1 border-t border-slate-200">
+                  <div className="text-[10px] font-medium text-slate-600">{t('onboarding.visual.analytics.revenueTitle')}</div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-700 truncate">welcome-message</span>
+                      <span className="text-[10px] font-semibold text-green-600">$1,240</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-700 truncate">checkout-assistant</span>
+                      <span className="text-[10px] font-semibold text-green-600">$890</span>
+                    </div>
+                  </div>
+                </div>
 
-              {/* Version Performance */}
-              <div className="space-y-1 pt-1 border-t border-slate-200">
-                <div className="text-[10px] font-medium text-slate-600">Version Performance</div>
-                <div className="space-y-0.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-700">welcome-message v2</span>
-                    <span className="text-[10px] font-semibold text-green-600">+15%</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-700">checkout-assistant v3</span>
-                    <span className="text-[10px] font-semibold text-green-600">+8%</span>
+                {/* Version Performance */}
+                <div className="space-y-1 pt-1 border-t border-slate-200">
+                  <div className="text-[10px] font-medium text-slate-600">{t('onboarding.visual.analytics.versionPerformance')}</div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-700">welcome-message v2</span>
+                      <span className="text-[10px] font-semibold text-green-600">+15%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-700">checkout-assistant v3</span>
+                      <span className="text-[10px] font-semibold text-green-600">+8%</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
             <div className="flex gap-2">
               <div className="h-6 bg-slate-200 rounded w-16"></div>
               <div className="h-6 bg-slate-900 rounded w-20"></div>
@@ -247,22 +319,22 @@ const VisualIllustration = ({ type }: { type: string }) => {
               <div className="flex items-center justify-between p-2 bg-blue-50 rounded border border-blue-200">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  <div className="text-xs font-medium text-slate-900">Variant A</div>
+                  <div className="text-xs font-medium text-slate-900">{t('onboarding.visual.variantA')}</div>
                 </div>
-                <div className="text-xs text-slate-600">45% traffic</div>
+                <div className="text-xs text-slate-600">{t('onboarding.visual.traffic', { percent: 45 })}</div>
               </div>
               <div className="flex items-center justify-between p-2 bg-green-50 rounded border border-green-200">
                 <div className="flex items-center gap-2">
                   <GitCompare className="w-3 h-3 text-green-600" />
-                  <div className="text-xs font-medium text-slate-900">Variant B</div>
-                  <div className="text-xs text-green-600 font-semibold">Winner</div>
+                  <div className="text-xs font-medium text-slate-900">{t('onboarding.visual.variantB')}</div>
+                  <div className="text-xs text-green-600 font-semibold">{t('onboarding.visual.winner')}</div>
                 </div>
-                <div className="text-xs text-slate-600">55% traffic</div>
+                <div className="text-xs text-slate-600">{t('onboarding.visual.traffic', { percent: 55 })}</div>
               </div>
               <div className="pt-2 border-t border-slate-200">
                 <div className="flex items-center gap-2 text-xs text-slate-600">
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                  <span>Conversion: +12% improvement</span>
+                  <span>{t('onboarding.visual.conversion')}</span>
                 </div>
               </div>
             </div>
@@ -277,6 +349,8 @@ const VisualIllustration = ({ type }: { type: string }) => {
 export function OnboardingWelcome({ isOpen, onClose, apiKey, onCreatePrompt }: OnboardingWelcomeProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const { refreshUser, user } = useAuth()
+  const { t } = useLocale()
+  const steps = useMemo(() => getSteps(t), [t])
 
   const userNeedsOnboarding = user && (
     user.onboarding_completed === false ||
@@ -356,10 +430,10 @@ export function OnboardingWelcome({ isOpen, onClose, apiKey, onCreatePrompt }: O
       <DialogContent className="max-w-xl p-0 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-200">
           <DialogTitle className="text-lg font-semibold text-slate-900">
-            Welcome to xR2
+            {t('onboarding.title')}
           </DialogTitle>
           <DialogDescription className="text-xs text-slate-600 mt-1">
-            Centralized platform for managing AI prompts across all your applications
+            {t('onboarding.subtitle')}
           </DialogDescription>
         </DialogHeader>
 
@@ -375,7 +449,7 @@ export function OnboardingWelcome({ isOpen, onClose, apiKey, onCreatePrompt }: O
                     ? 'w-8 bg-slate-900'
                     : 'w-1.5 bg-slate-300 hover:bg-slate-400'
                 }`}
-                aria-label={`Go to step ${index + 1}`}
+                aria-label={t('onboarding.goToStep', { step: index + 1 })}
               />
             ))}
           </div>
@@ -386,7 +460,7 @@ export function OnboardingWelcome({ isOpen, onClose, apiKey, onCreatePrompt }: O
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-                  Step {currentStep + 1} of {steps.length}
+                  {t('onboarding.progress', { current: currentStep + 1, total: steps.length })}
                 </span>
               </div>
               <h3 className="text-base font-semibold text-slate-900 mb-1.5">
@@ -412,7 +486,7 @@ export function OnboardingWelcome({ isOpen, onClose, apiKey, onCreatePrompt }: O
             {/* Visual illustration */}
             <div className="mt-4">
               <div className="relative w-full h-40 rounded-lg overflow-hidden border border-slate-200 bg-white shadow-sm">
-                <VisualIllustration type={steps[currentStep].visual} />
+                <VisualIllustration type={steps[currentStep].visual} t={t} />
               </div>
             </div>
           </div>
@@ -425,7 +499,7 @@ export function OnboardingWelcome({ isOpen, onClose, apiKey, onCreatePrompt }: O
             onClick={handleSkip}
             className="text-xs text-slate-600 hover:text-slate-900 h-8 px-3"
           >
-            Skip
+            {t('onboarding.skip')}
           </Button>
 
           <div className="flex items-center gap-2">
@@ -436,7 +510,7 @@ export function OnboardingWelcome({ isOpen, onClose, apiKey, onCreatePrompt }: O
               className="h-8 px-3 text-xs text-slate-700 hover:text-slate-900 disabled:opacity-40"
             >
               <ChevronLeft className="w-3 h-3 mr-1" />
-              Prev
+              {t('onboarding.prev')}
             </Button>
 
             {currentStep < steps.length - 1 ? (
@@ -444,7 +518,7 @@ export function OnboardingWelcome({ isOpen, onClose, apiKey, onCreatePrompt }: O
                 onClick={handleNext}
                 className="h-8 px-4 text-xs bg-slate-900 hover:bg-slate-800 text-white font-medium"
               >
-                Next
+                {t('onboarding.next')}
                 <ChevronRight className="w-3 h-3 ml-1" />
               </Button>
             ) : (
@@ -452,7 +526,7 @@ export function OnboardingWelcome({ isOpen, onClose, apiKey, onCreatePrompt }: O
                 onClick={handleGetStarted}
                 className="h-8 px-4 text-xs bg-slate-900 hover:bg-slate-800 text-white font-medium"
               >
-                Get Started
+                {t('onboarding.getStarted')}
               </Button>
             )}
           </div>

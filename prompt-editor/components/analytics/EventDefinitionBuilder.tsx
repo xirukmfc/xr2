@@ -9,6 +9,7 @@ import { apiClient } from '@/lib/api';
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useLocale } from '@/contexts/locale-context';
 
 export interface MetadataField {
   name: string;
@@ -83,6 +84,7 @@ export default function EventDefinitionBuilder({
   onDeleteClick,
   showNotification
 }: EventDefinitionBuilderProps) {
+  const { t } = useLocale();
   const [eventsList, setEventsList] = useState<EventDefinition[]>([]);
   const [editingEvent, setEditingEvent] = useState<EventDefinition | null>(null);
   const [showCodeFor, setShowCodeFor] = useState<string | null>(null);
@@ -128,7 +130,7 @@ export default function EventDefinitionBuilder({
         setRefreshKey(prev => prev + 1); // Force re-render
       } else {
         console.error('Invalid events data format:', data);
-        setSaveMessage('Invalid events data format');
+        setSaveMessage(t('analytics.notifications.eventDeletedError'));
       }
     } catch (error) {
       console.error('Error loading events:', error);
@@ -216,7 +218,7 @@ export default function EventDefinitionBuilder({
       }
 
       console.log('Event save successful, reloading events...');
-      setSaveMessage('Event saved successfully!');
+      setSaveMessage(t('analytics.notifications.eventCreatedSuccess'));
       setEditingEvent(null);
       await loadEvents(); // Reload events from server
       console.log('Events reloaded after save');
@@ -227,7 +229,7 @@ export default function EventDefinitionBuilder({
 
       setTimeout(() => setSaveMessage(''), 3000);
     } catch (error: any) {
-      setSaveMessage(error?.message || 'Failed to save event');
+      setSaveMessage(error?.message || t('analytics.notifications.eventDeletedError'));
       console.error('Save error:', error);
     } finally {
       setSaving(false);
@@ -360,8 +362,8 @@ export default function EventDefinitionBuilder({
             <div className="flex gap-2 items-center">
               <div className="relative flex-1">
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input
-                  placeholder="Search by event name..."
+               <Input
+                  placeholder={t('analytics.eventsBuilder.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-8 h-9 text-xs"
@@ -374,7 +376,7 @@ export default function EventDefinitionBuilder({
                   className="bg-black hover:bg-gray-800 text-xs h-9 px-3 gap-1.5"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  New
+                  {t('analytics.eventsBuilder.new')}
                 </Button>
               )}
             </div>
@@ -401,13 +403,13 @@ export default function EventDefinitionBuilder({
         <Card>
           <CardHeader className="pb-3">
             <h3 className="font-semibold">
-              {editingEvent.id && eventsList.find(e => e.id === editingEvent.id) ? 'Edit Event' : 'Create New Event'}
+              {editingEvent.id && eventsList.find(e => e.id === editingEvent.id) ? t('analytics.eventsBuilder.form.titleEdit') : t('analytics.eventsBuilder.form.titleCreate')}
             </h3>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="event_name" className="text-sm">Event Name</Label>
+                <Label htmlFor="event_name" className="text-sm">{t('analytics.eventsBuilder.form.eventName')}</Label>
                 <Input
                   id="event_name"
                   value={editingEvent.event_name}
@@ -419,36 +421,22 @@ export default function EventDefinitionBuilder({
             </div>
 
             <div>
-              <Label htmlFor="description" className="text-sm">Description</Label>
+              <Label htmlFor="description" className="text-sm">{t('analytics.eventsBuilder.form.description')}</Label>
               <Input
                 id="description"
                 value={editingEvent.description}
                 onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
-                placeholder="Describe when this event should be triggered"
+                placeholder={t('analytics.eventsBuilder.form.descriptionPlaceholder')}
                 className="h-8"
               />
-            </div>
-
-            {/* Standard Fields Info */}
-            <div className="p-3 bg-gray-50 rounded-md space-y-1">
-              <Label className="text-sm font-medium">Standard Fields (automatically available)</Label>
-              <p className="text-xs text-gray-600">These fields are available in all events:</p>
-              <ul className="text-xs text-gray-600 ml-4 list-disc space-y-0.5">
-                <li><code className="bg-white px-1 rounded">event_name</code> - string (required)</li>
-                <li><code className="bg-white px-1 rounded">trace_id</code> - string (required)</li>
-                <li><code className="bg-white px-1 rounded">user_id</code> - string (optional)</li>
-                <li><code className="bg-white px-1 rounded">session_id</code> - string (optional)</li>
-                <li><code className="bg-white px-1 rounded">value</code> - number (optional, for revenue/metrics)</li>
-                <li><code className="bg-white px-1 rounded">currency</code> - string (optional)</li>
-              </ul>
             </div>
 
             {/* Custom Metadata Fields */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <div>
-                  <Label className="text-sm font-medium">Custom Metadata Fields</Label>
-                  <p className="text-xs text-gray-500">Define custom fields that will be passed in the metadata object</p>
+                  <Label className="text-sm font-medium">{t('analytics.eventsBuilder.form.fieldsTitle')}</Label>
+                  <p className="text-xs text-gray-500">{t('analytics.eventsBuilder.form.descriptionPlaceholder')}</p>
                 </div>
                 <Button
                   onClick={() => handleAddField()}
@@ -456,7 +444,7 @@ export default function EventDefinitionBuilder({
                   variant="outline"
                   className="h-7 px-2"
                 >
-                  <Plus className="h-3 w-3 mr-1" /> Add
+                  <Plus className="h-3 w-3 mr-1" /> {t('analytics.eventsBuilder.form.addField')}
                 </Button>
               </div>
               {editingEvent.metadata_schema.map((field, idx) => (
@@ -464,7 +452,7 @@ export default function EventDefinitionBuilder({
                   <div className="flex-1 space-y-2">
                     <div className="flex gap-2">
                       <Input
-                        placeholder="Field name"
+                        placeholder={t('analytics.eventsBuilder.form.eventName')}
                         value={field.name}
                         onChange={(e) => handleFieldChange(idx, { name: e.target.value })}
                         className="h-8 text-sm flex-1"
@@ -477,10 +465,10 @@ export default function EventDefinitionBuilder({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="string">String</SelectItem>
-                          <SelectItem value="number">Number</SelectItem>
-                          <SelectItem value="boolean">Boolean</SelectItem>
-                          <SelectItem value="object">Object</SelectItem>
+                          <SelectItem value="string">{t('analytics.eventForm.typeString')}</SelectItem>
+                          <SelectItem value="number">{t('analytics.eventForm.typeNumber')}</SelectItem>
+                          <SelectItem value="boolean">{t('analytics.eventForm.typeBoolean')}</SelectItem>
+                          <SelectItem value="object">{t('analytics.eventForm.typeObject')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <label className="flex items-center gap-1.5 text-sm whitespace-nowrap">
@@ -490,11 +478,11 @@ export default function EventDefinitionBuilder({
                           onChange={(e) => handleFieldChange(idx, { required: e.target.checked })}
                           className="rounded"
                         />
-                        Required
+                        {t('analytics.eventForm.required')}
                       </label>
                     </div>
                     <Input
-                      placeholder="Description (optional)"
+                      placeholder={t('analytics.eventsBuilder.form.descriptionPlaceholder')}
                       value={field.description || ''}
                       onChange={(e) => handleFieldChange(idx, { description: e.target.value })}
                       className="h-7 text-xs"
@@ -511,7 +499,7 @@ export default function EventDefinitionBuilder({
                 </div>
               ))}
               {editingEvent.metadata_schema.length === 0 && (
-                <p className="text-xs text-gray-400 text-center py-2">No custom fields defined. Click "Add" to create one.</p>
+                <p className="text-xs text-gray-400 text-center py-2">{t('analytics.eventsBuilder.form.noFields')}</p>
               )}
             </div>
 
@@ -521,14 +509,14 @@ export default function EventDefinitionBuilder({
                 disabled={saving}
                 size="sm"
               >
-                {saving ? 'Saving...' : 'Save Event'}
+                {saving ? t('analytics.eventsBuilder.form.saving') : t('analytics.eventsBuilder.form.save')}
               </Button>
               <Button
                 onClick={() => setEditingEvent(null)}
                 variant="outline"
                 size="sm"
               >
-                Cancel
+                {t('analytics.eventsBuilder.form.cancel')}
               </Button>
             </div>
           </CardContent>
@@ -540,9 +528,9 @@ export default function EventDefinitionBuilder({
         {filteredEventsList.filter(event => editingEvent?.id !== event.id).length === 0 && !editingEvent ? (
           <EmptyState
             icon={Zap}
-            title="No event definitions yet"
-            description="Create your first event definition to start tracking user actions and behaviors in your application."
-            actionLabel="Create Event Definition"
+            title={t('analytics.eventsBuilder.empty.title')}
+            description={t('analytics.eventsBuilder.empty.description')}
+            actionLabel={t('analytics.eventsBuilder.form.titleCreate')}
             onAction={() => setEditingEvent(createNewEvent())}
           />
         ) : (
@@ -558,8 +546,10 @@ export default function EventDefinitionBuilder({
                   </div>
                   <div>
                     <h3 className="font-medium text-sm">{event.event_name}</h3>
-                    {event.description && (
+                    {event.description ? (
                       <p className="text-xs text-muted-foreground">{event.description}</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">{t('analytics.eventsBuilder.card.noDescription')}</p>
                     )}
                   </div>
                 </div>
@@ -568,8 +558,8 @@ export default function EventDefinitionBuilder({
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowCodeFor(showCodeFor === event.id ? null : event.id!)}
-                    className="h-6 px-2"
-                    title="Show code"
+                   className="h-6 px-2"
+                    title={t('analytics.abTests.notifications.compareTooltip')}
                   >
                     <Code className="h-3 w-3" />
                   </Button>
@@ -594,10 +584,10 @@ export default function EventDefinitionBuilder({
 
               {!event.collapsed && (
                 <div className="mt-3 pt-3 border-t text-sm space-y-2">
-                  <p><strong>Description:</strong> {event.description || 'No description'}</p>
+                  <p><strong>{t('analytics.eventsBuilder.card.description')}</strong> {event.description || t('analytics.eventsBuilder.card.noDescription')}</p>
                   {event.metadata_schema && event.metadata_schema.length > 0 ? (
                     <div>
-                      <p className="font-medium mb-1">Custom Metadata Fields:</p>
+                      <p className="font-medium mb-1">{t('analytics.eventsBuilder.card.customFieldsTitle')}</p>
                       <ul className="ml-4 list-disc text-xs space-y-1">
                         {event.metadata_schema.map((field, idx) => (
                           <li key={idx}>
@@ -609,8 +599,8 @@ export default function EventDefinitionBuilder({
                         ))}
                       </ul>
                     </div>
-                  ) : (
-                    <p className="text-gray-500 text-xs">No custom fields defined</p>
+                 ) : (
+                    <p className="text-gray-500 text-xs">{t('analytics.eventsBuilder.card.noFields')}</p>
                   )}
                 </div>
               )}
@@ -618,13 +608,13 @@ export default function EventDefinitionBuilder({
               {showCodeFor === event.id && (
                 <div className="mt-3 pt-3 border-t">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-medium">Code Example</h4>
+                    <h4 className="text-sm font-medium">{t('analytics.eventsBuilder.card.codeTitle')}</h4>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => copyToClipboard(generateCodeSnippet(event))}
                       className="h-6 px-2"
-                      title="Copy code to clipboard"
+                      title={t('analytics.eventsBuilder.card.copyCode')}
                     >
                       <Copy className="h-3 w-3" />
                     </Button>

@@ -10,6 +10,7 @@ import { useNotification } from "@/components/notification-provider"
 import { useRouter } from "next/navigation"
 import { apiClient, type ApiPrompt } from "@/lib/api"
 import { useWorkspaceContext } from "@/components/workspace-context"
+import { useLocale } from "@/contexts/locale-context"
 
 interface NewPromptModalProps {
   isOpen: boolean
@@ -25,6 +26,7 @@ export function NewPromptModal({ isOpen, onClose, onPromptCreated }: NewPromptMo
   const { showNotification } = useNotification()
   const router = useRouter()
   const { currentWorkspaceId } = useWorkspaceContext() // get from context
+  const { t } = useLocale()
 
   // Transliterate Cyrillic to Latin
   const transliterate = (text: string): string => {
@@ -108,15 +110,15 @@ export function NewPromptModal({ isOpen, onClose, onPromptCreated }: NewPromptMo
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="w-96 max-w-sm">
         <DialogHeader>
-          <DialogTitle>Create New Prompt</DialogTitle>
+          <DialogTitle>{t('newPromptModal.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Prompt Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('newPromptModal.name')}</label>
             <Input
               type="text"
-              placeholder="e.g. Customer Welcome Message"
+              placeholder={t('newPromptModal.namePlaceholder')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={isCreating}
@@ -124,9 +126,9 @@ export function NewPromptModal({ isOpen, onClose, onPromptCreated }: NewPromptMo
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('newPromptModal.description')}</label>
             <Textarea
-              placeholder="Brief description of what this prompt does..."
+              placeholder={t('newPromptModal.descriptionPlaceholder')}
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -138,7 +140,7 @@ export function NewPromptModal({ isOpen, onClose, onPromptCreated }: NewPromptMo
 
         <div className="flex justify-end space-x-3 mt-6">
           <Button variant="ghost" onClick={handleClose} disabled={isCreating}>
-            Cancel
+            {t('newPromptModal.cancel')}
           </Button>
           <Button
             onClick={handleSubmit}
@@ -146,7 +148,7 @@ export function NewPromptModal({ isOpen, onClose, onPromptCreated }: NewPromptMo
             disabled={isCreating || !name.trim() || !currentWorkspaceId}
             title={!currentWorkspaceId ? "No workspace" : undefined}
           >
-            {isCreating ? "Creating..." : "Create Prompt"}
+            {isCreating ? "Creating..." : t('newPromptModal.create')}
           </Button>
         </div>
       </DialogContent>

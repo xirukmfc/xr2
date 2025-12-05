@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { apiClient } from '@/lib/api';
+import { useLocale } from '@/contexts/locale-context';
 
 interface Prompt {
   id: string;
@@ -47,6 +48,7 @@ interface ChartData {
 }
 
 export default function PromptEventsViewer() {
+  const { t } = useLocale();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [versions, setVersions] = useState<PromptVersion[]>([]);
   const [selectedPromptId, setSelectedPromptId] = useState<string>('');
@@ -299,7 +301,7 @@ export default function PromptEventsViewer() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
+    return new Date(dateString).toLocaleString(undefined, {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -309,7 +311,7 @@ export default function PromptEventsViewer() {
   };
 
   const formatDateOnly = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
@@ -382,7 +384,7 @@ export default function PromptEventsViewer() {
             {/* Prompt Selector */}
             <Select value={selectedPromptId} onValueChange={setSelectedPromptId}>
               <SelectTrigger className="h-9">
-                <SelectValue placeholder="Select prompt" />
+                <SelectValue placeholder={t('analytics.promptEvents.selectPromptPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {prompts.map(prompt => (
@@ -400,10 +402,10 @@ export default function PromptEventsViewer() {
               disabled={!selectedPromptId}
             >
               <SelectTrigger className="h-9">
-                <SelectValue placeholder="Select version" />
+                <SelectValue placeholder={t('analytics.promptEvents.selectVersionPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Versions</SelectItem>
+                <SelectItem value="all">{t('analytics.promptEvents.allVersions')}</SelectItem>
                 {versions.map(version => (
                   <SelectItem key={version.id} value={version.id}>
                     v{version.version_number} ({version.status})
@@ -418,10 +420,10 @@ export default function PromptEventsViewer() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="week">This Week</SelectItem>
-                <SelectItem value="month">This Month</SelectItem>
-                <SelectItem value="year">This Year</SelectItem>
+                <SelectItem value="today">{t('analytics.promptEvents.periodToday')}</SelectItem>
+                <SelectItem value="week">{t('analytics.promptEvents.periodWeek')}</SelectItem>
+                <SelectItem value="month">{t('analytics.promptEvents.periodMonth')}</SelectItem>
+                <SelectItem value="year">{t('analytics.promptEvents.periodYear')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -544,7 +546,7 @@ export default function PromptEventsViewer() {
       ) : selectedPromptId && !loading ? (
         <Card>
           <CardContent className="flex items-center justify-center h-48 text-muted-foreground">
-            <p>No events found for the selected period</p>
+            <p>{t('analytics.promptEvents.chartEmpty')}</p>
           </CardContent>
         </Card>
       ) : null}
@@ -557,7 +559,7 @@ export default function PromptEventsViewer() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="h-10 px-4 py-2 text-xs font-medium sticky left-0 bg-white z-10">Event Type</TableHead>
+                    <TableHead className="h-10 px-4 py-2 text-xs font-medium sticky left-0 bg-white z-10">{t('analytics.promptEvents.table.eventType')}</TableHead>
                     {pivotData.versions.map(version => (
                       <TableHead key={version.id} className="h-10 px-4 py-2 text-xs text-center min-w-[100px]">
                         v{version.number}
@@ -566,7 +568,7 @@ export default function PromptEventsViewer() {
                         )}
                       </TableHead>
                     ))}
-                    <TableHead className="h-10 px-4 py-2 text-xs text-right font-medium">Total</TableHead>
+                    <TableHead className="h-10 px-4 py-2 text-xs text-right font-medium">{t('analytics.promptEvents.table.total')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -594,7 +596,7 @@ export default function PromptEventsViewer() {
                   {/* Totals row */}
                   <TableRow className="border-t-2 font-medium bg-muted/30">
                     <TableCell className="px-4 py-2 text-xs font-bold sticky left-0 bg-muted/30 z-10">
-                      Total
+                      {t('analytics.promptEvents.table.total')}
                     </TableCell>
                     {pivotData.versions.map(version => {
                       const total = pivotData.rows.reduce((sum, row) => sum + (row.versionCounts[version.id] || 0), 0);
@@ -618,7 +620,7 @@ export default function PromptEventsViewer() {
       {loading && (
         <Card>
           <CardContent className="flex items-center justify-center h-48">
-            <p>Loading events...</p>
+            <p>{t('analytics.promptEvents.loading')}</p>
           </CardContent>
         </Card>
       )}
@@ -626,7 +628,7 @@ export default function PromptEventsViewer() {
       {!selectedPromptId && (
         <Card>
           <CardContent className="flex items-center justify-center h-48 text-muted-foreground">
-            <p>Please select a prompt to view events</p>
+            <p>{t('analytics.promptEvents.selectPromptHint')}</p>
           </CardContent>
         </Card>
       )}
@@ -641,6 +643,7 @@ export default function PromptEventsViewer() {
 
 // Metadata Insights Component
 function MetadataInsights({ events }: { events: PromptEvent[] }) {
+  const { t } = useLocale();
   // Extract all metadata fields
   const metadataFields = new Set<string>();
   events.forEach(event => {
@@ -710,7 +713,7 @@ function MetadataInsights({ events }: { events: PromptEvent[] }) {
   return (
     <Card>
       <CardHeader className="px-4 py-3">
-        <CardTitle className="text-sm font-medium">Metadata Insights</CardTitle>
+        <CardTitle className="text-sm font-medium">{t('analytics.promptEvents.metadata.title')}</CardTitle>
       </CardHeader>
       <CardContent className="px-4 py-3">
         <div className="space-y-4">
@@ -730,17 +733,17 @@ function MetadataInsights({ events }: { events: PromptEvent[] }) {
                         {fieldName.replace(/_/g, ' ')}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {analysis.count} events
+                        {analysis.count} {t('analytics.promptEvents.metadata.events')}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 flex-shrink-0 ml-4">
                     <div className="text-right">
-                      <div className="text-xs text-muted-foreground">Avg</div>
+                      <div className="text-xs text-muted-foreground">{t('analytics.promptEvents.metadata.avg')}</div>
                       <div className="text-xs font-semibold">{analysis.avg.toFixed(1)}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-muted-foreground">Range</div>
+                      <div className="text-xs text-muted-foreground">{t('analytics.promptEvents.metadata.range')}</div>
                       <div className="text-xs font-semibold">
                         {analysis.min.toFixed(1)}–{analysis.max.toFixed(1)}
                       </div>
@@ -781,7 +784,7 @@ function MetadataInsights({ events }: { events: PromptEvent[] }) {
                         ))}
                         {analysis.values.length > 3 && (
                           <span className="inline-flex items-center px-2 py-0.5 text-xs text-muted-foreground">
-                            +{analysis.values.length - 3} more
+                            +{analysis.values.length - 3} {t('analytics.promptEvents.metadata.more', { count: analysis.values.length - 3 })}
                           </span>
                         )}
                       </div>
@@ -795,7 +798,7 @@ function MetadataInsights({ events }: { events: PromptEvent[] }) {
           {/* Empty State */}
           {numericFields.length === 0 && categoricalFields.length === 0 && (
             <div className="text-center py-6 text-muted-foreground text-xs">
-              No custom metadata fields found
+              {t('analytics.promptEvents.metadata.empty')}
             </div>
           )}
         </div>

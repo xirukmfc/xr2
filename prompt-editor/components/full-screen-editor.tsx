@@ -14,6 +14,7 @@ import { useNotification } from "@/components/notification-provider"
 import { ModelPicker } from "@/components/model-picker"
 import { TokenBadges } from "@/components/token-badges"
 import { useTheme } from "next-themes"
+import { useLocale } from "@/contexts/locale-context"
 import {
   getBaseEditorOptions,
   updateVariableDecorations,
@@ -176,6 +177,7 @@ function FullScreenEditor({
   onReturnToActive,
   onSave,
 }: FullScreenEditorProps) {
+  const { t } = useLocale()
   const { showNotification } = useNotification()
   const monaco = useMonaco()
   const { theme, setTheme } = useTheme()
@@ -658,7 +660,7 @@ function FullScreenEditor({
           {isPreviewMode ? (
             <div className="min-w-0 p-6 bg-gray-50 overflow-y-auto">
               <div className="max-w-4xl mx-auto space-y-8">
-                <h2 className="text-xl font-medium text-gray-900 mb-8">Preview Mode</h2>
+                <h2 className="text-xl font-medium text-gray-900 mb-8">{t('editor.previewMode')}</h2>
 
                 <div className="space-y-3">
                   <h3 className="text-base font-medium text-gray-700">System Prompt:</h3>

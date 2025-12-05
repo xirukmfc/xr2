@@ -15,6 +15,7 @@ import {
 import { CheckCircle, XCircle, Clock, AlertTriangle, Search, Filter, RefreshCw } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useLocale } from '@/contexts/locale-context';
 
 interface PromptEvent {
   id: string;
@@ -37,6 +38,7 @@ interface PromptEvent {
 }
 
 export default function RecentEventsTable() {
+  const { t } = useLocale();
   const [events, setEvents] = useState<PromptEvent[]>([]);
   const [totalEvents, setTotalEvents] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -136,7 +138,7 @@ export default function RecentEventsTable() {
     return (
       <Card>
         <CardContent className="flex items-center justify-center h-64">
-          Loading events...
+          {t('analytics.recentEvents.loading')}
         </CardContent>
       </Card>
     );
@@ -151,7 +153,7 @@ export default function RecentEventsTable() {
             <div className="relative flex-1">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <Input
-                placeholder="Search by trace ID or prompt ID..."
+                placeholder={t('analytics.recentEvents.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-8 h-9 text-xs"
@@ -162,14 +164,14 @@ export default function RecentEventsTable() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Events</SelectItem>
-                <SelectItem value="prompt_request">get_prompt</SelectItem>
-                <SelectItem value="custom_event">track_event</SelectItem>
+                <SelectItem value="all">{t('analytics.recentEvents.filterAll')}</SelectItem>
+                <SelectItem value="prompt_request">{t('analytics.recentEvents.filterPromptRequest')}</SelectItem>
+                <SelectItem value="custom_event">{t('analytics.recentEvents.filterCustomEvent')}</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" size="sm" onClick={fetchEvents} className="h-9 px-3 text-xs gap-1.5">
               <RefreshCw className="w-3.5 h-3.5" />
-              Refresh
+              {t('analytics.recentEvents.refresh')}
             </Button>
           </div>
         </CardContent>
@@ -185,13 +187,13 @@ export default function RecentEventsTable() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-b">
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">Time</TableHead>
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">Trace ID</TableHead>
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">Prompt</TableHead>
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">Version</TableHead>
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">Type</TableHead>
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">Source</TableHead>
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">Event</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.time')}</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.traceId')}</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.prompt')}</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.version')}</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.type')}</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.source')}</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.event')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -211,42 +213,42 @@ export default function RecentEventsTable() {
                       {event.trace_id}
                     </code>
                   </TableCell>
-                  <TableCell className="px-4 py-2">
-                    {event.event_metadata?.prompt_name ? (
-                      <span className="text-xs">{event.event_metadata.prompt_name}</span>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4 py-2 text-xs">
-                    {event.event_metadata?.version_number
-                      ? `v${event.event_metadata.version_number}`
+                <TableCell className="px-4 py-2">
+                  {event.event_metadata?.prompt_name ? (
+                    <span className="text-xs">{event.event_metadata.prompt_name}</span>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">{t('analytics.recentEvents.noPrompt')}</span>
+                  )}
+                </TableCell>
+                <TableCell className="px-4 py-2 text-xs">
+                  {event.event_metadata?.version_number
+                    ? `v${event.event_metadata.version_number}`
                       : '—'}
                   </TableCell>
                   <TableCell className="px-4 py-2 text-xs">{formatEventType(event.event_type)}</TableCell>
-                  <TableCell className="px-4 py-2 text-xs">
-                    {event.event_metadata?.source_name ? (
-                      <span>{event.event_metadata.source_name}</span>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4 py-2 text-xs">
-                    {event.event_type === 'custom_event' && event.event_metadata?.event_name ? (
-                      <span>{event.event_metadata.event_name}</span>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
+                <TableCell className="px-4 py-2 text-xs">
+                  {event.event_metadata?.source_name ? (
+                    <span>{event.event_metadata.source_name}</span>
+                  ) : (
+                    <span className="text-muted-foreground">{t('analytics.recentEvents.noSource')}</span>
+                  )}
+                </TableCell>
+                <TableCell className="px-4 py-2 text-xs">
+                  {event.event_type === 'custom_event' && event.event_metadata?.event_name ? (
+                    <span>{event.event_metadata.event_name}</span>
+                  ) : (
+                    <span className="text-muted-foreground">{t('analytics.recentEvents.noEvent')}</span>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
           </Table>
         </div>
 
         {filteredEvents.length === 0 && !loading && (
           <div className="text-center text-muted-foreground py-8">
-            No events found matching your filters.
+            {t('analytics.recentEvents.empty')}
           </div>
         )}
 
@@ -254,7 +256,11 @@ export default function RecentEventsTable() {
         {totalPages > 1 && (
           <div className="flex justify-between items-center mt-3 mb-3">
             <div className="text-xs text-muted-foreground">
-              {startIndex + 1}-{Math.min(startIndex + eventsPerPage, filteredEvents.length)} of {filteredEvents.length}
+              {t('analytics.recentEvents.pagination', {
+                from: startIndex + 1,
+                to: Math.min(startIndex + eventsPerPage, filteredEvents.length),
+                total: filteredEvents.length
+              })}
             </div>
             <div className="flex gap-2">
               <Button
@@ -264,7 +270,7 @@ export default function RecentEventsTable() {
                 disabled={currentPage === 1}
                 className="text-xs"
               >
-                Prev
+                {t('analytics.recentEvents.prev')}
               </Button>
               <span className="px-2 py-1 text-xs text-muted-foreground">
                 {currentPage}/{totalPages}
@@ -276,7 +282,7 @@ export default function RecentEventsTable() {
                 disabled={currentPage === totalPages}
                 className="text-xs"
               >
-                Next
+                {t('analytics.recentEvents.next')}
               </Button>
             </div>
           </div>

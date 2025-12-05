@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react"
 import { ProtectedRoute } from "@/components/protected-route"
-import {MoreHorizontal, Copy, Edit2, Trash2, Eye, EyeOff, Search, Key, Edit, BookOpen} from "lucide-react"
+import {MoreHorizontal, Copy, Edit2, Trash2, Eye, EyeOff, Search, Key, Edit, BookOpen, Plus} from "lucide-react"
 import { getApiKeys, deleteApiKey, createApiKey } from "@/lib/api"
 import { useCountsContext } from "@/components/counts-context"
+import { useLocale } from "@/contexts/locale-context"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -46,12 +47,12 @@ export interface ApiKey {
 }
 
 function ApiKeysPageContent() {
+  const { t } = useLocale()
   const [isNewApiKeyModalOpen, setIsNewApiKeyModalOpen] = useState(false)
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [sortBy, setSortBy] = useState("createdAt")
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10) // Fixed 10 items per page
   const [deleteKeyId, setDeleteKeyId] = useState<string | null>(null)
@@ -167,23 +168,16 @@ function ApiKeysPageContent() {
 
   // No filter options needed for API keys
 
-  const sortOptions = [
-    { value: "createdAt", label: "Sort by: Created Date" },
-    { value: "name", label: "Sort by: Name" },
-    { value: "usage", label: "Sort by: Usage" },
-    { value: "lastUsed", label: "Sort by: Last Used" },
-  ]
-
   const columns: Column<ApiKey>[] = [
     {
       key: "name",
-      header: "Name",
+      header: t('apiKeys.columns.name'),
       width: "col-span-3",
       render: (apiKey) => (
         <div className="flex items-center space-x-3">
           <div>
             <div className="text-sm font-medium text-slate-900">{apiKey.name}</div>
-            <div className="text-xs text-slate-500">Created {new Date(apiKey.created_at).toLocaleDateString()}</div>
+            <div className="text-xs text-slate-500">{t('apiKeys.columns.created')} {new Date(apiKey.created_at).toLocaleDateString()}</div>
             {apiKey.description && (
               <div className="text-xs text-slate-400 truncate max-w-xs">{apiKey.description}</div>
             )}
@@ -193,7 +187,7 @@ function ApiKeysPageContent() {
     },
     {
       key: "apiKey",
-      header: "API Key",
+      header: t('apiKeys.columns.key'),
       width: "col-span-4",
       render: (apiKey) => (
         <div>
@@ -216,7 +210,7 @@ function ApiKeysPageContent() {
     },
     {
       key: "usage",
-      header: "Usage",
+      header: t('apiKeys.columns.lastUsed'),
       width: "col-span-2",
       render: (apiKey) => (
         <div>
@@ -226,7 +220,7 @@ function ApiKeysPageContent() {
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t('apiKeys.columns.actions'),
       width: "col-span-1",
       render: (apiKey) => (
         <div className="flex items-center space-x-1">
@@ -250,20 +244,9 @@ function ApiKeysPageContent() {
     return apiKey.name.toLowerCase().includes(searchQuery.toLowerCase())
   })
 
+  // Sort by created date by default (most recent first)
   filteredApiKeys = filteredApiKeys.sort((a, b) => {
-    switch (sortBy) {
-      case "name":
-        return a.name.localeCompare(b.name)
-      case "usage":
-        return b.total_requests - a.total_requests
-      case "lastUsed":
-        if (!a.last_used_at) return 1
-        if (!b.last_used_at) return -1
-        return new Date(b.last_used_at).getTime() - new Date(a.last_used_at).getTime()
-      case "createdAt":
-      default:
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    }
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   })
 
   const totalPages = Math.ceil(filteredApiKeys.length / itemsPerPage)
@@ -289,7 +272,7 @@ function ApiKeysPageContent() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search API keys..."
+                  placeholder={t('apiKeys.searchPlaceholder')}
                   className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -307,25 +290,11 @@ function ApiKeysPageContent() {
               </Button>
               <Button
                 onClick={() => setIsNewApiKeyModalOpen(true)}
-                className="bg-black hover:bg-gray-800 text-white h-[35px]"
+                className="bg-black hover:bg-gray-800 text-white h-[35px] gap-2"
               >
-                + Create Key
+                <Plus className="w-4 h-4" />
+                {t('apiKeys.newKey')}
               </Button>
-            </div>
-
-            {/* Sort dropdown */}
-            <div>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              >
-                {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
         </div>
@@ -353,16 +322,15 @@ function ApiKeysPageContent() {
       <AlertDialog open={!!deleteKeyId} onOpenChange={() => setDeleteKeyId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete API Key</AlertDialogTitle>
+            <AlertDialogTitle>{t('apiKeys.modal.delete')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this API key? This action cannot be undone and will immediately revoke
-              access for any applications using this key.
+              {t('apiKeys.modal.deleteConfirm')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('apiKeys.modal.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-              Delete
+              {t('bulkActions.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -372,25 +340,25 @@ function ApiKeysPageContent() {
       <Dialog open={!!renameKeyId} onOpenChange={() => setRenameKeyId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rename API Key</DialogTitle>
+            <DialogTitle>{t('apiKeys.modal.edit')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="name">API Key Name</Label>
+              <Label htmlFor="name">{t('apiKeys.modal.name')}</Label>
               <Input
                 id="name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="Enter API key name"
+                placeholder={t('apiKeys.modal.namePlaceholder')}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRenameKeyId(null)}>
-              Cancel
+              {t('apiKeys.modal.cancel')}
             </Button>
             <Button onClick={handleRename} className="bg-black hover:bg-gray-800">
-              Save Changes
+              {t('apiKeys.modal.save')}
             </Button>
           </DialogFooter>
         </DialogContent>

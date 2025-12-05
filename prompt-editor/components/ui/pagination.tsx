@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { useLocale } from "@/contexts/locale-context"
 
 export interface PaginationProps {
   totalItems: number
@@ -21,6 +22,7 @@ export function Pagination({
   itemName = "items",
   className = "",
 }: PaginationProps) {
+  const { t } = useLocale()
   const startIndex = (currentPage - 1) * itemsPerPage + 1
   const endIndex = Math.min(currentPage * itemsPerPage, totalItems)
 
@@ -40,7 +42,7 @@ export function Pagination({
   return (
     <div className={`flex items-center justify-between mt-4 px-4 mb-4 ${className}`}>
       <div className="text-xs text-slate-600">
-        Showing <span className="font-medium">{startIndex}</span> to <span className="font-medium">{endIndex}</span> of{" "}
+        {t('prompts.pagination.showing')} <span className="font-medium">{startIndex}</span> {t('prompts.pagination.of')}{" "}
         <span className="font-medium">{totalItems}</span> {itemName}
       </div>
       <div className="flex items-center space-x-1">
@@ -51,7 +53,7 @@ export function Pagination({
           onClick={() => onPageChange(currentPage - 1)}
           className="h-8 px-3 text-xs"
         >
-          Previous
+          {t('prompts.pagination.previous')}
         </Button>
         {getVisiblePages().map((pageNum) => (
           <Button
@@ -71,7 +73,7 @@ export function Pagination({
           onClick={() => onPageChange(currentPage + 1)}
           className="h-8 px-3 text-xs"
         >
-          Next
+          {t('prompts.pagination.next')}
         </Button>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
+import { useLocale } from '@/contexts/locale-context';
 
 interface MetadataField {
   name: string;
@@ -58,6 +59,7 @@ interface NewEventModalProps {
 }
 
 export default function NewEventModal({ onSave, onCancel, initialData }: NewEventModalProps) {
+  const { t } = useLocale();
   const [formData, setFormData] = useState<EventDefinition>(initialData || {
     event_name: '',
     description: '',
@@ -115,7 +117,7 @@ export default function NewEventModal({ onSave, onCancel, initialData }: NewEven
 
   const handleSave = async () => {
     if (!formData.event_name.trim()) {
-      setError('Event name is required');
+      setError(t('analytics.eventForm.errorRequired'));
       return;
     }
 
@@ -134,7 +136,7 @@ export default function NewEventModal({ onSave, onCancel, initialData }: NewEven
 
       onSave(formData);
     } catch (error: any) {
-      setError(error?.message || 'Failed to save event');
+      setError(error?.message || t('analytics.eventForm.errorSave'));
       console.error('Save error:', error);
     } finally {
       setSaving(false);
@@ -152,39 +154,39 @@ export default function NewEventModal({ onSave, onCancel, initialData }: NewEven
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label htmlFor="event_name" className="text-sm">Event Name</Label>
+          <Label htmlFor="event_name" className="text-sm">{t('analytics.eventForm.eventNameLabel')}</Label>
           <Input
             id="event_name"
             value={formData.event_name}
             onChange={(e) => setFormData({ ...formData, event_name: e.target.value })}
-            placeholder="e.g., user_signup"
+            placeholder={t('analytics.eventForm.eventNamePlaceholder')}
             className="h-8"
           />
         </div>
       </div>
 
       <div>
-        <Label htmlFor="description" className="text-sm">Description</Label>
+        <Label htmlFor="description" className="text-sm">{t('analytics.eventForm.descriptionLabel')}</Label>
         <Input
           id="description"
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Describe when this event should be triggered"
+          placeholder={t('analytics.eventForm.descriptionPlaceholder')}
           className="h-8"
         />
       </div>
 
       {/* Standard Fields Info */}
       <div className="p-3 bg-muted/50 rounded-md space-y-2">
-        <Label className="text-sm font-medium">Standard Fields (automatically available)</Label>
-        <p className="text-xs text-muted-foreground">These fields are available in all events:</p>
+        <Label className="text-sm font-medium">{t('analytics.eventForm.standardFieldsTitle')}</Label>
+        <p className="text-xs text-muted-foreground">{t('analytics.eventForm.standardFieldsInfo')}</p>
         <ul className="text-xs text-muted-foreground ml-4 list-disc space-y-0.5">
-          <li><code className="bg-white px-1 rounded">event_name</code> - string (required)</li>
-          <li><code className="bg-white px-1 rounded">trace_id</code> - string (required)</li>
-          <li><code className="bg-white px-1 rounded">user_id</code> - string (optional)</li>
-          <li><code className="bg-white px-1 rounded">session_id</code> - string (optional)</li>
-          <li><code className="bg-white px-1 rounded">value</code> - number (optional, for revenue/metrics)</li>
-          <li><code className="bg-white px-1 rounded">currency</code> - string (optional)</li>
+          <li>{t('analytics.eventForm.standardFields.eventName')}</li>
+          <li>{t('analytics.eventForm.standardFields.traceId')}</li>
+          <li>{t('analytics.eventForm.standardFields.userId')}</li>
+          <li>{t('analytics.eventForm.standardFields.sessionId')}</li>
+          <li>{t('analytics.eventForm.standardFields.value')}</li>
+          <li>{t('analytics.eventForm.standardFields.currency')}</li>
         </ul>
       </div>
 
@@ -192,8 +194,8 @@ export default function NewEventModal({ onSave, onCancel, initialData }: NewEven
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <div>
-            <Label className="text-sm font-medium">Custom Metadata Fields</Label>
-            <p className="text-xs text-muted-foreground">Define custom fields that will be passed in the metadata object</p>
+            <Label className="text-sm font-medium">{t('analytics.eventForm.customFieldsTitle')}</Label>
+            <p className="text-xs text-muted-foreground">{t('analytics.eventForm.customFieldsDescription')}</p>
           </div>
           <Button
             onClick={addField}
@@ -202,7 +204,7 @@ export default function NewEventModal({ onSave, onCancel, initialData }: NewEven
             className="h-7 px-2"
             type="button"
           >
-            <Plus className="h-3 w-3 mr-1" /> Add
+            <Plus className="h-3 w-3 mr-1" /> {t('analytics.eventForm.add')}
           </Button>
         </div>
         {formData.metadata_schema.map((field, idx) => (
@@ -210,7 +212,7 @@ export default function NewEventModal({ onSave, onCancel, initialData }: NewEven
             <div className="flex-1 space-y-2">
               <div className="flex gap-2">
                 <Input
-                  placeholder="Field name"
+                  placeholder={t('analytics.eventForm.fieldNamePlaceholder')}
                   value={field.name}
                   onChange={(e) => updateField(idx, { name: e.target.value })}
                   className="h-8 text-sm flex-1"
@@ -223,10 +225,10 @@ export default function NewEventModal({ onSave, onCancel, initialData }: NewEven
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="string">String</SelectItem>
-                    <SelectItem value="number">Number</SelectItem>
-                    <SelectItem value="boolean">Boolean</SelectItem>
-                    <SelectItem value="object">Object</SelectItem>
+                    <SelectItem value="string">{t('analytics.eventForm.typeString')}</SelectItem>
+                    <SelectItem value="number">{t('analytics.eventForm.typeNumber')}</SelectItem>
+                    <SelectItem value="boolean">{t('analytics.eventForm.typeBoolean')}</SelectItem>
+                    <SelectItem value="object">{t('analytics.eventForm.typeObject')}</SelectItem>
                   </SelectContent>
                 </Select>
                 <label className="flex items-center gap-2 text-sm whitespace-nowrap">
@@ -236,11 +238,11 @@ export default function NewEventModal({ onSave, onCancel, initialData }: NewEven
                     onChange={(e) => updateField(idx, { required: e.target.checked })}
                     className="rounded"
                   />
-                  Required
+                  {t('analytics.eventForm.required')}
                 </label>
               </div>
               <Input
-                placeholder="Description (optional)"
+                placeholder={t('analytics.eventForm.fieldDescriptionPlaceholder')}
                 value={field.description || ''}
                 onChange={(e) => updateField(idx, { description: e.target.value })}
                 className="h-7 text-xs"
@@ -258,7 +260,7 @@ export default function NewEventModal({ onSave, onCancel, initialData }: NewEven
           </div>
         ))}
         {formData.metadata_schema.length === 0 && (
-          <p className="text-xs text-muted-foreground text-center py-2">No custom fields defined. Click "Add" to create one.</p>
+          <p className="text-xs text-muted-foreground text-center py-2">{t('analytics.eventForm.noFields')}</p>
         )}
       </div>
 
@@ -269,14 +271,16 @@ export default function NewEventModal({ onSave, onCancel, initialData }: NewEven
           size="sm"
           className="bg-black hover:bg-gray-800"
         >
-          {saving ? (formData.id ? 'Updating...' : 'Creating...') : (formData.id ? 'Update Event' : 'Create Event')}
+          {saving
+            ? (formData.id ? t('analytics.eventForm.updating') : t('analytics.eventForm.creating'))
+            : (formData.id ? t('analytics.eventForm.updateEvent') : t('analytics.eventForm.createEvent'))}
         </Button>
         <Button
           onClick={onCancel}
           variant="outline"
           size="sm"
         >
-          Cancel
+          {t('analytics.eventForm.cancel')}
         </Button>
       </div>
     </div>

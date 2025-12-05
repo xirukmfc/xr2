@@ -23,6 +23,7 @@ import {OnboardingWelcome} from "@/components/onboarding-welcome"
 import {useAuth} from "@/contexts/auth-context"
 import {getStatusBadgeClasses, getStatusDotClasses} from "@/lib/design-tokens"
 import {logger} from "@/lib/logger"
+import {useLocale} from "@/contexts/locale-context"
 
 // UI model expected by design components
 export interface UIPrompt {
@@ -111,6 +112,7 @@ function PromptsPageContent() {
     const workspaceContext = useWorkspaceContext()
     const { showNotification } = useNotification()
     const { user } = useAuth()
+    const { t } = useLocale()
 
     // Setup hotkeys (removed Cmd+N functionality)
 
@@ -419,23 +421,22 @@ function PromptsPageContent() {
     };
 
     const filterOptions = [
-        {key: "all", label: "All"},
-        {key: "active", label: "Active"},
-        {key: "draft", label: "Draft"},
-        {key: "archived", label: "Archived"},
+        {key: "all", label: t('prompts.filters.all')},
+        {key: "active", label: t('prompts.filters.active')},
+        {key: "draft", label: t('prompts.filters.draft')},
     ]
 
     const sortOptions = [
-        {value: "lastUpdated", label: "Sort by: Last Updated"},
-        {value: "name", label: "Sort by: Name"},
-        {value: "usage", label: "Sort by: Usage"},
+        {value: "lastUpdated", label: t('prompts.sort.lastUpdated')},
+        {value: "name", label: t('prompts.sort.name')},
+        {value: "usage", label: t('prompts.sort.usage')},
     ]
     logger.log("Prompts:", prompts)
     // Columns for table
     const columns: Column<UIPrompt>[] = [
         {
             key: "name",
-            header: "Name",
+            header: t('prompts.columns.name'),
             width: "col-span-4",
             render: (prompt) => (
                 <div className="flex items-center space-x-2">
@@ -469,7 +470,7 @@ function PromptsPageContent() {
         },
         {
             key: "status",
-            header: "Status",
+            header: t('prompts.columns.status'),
             width: "col-span-1",
             render: (prompt) => (
                 <span
@@ -480,23 +481,23 @@ function PromptsPageContent() {
         },
         {
             key: "lastUpdated",
-            header: "Last Updated",
-            width: "col-span-3",
+            header: t('prompts.columns.lastUpdated'),
+            width: "col-span-2",
             render: (prompt) => (
                 <div>
                     <div className={`text-sm ${prompt.status === "archived" ? "text-slate-500" : "text-slate-800"} truncate`}>
                         {prompt.lastUpdated}
                     </div>
                     <div className={`text-xs ${prompt.status === "archived" ? "text-slate-400" : "text-slate-500"} truncate`}>
-                        by {prompt.updatedBy}
+                        {t('prompts.by')} {prompt.updatedBy}
                     </div>
                 </div>
             ),
         },
         {
             key: "usage",
-            header: "Usage (24H)",
-            width: "col-span-1",
+            header: t('prompts.columns.usage24h'),
+            width: "col-span-2",
             render: (prompt) => (
                 <div className="text-sm font-medium text-slate-800">
                     {prompt.usage24h.toLocaleString()}
@@ -505,7 +506,7 @@ function PromptsPageContent() {
         },
         {
             key: "owner",
-            header: "Owner",
+            header: t('prompts.columns.owner'),
             width: "col-span-2",
             render: (prompt) => (
                 <div className="flex items-center space-x-2">
@@ -553,7 +554,7 @@ function PromptsPageContent() {
     if (loading || workspaceLoading) {
         return (
           <div className="flex flex-col min-h-screen">
-            <LoadingState message="Loading your prompts..." />
+            <LoadingState message={t('prompts.loading')} />
           </div>
         )
       }
@@ -561,7 +562,7 @@ function PromptsPageContent() {
         return (
           <div className="flex flex-col min-h-screen">
             <ErrorState
-              title="Failed to load prompts"
+              title={t('prompts.error.title')}
               message={error}
               onRetry={loadData}
             />
@@ -578,7 +579,7 @@ function PromptsPageContent() {
                     <DataFilters
                         searchQuery={searchQuery}
                         onSearch={setSearchQuery}
-                        searchPlaceholder="Search prompts..."
+                        searchPlaceholder={t('prompts.searchPlaceholder')}
                         activeFilter={activeFilter}
                         onFilter={setActiveFilter}
                         filterOptions={filterOptions}
@@ -603,7 +604,7 @@ function PromptsPageContent() {
                         totalPages={totalPages}
                         itemsPerPage={itemsPerPage}
                         onPageChange={setCurrentPage}
-                        itemName="prompts"
+                        itemName={t('prompts.itemsPerPage')}
                     />
                 </div>
             </div>

@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useLocale } from "@/contexts/locale-context"
 
 interface CreateVersionModalProps {
   isOpen: boolean
@@ -15,6 +16,7 @@ interface CreateVersionModalProps {
 }
 
 export function CreateVersionModal({ isOpen, onClose, onCreateVersion, availableVersions }: CreateVersionModalProps) {
+  const { t } = useLocale()
   const [selectedOption, setSelectedOption] = useState<"current" | "history" | "scratch">("current")
   const [selectedVersionId, setSelectedVersionId] = useState<string>("")
 
@@ -29,19 +31,19 @@ export function CreateVersionModal({ isOpen, onClose, onCreateVersion, available
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create New Version</DialogTitle>
+          <DialogTitle>{t('editor.createVersion.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <RadioGroup value={selectedOption} onValueChange={(value) => setSelectedOption(value as any)}>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="current" id="current" />
-              <Label htmlFor="current">Copy current version</Label>
+              <Label htmlFor="current">{t('editor.createVersion.copyCurrentVersion')}</Label>
             </div>
 
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="scratch" id="scratch" />
-              <Label htmlFor="scratch">Start from scratch</Label>
+              <Label htmlFor="scratch">{t('editor.createVersion.startFromScratch')}</Label>
             </div>
           </RadioGroup>
 
@@ -68,10 +70,10 @@ export function CreateVersionModal({ isOpen, onClose, onCreateVersion, available
 
         <div className="flex justify-end space-x-2 mt-6">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t('editor.createVersion.cancel')}
           </Button>
           <Button onClick={handleCreate} disabled={selectedOption === "history" && !selectedVersionId} className="bg-black hover:bg-gray-800">
-            Create Version
+            {t('editor.createVersion.create')}
           </Button>
         </div>
       </DialogContent>

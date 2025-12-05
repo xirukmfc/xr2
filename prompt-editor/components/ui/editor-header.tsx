@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useNotification } from "@/components/notification-provider"
+import { useLocale } from "@/contexts/locale-context"
 import { Eye, Edit3, Bot, Save, Rocket, Loader2 } from "lucide-react"
 
 interface HeaderProps {
@@ -37,6 +38,7 @@ export function EditorHeader({
   onSave,
   versions = [],
 }: HeaderProps) {
+  const { t } = useLocale()
   const { showNotification } = useNotification()
   const router = useRouter()
 
@@ -75,7 +77,7 @@ export function EditorHeader({
     setIsSaving(true)
     try {
       await onSave?.()
-      showNotification("Draft saved successfully!", "success")
+      showNotification(t('editor.saveSuccess') || "Draft saved successfully!", "success")
       // Keep green state for a moment before resetting
       setTimeout(() => setIsSaving(false), 200)
     } catch (e: any) {
@@ -149,14 +151,19 @@ export function EditorHeader({
 
   const handlePreviewToggle = () => {
     setIsPreviewMode(!isPreviewMode)
-    showNotification(isPreviewMode ? "Switched to edit mode" : "Switched to preview mode", "success")
+    showNotification(
+      isPreviewMode
+        ? (t('editor.editModeEnabled') || "Switched to edit mode")
+        : (t('editor.previewModeEnabled') || "Switched to preview mode"),
+      "success"
+    )
   }
 
   const shouldShowPublishButton = !!currentViewingVersion
   const isCurrentlyPublished = publishedVersion === currentViewingVersion
   const publishButtonText = isCurrentlyPublished
-    ? `Unpublish v.${currentViewingVersion}`
-    : `Publish v.${currentViewingVersion}`
+    ? `${t('editor.unpublish')} v.${currentViewingVersion}`
+    : `${t('editor.publish')} v.${currentViewingVersion}`
 
   return (
     <header className="fixed top-0 h-[65px] left-0 right-0 bg-white/95 backdrop-blur border-b border-slate-200 px-4 py-3 z-50">
@@ -168,7 +175,7 @@ export function EditorHeader({
             className="gap-1 h-9 px-3 rounded-md text-sm border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
           >
             <span className="text-lg leading-none">←</span>
-            <span>Back</span>
+            <span>{t('editor.back')}</span>
           </Button>
           {promptSlug && (
             <div className="flex items-center gap-2 text-sm">
@@ -203,12 +210,12 @@ export function EditorHeader({
             {isPreviewMode ? (
               <>
                 <Edit3 className="w-4 h-4" />
-                Edit
+                {t('editor.edit')}
               </>
             ) : (
               <>
                 <Eye className="w-4 h-4" />
-                Preview
+                {t('editor.preview')}
               </>
             )}
           </Button>
@@ -225,7 +232,7 @@ export function EditorHeader({
             ) : (
               <Bot className="w-4 h-4" />
             )}
-            Test with AI
+            {t('editor.testWithAI')}
           </Button>
 
           {/* Save */}
@@ -240,7 +247,7 @@ export function EditorHeader({
             ) : (
               <Save className="w-4 h-4" />
             )}
-            Save Changes
+            {t('editor.saveChanges')}
           </Button>
 
           {/* Publish / Unpublish */}
@@ -271,7 +278,7 @@ export function EditorHeader({
                 </TooltipTrigger>
                 {!isCurrentlyPublished && hasUndefinedVariables && (
                   <TooltipContent>
-                    <p>Cannot publish: there are undefined variables that need to be defined first</p>
+                    <p>{t('editor.cannotPublishUndefined')}</p>
                   </TooltipContent>
                 )}
               </Tooltip>

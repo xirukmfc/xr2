@@ -25,6 +25,7 @@ import {CreateVersionModal} from "@/components/create-version-modal"
 import {ShareModal} from "@/components/share-modal"
 import type {Version, Variable} from "@/app/editor/[id]/page"
 import {apiClient} from "@/lib/api"
+import {useLocale} from "@/contexts/locale-context"
 
 interface PromptPerformanceStats {
     prompt_id: string;
@@ -55,14 +56,16 @@ type MyTag = { id: string; name: string; color: string }
 function SourceBreakdown({
                              total,
                              sources,
+                             t,
                          }: {
     total: number
     sources: { name: string; count: number }[]
+    t: (key: string) => string
 }) {
     const data = [...sources].sort((a, b) => b.count - a.count)
     return (
         <div className="mt-3 pt-3 border-t border-gray-200">
-            <div className="text-xs font-medium text-gray-700 mb-2">By Source</div>
+            <div className="text-xs font-medium text-gray-700 mb-2">{t('leftPanel.bySource')}</div>
             <div className="space-y-2">
                 {data.map(({name, count}, index) => {
                     const pct = Math.round((count / Math.max(total, 1)) * 100)
@@ -100,6 +103,7 @@ export function LeftPanel({
                               versions,
                               promptId,
                           }: LeftPanelProps) {
+    const { t } = useLocale()
     const [newTag, setNewTag] = useState("")
     const [editingVar, setEditingVar] = useState<{ name: string } | null>(null)
     const [showSettings, setShowSettings] = useState(false)
@@ -313,7 +317,7 @@ export function LeftPanel({
     }
 
     const handleDeleteVersion = async (version: Version) => {
-        if (!confirm(`Are you sure you want to delete version ${version.version}?`)) {
+        if (!confirm(`${t('leftPanel.deleteVersionConfirm')} ${version.version}?`)) {
             return
         }
 
@@ -378,7 +382,7 @@ export function LeftPanel({
                     >
                     <span className="flex items-center gap-2">
                       <Settings className="w-4 h-4 flex-shrink-0"/>
-                      <span className="text-sm">Settings</span>
+                      <span className="text-sm">{t('leftPanel.settings')}</span>
                     </span>
                         {showSettings ? <Minus className="w-4 h-4 flex-shrink-0"/> :
                             <Plus className="w-4 h-4 flex-shrink-0"/>}
@@ -389,7 +393,7 @@ export function LeftPanel({
                 {showSettings && (
                     <div className="px-4 py-3 space-y-3 bg-white">
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Prompt Name</label>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">{t('leftPanel.promptName')}</label>
                             <Input
                                 value={safePromptData.name || ""}
                                 onChange={(e) => updatePromptDataAction({name: e.target.value})}
@@ -398,7 +402,7 @@ export function LeftPanel({
                         </div>
 
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Slug</label>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">{t('leftPanel.slug')}</label>
                             <Input
                                 value={safePromptData.slug || ""}
                                 onChange={(e) => updatePromptDataAction({slug: e.target.value})}
@@ -407,19 +411,19 @@ export function LeftPanel({
                         </div>
 
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">{t('leftPanel.description')}</label>
                             <textarea
                                 value={safePromptData.description || ""}
                                 onChange={(e) => updatePromptDataAction({description: e.target.value})}
                                 className="w-full text-sm p-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 rows={5}
                                 maxLength={250}
-                                placeholder="Enter prompt description..."
+                                placeholder={t('leftPanel.description')}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Tags</label>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">{t('leftPanel.tags')}</label>
                             <div className="flex flex-wrap gap-1 mb-2">
                                 {safePromptData.tags.map((tag, index) => (
                                     <span
@@ -439,7 +443,7 @@ export function LeftPanel({
                               onCreateTag={createTag}
                               existingTags={safePromptData.tags.map(tag => tag.name)}
                               myTags={myTags}
-                              placeholder="Add tag..."
+                              placeholder={t('leftPanel.addTag')}
                             />
                         </div>
                     </div>
@@ -456,7 +460,7 @@ export function LeftPanel({
                     >
                     <span className="flex items-center gap-2">
                       <BarChart3 className="w-4 h-4 flex-shrink-0"/>
-                      <span className="text-sm">Performance Stats</span>
+                      <span className="text-sm">{t('leftPanel.performanceStats')}</span>
                     </span>
                         {showPerformanceStats ? <Minus className="w-4 h-4 flex-shrink-0"/> :
                             <Plus className="w-4 h-4 flex-shrink-0"/>}
@@ -479,15 +483,16 @@ export function LeftPanel({
                                     <div className="text-2xl font-bold text-gray-900 mb-1">
                                         {performanceStats.total_requests.toLocaleString()}
                                     </div>
-                                    <div className="text-xs text-gray-600">Total Requests</div>
+                                    <div className="text-xs text-gray-600">{t('leftPanel.totalRequests')}</div>
                                     
                                     {performanceStats.total_requests > 0 && (
-                                        <SourceBreakdown 
-                                            total={performanceStats.total_requests} 
+                                        <SourceBreakdown
+                                            total={performanceStats.total_requests}
                                             sources={Object.entries(performanceStats.requests_by_source).map(([name, data]) => ({
                                                 name,
                                                 count: data.total
-                                            }))} 
+                                            }))}
+                                            t={t}
                                         />
                                     )}
                                 </div>
@@ -498,24 +503,24 @@ export function LeftPanel({
                                         <div className="text-lg font-bold text-gray-900">
                                             {performanceStats.success_rate_200_percent.toFixed(1)}%
                                         </div>
-                                        <div className="text-xs text-gray-600">Success Rate</div>
+                                        <div className="text-xs text-gray-600">{t('leftPanel.successRate')}</div>
                                     </div>
                                     <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                                         <Clock className="w-4 h-4 text-gray-600 mb-2"/>
                                         <div className="text-lg font-bold text-gray-900">
-                                            {performanceStats.avg_response_time_ms > 0 
+                                            {performanceStats.avg_response_time_ms > 0
                                                 ? `${(performanceStats.avg_response_time_ms / 1000).toFixed(1)}s`
                                                 : '0s'
                                             }
                                         </div>
-                                        <div className="text-xs text-gray-600">Avg Response</div>
+                                        <div className="text-xs text-gray-600">{t('leftPanel.avgResponse')}</div>
                                     </div>
                                 </div>
                             </>
                         ) : (
                             <div className="text-center py-8 text-gray-500">
                                 <BarChart3 className="w-8 h-8 mx-auto mb-2 opacity-50"/>
-                                <div className="text-sm">No data available</div>
+                                <div className="text-sm">{t('leftPanel.noDataAvailable')}</div>
                             </div>
                         )}
                     </div>
@@ -530,7 +535,7 @@ export function LeftPanel({
                     >
                     <span className="flex items-center gap-2">
                       <Code className="w-4 h-4 flex-shrink-0"/>
-                      <span className="text-sm">Variables ({variables.length})</span>
+                      <span className="text-sm">{t('leftPanel.variables')} ({variables.length})</span>
                         {hasUndefined && (
                             <span className="ml-2 inline-flex items-center gap-1 rounded px-1.5 py-0.5 bg-red-50 text-red-700 text-[10px] font-medium">
                           <AlertTriangle className="w-3 h-3"/>
@@ -551,11 +556,11 @@ export function LeftPanel({
                             className="w-full text-xs h-8"
                         >
                             <Plus className="w-3 h-3 mr-1"/>
-                            Add Variable
+                            {t('leftPanel.addVariable')}
                         </Button>
 
                         {variables.length === 0 ? (
-                            <div className="text-xs text-gray-500 text-center py-2">No variables defined</div>
+                            <div className="text-xs text-gray-500 text-center py-2">{t('leftPanel.noVariablesDefined')}</div>
                         ) : (
                             <div className="space-y-2">
                                 {variables.map((variable, index) => (
@@ -582,7 +587,7 @@ export function LeftPanel({
                                                     variant="ghost"
                                                     size="sm"
                                                     className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                                    title="Define variable"
+                                                    title={t('leftPanel.defineVariable')}
                                                 >
                                                     <CheckCircle className="w-3 h-3"/>
                                                 </Button>
@@ -592,7 +597,7 @@ export function LeftPanel({
                                                 variant="ghost"
                                                 size="sm"
                                                 className="h-6 w-6 p-0 text-gray-600 hover:text-gray-700 hover:bg-gray-100"
-                                                title="Edit variable"
+                                                title={t('leftPanel.editVariable')}
                                             >
                                                 <Edit className="w-3 h-3"/>
                                             </Button>
@@ -601,7 +606,7 @@ export function LeftPanel({
                                                 variant="ghost"
                                                 size="sm"
                                                 className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                title="Remove variable"
+                                                title={t('leftPanel.removeVariable')}
                                             >
                                                 <Trash2 className="w-3 h-3"/>
                                             </Button>
@@ -622,7 +627,7 @@ export function LeftPanel({
                     >
                     <span className="flex items-center gap-2">
                       <Clock className="w-4 h-4 flex-shrink-0"/>
-                      <span className="text-sm">Versions ({versions.length})</span>
+                      <span className="text-sm">{t('leftPanel.versions')} ({versions.length})</span>
                     </span>
                         {showVersions ? <Minus className="w-4 h-4 flex-shrink-0"/> :
                             <Plus className="w-4 h-4 flex-shrink-0"/>}
@@ -637,11 +642,11 @@ export function LeftPanel({
                             className="w-full text-xs h-8"
                         >
                             <Plus className="w-3 h-3 mr-1"/>
-                            New Version
+                            {t('leftPanel.newVersion')}
                         </Button>
 
                         {versions.length === 0 ? (
-                            <div className="text-xs text-gray-500 text-center py-2">No versions</div>
+                            <div className="text-xs text-gray-500 text-center py-2">{t('leftPanel.noVersions')}</div>
                         ) : (
                             <div className="space-y-2">
                                 {versions.map((version) => (
@@ -671,7 +676,7 @@ export function LeftPanel({
                                                     variant="ghost"
                                                     size="sm"
                                                     className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                                    title="Share version"
+                                                    title={t('leftPanel.shareVersion')}
                                                 >
                                                     <Share className="w-3 h-3"/>
                                                 </Button>
@@ -685,7 +690,7 @@ export function LeftPanel({
                                                         variant="ghost"
                                                         size="sm"
                                                         className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                        title="Delete version"
+                                                        title={t('leftPanel.deleteVersion')}
                                                     >
                                                         <Trash2 className="w-3 h-3"/>
                                                     </Button>

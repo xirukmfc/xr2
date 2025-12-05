@@ -1,0 +1,852 @@
+{
+  "common": {
+    "language": "Язык",
+    "en": "EN",
+    "ru": "RU"
+  },
+  "sidebar": {
+    "prompts": "Промпты",
+    "analytics": "Аналитика",
+    "apiKeys": "API ключи",
+    "apiLogs": "Логи API",
+    "settings": "Настройки",
+    "fullDocs": "Документация",
+    "logout": "Выход",
+    "collapse": "Свернуть",
+    "usageLimits": "Лимиты использования",
+    "availablePrompts": "Доступно промптов",
+    "dailyApiRequests": "Запросов в день",
+    "remaining": "осталось",
+    "resetsAt": "Обновится в"
+  },
+  "auth": {
+    "login": {
+      "title": "Вход",
+      "subtitle": "Введите данные, чтобы войти в аккаунт",
+      "usernameLabel": "Имя пользователя или email",
+      "usernamePlaceholder": "Введите имя пользователя или email",
+      "passwordLabel": "Пароль",
+      "passwordPlaceholder": "Введите пароль",
+      "remember": "Запомнить меня на 90 дней",
+      "button": "Войти",
+      "buttonLoading": "Входим...",
+      "divider": "Или продолжите через",
+      "googleButton": "Войти через Google",
+      "demo": {
+        "title": "Демо-доступ:",
+        "username": "Имя пользователя",
+        "password": "Пароль"
+      },
+      "errors": {
+        "sessionExpired": "Сессия истекла. Войдите снова.",
+        "googleInitFailed": "Не удалось инициализировать вход через Google. Обновите страницу.",
+        "googleUnavailable": "Сервис входа через Google недоступен. Обновите страницу.",
+        "googleLoadFailed": "Не удалось загрузить вход через Google. Проверьте интернет-соединение.",
+        "googleSignInFailedWithMessage": "Вход через Google не удался: {message}",
+        "googleNotAvailable": "Вход через Google недоступен. Обновите страницу.",
+        "googleUserInfoFailed": "Не удалось получить данные пользователя Google.",
+        "googleAuthFailed": "Не удалось пройти аутентификацию через Google. Попробуйте еще раз.",
+        "googleNoToken": "Google не вернул токен доступа.",
+        "googlePopupFailed": "Вход через Google не удался. Попробуйте еще раз.",
+        "googlePopupUnavailable": "Окно входа Google недоступно. Обновите страницу.",
+        "googlePopupShowFailed": "Не удалось показать окно входа Google. Попробуйте еще раз.",
+        "loginFailed": "Не удалось войти. Проверьте учетные данные.",
+        "tryAgain": "Попробуйте еще раз."
+      }
+    }
+  },
+  "onboarding": {
+    "title": "Начало работы с xR2",
+    "subtitle": "Короткий обзор промптов, API, аналитики и тестов",
+    "progress": "Шаг {current} из {total}",
+    "goToStep": "Перейти к шагу {step}",
+    "skip": "Пропустить",
+    "prev": "Назад",
+    "next": "Далее",
+    "getStarted": "Начать работу",
+    "visual": {
+      "variantA": "Вариант A",
+      "variantB": "Вариант B",
+      "winner": "Победитель",
+      "traffic": "{percent}% трафика",
+      "conversion": "Конверсия: +12% улучшение",
+      "sdk": {
+        "makeModule": "Модуль xR2 Get Prompt",
+        "n8nNode": "Кастомный узел установлен",
+        "connected": "Подключено и готово"
+      },
+      "analytics": {
+        "requestsTitle": "Запросы по источникам",
+        "mobile": "mobile-app",
+        "web": "web",
+        "revenueTitle": "Доход по промптам",
+        "versionPerformance": "Производительность версий",
+        "latency": "Задержка",
+        "avgCost": "Средняя стоимость"
+      }
+    },
+    "steps": {
+      "prompts": {
+        "title": "Управление промптами и версиями",
+        "description": "Создавайте промпты с переменными, храните версии и обновляйте без деплоя.",
+        "features": {
+          "history": "История версий для каждого изменения",
+          "variables": "Переменные для динамических текстов",
+          "instantUpdates": "Мгновенные обновления во всех приложениях",
+          "collaboration": "Совместное редактирование в команде"
+        }
+      },
+      "api": {
+        "title": "Интеграция через REST API",
+        "description": "Получайте промпты из любого сервиса простым HTTP-запросом.",
+        "features": {
+          "rest": "REST API для любого стека",
+          "examples": "Сниппеты для копирования",
+          "auth": "Авторизация по API-ключу",
+          "platforms": "Подходит для веб, мобильных и бэкенда"
+        }
+      },
+      "sdk": {
+        "title": "Готовые SDK и плагины",
+        "description": "Подключайте xR2 к Make, n8n и другим инструментам без кастомного кода.",
+        "features": {
+          "make": "Модуль Make.com",
+          "n8n": "Кастомный узел n8n",
+          "nocode": "Интеграция с Zapier",
+          "templates": "Готовые конфиги и примеры"
+        }
+      },
+      "analytics": {
+        "title": "Мониторинг использования и стоимости",
+        "description": "Собирайте события, задержки, стоимость и результаты в одном месте.",
+        "features": {
+          "realtime": "Статистика использования и событий",
+          "costs": "Стоимость по каждому промпту",
+          "performance": "Метрики производительности и задержек",
+          "trends": "Тренды и разрезы"
+        }
+      },
+      "ab": {
+        "title": "A/B-тесты",
+        "description": "Сравнивайте версии промптов и меряйте конверсии.",
+        "features": {
+          "multiple": "Тест нескольких версий",
+          "traffic": "Деление трафика и конверсии",
+          "significance": "Проверка статистической значимости",
+          "decisions": "Выбор победителя по данным"
+        }
+      }
+    }
+  },
+  "prompts": {
+    "title": "Промпты",
+    "searchPlaceholder": "Поиск промптов...",
+    "newPrompt": "Новый промпт",
+    "filters": {
+      "all": "Все",
+      "active": "Активные",
+      "draft": "Черновики",
+      "archived": "Архив"
+    },
+    "sort": {
+      "lastUpdated": "Сортировка: Последнее обновление",
+      "name": "Сортировка: Имя",
+      "usage": "Сортировка: Использование"
+    },
+    "columns": {
+      "name": "Название",
+      "status": "Статус",
+      "lastUpdated": "Обновление",
+      "usage24h": "Использование за 24ч",
+      "owner": "Автор"
+    },
+    "noDescription": "Нет описания",
+    "by": "от",
+    "loading": "Загрузка промптов...",
+    "error": {
+      "title": "Не удалось загрузить промпты",
+      "retry": "Повторить"
+    },
+    "empty": {
+      "title": "Промпты не найдены",
+      "message": "Создайте промпт, чтобы продолжить"
+    },
+    "itemsPerPage": "промптов",
+    "pagination": {
+      "showing": "Показано",
+      "to": "по",
+      "of": "из",
+      "previous": "Назад",
+      "next": "Вперед"
+    }
+  },
+    "analytics": {
+      "title": "Аналитика производительности",
+    "subtitle": "Использование, события и эксперименты по промптам",
+      "tabs": {
+        "recentEvents": "Последние события",
+        "prompts": "Промпты",
+        "funnels": "Воронки",
+        "abTests": "A/B тесты",
+        "defineEvents": "Настроить события"
+      },
+      "notifications": {
+        "eventDeletedSuccess": "Событие успешно удалено",
+        "eventDeletedError": "Не удалось удалить событие",
+        "funnelDeletedSuccess": "Воронка успешно удалена",
+        "funnelDeletedError": "Не удалось удалить воронку",
+        "funnelCreatedSuccess": "Воронка успешно создана",
+        "funnelUpdatedSuccess": "Воронка успешно обновлена",
+        "abTestDeletedSuccess": "A/B тест успешно удален",
+        "abTestDeletedError": "Не удалось удалить A/B тест",
+        "eventCreatedSuccess": "Событие успешно создано",
+        "eventUpdatedSuccess": "Событие успешно обновлено"
+      },
+    "modals": {
+      "event": {
+        "titleCreate": "Создать событие",
+        "titleEdit": "Редактировать событие",
+        "descriptionCreate": "Задайте пользовательское событие для отслеживания поведения промптов",
+        "descriptionEdit": "Обновите описание события"
+      },
+      "funnel": {
+        "createTitle": "Создать воронку",
+        "createDescription": "Настройте воронку, чтобы измерять переходы между событиями",
+        "editTitle": "Редактировать воронку",
+        "editDescription": "Обновите конфигурацию воронки"
+      },
+      "abTest": {
+        "createTitle": "Создать A/B тест",
+        "createDescription": "Сравните две версии промпта с равномерным (50/50) трафиком"
+      },
+      "delete": {
+        "eventTitle": "Удаление события",
+        "eventDescription": "Удалить это событие? Это действие нельзя отменить.",
+        "funnelTitle": "Удаление воронки",
+        "funnelDescription": "Удалить эту конфигурацию воронки? Это действие нельзя отменить.",
+        "abTestTitle": "Удаление A/B теста",
+        "abTestDescription": "Удалить этот A/B тест? Это действие нельзя отменить."
+      }
+    },
+    "funnelForm": {
+      "savedConfigs": "Сохраненные воронки",
+      "savedConfigsDescription": "Загрузите ранее сохраненную конфигурацию воронки",
+      "nameLabel": "Название воронки",
+      "namePlaceholder": "например, User Onboarding",
+      "stepsLabel": "Шаги воронки",
+      "stepsDescription": "Опишите последовательность событий для конверсии",
+      "add": "Добавить",
+      "stepPlaceholder": "Название события (например, {example})",
+      "noSteps": "Шаги не заданы. Нажмите «Добавить», чтобы создать.",
+      "saving": "Сохранение...",
+      "save": "Сохранить воронку",
+      "update": "Обновить воронку",
+      "edit": "Редактировать воронку",
+      "create": "Создать воронку",
+      "createdDate": "Создано:",
+      "systemEventNote": "Системное событие — запрос промпта",
+      "builtInEvents": "Встроенные события",
+      "cancel": "Отмена",
+      "noData": "Нет данных по воронке.",
+      "active": "Активна",
+      "load": "Загрузить",
+      "noFunnelTitle": "Воронка не выбрана",
+      "noFunnelSubtitle": "Выберите воронку в выпадающем списке выше, чтобы увидеть данные",
+      "loadingData": "Загрузка данных воронки...",
+      "customFunnelCta": "Создайте пользовательскую воронку, чтобы отслеживать конверсию между событиями.",
+      "selectFunnelPlaceholder": "Выберите воронку...",
+      "allPrompts": "Все промпты",
+      "allVersions": "Все версии",
+      "vs": "vs",
+      "periodToday": "Сегодня",
+      "period7days": "7 дней",
+      "period30days": "30 дней",
+      "periodThisMonth": "Этот месяц",
+      "periodCustom": "Выбрать диапазон",
+      "noDataFilters": "Нет данных для выбранных фильтров",
+        "customEvents": "Пользовательские события"
+      },
+      "abTests": {
+        "title": "A/B тесты",
+        "subtitle": "A/B тесты",
+        "searchPlaceholder": "Поиск по названию теста или промпта...",
+        "new": "Новый тест",
+        "form": {
+          "nameLabel": "Название теста",
+          "namePlaceholder": "например, Welcome Message Test",
+          "totalRequestsLabel": "Всего запросов",
+          "promptLabel": "Выберите промпт",
+          "promptPlaceholder": "Выберите промпт...",
+          "versionA": "Версия A (контроль)",
+          "versionB": "Версия B (вариант)",
+          "versionPlaceholder": "Выберите версию...",
+          "successMetric": "Метрика успеха (опционально)",
+          "noFunnel": "Без воронки — показывать все события",
+          "funnelHint": "Выберите воронку, чтобы сравнить конверсию между версиями",
+          "create": "Создать тест",
+          "creating": "Создание...",
+          "cancel": "Отмена"
+        },
+        "notifications": {
+          "created": "A/B тест успешно создан",
+          "createError": "Не удалось создать A/B тест",
+          "deleteSuccess": "A/B тест удален",
+          "deleteError": "Не удалось удалить A/B тест",
+          "startError": "Не удалось запустить тест",
+          "stopError": "Не удалось остановить тест",
+          "completeConfirm": "Завершить A/B тест? Это действие нельзя отменить.",
+          "completeError": "Не удалось завершить тест",
+          "deleteConfirm": "Удалить этот A/B тест?",
+          "startTooltip": "Запустить",
+          "resumeTooltip": "Продолжить",
+          "pauseTooltip": "Пауза",
+          "completeTooltip": "Завершить",
+          "deleteTooltip": "Удалить",
+          "editFunnelTooltip": "Редактировать конфигурацию воронки",
+          "deleteFunnelTooltip": "Удалить конфигурацию воронки",
+          "compareTooltip": "Сравнить с другой версией",
+          "clearDateTooltip": "Очистить фильтр дат",
+          "cancelComparison": "Отменить сравнение"
+        },
+        "filters": {
+          "selectFunnel": "Выберите воронку...",
+          "allPrompts": "Все промпты",
+          "allVersions": "Все версии",
+          "vs": "vs",
+          "periodToday": "Сегодня",
+          "period7days": "7 дней",
+          "period30days": "30 дней",
+          "periodThisMonth": "Этот месяц",
+          "periodCustom": "Выбрать диапазон",
+          "presetToday": "Сегодня",
+          "preset7days": "7 дней",
+          "preset30days": "30 дней",
+          "presetThisMonth": "Этот месяц",
+          "from": "С",
+          "to": "По"
+        },
+        "empty": {
+          "noTests": "A/B тестов пока нет.",
+          "noMatch": "Тесты не найдены по поиску.",
+          "cta": "Создайте первый тест, чтобы сравнивать версии промптов."
+        },
+        "table": {
+          "name": "Название теста",
+          "prompt": "Промпт",
+          "status": "Статус",
+          "progress": "Прогресс",
+          "versions": "Версии",
+          "confidence": "Доверие",
+          "winner": "Победитель",
+          "actions": "Действия",
+          "metric": "Метрика",
+          "activeFunnel": "Метрика:",
+          "confidenceLabel": "Статистическая значимость",
+          "threshold95": "Порог 95%",
+          "overall": "Итог",
+          "funnelComparison": "Сравнение воронки",
+          "step": "Шаг",
+          "diff": "Разница",
+          "eventsBreakdown": "Все события",
+          "event": "Событие",
+          "winnerShort": "Победитель",
+          "noData": "Для теста пока нет событий.",
+          "loading": "Загрузка результатов..."
+        },
+        "statuses": {
+          "running": "В работе",
+          "paused": "На паузе",
+          "completed": "Завершен",
+          "draft": "Черновик",
+          "cancelled": "Отменен"
+        }
+      },
+    "recentEvents": {
+      "title": "Последние события",
+      "loading": "Загрузка событий...",
+      "searchPlaceholder": "Поиск по trace ID или prompt ID...",
+      "filterAll": "Все события",
+      "filterPromptRequest": "get_prompt",
+      "filterCustomEvent": "track_event",
+      "refresh": "Обновить",
+      "columns": {
+        "time": "Время",
+        "traceId": "Trace ID",
+        "prompt": "Промпт",
+        "version": "Версия",
+        "type": "Тип",
+        "source": "Источник",
+        "event": "Событие"
+      },
+      "noPrompt": "—",
+      "noSource": "—",
+      "noEvent": "—",
+      "empty": "События не найдены по выбранным фильтрам.",
+      "pagination": "{from}-{to} из {total}",
+      "prev": "Назад",
+      "next": "Вперед"
+    },
+    "promptEvents": {
+      "selectPromptPlaceholder": "Выберите промпт",
+      "selectVersionPlaceholder": "Выберите версию",
+      "allVersions": "Все версии",
+      "periodToday": "Сегодня",
+      "periodWeek": "Эта неделя",
+      "periodMonth": "Этот месяц",
+      "periodYear": "Этот год",
+      "chartEmpty": "События за выбранный период не найдены",
+      "loading": "Загрузка событий...",
+      "selectPromptHint": "Выберите промпт, чтобы увидеть события",
+      "table": {
+        "eventType": "Тип события",
+        "total": "Итого"
+      },
+      "metadata": {
+        "title": "Инсайты по метаданным",
+        "events": "событий",
+        "avg": "Среднее",
+        "range": "Диапазон",
+        "more": "{count} еще",
+        "empty": "Пользовательских метаданных не найдено"
+      }
+    },
+    "eventsTable": {
+      "emptyTitle": "Недавних событий нет",
+      "emptySubtitle": "События появятся здесь после отслеживания",
+      "headers": {
+        "event": "Событие",
+        "category": "Категория",
+        "data": "Данные",
+        "amount": "Сумма",
+        "created": "Создано"
+      },
+      "details": {
+        "title": "Детали события",
+        "id": "ID",
+        "type": "Тип",
+        "outcome": "Статус",
+        "userId": "User ID",
+        "trace": "Полный Trace ID",
+        "metadataTitle": "Метаданные",
+        "metadataMissing": "Метаданные отсутствуют",
+        "eventName": "Название события",
+        "category": "Категория",
+        "allFields": "Все поля",
+        "business": "Бизнес-показатели"
+      }
+    },
+    "eventsBuilder": {
+      "searchPlaceholder": "Поиск по названию события...",
+      "new": "Новая",
+      "form": {
+        "titleCreate": "Создать событие",
+        "titleEdit": "Редактировать событие",
+        "eventName": "Название события",
+        "description": "Описание",
+        "descriptionPlaceholder": "Коротко опишите событие",
+        "fieldsTitle": "Пользовательские поля",
+        "addField": "Добавить",
+        "noFields": "Пользовательских полей нет. Нажмите «Добавить», чтобы создать.",
+        "saving": "Сохранение...",
+        "save": "Сохранить событие",
+        "cancel": "Отмена"
+      },
+      "empty": {
+        "title": "События еще не созданы",
+        "description": "Создайте первое событие, чтобы начать отслеживание действий пользователей."
+      },
+      "card": {
+        "description": "Описание:",
+        "noDescription": "Описание отсутствует",
+        "noFields": "Пользовательских полей нет",
+        "customFieldsTitle": "Пользовательские метаданные:",
+        "codeTitle": "Пример кода",
+        "copyCode": "Скопировать код"
+      }
+    },
+    "eventForm": {
+      "errorRequired": "Название события обязательно",
+      "errorSave": "Не удалось сохранить событие",
+      "eventNameLabel": "Название события",
+      "eventNamePlaceholder": "например, user_signup",
+      "descriptionLabel": "Описание",
+      "descriptionPlaceholder": "Опишите, когда должно срабатывать событие",
+      "standardFieldsTitle": "Стандартные поля (доступны автоматически)",
+      "standardFieldsInfo": "Эти поля есть во всех событиях:",
+      "standardFields": {
+        "eventName": "event_name — строка (обязательно)",
+        "traceId": "trace_id — строка (обязательно)",
+        "userId": "user_id — строка (необязательно)",
+        "sessionId": "session_id — строка (необязательно)",
+        "value": "value — число (необязательно, для выручки/метрик)",
+        "currency": "currency — строка (необязательно)"
+      },
+      "customFieldsTitle": "Дополнительные метаданные",
+      "customFieldsDescription": "Определите пользовательские поля, которые будут передаваться в metadata",
+      "add": "Добавить",
+      "noFields": "Пользовательских полей нет. Нажмите «Добавить», чтобы создать.",
+      "fieldNamePlaceholder": "Имя поля",
+      "fieldDescriptionPlaceholder": "Описание (необязательно)",
+      "typeString": "Строка",
+      "typeNumber": "Число",
+      "typeBoolean": "Логическое",
+      "typeObject": "Объект",
+      "required": "Обязательно",
+      "creating": "Создание...",
+      "updating": "Обновление...",
+      "createEvent": "Создать событие",
+      "updateEvent": "Обновить событие",
+      "cancel": "Отмена"
+    }
+  },
+  "leftPanel": {
+    "settings": "Настройки",
+    "performanceStats": "Статистика",
+    "variables": "Переменные",
+    "versions": "Версии",
+    "promptName": "Название промпта",
+    "slug": "Slug",
+    "description": "Описание",
+    "tags": "Теги",
+    "addTag": "Добавить тег...",
+    "totalRequests": "Всего запросов",
+    "successRate": "Успешность",
+    "avgResponse": "Среднее время",
+    "bySource": "По источникам",
+    "noDataAvailable": "Нет данных",
+    "addVariable": "Добавить переменную",
+    "noVariablesDefined": "Переменные не определены",
+    "defineVariable": "Определить переменную",
+    "editVariable": "Редактировать переменную",
+    "removeVariable": "Удалить переменную",
+    "newVersion": "Новая версия",
+    "noVersions": "Нет версий",
+    "shareVersion": "Поделиться версией",
+    "deleteVersion": "Удалить версию",
+    "deleteVersionConfirm": "Вы уверены, что хотите удалить версию"
+  },
+  "bulkActions": {
+    "selected": "выбрано",
+    "delete": "Удалить",
+    "deploy": "Развернуть",
+    "undeploy": "Свернуть",
+    "clearSelection": "Снять выделение",
+    "deleteConfirm": "Вы уверены, что хотите удалить {count} промпт(ов)? Это действие нельзя отменить.",
+    "successDelete": "Успешно удалено {count} промпт(ов)",
+    "failedDelete": "Не удалось удалить {count} промпт(ов)",
+    "successDeploy": "Успешно развернуто {count} промпт(ов)",
+    "failedDeploy": "Не удалось развернуть {count} промпт(ов)",
+    "successUndeploy": "Успешно свернуто {count} промпт(ов)",
+    "failedUndeploy": "Не удалось свернуть {count} промпт(ов)"
+  },
+  "time": {
+    "justNow": "только что",
+    "minutesAgo": "минут назад",
+    "hoursAgo": "часов назад",
+    "daysAgo": "дней назад",
+    "monthsAgo": "месяцев назад",
+    "yearsAgo": "лет назад",
+    "unknown": "Неизвестно"
+  },
+  "settings": {
+    "title": "Настройки",
+    "subtitle": "Управление настройками учетной записи",
+    "tabs": {
+      "profile": "Профиль",
+      "tags": "Теги",
+      "llmKeys": "LLM API ключи"
+    },
+    "profile": {
+      "title": "Профиль",
+      "name": "Имя",
+      "email": "Email",
+      "save": "Сохранить изменения",
+      "namePlaceholder": "Введите полное имя",
+      "emailPlaceholder": "Введите email",
+      "saving": "Сохранение..."
+    },
+    "account": {
+      "title": "Аккаунт",
+      "subtitle": "Необратимые действия, которые влияют на ваш аккаунт",
+      "changePassword": "Изменить пароль",
+      "deleteAccount": "Удалить аккаунт",
+      "deleteAccountDescription": "Безвозвратно удалить ваш аккаунт и все связанные данные. Это действие нельзя отменить.",
+      "deleteDialog": {
+        "title": "Удаление аккаунта",
+        "description": "Это действие нельзя отменить. Ваш аккаунт и все данные будут полностью удалены, включая рабочие пространства, промпты, теги и API ключи.",
+        "warningTitle": "Предупреждение",
+        "warningDescription": "Будет безвозвратно удалено:",
+        "items": {
+          "workspaces": "Все рабочие пространства и промпты",
+          "promptVersions": "Все версии промптов и тестовые данные",
+          "tags": "Все теги и категории",
+          "apiKeys": "Все API ключи и конфигурации",
+          "history": "Вся история использования и аналитика"
+        },
+        "confirmationLabel": "Введите \"delete\" для подтверждения",
+        "confirmationPlaceholder": "Введите 'delete' для подтверждения",
+        "cancel": "Отмена",
+        "confirm": "Удалить мой аккаунт",
+        "confirmLoading": "Удаление..."
+      }
+    },
+    "tags": {
+      "title": "Теги",
+      "subtitle": "Управление тегами",
+      "newTag": "Новый тег",
+      "loading": "Загрузка тегов...",
+      "loadError": "Не удалось загрузить теги",
+      "searchPlaceholder": "Поиск тегов...",
+      "empty": {
+        "title": "Пока нет тегов",
+        "description": "Создайте первый тег, чтобы начать.",
+        "filteredTitle": "Теги не найдены",
+        "filteredDescription": "Попробуйте изменить поисковый запрос."
+      },
+      "columns": {
+        "name": "Название",
+        "color": "Цвет",
+        "usageCount": "Использований",
+        "actions": "Действия"
+      },
+      "modal": {
+        "titleCreate": "Создать новый тег",
+        "titleEdit": "Редактировать тег",
+        "descriptionCreate": "Создайте новый тег для организации промптов.",
+        "descriptionEdit": "Обновите параметры тега.",
+        "nameLabel": "Название тега",
+        "namePlaceholder": "Введите название тега",
+        "colorLabel": "Цвет",
+        "previewLabel": "Превью",
+        "previewPlaceholder": "Пример тега",
+        "cancel": "Отмена",
+        "saveCreate": "Создать тег",
+        "saveEdit": "Обновить тег"
+      },
+      "colors": {
+        "blue": "Синий",
+        "green": "Зеленый",
+        "purple": "Фиолетовый",
+        "orange": "Оранжевый",
+        "pink": "Розовый",
+        "teal": "Бирюзовый",
+        "indigo": "Индиго",
+        "red": "Красный"
+      },
+      "deleteDialog": {
+        "title": "Удаление тега",
+        "description": "Удалить тег? Это действие нельзя отменить."
+      }
+    },
+    "llmKeys": {
+      "title": "LLM API ключи",
+      "subtitle": "Управление API ключами LLM провайдеров",
+      "newKey": "Новый LLM ключ",
+      "loading": "Загрузка API ключей...",
+      "providersLoadError": "Не удалось загрузить провайдеров",
+      "loadError": "Не удалось загрузить API ключи",
+      "retry": "Повторить",
+      "unknownProvider": "Неизвестный провайдер",
+      "columns": {
+        "name": "Название",
+        "provider": "Провайдер",
+        "key": "API ключ",
+        "created": "Создан",
+        "preview": "API ключ",
+        "hidden": "Скрыт",
+        "actions": "Действия"
+      },
+      "empty": {
+        "title": "Пока нет API ключей",
+        "description": "Добавьте первый API ключ, чтобы начать тестировать LLM.",
+        "noProviders": "Нет доступных LLM провайдеров. Свяжитесь с администратором."
+      },
+      "modal": {
+        "titleCreate": "Добавить новый API ключ",
+        "titleEdit": "Редактировать API ключ",
+        "descriptionCreate": "Добавьте API ключ для тестирования моделей LLM.",
+        "descriptionEdit": "Обновите параметры API ключа.",
+        "fields": {
+          "name": "Название",
+          "namePlaceholder": "Введите название для этого API ключа",
+          "provider": "Провайдер",
+          "providerPlaceholder": "Выберите провайдера",
+          "apiKey": "API ключ",
+          "apiKeyPlaceholder": "Введите API ключ",
+          "apiKeyEditPlaceholder": "Введите новый ключ (оставьте пустым, чтобы не менять)"
+        },
+        "cancel": "Отмена",
+        "saveCreate": "Добавить ключ",
+        "saveEdit": "Обновить ключ"
+      },
+      "deleteDialog": {
+        "title": "Удаление API ключа",
+        "description": "Удалить этот API ключ? Это действие нельзя отменить."
+      }
+    },
+    "notifications": {
+      "profileSaved": "Профиль успешно обновлен",
+      "profileSaveError": "Не удалось сохранить профиль",
+      "accountDeleted": "Аккаунт успешно удален",
+      "accountDeleteError": "Не удалось удалить аккаунт. Попробуйте еще раз.",
+      "tagCreated": "Тег успешно создан",
+      "tagUpdated": "Тег успешно обновлен",
+      "tagSaveError": "Не удалось сохранить тег",
+      "tagDeleted": "Тег удален",
+      "tagDeleteError": "Не удалось удалить тег",
+      "llmKeyCreated": "API ключ успешно создан",
+      "llmKeyUpdated": "API ключ успешно обновлен",
+      "llmKeySaveError": "Не удалось сохранить API ключ",
+      "llmKeyDeleted": "API ключ удален",
+      "llmKeyDeleteError": "Не удалось удалить API ключ"
+    }
+  },
+  "logs": {
+    "title": "Логи API",
+    "subtitle": "Просмотр и мониторинг логов API запросов",
+    "searchPlaceholder": "Поиск логов...",
+    "filters": {
+      "all": "Все",
+      "success": "Успешные",
+      "error": "Ошибки",
+      "sortCreated": "Сортировка: Время запроса",
+      "sortLatency": "Сортировка: Длительность",
+      "sortStatus": "Сортировка: Код статуса",
+      "sortEndpoint": "Сортировка: Эндпоинт",
+      "refresh": "Обновить",
+      "showRequest": "Показать запрос",
+      "showResponse": "Показать ответ"
+    },
+    "columns": {
+      "timestamp": "Время",
+      "endpoint": "Эндпоинт",
+      "method": "Метод",
+      "status": "Статус",
+      "duration": "Длительность"
+    }
+  },
+  "apiKeys": {
+    "title": "API ключи",
+    "subtitle": "Управление API ключами",
+    "newKey": "Новый API ключ",
+    "searchPlaceholder": "Поиск API ключей...",
+    "columns": {
+      "name": "Название",
+      "key": "API Ключ",
+      "created": "Создан",
+      "lastUsed": "Использование",
+      "actions": "Действия"
+    },
+    "modal": {
+      "create": "Создать новый API ключ",
+      "edit": "Редактировать API ключ",
+      "delete": "Удалить API ключ",
+      "name": "Название API ключа",
+      "namePlaceholder": "например, Production API Key",
+      "nameHelper": "Выберите понятное название, чтобы идентифицировать этот ключ позже.",
+      "description": "Описание (необязательно)",
+      "descriptionPlaceholder": "Для чего будет использоваться этот ключ?",
+      "cancel": "Отмена",
+      "create_button": "Создать API ключ",
+      "save": "Сохранить",
+      "deleteConfirm": "Вы уверены, что хотите удалить этот API ключ? Это действие нельзя отменить."
+    }
+  },
+  "newPromptModal": {
+    "title": "Создать новый промпт",
+    "name": "Название промпта",
+    "namePlaceholder": "Введите название промпта",
+    "slug": "Slug",
+    "slugPlaceholder": "prompt-slug",
+    "description": "Описание",
+    "descriptionPlaceholder": "Введите описание промпта",
+    "tags": "Теги",
+    "tagsPlaceholder": "Введите для поиска или создания",
+    "tagsAvailable": "доступных тегов",
+    "cancel": "Отмена",
+    "create": "Создать промпт"
+  },
+  "editor": {
+    "title": "Редактор промптов",
+    "save": "Сохранить",
+    "test": "Тест",
+    "deploy": "Развернуть",
+    "share": "Поделиться",
+    "fullscreen": "Полный экран",
+    "exitFullscreen": "Выйти из полного экрана",
+    "systemPrompt": "Системный промпт",
+    "userPrompt": "Промпт пользователя",
+    "assistantPrompt": "Промпт ассистента",
+    "back": "Назад",
+    "edit": "Редактировать",
+    "preview": "Предпросмотр",
+    "previewMode": "Режим предпросмотра",
+    "testWithAI": "Тестировать с AI",
+    "saveChanges": "Сохранить изменения",
+    "publish": "Опубликовать",
+    "unpublish": "Снять с публикации",
+    "saveSuccess": "Черновик успешно сохранен!",
+    "editModeEnabled": "Переключено в режим редактирования",
+    "previewModeEnabled": "Переключено в режим предпросмотра",
+    "cannotPublishUndefined": "Невозможно опубликовать: есть неопределенные переменные, которые нужно определить",
+    "tagsInput": {
+      "available": "тегов",
+      "typeToSearch": "Введите для поиска или создания"
+    },
+    "createTag": {
+      "title": "Создать тег",
+      "chooseColor": "Выберите цвет для",
+      "create": "Создать тег",
+      "cancel": "Отмена"
+    },
+    "addVariable": {
+      "title": "Добавить переменную",
+      "name": "Название переменной",
+      "namePlaceholder": "например user_role",
+      "type": "Тип",
+      "defaultValue": "Значение по умолчанию",
+      "defaultValuePlaceholder": "Необязательное значение",
+      "cancel": "Отмена",
+      "add": "Добавить переменную"
+    },
+    "createVersion": {
+      "title": "Создать новую версию",
+      "copyCurrentVersion": "Скопировать текущую версию",
+      "startFromScratch": "Начать с нуля",
+      "cancel": "Отмена",
+      "create": "Создать версию"
+    },
+    "testModal": {
+      "title": "Тестировать с AI",
+      "model": "Модель",
+      "advancedSettings": "Расширенные настройки",
+      "run": "Запустить тест",
+      "aiResponse": "Ответ AI",
+      "noResponse": "Ответа пока нет. Нажмите \"Запустить тест\" для генерации.",
+      "responseTime": "Время ответа",
+      "totalTokens": "Всего токенов",
+      "inputTokens": "Входящие токены",
+      "outputTokens": "Исходящие токены",
+      "cost": "Стоимость",
+      "close": "Закрыть"
+    },
+    "shareModal": {
+      "title": "Поделиться шаблоном промпта",
+      "shareVersion": "Поделиться версией",
+      "of": "промпта",
+      "withOthers": "с другими через публичную ссылку",
+      "description": "Создайте публичную ссылку только для чтения, которую может открыть любой без авторизации.",
+      "createLink": "Создать ссылку для доступа",
+      "link": "Ссылка для доступа",
+      "copy": "Скопировать ссылку",
+      "close": "Закрыть",
+      "copied": "Ссылка скопирована в буфер обмена!"
+    },
+    "statsPanel": {
+      "characters": "Символов",
+      "variables": "Переменных",
+      "tokens": "Токенов",
+      "models": "Модели"
+    }
+  }
+}

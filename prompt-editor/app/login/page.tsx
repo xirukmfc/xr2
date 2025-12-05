@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, LogIn, Loader2 } from 'lucide-react'
+import { useLocale } from '@/contexts/locale-context'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
@@ -19,6 +20,7 @@ export default function LoginPage() {
   const [showSplash, setShowSplash] = useState(true)
 
   const { login, googleLogin, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { t } = useLocale()
   const router = useRouter()
 
   // Splash screen animation
@@ -36,10 +38,10 @@ export default function LoginPage() {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('expired') === 'true') {
         setSessionExpired(true);
-        setError('Your session has expired. Please log in again.');
+        setError(t('auth.login.errors.sessionExpired'));
       }
     }
-  }, []);
+  }, [t]);
 
   // Redirect authenticated users to prompts page
   useEffect(() => {
@@ -82,17 +84,17 @@ export default function LoginPage() {
           console.log('Google OAuth initialized successfully');
         } catch (error) {
           console.error('Error initializing Google OAuth:', error);
-          setError('Failed to initialize Google Sign-In. Please refresh the page.');
+          setError(t('auth.login.errors.googleInitFailed'));
         }
       } else {
         console.error('Google object not found after script load');
-        setError('Google Sign-In service unavailable. Please refresh the page.');
+        setError(t('auth.login.errors.googleUnavailable'));
       }
     }
 
     script.onerror = (error) => {
       console.error('Failed to load Google Identity Services script:', error);
-      setError('Failed to load Google Sign-In. Please check your internet connection.');
+      setError(t('auth.login.errors.googleLoadFailed'));
     }
 
     return () => {
@@ -100,7 +102,7 @@ export default function LoginPage() {
         document.body.removeChild(script)
       }
     }
-  }, [hasGoogleClientId])
+  }, [hasGoogleClientId, t])
 
   const handleGoogleResponse = async (response: any) => {
     try {
@@ -110,7 +112,7 @@ export default function LoginPage() {
       router.push('/prompts')
     } catch (error: any) {
       console.error('Google sign-in error:', error);
-      setError(`Google sign-in failed: ${error?.message || 'Please try again.'}`)
+      setError(t('auth.login.errors.googleSignInFailedWithMessage', { message: error?.message || t('auth.login.errors.tryAgain') }))
     } finally {
       setIsLoading(false);
     }
@@ -123,7 +125,7 @@ export default function LoginPage() {
       handlePopupFallback();
     } else {
       console.error('Google Identity Services not loaded');
-      setError('Google sign-in is not available. Please refresh the page.');
+      setError(t('auth.login.errors.googleNotAvailable'));
     }
   }
 
@@ -158,29 +160,29 @@ export default function LoginPage() {
                   
                   await handleGoogleResponse({ credential: mockCredential });
                 } else {
-                  setError('Failed to get user information from Google.');
+                  setError(t('auth.login.errors.googleUserInfoFailed'));
                 }
               } catch (error) {
                 console.error('Error getting user info from Google:', error);
-                setError('Failed to authenticate with Google. Please try again.');
+                setError(t('auth.login.errors.googleAuthFailed'));
               }
             } else {
-              setError('No access token received from Google.');
+              setError(t('auth.login.errors.googleNoToken'));
             }
           },
           error_callback: (error: any) => {
             console.error('Popup OAuth error:', error);
-            setError('Google sign-in failed. Please try again.');
+            setError(t('auth.login.errors.googlePopupFailed'));
           }
         });
 
         client.requestAccessToken();
       } else {
-        setError('Google OAuth popup not available. Please refresh the page.');
+        setError(t('auth.login.errors.googlePopupUnavailable'));
       }
     } catch (error) {
       console.error('Popup fallback error:', error);
-      setError('Failed to show Google sign-in. Please try again.');
+      setError(t('auth.login.errors.googlePopupShowFailed'));
     }
   }
 
@@ -193,7 +195,7 @@ export default function LoginPage() {
       await login(username, password, rememberMe)
       router.push('/prompts') // Redirect to prompts page after login
     } catch (error: any) {
-      setError(error?.message || 'Login failed. Please check your credentials.')
+      setError(error?.message || t('auth.login.errors.loginFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -239,16 +241,16 @@ export default function LoginPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Login</CardTitle>
+            <CardTitle>{t('auth.login.title')}</CardTitle>
             <CardDescription>
-              Enter your credentials to access your account
+              {t('auth.login.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                  Username or Email
+                  {t('auth.login.usernameLabel')}
                 </label>
                 <Input
                   id="username"
@@ -256,7 +258,7 @@ export default function LoginPage() {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter your username or email"
+                  placeholder={t('auth.login.usernamePlaceholder')}
                   className="mt-1"
                   disabled={isLoading}
                 />
@@ -264,7 +266,7 @@ export default function LoginPage() {
 
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Password
+                  {t('auth.login.passwordLabel')}
                 </label>
                 <div className="relative mt-1">
                   <Input
@@ -273,7 +275,7 @@ export default function LoginPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder={t('auth.login.passwordPlaceholder')}
                     disabled={isLoading}
                   />
                   <button
@@ -303,7 +305,7 @@ export default function LoginPage() {
                   className="h-4 w-4 text-primary border-input rounded focus:ring-primary"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                  remember me for 90 days
+                  {t('auth.login.remember')}
                 </label>
               </div>
 
@@ -315,12 +317,12 @@ export default function LoginPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Signing in...
+                    {t('auth.login.buttonLoading')}
                   </>
                 ) : (
                   <>
                     <LogIn className="h-4 w-4" />
-                    Sign in
+                    {t('auth.login.button')}
                   </>
                 )}
               </Button>
@@ -333,7 +335,7 @@ export default function LoginPage() {
                     <div className="w-full border-t border-gray-300" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                    <span className="px-2 bg-white text-gray-500">{t('auth.login.divider')}</span>
                   </div>
                 </div>
 
@@ -351,7 +353,7 @@ export default function LoginPage() {
                       <path fill="#fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                       <path fill="#ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    Sign in with Google
+                    {t('auth.login.googleButton')}
                   </Button>
                 </div>
               </div>
@@ -359,9 +361,9 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                Demo credentials: <br />
-                Username: <code className="bg-gray-100 px-2 py-1 rounded">www</code> <br />
-                Password: <code className="bg-gray-100 px-2 py-1 rounded">***REMOVED_ADMIN_PWD***</code>
+                {t('auth.login.demo.title')} <br />
+                {t('auth.login.demo.username')}: <code className="bg-gray-100 px-2 py-1 rounded">www</code> <br />
+                {t('auth.login.demo.password')}: <code className="bg-gray-100 px-2 py-1 rounded">***REMOVED_ADMIN_PWD***</code>
               </p>
             </div>
           </CardContent>

@@ -19,6 +19,7 @@ import {TokenBadges} from "@/components/token-badges"
 import type {editor as Monaco} from "monaco-editor"
 import type {ModelId} from "@/lib/tokens"
 import {useNotification} from "@/components/notification-provider"
+import {useLocale} from "@/contexts/locale-context"
 
 interface CenterPanelProps {
     promptData: PromptData
@@ -53,6 +54,7 @@ export function CenterPanel({
                                 setSnapshotGetterAction,
                                 onSave,
                             }: CenterPanelProps) {
+    const { t } = useLocale()
     const monaco = useMonaco()
     const containerRef = useRef<HTMLDivElement | null>(null)
     const editorRef = useRef<IStandaloneCodeEditor | null>(null)
@@ -375,7 +377,7 @@ export function CenterPanel({
                     <div className="flex-shrink-0 bg-white/95 backdrop-blur border-b-0 px-4">
                         <div className="flex items-center justify-between h-full border-b-0 py-1">
                             <div className="flex items-center gap-2">
-                                <h2 className="text-base font-medium text-gray-700">Preview Mode</h2>
+                                <h2 className="text-base font-medium text-gray-700">{t('editor.previewMode')}</h2>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Button variant="ghost" size="sm" onClick={handleCopyActive} className="h-8 w-8 p-0"
@@ -408,11 +410,11 @@ export function CenterPanel({
                         <div className="flex items-center justify-between text-xs text-gray-600">
                             <div className="flex items-center space-x-3">
                 <span>
-                  Characters:{" "}
+                  {t('editor.statsPanel.characters')}:{" "}
                     <span className="font-medium">{currentSystemPrompt.length + currentUserPrompt.length}</span>
                 </span>
                                 <span>
-                  Variables: <span className="font-medium">{variableCount}</span>
+                  {t('editor.statsPanel.variables')}: <span className="font-medium">{variableCount}</span>
                 </span>
                                 {undefinedCount > 0 && (
                                     <span className="text-orange-600">
@@ -561,10 +563,10 @@ export function CenterPanel({
                     <div className="flex items-center justify-between text-xs text-gray-600">
                         <div className="flex items-center space-x-3">
               <span>
-                Characters: <span className="font-medium">{totalCharacters}</span>
+                {t('editor.statsPanel.characters')}: <span className="font-medium">{totalCharacters}</span>
               </span>
                             <span>
-                Variables: <span className="font-medium">{variableCount}</span>
+                {t('editor.statsPanel.variables')}: <span className="font-medium">{variableCount}</span>
               </span>
                             {undefinedCount > 0 && (
                                 <span className="text-orange-600">

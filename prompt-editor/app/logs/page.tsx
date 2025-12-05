@@ -11,6 +11,7 @@ import type { Column } from "@/components/ui/data-table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { apiClient } from "@/lib/api"
 import { useNotification } from "@/components/notification-provider"
+import { useLocale } from "@/contexts/locale-context"
 
 export interface ApiLog {
   id: string
@@ -46,6 +47,7 @@ function cleanText(text: string): string {
 const cleanEndpoint = cleanText
 
 function LogsPageContent() {
+  const { t } = useLocale()
   const [logs, setLogs] = useState<ApiLog[]>([])
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -56,6 +58,14 @@ function LogsPageContent() {
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const { showNotification } = useNotification()
+  const handleSortChange = (sort: string) => {
+    setSortBy(sort)
+    setCurrentPage(1)
+  }
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter)
+    setCurrentPage(1)
+  }
 
   // fullscreen viewer
   const [viewerOpen, setViewerOpen] = useState(false)
@@ -171,22 +181,21 @@ function LogsPageContent() {
   }
 
   const filterOptions = [
-    { key: "all", label: "All" },
-    { key: "success", label: "Success" },
-    { key: "error", label: "Error" },
+    { key: "all", label: t('logs.filters.all') },
+    { key: "success", label: t('logs.filters.success') },
+    { key: "error", label: t('logs.filters.error') },
   ]
 
   const sortOptions = [
-    { value: "created_at", label: "Sort by: Request Time" },
-    { value: "latency_ms", label: "Sort by: Duration" },
-    { value: "status_code", label: "Sort by: Status Code" },
-    { value: "endpoint", label: "Sort by: Endpoint" },
+    { value: "created_at", label: t('logs.filters.sortCreated') },
+    { value: "status_code", label: t('logs.filters.sortStatus') },
+    { value: "endpoint", label: t('logs.filters.sortEndpoint') },
   ]
 
   const columns: Column<ApiLog>[] = [
     {
       key: "request",
-      header: "Request & Response",
+      header: t('logs.columns.endpoint'),
       width: "col-span-5",
       render: (log) => (
         <div className="flex items-center space-x-2 min-w-0">
@@ -202,7 +211,7 @@ function LogsPageContent() {
     },
     {
       key: "timing",
-      header: "Timing",
+      header: t('logs.columns.timestamp'),
       width: "col-span-3",
       render: (log) => (
         <div className="text-xs">
@@ -226,7 +235,7 @@ function LogsPageContent() {
     },
     {
       key: "status",
-      header: "Status",
+      header: t('logs.columns.status'),
       width: "col-span-1",
       render: (log) => (
         <div className="flex items-center">
@@ -257,6 +266,18 @@ function LogsPageContent() {
       log.client_ip.toLowerCase().includes(searchLower)
     )
   })
+  const sortedLogs = [...displayedLogs].sort((a, b) => {
+    switch (sortBy) {
+      case "created_at":
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      case "status_code":
+        return b.status_code - a.status_code
+      case "endpoint":
+        return a.endpoint.localeCompare(b.endpoint)
+      default:
+        return 0
+    }
+  })
 
   // Add refresh function
   const handleRefresh = () => {
@@ -269,12 +290,12 @@ function LogsPageContent() {
           <DataFilters
             searchQuery={searchQuery}
             onSearch={setSearchQuery}
-            searchPlaceholder="Search logs..."
+            searchPlaceholder={t('logs.searchPlaceholder')}
             activeFilter={activeFilter}
-            onFilter={setActiveFilter}
+            onFilter={handleFilterChange}
             filterOptions={filterOptions}
             sortBy={sortBy}
-            onSort={setSortBy}
+            onSort={handleSortChange}
             sortOptions={sortOptions}
             showNewPromptButton={false}
             customActionButton={
@@ -285,7 +306,7 @@ function LogsPageContent() {
                 className="h-[35px]"
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
+                {t('logs.filters.refresh')}
               </Button>
             }
           />
@@ -293,7 +314,7 @@ function LogsPageContent() {
 
       <div className="flex flex-col">
         <DataTable
-          data={displayedLogs}
+          data={sortedLogs}
           columns={columns}
           isLoading={loading}
           onRowClick={(log) => openViewer(log)}

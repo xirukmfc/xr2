@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { ProtectedRoute } from "@/components/protected-route"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,6 +24,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { NotificationProvider, useNotification } from "@/components/notification-provider"
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog"
 import { logger } from "@/lib/logger"
+import { useLocale } from "@/contexts/locale-context"
 
 interface LLMApiKey {
   id: string
@@ -54,24 +55,25 @@ interface UserTag {
 }
 
 const colorOptions = [
-  { value: "#3B82F6", label: "Blue", class: "bg-blue-50 text-blue-700 border-blue-200", dot: "bg-blue-500" },
-  { value: "#10B981", label: "Green", class: "bg-green-50 text-green-700 border-green-200", dot: "bg-green-500" },
-  { value: "#8B5CF6", label: "Purple", class: "bg-purple-50 text-purple-700 border-purple-200", dot: "bg-purple-500" },
-  { value: "#F59E0B", label: "Orange", class: "bg-orange-50 text-orange-700 border-orange-200", dot: "bg-orange-500" },
-  { value: "#EC4899", label: "Pink", class: "bg-pink-50 text-pink-700 border-pink-200", dot: "bg-pink-500" },
-  { value: "#14B8A6", label: "Teal", class: "bg-teal-50 text-teal-700 border-teal-200", dot: "bg-teal-500" },
-  { value: "#6366F1", label: "Indigo", class: "bg-indigo-50 text-indigo-700 border-indigo-200", dot: "bg-indigo-500" },
-  { value: "#EF4444", label: "Red", class: "bg-red-50 text-red-700 border-red-200", dot: "bg-red-500" },
+  { value: "#3B82F6", labelKey: "settings.tags.colors.blue", class: "bg-blue-50 text-blue-700 border-blue-200", dot: "bg-blue-500" },
+  { value: "#10B981", labelKey: "settings.tags.colors.green", class: "bg-green-50 text-green-700 border-green-200", dot: "bg-green-500" },
+  { value: "#8B5CF6", labelKey: "settings.tags.colors.purple", class: "bg-purple-50 text-purple-700 border-purple-200", dot: "bg-purple-500" },
+  { value: "#F59E0B", labelKey: "settings.tags.colors.orange", class: "bg-orange-50 text-orange-700 border-orange-200", dot: "bg-orange-500" },
+  { value: "#EC4899", labelKey: "settings.tags.colors.pink", class: "bg-pink-50 text-pink-700 border-pink-200", dot: "bg-pink-500" },
+  { value: "#14B8A6", labelKey: "settings.tags.colors.teal", class: "bg-teal-50 text-teal-700 border-teal-200", dot: "bg-teal-500" },
+  { value: "#6366F1", labelKey: "settings.tags.colors.indigo", class: "bg-indigo-50 text-indigo-700 border-indigo-200", dot: "bg-indigo-500" },
+  { value: "#EF4444", labelKey: "settings.tags.colors.red", class: "bg-red-50 text-red-700 border-red-200", dot: "bg-red-500" },
 ]
 
 
 const subsections = [
-  { id: "profile", name: "Profile", icon: User },
-  { id: "tags", name: "Tags", icon: Tag },
-  { id: "llm-keys", name: "LLM API Keys", icon: Key },
+  { id: "profile", labelKey: "settings.tabs.profile", icon: User },
+  { id: "tags", labelKey: "settings.tabs.tags", icon: Tag },
+  { id: "llm-keys", labelKey: "settings.tabs.llmKeys", icon: Key },
 ]
 
 function SettingsPageContent() {
+  const { t } = useLocale()
   const { user, refreshUser } = useAuth()
   const { showNotification } = useNotification()
   const [activeSubsection, setActiveSubsection] = useState<string>("profile")
@@ -117,6 +119,20 @@ function SettingsPageContent() {
   const [deleteAccountLoading, setDeleteAccountLoading] = useState(false)
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState("")
+
+  const localizedSubsections = useMemo(() =>
+    subsections.map((section) => ({
+      ...section,
+      name: t(section.labelKey),
+    }))
+  , [t])
+
+  const translatedColorOptions = useMemo(() =>
+    colorOptions.map((option) => ({
+      ...option,
+      label: t(option.labelKey),
+    }))
+  , [t])
 
   // Load user data into profile form
   useEffect(() => {
@@ -169,7 +185,7 @@ function SettingsPageContent() {
         setTags(tagsArray)
       } catch (error) {
         logger.error('[Settings] Failed to load user tags:', error)
-        setTagsError('Failed to load tags')
+        setTagsError(t('settings.tags.loadError'))
         setTags([])
       } finally {
         setTagsLoading(false)
@@ -177,7 +193,7 @@ function SettingsPageContent() {
     }
 
     loadUserTags()
-  }, [])
+  }, [t])
 
   // Load LLM providers and user API keys from API
   useEffect(() => {
@@ -224,15 +240,15 @@ function SettingsPageContent() {
         
       } catch (error) {
         logger.error('[Settings] Failed to load LLM data:', error)
-        setProvidersError('Failed to load providers')
-        setLlmKeysError('Failed to load API keys')
+        setProvidersError(t('settings.llmKeys.providersLoadError'))
+        setLlmKeysError(t('settings.llmKeys.loadError'))
         setProvidersLoading(false)
         setLlmKeysLoading(false)
       }
     }
 
     loadLLMData()
-  }, [])
+  }, [t])
 
   const handleSaveProfile = async () => {
     try {
@@ -242,10 +258,10 @@ function SettingsPageContent() {
         body: JSON.stringify(profileForm),
       })
       await refreshUser()
-      showNotification('Profile updated successfully', 'success')
+      showNotification(t('settings.notifications.profileSaved'), 'success')
     } catch (error: any) {
       logger.error('Failed to save profile:', error)
-      showNotification(error?.message || 'Failed to save profile', 'error')
+      showNotification(error?.message || t('settings.notifications.profileSaveError'), 'error')
     } finally {
       setProfileLoading(false)
     }
@@ -259,14 +275,14 @@ function SettingsPageContent() {
         body: JSON.stringify({ confirmation: deleteConfirmation }),
       })
       // Account deleted successfully - clear token and redirect
-      showNotification('Account deleted successfully', 'success')
+      showNotification(t('settings.notifications.accountDeleted'), 'success')
       apiClient.clearToken()
       setTimeout(() => {
         window.location.href = '/login'
       }, 1000)
     } catch (error: any) {
       logger.error('Failed to delete account:', error)
-      showNotification(error?.message || 'Failed to delete account. Please try again.', 'error')
+      showNotification(error?.message || t('settings.notifications.accountDeleteError'), 'error')
     } finally {
       setDeleteAccountLoading(false)
       setShowDeleteConfirmDialog(false)
@@ -293,7 +309,7 @@ function SettingsPageContent() {
         setTags(tags.map((tag) =>
           tag.id === editingTag.id ? { ...tag, ...tagForm } : tag
         ))
-        showNotification('Tag updated successfully', 'success')
+        showNotification(t('settings.notifications.tagUpdated'), 'success')
       } else {
         // Create new tag
         logger.log('[Settings] Creating new tag:', tagForm)
@@ -310,7 +326,7 @@ function SettingsPageContent() {
           name: newTag.name,
           color: newTag.color
         }])
-        showNotification('Tag created successfully', 'success')
+        showNotification(t('settings.notifications.tagCreated'), 'success')
       }
 
       setShowTagModal(false)
@@ -318,7 +334,7 @@ function SettingsPageContent() {
       setTagForm({ name: "", color: "#3B82F6" })
     } catch (error) {
       logger.error('[Settings] Failed to save tag:', error)
-      showNotification('Failed to save tag', 'error')
+      showNotification(t('settings.notifications.tagSaveError'), 'error')
     }
   }
 
@@ -345,7 +361,7 @@ function SettingsPageContent() {
 
         // Update local state
         setLlmKeys(llmKeys.map((key) => (key.id === editingLLM.id ? typedUpdatedKey : key)))
-        showNotification('API key updated successfully', 'success')
+        showNotification(t('settings.notifications.llmKeyUpdated'), 'success')
       } else {
         // Create new API key
         logger.log('[Settings] Creating new API key')
@@ -362,7 +378,7 @@ function SettingsPageContent() {
 
         // Update local state
         setLlmKeys([...llmKeys, typedNewKey])
-        showNotification('API key created successfully', 'success')
+        showNotification(t('settings.notifications.llmKeyCreated'), 'success')
       }
 
       setShowLLMModal(false)
@@ -370,7 +386,7 @@ function SettingsPageContent() {
       setLlmForm({ name: "", provider_id: "", api_key: "" })
     } catch (error) {
       logger.error('[Settings] Failed to save API key:', error)
-      showNotification('Failed to save API key', 'error')
+      showNotification(t('settings.notifications.llmKeySaveError'), 'error')
     }
   }
 
@@ -383,12 +399,12 @@ function SettingsPageContent() {
 
       // Update local state
       setTags(tags.filter((tag) => tag.id !== deletingTagId))
-      showNotification('Tag deleted successfully', 'success')
+      showNotification(t('settings.notifications.tagDeleted'), 'success')
       setShowDeleteTagDialog(false)
       setDeletingTagId(null)
     } catch (error) {
       logger.error('[Settings] Failed to delete tag:', error)
-      showNotification('Failed to delete tag', 'error')
+      showNotification(t('settings.notifications.tagDeleteError'), 'error')
     }
   }
 
@@ -403,12 +419,12 @@ function SettingsPageContent() {
 
       // Update local state
       setLlmKeys(llmKeys.filter((key) => key.id !== deletingLLMId))
-      showNotification('API key deleted successfully', 'success')
+      showNotification(t('settings.notifications.llmKeyDeleted'), 'success')
       setShowDeleteLLMDialog(false)
       setDeletingLLMId(null)
     } catch (error) {
       logger.error('[Settings] Failed to delete API key:', error)
-      showNotification('Failed to delete API key', 'error')
+      showNotification(t('settings.notifications.llmKeyDeleteError'), 'error')
     }
   }
 
@@ -438,42 +454,36 @@ function SettingsPageContent() {
     setShowLLMModal(true)
   }
 
-  const getColorStyle = (color: string) => {
-    return {
-      '--tag-custom-color': color,
-    } as React.CSSProperties
-  }
-
   const filteredTags = tags.filter((tag) => tag.name.toLowerCase().includes(tagSearch.toLowerCase()))
 
   const renderProfileSection = () => (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Profile Settings</CardTitle>
-          <CardDescription>Manage your personal account settings</CardDescription>
+          <CardTitle>{t('settings.profile.title')}</CardTitle>
+          <CardDescription>{t('settings.subtitle')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="full_name">Full Name</Label>
-            <Input 
-              id="full_name" 
-              value={profileForm.full_name} 
+            <Label htmlFor="full_name">{t('settings.profile.name')}</Label>
+            <Input
+              id="full_name"
+              value={profileForm.full_name}
               onChange={(e) => setProfileForm({...profileForm, full_name: e.target.value})}
-              placeholder="Enter your full name" 
-              className="mt-1" 
+              placeholder={t('settings.profile.namePlaceholder')}
+              className="mt-1"
               disabled={profileLoading}
             />
           </div>
           <div>
-            <Label htmlFor="email">Email Address</Label>
-            <Input 
-              id="email" 
-              type="email" 
+            <Label htmlFor="email">{t('settings.profile.email')}</Label>
+            <Input
+              id="email"
+              type="email"
               value={profileForm.email}
               onChange={(e) => setProfileForm({...profileForm, email: e.target.value})}
-              placeholder="Enter your email" 
-              className="mt-1" 
+              placeholder={t('settings.profile.emailPlaceholder')}
+              className="mt-1"
               disabled={profileLoading}
             />
           </div>
@@ -482,27 +492,27 @@ function SettingsPageContent() {
             disabled={profileLoading}
             size="sm"
           >
-            {profileLoading ? "Saving..." : "Save Changes"}
+            {profileLoading ? t('settings.profile.saving') : t('settings.profile.save')}
           </Button>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-red-600">Danger Zone</CardTitle>
-          <CardDescription>Irreversible actions that affect your account</CardDescription>
+          <CardTitle className="text-red-600">{t('settings.account.title')}</CardTitle>
+          <CardDescription>{t('settings.account.subtitle')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="p-4 border border-red-200 rounded-lg bg-red-50">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-sm font-medium text-red-800">Delete Account</h3>
+                <h3 className="text-sm font-medium text-red-800">{t('settings.account.deleteAccount')}</h3>
                 <p className="text-sm text-red-700 mt-1">
-                  Permanently delete your account and all associated data. This action cannot be undone.
+                  {t('settings.account.deleteAccountDescription')}
                 </p>
               </div>
               <Button variant="destructive" className="ml-4" onClick={openDeleteDialog} size="sm">
-                Delete Account
+                {t('settings.account.deleteAccount')}
               </Button>
             </div>
           </div>
@@ -517,7 +527,7 @@ function SettingsPageContent() {
       return (
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
-          <span className="text-sm text-muted-foreground">Loading tags...</span>
+          <span className="text-sm text-muted-foreground">{t('settings.tags.loading')}</span>
         </div>
       )
     }
@@ -525,7 +535,7 @@ function SettingsPageContent() {
     if (tagsError) {
       return (
         <div className="flex items-center justify-center py-12 text-red-600">
-          <span>{tagsError}</span>
+          <span>{tagsError || t('settings.tags.loadError')}</span>
         </div>
       )
     }
@@ -533,7 +543,7 @@ function SettingsPageContent() {
     const tagColumns: Column<UserTag>[] = [
       {
         key: "name",
-        header: "Name",
+        header: t('settings.tags.columns.name'),
         width: "col-span-6",
         render: (tag) => (
           <div className="flex items-center space-x-3">
@@ -549,7 +559,7 @@ function SettingsPageContent() {
       },
       {
         key: "color",
-        header: "Color",
+        header: t('settings.tags.columns.color'),
         width: "col-span-3",
         render: (tag) => (
           <div className="flex items-center space-x-2">
@@ -563,11 +573,11 @@ function SettingsPageContent() {
       },
       {
         key: "actions",
-        header: "Actions",
+        header: t('settings.tags.columns.actions'),
         width: "col-span-3",
         render: (tag) => (
           <div className="flex items-center space-x-1">
-            <Button variant="ghost" size="sm" onClick={() => openTagModal(tag)} className="p-1 h-auto" title="Edit">
+            <Button variant="ghost" size="sm" onClick={() => openTagModal(tag)} className="p-1 h-auto" title={t('settings.tags.modal.titleEdit')}>
               <Edit2 className="w-4 h-4 text-slate-400 hover:text-blue-600" />
             </Button>
             <Button
@@ -578,7 +588,7 @@ function SettingsPageContent() {
                 setShowDeleteTagDialog(true)
               }}
               className="p-1 h-auto"
-              title="Delete"
+              title={t('settings.tags.deleteDialog.title')}
             >
               <Trash2 className="w-4 h-4 text-slate-400 hover:text-red-600" />
             </Button>
@@ -596,7 +606,7 @@ function SettingsPageContent() {
               <div className="relative flex-1">
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <Input
-                  placeholder="Search tags..."
+                  placeholder={t('settings.tags.searchPlaceholder')}
                   value={tagSearch}
                   onChange={(e) => setTagSearch(e.target.value)}
                   className="pl-8 h-9 text-xs"
@@ -608,7 +618,7 @@ function SettingsPageContent() {
                 className="text-xs h-9 px-3 gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
-                New
+                {t('settings.tags.newTag')}
               </Button>
             </div>
           </CardContent>
@@ -625,8 +635,8 @@ function SettingsPageContent() {
               columns={tagColumns}
               emptyState={{
                 icon: <Tag className="w-6 h-6 text-slate-400" />,
-                title: tagSearch ? "No tags found" : "No tags yet",
-                description: tagSearch ? "Try adjusting your search terms." : "Create your first tag to get started.",
+                title: tagSearch ? t('settings.tags.empty.filteredTitle') : t('settings.tags.empty.title'),
+                description: tagSearch ? t('settings.tags.empty.filteredDescription') : t('settings.tags.empty.description'),
               }}
             />
           </CardContent>
@@ -639,20 +649,20 @@ function SettingsPageContent() {
     const llmColumns: Column<any>[] = [
       {
         key: "name",
-        header: "Name",
+        header: t('settings.llmKeys.columns.name'),
         width: "col-span-4",
         render: (llm: LLMApiKey) => (
           <div>
             <div className="font-semibold text-slate-900 text-sm truncate">{llm.name}</div>
             <div className="text-xs text-slate-500 truncate">
-              {llm.provider_display_name || llm.provider_name || 'Unknown Provider'}
+              {llm.provider_display_name || llm.provider_name || t('settings.llmKeys.unknownProvider')}
             </div>
           </div>
         ),
       },
       {
         key: "created",
-        header: "Created",
+        header: t('settings.llmKeys.columns.created'),
         width: "col-span-2",
         render: (llm: LLMApiKey) => (
           <div className="text-sm text-slate-600 whitespace-nowrap">
@@ -662,24 +672,24 @@ function SettingsPageContent() {
       },
       {
         key: "key_preview",
-        header: "Key Preview",
+        header: t('settings.llmKeys.columns.preview'),
         width: "col-span-4",
         render: (llm: LLMApiKey) => (
           <div className="flex items-center space-x-2 min-w-0">
             <code className="text-xs bg-slate-100 px-2 py-1 rounded font-mono text-slate-600 truncate">
               ••••••••••••••••••••
             </code>
-            <span className="text-xs text-slate-400 whitespace-nowrap">Hidden</span>
+            <span className="text-xs text-slate-400 whitespace-nowrap">{t('settings.llmKeys.columns.hidden')}</span>
           </div>
         ),
       },
       {
         key: "actions",
-        header: "Actions",
+        header: t('settings.llmKeys.columns.actions'),
         width: "col-span-2",
         render: (llm: LLMApiKey) => (
           <div className="flex items-center space-x-1 justify-end">
-            <Button variant="ghost" size="sm" onClick={() => openLLMModal(llm)} className="p-1 h-auto" title="Edit">
+            <Button variant="ghost" size="sm" onClick={() => openLLMModal(llm)} className="p-1 h-auto" title={t('settings.llmKeys.modal.titleEdit')}>
               <Edit2 className="w-4 h-4 text-slate-400 hover:text-blue-600" />
             </Button>
             <Button
@@ -690,7 +700,7 @@ function SettingsPageContent() {
                 setShowDeleteLLMDialog(true)
               }}
               className="p-1 h-auto"
-              title="Delete"
+              title={t('settings.llmKeys.deleteDialog.title')}
             >
               <Trash2 className="w-4 h-4 text-slate-400 hover:text-red-600" />
             </Button>
@@ -704,7 +714,7 @@ function SettingsPageContent() {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-sm text-muted-foreground">Loading API keys...</p>
+            <p className="text-sm text-muted-foreground">{t('settings.llmKeys.loading')}</p>
           </div>
         </div>
       )
@@ -716,7 +726,7 @@ function SettingsPageContent() {
           <div className="text-center">
             <div className="text-red-500 mb-2">⚠️</div>
             <p className="text-sm text-red-600 mb-2">
-              {llmKeysError || providersError}
+              {llmKeysError || providersError || t('settings.llmKeys.loadError')}
             </p>
             <Button
               variant="outline"
@@ -725,7 +735,7 @@ function SettingsPageContent() {
                 window.location.reload()
               }}
             >
-              Retry
+              {t('settings.llmKeys.retry')}
             </Button>
           </div>
         </div>
@@ -745,7 +755,7 @@ function SettingsPageContent() {
                 disabled={!llmProviders.length}
               >
                 <Plus className="w-3.5 h-3.5" />
-                New
+                {t('settings.llmKeys.newKey')}
               </Button>
             </div>
           </CardContent>
@@ -762,10 +772,10 @@ function SettingsPageContent() {
               columns={llmColumns}
               emptyState={{
                 icon: <Key className="w-6 h-6 text-slate-400" />,
-                title: "No API keys yet",
+                title: t('settings.llmKeys.empty.title'),
                 description: llmProviders.length === 0
-                  ? "No LLM providers are available. Please contact your administrator."
-                  : "Add your first API key to get started with LLM testing.",
+                  ? t('settings.llmKeys.empty.noProviders')
+                  : t('settings.llmKeys.empty.description'),
               }}
             />
           </CardContent>
@@ -793,9 +803,9 @@ function SettingsPageContent() {
       {/* EditorHeader */}
       <div className="px-4 pt-[12px] pb-[12px] h-[65px] bg-white border-b border-slate-200 flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-base font-semibold">Settings</h1>
+          <h1 className="text-base font-semibold">{t('settings.title')}</h1>
           <p className="text-xs text-muted-foreground">
-            Manage your account, tags, and API configurations
+            {t('settings.subtitle')}
           </p>
         </div>
       </div>
@@ -805,7 +815,7 @@ function SettingsPageContent() {
         {/* Horizontal tabs navigation */}
         <div className="bg-white border-b border-slate-200 px-4 h-10">
           <div className="flex items-center gap-1 -mb-px">
-            {subsections.map((subsection) => {
+            {localizedSubsections.map((subsection) => {
               const Icon = subsection.icon
               const isActive = activeSubsection === subsection.id
               return (
@@ -835,26 +845,26 @@ function SettingsPageContent() {
       <Dialog open={showTagModal} onOpenChange={setShowTagModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingTag ? "Edit Tag" : "Create New Tag"}</DialogTitle>
+            <DialogTitle>{editingTag ? t('settings.tags.modal.titleEdit') : t('settings.tags.modal.titleCreate')}</DialogTitle>
             <DialogDescription>
-              {editingTag ? "Update the tag details below." : "Create a new tag for organizing your prompts."}
+              {editingTag ? t('settings.tags.modal.descriptionEdit') : t('settings.tags.modal.descriptionCreate')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="tag-name">Tag Name</Label>
+              <Label htmlFor="tag-name">{t('settings.tags.modal.nameLabel')}</Label>
               <Input
                 id="tag-name"
                 value={tagForm.name}
                 onChange={(e) => setTagForm({ ...tagForm, name: e.target.value })}
-                placeholder="Enter tag name"
+                placeholder={t('settings.tags.modal.namePlaceholder')}
                 className="mt-1"
               />
             </div>
             <div>
-              <Label htmlFor="tag-color">Color</Label>
+              <Label htmlFor="tag-color">{t('settings.tags.modal.colorLabel')}</Label>
               <div className="grid grid-cols-4 gap-2 mt-2">
-                {colorOptions.map((color) => (
+                {translatedColorOptions.map((color) => (
                   <button
                     key={color.value}
                     type="button"
@@ -872,7 +882,7 @@ function SettingsPageContent() {
               </div>
             </div>
             <div>
-              <Label>Preview</Label>
+              <Label>{t('settings.tags.modal.previewLabel')}</Label>
               <div className="mt-2">
                 <div className="flex items-center space-x-2">
                   <div 
@@ -880,7 +890,7 @@ function SettingsPageContent() {
                     style={{ backgroundColor: tagForm.color }}
                   />
                   <Badge variant="outline" className="border-gray-300">
-                    {tagForm.name || "Tag Preview"}
+                    {tagForm.name || t('settings.tags.modal.previewPlaceholder')}
                   </Badge>
                 </div>
               </div>
@@ -888,10 +898,10 @@ function SettingsPageContent() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowTagModal(false)}>
-              Cancel
+              {t('settings.tags.modal.cancel')}
             </Button>
             <Button onClick={handleSaveTag} disabled={!tagForm.name}>
-              {editingTag ? "Update Tag" : "Create Tag"}
+              {editingTag ? t('settings.tags.modal.saveEdit') : t('settings.tags.modal.saveCreate')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -901,31 +911,31 @@ function SettingsPageContent() {
       <Dialog open={showLLMModal} onOpenChange={setShowLLMModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingLLM ? "Edit API Key" : "Add New API Key"}</DialogTitle>
+            <DialogTitle>{editingLLM ? t('settings.llmKeys.modal.titleEdit') : t('settings.llmKeys.modal.titleCreate')}</DialogTitle>
             <DialogDescription>
-              {editingLLM ? "Update the API key details below." : "Add a new API key for LLM model testing."}
+              {editingLLM ? t('settings.llmKeys.modal.descriptionEdit') : t('settings.llmKeys.modal.descriptionCreate')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="llm-name">Name</Label>
+              <Label htmlFor="llm-name">{t('settings.llmKeys.modal.fields.name')}</Label>
               <Input
                 id="llm-name"
                 value={llmForm.name}
                 onChange={(e) => setLlmForm({ ...llmForm, name: e.target.value })}
-                placeholder="Enter a name for this API key"
+                placeholder={t('settings.llmKeys.modal.fields.namePlaceholder')}
                 className="mt-1"
               />
             </div>
             <div>
-              <Label htmlFor="llm-provider">Provider</Label>
+              <Label htmlFor="llm-provider">{t('settings.llmKeys.modal.fields.provider')}</Label>
               <Select 
                 value={llmForm.provider_id} 
                 onValueChange={(value) => setLlmForm({ ...llmForm, provider_id: value })}
                 disabled={!!editingLLM} // Disable provider selection when editing
               >
                 <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select provider" />
+                  <SelectValue placeholder={t('settings.llmKeys.modal.fields.providerPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {llmProviders.map((provider) => (
@@ -937,26 +947,26 @@ function SettingsPageContent() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="llm-key">API Key</Label>
+              <Label htmlFor="llm-key">{t('settings.llmKeys.modal.fields.apiKey')}</Label>
               <Input
                 id="llm-key"
                 type="password"
                 value={llmForm.api_key}
                 onChange={(e) => setLlmForm({ ...llmForm, api_key: e.target.value })}
-                placeholder={editingLLM ? "Enter new API key (leave blank to keep current)" : "Enter your API key"}
+                placeholder={editingLLM ? t('settings.llmKeys.modal.fields.apiKeyEditPlaceholder') : t('settings.llmKeys.modal.fields.apiKeyPlaceholder')}
                 className="mt-1"
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowLLMModal(false)}>
-              Cancel
+              {t('settings.llmKeys.modal.cancel')}
             </Button>
             <Button
               onClick={handleSaveLLM}
               disabled={!llmForm.name || !llmForm.provider_id || (!editingLLM && !llmForm.api_key)}
             >
-              {editingLLM ? "Update Key" : "Add Key"}
+              {editingLLM ? t('settings.llmKeys.modal.saveEdit') : t('settings.llmKeys.modal.saveCreate')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -966,33 +976,33 @@ function SettingsPageContent() {
       <Dialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-red-600">Delete Account</DialogTitle>
+            <DialogTitle className="text-red-600">{t('settings.account.deleteDialog.title')}</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete your account and remove all your data including workspaces, prompts, tags, and API keys.
+              {t('settings.account.deleteDialog.description')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-800 font-medium">⚠️ Warning</p>
+              <p className="text-sm text-red-800 font-medium">⚠️ {t('settings.account.deleteDialog.warningTitle')}</p>
               <p className="text-sm text-red-700 mt-1">
-                All of your data will be permanently deleted, including:
+                {t('settings.account.deleteDialog.warningDescription')}
               </p>
               <ul className="text-sm text-red-700 mt-2 ml-4 list-disc">
-                <li>All workspaces and prompts</li>
-                <li>All prompt versions and test data</li>
-                <li>All tags and categorizations</li>
-                <li>All API keys and configurations</li>
-                <li>All usage history and analytics</li>
+                <li>{t('settings.account.deleteDialog.items.workspaces')}</li>
+                <li>{t('settings.account.deleteDialog.items.promptVersions')}</li>
+                <li>{t('settings.account.deleteDialog.items.tags')}</li>
+                <li>{t('settings.account.deleteDialog.items.apiKeys')}</li>
+                <li>{t('settings.account.deleteDialog.items.history')}</li>
               </ul>
             </div>
             <div>
-              <Label htmlFor="delete-confirmation">Type "delete" to confirm</Label>
+              <Label htmlFor="delete-confirmation">{t('settings.account.deleteDialog.confirmationLabel')}</Label>
               <Input
                 id="delete-confirmation"
                 type="text"
                 value={deleteConfirmation}
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
-                placeholder="Type 'delete' to confirm"
+                placeholder={t('settings.account.deleteDialog.confirmationPlaceholder')}
                 className="mt-1"
                 disabled={deleteAccountLoading}
               />
@@ -1007,14 +1017,14 @@ function SettingsPageContent() {
               }}
               disabled={deleteAccountLoading}
             >
-              Cancel
+              {t('settings.account.deleteDialog.cancel')}
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteAccount}
               disabled={deleteConfirmation.toLowerCase() !== "delete" || deleteAccountLoading}
             >
-              {deleteAccountLoading ? "Deleting..." : "Delete My Account"}
+              {deleteAccountLoading ? t('settings.account.deleteDialog.confirmLoading') : t('settings.account.deleteDialog.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1028,8 +1038,8 @@ function SettingsPageContent() {
           if (!open) setDeletingTagId(null)
         }}
         onConfirm={handleDeleteTag}
-        title="Delete Tag"
-        description="Are you sure you want to delete this tag? This action cannot be undone."
+        title={t('settings.tags.deleteDialog.title')}
+        description={t('settings.tags.deleteDialog.description')}
       />
 
       {/* Delete LLM API Key Confirmation Dialog */}
@@ -1040,8 +1050,8 @@ function SettingsPageContent() {
           if (!open) setDeletingLLMId(null)
         }}
         onConfirm={handleDeleteLLM}
-        title="Delete API Key"
-        description="Are you sure you want to delete this API key? This action cannot be undone."
+        title={t('settings.llmKeys.deleteDialog.title')}
+        description={t('settings.llmKeys.deleteDialog.description')}
       />
       </>
     </ProtectedRoute>

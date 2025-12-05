@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useNotification } from "@/components/notification-provider"
+import { useLocale } from "@/contexts/locale-context"
 import type { Variable } from "@/app/page"
 
 interface AddVariableModalProps {
@@ -15,6 +16,7 @@ interface AddVariableModalProps {
 }
 
 export function AddVariableModal({ isOpen, onClose, onAdd }: AddVariableModalProps) {
+  const { t } = useLocale()
   const [name, setName] = useState("")
   const [type, setType] = useState<"string" | "number" | "boolean" | "array">("string")
   const [defaultValue, setDefaultValue] = useState("")
@@ -52,17 +54,17 @@ export function AddVariableModal({ isOpen, onClose, onAdd }: AddVariableModalPro
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="w-96 max-w-sm">
         <DialogHeader>
-          <DialogTitle>Add Variable</DialogTitle>
+          <DialogTitle>{t('editor.addVariable.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Variable Name</label>
-            <Input type="text" placeholder="e.g. user_role" value={name} onChange={(e) => setName(e.target.value)} />
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('editor.addVariable.name')}</label>
+            <Input type="text" placeholder={t('editor.addVariable.namePlaceholder')} value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('editor.addVariable.type')}</label>
             <Select value={type} onValueChange={(value: typeof type) => setType(value)}>
               <SelectTrigger>
                 <SelectValue />
@@ -77,10 +79,10 @@ export function AddVariableModal({ isOpen, onClose, onAdd }: AddVariableModalPro
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Default Value</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('editor.addVariable.defaultValue')}</label>
             <Input
               type="text"
-              placeholder="Optional default value"
+              placeholder={t('editor.addVariable.defaultValuePlaceholder')}
               value={defaultValue}
               onChange={(e) => setDefaultValue(e.target.value)}
             />
@@ -89,9 +91,9 @@ export function AddVariableModal({ isOpen, onClose, onAdd }: AddVariableModalPro
 
         <div className="flex justify-end space-x-3 mt-6">
           <Button variant="ghost" onClick={handleClose}>
-            Cancel
+            {t('editor.addVariable.cancel')}
           </Button>
-          <Button onClick={handleSubmit} className="bg-black hover:bg-gray-800">Add Variable</Button>
+          <Button onClick={handleSubmit} className="bg-black hover:bg-gray-800">{t('editor.addVariable.add')}</Button>
         </div>
       </DialogContent>
     </Dialog>

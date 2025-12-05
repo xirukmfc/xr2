@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useNotification } from "@/components/notification-provider"
+import { useLocale } from "@/contexts/locale-context"
 
 interface NewApiKeyModalProps {
   isOpen: boolean
@@ -20,6 +21,7 @@ interface NewApiKeyModalProps {
 }
 
 export function NewApiKeyModal({ isOpen, onClose, onCreateApiKey }: NewApiKeyModalProps) {
+  const { t } = useLocale()
   const [step, setStep] = useState<"form" | "success">("form")
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
@@ -70,43 +72,43 @@ export function NewApiKeyModal({ isOpen, onClose, onCreateApiKey }: NewApiKeyMod
       <DialogContent className="sm:max-w-lg md:max-w-xl">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle>{step === "form" ? "Create New API Key" : "API Key Created"}</DialogTitle>
+            <DialogTitle>{step === "form" ? t('apiKeys.modal.create') : "API Key Created"}</DialogTitle>
           </div>
         </DialogHeader>
 
         {step === "form" ? (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="name">API Key Name</Label>
+              <Label htmlFor="name">{t('apiKeys.modal.name')}</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Production API Key"
+                placeholder={t('apiKeys.modal.namePlaceholder')}
                 required
               />
               <p className="text-sm text-slate-500 mt-1">
-                Choose a descriptive name to help you identify this key later.
+                {t('apiKeys.modal.nameHelper')}
               </p>
             </div>
 
             <div>
-              <Label htmlFor="description">Description (Optional)</Label>
+              <Label htmlFor="description">{t('apiKeys.modal.description')}</Label>
               <Input
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="What will this key be used for?"
+                placeholder={t('apiKeys.modal.descriptionPlaceholder')}
               />
             </div>
 
 
             <div className="flex justify-end space-x-2 pt-4">
               <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
-                Cancel
+                {t('apiKeys.modal.cancel')}
               </Button>
               <Button type="submit" disabled={!name.trim() || loading} className="bg-black hover:bg-gray-800">
-                {loading ? "Creating..." : "Create API Key"}
+                {loading ? "Creating..." : t('apiKeys.modal.create_button')}
               </Button>
             </div>
           </form>

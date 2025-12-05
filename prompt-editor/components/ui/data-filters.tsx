@@ -3,6 +3,7 @@
 import {Search} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {ReactNode} from "react"
+import {useLocale} from "@/contexts/locale-context"
 
 interface FilterOption {
     key: string
@@ -43,6 +44,8 @@ export function DataFilters({
                                 customActionButton, // Custom button
                                 onNewPromptClick, // Add callback for creating prompt
                             }: DataFiltersProps) {
+    const { t } = useLocale()
+
     return (
         <div className="">
             <div className="flex items-center justify-between space-x-4">
@@ -88,7 +91,7 @@ export function DataFilters({
                             variant="primary"
                             className="h-[35px]"
                         >
-                            + New Prompt
+                            + {t('prompts.newPrompt')}
                         </Button>
                     </div>
                 )}

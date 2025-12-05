@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Plus, Palette } from "lucide-react"
+import { useLocale } from "@/contexts/locale-context"
 
 // Minimal tag type from API
 type ApiTag = { id: string; name: string; color?: string }
@@ -47,6 +48,7 @@ export function TagInput({
   myTags = [],
   placeholder = "Add tag..."
 }: TagInputProps) {
+  const { t } = useLocale()
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [showColorPicker, setShowColorPicker] = useState(false)
@@ -283,7 +285,7 @@ export function TagInput({
                 <div className="p-3 border-t border-gray-100">
                   <div className="flex items-center gap-2 mb-2">
                     <Palette className="w-4 h-4 text-gray-600" />
-                    <span className="text-sm font-medium">Choose color for "{suggestions.searchQuery}"</span>
+                    <span className="text-sm font-medium">{t('editor.createTag.chooseColor')} "{suggestions.searchQuery}"</span>
                   </div>
 
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -293,8 +295,8 @@ export function TagInput({
                         type="button"
                         onClick={() => setSelectedColor(color)}
                         className={`w-6 h-6 rounded-full border-2 transition-all ${
-                          selectedColor === color 
-                            ? 'border-gray-800 ring-2 ring-blue-200' 
+                          selectedColor === color
+                            ? 'border-gray-800 ring-2 ring-blue-200'
                             : 'border-gray-200 hover:border-gray-400'
                         }`}
                         style={{ backgroundColor: color }}
@@ -310,7 +312,7 @@ export function TagInput({
                       disabled={isCreating}
                       className="flex-1 h-7 text-xs"
                     >
-                      {isCreating ? "Creating..." : "Create Tag"}
+                      {isCreating ? "Creating..." : t('editor.createTag.create')}
                     </Button>
                     <Button
                       type="button"
@@ -319,7 +321,7 @@ export function TagInput({
                       onClick={hideCreateForm}
                       className="h-7 text-xs"
                     >
-                      Cancel
+                      {t('editor.createTag.cancel')}
                     </Button>
                   </div>
                 </div>
@@ -331,7 +333,7 @@ export function TagInput({
 
       <div className="mt-1 text-[11px] text-gray-500">
         {myTags && myTags.length > 0
-          ? `${myTags.length} tags available • Type to search or create new`
+          ? `${myTags.length} ${t('editor.tagsInput.available')} • ${t('editor.tagsInput.typeToSearch')}`
           : myTags && Array.isArray(myTags) && myTags.length === 0
             ? "No tags found • Type to create your first tag"
             : "Loading tags..."}

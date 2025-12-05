@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Progress } from "@/components/ui/progress"
 import { getUserLimits } from "@/lib/api"
 import { useDataPreloader } from "@/lib/preload-data"
+import { useLocale } from "@/contexts/locale-context"
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed'
 
@@ -79,6 +80,7 @@ export function Sidebar() {
   const { preloadPageData } = useDataPreloader()
   const [limits, setLimits] = useState<UserLimits | null>(null)
   const [limitsLoading, setLimitsLoading] = useState(true)
+  const { locale, setLocale } = useLocale()
 
   // Initialize collapse state from localStorage
   useEffect(() => {
@@ -135,12 +137,18 @@ export function Sidebar() {
     notifySidebarCollapse(newCollapsedState)
   }
 
+  const toggleLanguage = () => {
+    setLocale(locale === 'en' ? 'ru' : 'en')
+  }
+
+  const { t } = useLocale()
+
   const navigationItems = [
-    { name: "Prompts", href: "/prompts", icon: MessageSquare, count: promptsCount },
-    { name: "Analytics", href: "/analytics", icon: BarChart3 },
-    { name: "API Keys", href: "/api-keys", icon: Key, count: apiKeysCount },
-    { name: "Api Logs", href: "/logs", icon: FileText },
-    { name: "Settings", href: "/settings", icon: Settings },
+    { name: t('sidebar.prompts'), href: "/prompts", icon: MessageSquare, count: promptsCount },
+    { name: t('sidebar.analytics'), href: "/analytics", icon: BarChart3 },
+    { name: t('sidebar.apiKeys'), href: "/api-keys", icon: Key, count: apiKeysCount },
+    { name: t('sidebar.apiLogs'), href: "/logs", icon: FileText },
+    { name: t('sidebar.settings'), href: "/settings", icon: Settings },
   ]
 
   return (
@@ -178,12 +186,12 @@ export function Sidebar() {
             {limits && !limits.is_superuser && !limits.limits.is_superuser && !limitsLoading && (
               <TooltipContent side="right" className="w-64">
                 <div className="space-y-3">
-                  <div className="text-sm font-medium text-slate-900">Usage Limits</div>
-                  
+                  <div className="text-sm font-medium text-slate-900">{t('sidebar.usageLimits')}</div>
+
                   {/* Prompts Limit */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-600">Available Prompts</span>
+                      <span className="text-slate-600">{t('sidebar.availablePrompts')}</span>
                       <span className="text-slate-700 font-medium">
                         {limits.limits.prompts.current} / {limits.limits.prompts.max}
                       </span>
@@ -197,14 +205,14 @@ export function Sidebar() {
                       }
                     />
                     <div className="text-xs text-slate-500">
-                      {limits.limits.prompts.max - limits.limits.prompts.current} remaining
+                      {limits.limits.prompts.max - limits.limits.prompts.current} {t('sidebar.remaining')}
                     </div>
                   </div>
 
                   {/* API Requests Limit */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-600">Daily API Requests</span>
+                      <span className="text-slate-600">{t('sidebar.dailyApiRequests')}</span>
                       <span className="text-slate-700 font-medium">
                         {limits.limits.api_requests.current} / {limits.limits.api_requests.max}
                       </span>
@@ -218,7 +226,7 @@ export function Sidebar() {
                       }
                     />
                     <div className="text-xs text-slate-500">
-                      Resets at {new Date(limits.limits.api_requests.reset_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {t('sidebar.resetsAt')} {new Date(limits.limits.api_requests.reset_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
                 </div>
@@ -273,6 +281,20 @@ export function Sidebar() {
 
       {/* Bottom Actions */}
       <div className="absolute bottom-4 left-4 right-4 space-y-2">
+        {/* Language Switcher */}
+        <button
+          onClick={toggleLanguage}
+          className={`flex items-center p-2 rounded-md transition-colors group text-slate-600 hover:bg-slate-50 hover:text-slate-900 ${
+            isCollapsed
+              ? "w-8 h-8 justify-center"
+              : "w-full justify-start space-x-2"
+          }`}
+          title={locale === 'en' ? 'Switch to Russian' : 'Переключить на английский'}
+        >
+          <span className="text-sm">
+            {locale.toUpperCase()}
+          </span>
+        </button>
         {/* Full Docs Button */}
         <a
           href="https://xr2.gitbook.io/docs"
@@ -286,7 +308,7 @@ export function Sidebar() {
           title="Full Documentation"
         >
           <BookOpen className="w-4 h-4" />
-          {!isCollapsed && <span className="text-sm">Full Docs</span>}
+          {!isCollapsed && <span className="text-sm">{t('sidebar.fullDocs')}</span>}
         </a>
         {/* Logout Button */}
         <button
@@ -296,10 +318,10 @@ export function Sidebar() {
               ? "w-8 h-8 justify-center"
               : "w-full justify-start space-x-2"
           }`}
-          title="Logout"
+          title={t('sidebar.logout')}
         >
           <LogOut className="w-4 h-4" />
-          {!isCollapsed && <span className="text-sm">Logout</span>}
+          {!isCollapsed && <span className="text-sm">{t('sidebar.logout')}</span>}
         </button>
         <button
           onClick={handleToggleCollapse}
@@ -308,14 +330,14 @@ export function Sidebar() {
               ? "w-8 h-8 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               : "w-full h-8 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
           }`}
-          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={isCollapsed ? "Expand sidebar" : t('sidebar.collapse')}
         >
           <div className="flex flex-col space-y-0.5">
             <div className="w-3 h-0.5 bg-current rounded"></div>
             <div className="w-3 h-0.5 bg-current rounded"></div>
             <div className="w-3 h-0.5 bg-current rounded"></div>
           </div>
-          {!isCollapsed && <span className="ml-2 text-sm">Collapse</span>}
+          {!isCollapsed && <span className="ml-2 text-sm">{t('sidebar.collapse')}</span>}
         </button>
       </div>
     </div>

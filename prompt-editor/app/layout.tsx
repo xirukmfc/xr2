@@ -8,6 +8,7 @@ import {PromptsProvider} from '@/components/prompts-context'
 import {WorkspaceProvider} from "@/components/workspace-context"
 import {CountsProvider} from '@/components/counts-context'
 import {AuthProvider} from "@/contexts/auth-context"
+import {LocaleProvider} from "@/contexts/locale-context"
 import {DataPreloader} from "@/lib/preload-data"
 import "./globals.css"
 
@@ -116,17 +117,19 @@ export default function RootLayout({
         </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
-          <AuthProvider>
-            <WorkspaceProvider>
-              <PromptsProvider>
-                <CountsProvider>
-                  <DataPreloader>
-                    <ClientLayout>{children}</ClientLayout>
-                  </DataPreloader>
-                </CountsProvider>
-              </PromptsProvider>
-            </WorkspaceProvider>
-          </AuthProvider>
+          <LocaleProvider>
+            <AuthProvider>
+              <WorkspaceProvider>
+                <PromptsProvider>
+                  <CountsProvider>
+                    <DataPreloader>
+                      <ClientLayout>{children}</ClientLayout>
+                    </DataPreloader>
+                  </CountsProvider>
+                </PromptsProvider>
+              </WorkspaceProvider>
+            </AuthProvider>
+          </LocaleProvider>
         </ThemeProvider>
       </body>
         </html>
