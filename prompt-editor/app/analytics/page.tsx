@@ -184,7 +184,7 @@ function AnalyticsPageContent() {
 
     for (let i = 0; i < customFunnelSteps.length; i++) {
       const stepName = customFunnelSteps[i];
-      const stepLower = stepName.toLowerCase();
+      const stepLower = stepName?.toLowerCase() || '';
 
       // Get count using aliases
       const stepVariants = aliases[stepLower] || [stepLower];
