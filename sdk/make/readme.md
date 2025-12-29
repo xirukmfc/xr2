@@ -41,6 +41,7 @@ Retrieves prompt content by slug.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | slug | string | Yes | Unique prompt identifier |
+| source_name | string | No | Auto-filled as `make_sdk` (identifier of the caller) |
 | version_number | integer | No | Specific version to retrieve |
 | status | select | No | Filter by status (production, testing, draft, etc.) |
 
@@ -61,9 +62,13 @@ Sends usage events for analytics.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | trace_id | string | Yes | Trace ID from Get Prompt response |
-| event_name | string | Yes | Event name (e.g., "purchase", "signup") |
-| category | select | Yes | Event category (conversion, revenue, engagement, custom) |
-| fields | collection | No | Additional event data |
+| event_name | string | Yes | Event name defined in xR2 Analytics |
+| source_name | string | No | Auto-filled as `make_sdk` (can override if needed) |
+| user_id | string | No | Optional user identifier |
+| session_id | string | No | Optional session identifier |
+| value | number | No | Numeric value (e.g., revenue) |
+| currency | string | No | Currency for value |
+| metadata | collection | No | Custom fields defined in the event metadata schema |
 
 ## Example Scenario
 

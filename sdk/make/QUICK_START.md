@@ -102,11 +102,13 @@
 ### Тест модулей:
 1. Создайте новый Scenario
 2. Добавьте xR2 → Get Prompt
-3. Введите slug существующего промпта
+3. Введите slug существующего промпта (source_name подставится автоматически как `make_sdk`)
 4. Run once → проверьте output
 5. Добавьте xR2 → Track Event
 6. Замапьте trace_id из Get Prompt
-7. Run once → должно вернуть success: true
+7. Укажите event_name (из настроек Analytics); source_name заполнится `make_sdk` если не менять
+8. При необходимости заполните user_id/session_id/value/currency/metadata
+9. Run once → должно вернуть статус success и event_id
 
 ---
 

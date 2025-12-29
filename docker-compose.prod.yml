@@ -10,8 +10,6 @@ services:
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
       - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
-    ports:
-      - "5432:5432"
     networks:
       - xr2_network
     restart: unless-stopped
@@ -28,8 +26,6 @@ services:
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-***REMOVED_REDIS_PWD***}
     volumes:
       - redis_data_prod:/data
-    ports:
-      - "6379:6379"
     networks:
       - xr2_network
     restart: unless-stopped
@@ -113,8 +109,6 @@ services:
       DB_USER: xr2_user
       DB_PASSWORD: ${POSTGRES_PASSWORD:-***REMOVED_PG_PWD***}
       DB_NAME: xr2_db
-    ports:
-      - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -147,8 +141,6 @@ services:
     environment:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
-    ports:
-      - "3000:3000"
     depends_on:
       - app
     networks:
@@ -182,8 +174,6 @@ services:
     environment:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
-    ports:
-      - "3001:3001"
     networks:
       - xr2_network
     restart: unless-stopped

@@ -136,8 +136,8 @@
 ### modules/trackEvent.json
 ```json
 {
-    "parameters": [...],        // trace_id, event_name, category, fields
-    "interface": [...],         // success, event_id, message
+    "parameters": [...],        // trace_id, event_name, source_name, user/session/value/currency, metadata
+    "interface": [...],         // status, event_id, trace_id, event_name, timestamp, is_duplicate
     "communication": {...}      // POST /events
 }
 ```

@@ -11,7 +11,14 @@ export class XR2Api implements ICredentialType {
             type: 'string',
             typeOptions: { password: true },
             default: '',
-            description: 'Product API key for xR2',
+            description: 'Product API key for xR2 (starts with xr2_prod_)',
+        },
+        {
+            displayName: 'Base URL',
+            name: 'baseUrl',
+            type: 'string',
+            default: 'https://xr2.uk',
+            description: 'API base URL (use http://localhost:8000 for local development)',
         },
     ];
 

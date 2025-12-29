@@ -19,7 +19,7 @@ Create credentials of type "xR2 API" and paste your Product API Key.
 ## Nodes
 
 - XR2: Prompt → Get
-  - Inputs: `slug`, `sourceName`, optional `versionNumber`, `status`
+  - Inputs: `slug`, optional `versionNumber`, `status` (source_name автоматически = `n8n_sdk`)
   - Output: JSON of PromptContentResponse including `trace_id`
 
 ## Configuration

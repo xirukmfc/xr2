@@ -9,6 +9,127 @@ export interface RequestOptions {
     json?: boolean;
 }
 
+function handleXr2Error(this: any, error: any): never {
+    // Extract status code from various possible locations
+    const rawStatusCode = error.httpCode || error.statusCode || error.status ||
+                         error.response?.statusCode || error.response?.status;
+    const statusCode = rawStatusCode !== undefined && rawStatusCode !== null
+        ? Number(rawStatusCode)
+        : undefined;
+    const statusForMessage = Number.isFinite(statusCode) ? statusCode : rawStatusCode;
+
+    // Extract error details from response body - check multiple locations
+    let apiResponse: any = null;
+
+    // n8n puts the response in error.errorResponse
+    const possibleBodies = [
+        error.errorResponse,
+        error.response?.body,
+        error.cause?.response?.body,
+        error.body,
+        error.data,
+    ];
+
+    for (const body of possibleBodies) {
+        if (body) {
+            try {
+                apiResponse = typeof body === 'string' ? JSON.parse(body) : body;
+                break;
+            } catch {
+                // continue to next
+            }
+        }
+    }
+
+    // Extract detailed error message from API response
+    let apiErrorMessage = '';
+    let apiSuggestion = '';
+
+    if (apiResponse?.detail) {
+        const detail = apiResponse.detail;
+        if (typeof detail === 'object') {
+            apiErrorMessage = detail.message || detail.error || '';
+            apiSuggestion = detail.suggestion || '';
+            if (detail.available_statuses) {
+                apiSuggestion += `\nAvailable statuses: ${detail.available_statuses.join(', ')}`;
+            }
+            if (detail.slug) {
+                apiErrorMessage = `[${detail.slug}] ${apiErrorMessage}`;
+            }
+        } else {
+            apiErrorMessage = String(detail);
+        }
+    }
+
+    // Build error message
+    let errorMessage = '';
+    let suggestions = '';
+
+    if (statusCode === 401 || statusCode === 403) {
+        errorMessage = '🔐 Authentication Failed';
+        suggestions = apiErrorMessage || 'Please verify:\n' +
+            '✓ Your API key is correct in n8n credentials\n' +
+            '✓ The API key starts with "xr2_prod_"\n' +
+            '✓ The API key is active in your xR2 account';
+    } else if (statusCode === 404) {
+        errorMessage = '❌ ' + (apiErrorMessage || 'Resource Not Found');
+        suggestions = apiSuggestion || 'Please check:\n' +
+            '✓ The prompt slug is correct (no typos)\n' +
+            '✓ The prompt has a deployed (production) version\n' +
+            '✓ You have access to this resource in your workspace';
+    } else if (statusCode === 429) {
+        errorMessage = '⏱️ Rate Limit Exceeded';
+        suggestions = apiErrorMessage || 'Too many requests. Please wait a moment and try again.';
+    } else if (statusCode && statusCode >= 500) {
+        errorMessage = '🔧 Server Error';
+        suggestions = apiErrorMessage || 'xR2 server is experiencing issues. Please try again in a few moments.';
+    } else {
+        errorMessage = '⚠️ ' + (apiErrorMessage || error.message || 'Request Failed');
+        suggestions = apiSuggestion || '';
+    }
+
+    // Combine message with details
+    let fullMessage = errorMessage;
+
+    if (suggestions) {
+        fullMessage += `\n\n💡 ${suggestions}`;
+    }
+
+    if (statusForMessage !== undefined) {
+        fullMessage += `\n\n🔍 HTTP Status: ${statusForMessage}`;
+    }
+
+    // Create enhanced error object
+    const enhancedError = {
+        ...error,
+        message: fullMessage,
+        httpCode: statusForMessage || 'unknown',
+        description: fullMessage,
+        statusCode: statusForMessage,
+    };
+
+    throw new NodeApiError(this.getNode(), enhancedError as JsonObject);
+}
+
+export async function xr2GetRequest(this: any, options: RequestOptions) {
+    const requestOptions = {
+        method: 'GET',
+        json: true,
+        ...options,
+    };
+
+    try {
+        const response = await this.helpers.requestWithAuthentication.call(
+            this,
+            'xr2Api',
+            requestOptions,
+        );
+        return response;
+    } catch (error: any) {
+        throw handleXr2Error.call(this, error);
+    }
+}
+
 export async function xr2Request(this: any, options: RequestOptions) {
     const requestOptions = {
         method: 'POST',
@@ -17,7 +138,6 @@ export async function xr2Request(this: any, options: RequestOptions) {
     };
 
     try {
-        // Use requestWithAuthentication to automatically inject credentials
         const response = await this.helpers.requestWithAuthentication.call(
             this,
             'xr2Api',
@@ -25,74 +145,6 @@ export async function xr2Request(this: any, options: RequestOptions) {
         );
         return response;
     } catch (error: any) {
-
-        // Extract status code from various possible locations
-        const statusCode = error.statusCode || error.status || error.httpCode ||
-                          error.response?.statusCode || error.response?.status;
-
-        // Extract error details from response
-        let apiDetails = '';
-        if (error.response?.body) {
-            const body = typeof error.response.body === 'string'
-                ? error.response.body
-                : JSON.stringify(error.response.body, null, 2);
-            apiDetails = body;
-        } else if (error.cause?.response?.body) {
-            apiDetails = JSON.stringify(error.cause.response.body, null, 2);
-        }
-
-        // Enhance error messages based on status code
-        let errorMessage = '';
-        let suggestions = '';
-
-        if (statusCode === 401 || statusCode === 403) {
-            errorMessage = '🔐 Authentication Failed';
-            suggestions = 'Please verify:\n' +
-                '✓ Your API key is correct in n8n credentials\n' +
-                '✓ The API key starts with "xr2_prod_"\n' +
-                '✓ The API key is active in your xR2 account';
-        } else if (statusCode === 404) {
-            errorMessage = '❌ Prompt Not Found';
-            suggestions = 'Please check:\n' +
-                '✓ The prompt slug is correct (no typos)\n' +
-                '✓ The prompt exists in your xR2 dashboard\n' +
-                '✓ The prompt has at least one published version\n' +
-                '✓ You have access to this prompt in your workspace\n\n' +
-                '💡 Tip: Available prompts can be viewed at https://xr2.uk/prompts';
-        } else if (statusCode === 429) {
-            errorMessage = '⏱️ Rate Limit Exceeded';
-            suggestions = 'Too many requests. Please wait a moment and try again.';
-        } else if (statusCode && statusCode >= 500) {
-            errorMessage = '🔧 Server Error';
-            suggestions = 'xR2 server is experiencing issues. Please try again in a few moments.\n' +
-                'If the problem persists, contact support at https://xr2.uk/support';
-        } else {
-            errorMessage = '⚠️ Request Failed';
-            suggestions = error.message || 'An unexpected error occurred';
-        }
-
-        // Combine message with details
-        let fullMessage = `${errorMessage}\n\n${suggestions}`;
-
-        if (apiDetails) {
-            fullMessage += `\n\n📋 API Response:\n${apiDetails}`;
-        }
-
-        if (statusCode) {
-            fullMessage += `\n\n🔍 HTTP Status: ${statusCode}`;
-        }
-
-        // Create enhanced error object
-        const enhancedError = {
-            ...error,
-            message: fullMessage,
-            httpCode: statusCode || 'unknown',
-            description: fullMessage,
-            statusCode: statusCode,
-        };
-
-        throw new NodeApiError(this.getNode(), enhancedError as JsonObject);
+        throw handleXr2Error.call(this, error);
     }
 }
-
-

@@ -263,7 +263,7 @@
 {
     "name": "trackEvent",
     "label": "Track Event",
-    "description": "Send a prompt usage event for analytics. Use the trace_id from the Get Prompt response.",
+    "description": "Track a business event linked to a prompt trace_id. Use trace_id from the Get Prompt response.",
     "connection": "xr2_api_key",
     "parameters": [
         {
@@ -277,69 +277,60 @@
             "name": "event_name",
             "type": "text",
             "label": "Event Name",
-            "help": "Event name (e.g., conversion, purchase, click, signup)",
+            "help": "Event name configured in xR2 Analytics (e.g., signup, purchase_completed).",
             "required": true
         },
         {
-            "name": "category",
-            "type": "select",
-            "label": "Category",
-            "help": "Event category",
-            "required": true,
-            "options": [
-                {"label": "Conversion", "value": "conversion"},
-                {"label": "Revenue", "value": "revenue"},
-                {"label": "Engagement", "value": "engagement"},
-                {"label": "Custom", "value": "custom"}
-            ]
+            "name": "source_name",
+            "type": "text",
+            "label": "Source Name",
+            "help": "Where the event happened (web_app, chatbot, workspace, etc.). Auto-fills to make_sdk if пусто.",
+            "required": false
         },
         {
-            "name": "fields",
+            "name": "user_id",
+            "type": "text",
+            "label": "User ID",
+            "help": "Optional user identifier.",
+            "required": false
+        },
+        {
+            "name": "session_id",
+            "type": "text",
+            "label": "Session ID",
+            "help": "Optional session identifier.",
+            "required": false
+        },
+        {
+            "name": "value",
+            "type": "number",
+            "label": "Value",
+            "help": "Numeric value for the event (e.g., revenue).",
+            "required": false
+        },
+        {
+            "name": "currency",
+            "type": "text",
+            "label": "Currency",
+            "help": "Currency code for value (USD, EUR, etc.).",
+            "required": false
+        },
+        {
+            "name": "metadata",
             "type": "collection",
-            "label": "Event Fields",
-            "help": "Additional event data (key-value pairs)",
+            "label": "Metadata",
+            "help": "Custom fields defined in the event metadata schema.",
             "required": false,
-            "spec": [
-                {
-                    "name": "amount",
-                    "type": "number",
-                    "label": "Amount",
-                    "help": "Amount (for revenue events)"
-                },
-                {
-                    "name": "currency",
-                    "type": "text",
-                    "label": "Currency",
-                    "help": "Currency code (USD, EUR, etc.)"
-                },
-                {
-                    "name": "product_id",
-                    "type": "text",
-                    "label": "Product ID"
-                },
-                {
-                    "name": "user_id",
-                    "type": "text",
-                    "label": "User ID"
-                },
-                {
-                    "name": "custom_field_1",
-                    "type": "text",
-                    "label": "Custom Field 1"
-                },
-                {
-                    "name": "custom_field_2",
-                    "type": "text",
-                    "label": "Custom Field 2"
-                }
-            ]
+            "spec": []
         }
     ],
     "interface": [
-        {"name": "success", "type": "boolean", "label": "Success"},
+        {"name": "status", "type": "text", "label": "Status"},
         {"name": "event_id", "type": "text", "label": "Event ID"},
         {"name": "trace_id", "type": "text", "label": "Trace ID"},
-        {"name": "message", "type": "text", "label": "Message"}
+        {"name": "event_name", "type": "text", "label": "Event Name"},
+        {"name": "timestamp", "type": "date", "label": "Timestamp"},
+        {"name": "is_duplicate", "type": "boolean", "label": "Is Duplicate"}
     ],
     "communication": {
         "url": "/events",
@@ -348,8 +339,12 @@
             "type": "json",
             "trace_id": "{{parameters.trace_id}}",
             "event_name": "{{parameters.event_name}}",
-            "category": "{{parameters.category}}",
-            "fields": "{{ifempty(parameters.fields, emptyobject)}}"
+            "source_name": "{{ifempty(parameters.source_name, \"make_sdk\")}}",
+            "user_id": "{{if(parameters.user_id, parameters.user_id)}}",
+            "session_id": "{{if(parameters.session_id, parameters.session_id)}}",
+            "value": "{{if(parameters.value, parameters.value)}}",
+            "currency": "{{if(parameters.currency, parameters.currency)}}",
+            "metadata": "{{ifempty(parameters.metadata, emptyobject)}}"
         },
         "response": {
             "output": "{{body}}"
@@ -358,11 +353,14 @@
     "samples": {
         "parameters": {
             "trace_id": "evt_abc123_1634567890_xyz",
-            "event_name": "purchase",
-            "category": "revenue",
-            "fields": {
-                "amount": 99.99,
-                "currency": "USD"
+            "event_name": "purchase_completed",
+            "source_name": "make_sdk",
+            "user_id": "user_123",
+            "value": 99.99,
+            "currency": "USD",
+            "metadata": {
+                "order_id": "order_456",
+                "plan": "premium"
             }
         }
     }
@@ -371,26 +369,14 @@
 
 ### Особенности этого модуля:
 
-#### **Collection parameter** (`fields`)
-Это группа связанных полей:
-```json
-{
-    "name": "fields",
-    "type": "collection",
-    "spec": [
-        {"name": "amount", "type": "number", "label": "Amount"},
-        {"name": "currency", "type": "text", "label": "Currency"}
-    ]
-}
-```
-
-В UI пользователь увидит группу полей для ввода дополнительных данных события.
+#### **Collection parameter** (`metadata`)
+Позволяет передавать любые дополнительные поля, определенные в схеме события в xR2 Analytics. `spec: []` оставляет структуру динамической.
 
 #### **IML функция ifempty**
 ```json
-"fields": "{{ifempty(parameters.fields, emptyobject)}}"
+"metadata": "{{ifempty(parameters.metadata, emptyobject)}}"
 ```
-Если `fields` пустой - отправит пустой объект `{}`, иначе - данные пользователя.
+Если `metadata` пустой - отправит пустой объект `{}`, иначе - данные пользователя.
 
 3. Сохраните модуль
 
@@ -421,10 +407,11 @@
 1. Добавьте в сценарий модуль **xR2** → **Track Event**
 2. Замапьте `trace_id` из предыдущего модуля Get Prompt
 3. Заполните:
-   - Event Name: `test_event`
-   - Category: `custom`
+   - Event Name: `test_event` (или имя из настроек Analytics)
+   - Source Name: можно оставить пустым (по умолчанию `make_sdk`) или указать свой идентификатор
+   - При необходимости: user_id, session_id, value/currency, metadata
 4. Нажмите **Run once**
-5. Должно вернуться: `{"success": true, "event_id": "...", ...}`
+5. Должно вернуться: `{"status": "success", "event_id": "...", "is_duplicate": false, ...}`
 
 ---
 
@@ -525,8 +512,8 @@ https://www.make.com/en/integrations/xr2
 - ✅ Модуль Get Prompt: parameters определены (slug, version_number, status)
 - ✅ Модуль Get Prompt: interface содержит все output поля
 - ✅ Модуль Get Prompt: communication.body.type = "json"
-- ✅ Модуль Track Event: все параметры и interface определены
-- ✅ Модуль Track Event: collection parameter `fields` с spec
+- ✅ Модуль Track Event: параметры и interface соответствуют API
+- ✅ Модуль Track Event: collection parameter `metadata` со свободной схемой
 - ✅ Оба модуля протестированы на реальных данных
 - ✅ Connection test проходит успешно
 
@@ -623,7 +610,8 @@ https://www.make.com/en/integrations/xr2
 4. xR2 - Track Event
    - trace_id: {{2.trace_id}}
    - event_name: "ai_response_generated"
-   - category: "engagement"
+   - source_name: "web_app"
+   - metadata: {"model": "gpt-4o-mini"}
    ↓
 5. Webhook Response
    - Body: {{3.completion}}

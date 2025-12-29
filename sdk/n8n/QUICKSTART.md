@@ -38,6 +38,16 @@ Then restart n8n.
 4. Paste your API key
 5. Click **Save**
 
+## Available Operations
+
+The xR2 node supports 3 operations:
+
+| Resource | Operation | Description |
+|----------|-----------|-------------|
+| API Key | Check | Validate API key and get username |
+| Prompt | Get | Fetch a prompt by slug |
+| Event | Track | Send an event with trace_id |
+
 ## Your First Workflow
 
 ### Step 1: Create a New Workflow
@@ -45,29 +55,55 @@ Then restart n8n.
 1. Click **+ New Workflow**
 2. Add a **Manual Trigger** node
 
-### Step 2: Add xR2 Get Prompt Node
+### Step 2: Check API Key (Optional)
 
 1. Click **+** to add a node
 2. Search for "xR2"
-3. Select **xR2** node
-4. Configure:
+3. Configure:
+   - **Resource**: API Key
+   - **Operation**: Check
+4. Run to verify your credentials work
+
+Output:
+```json
+{
+  "ok": true,
+  "user": "your_username"
+}
+```
+
+### Step 3: Add xR2 Get Prompt Node
+
+1. Add another **xR2** node
+2. Configure:
    - **Credentials**: Select your xR2 API credential
    - **Resource**: Prompt
    - **Operation**: Get
    - **Slug**: `your-prompt-slug` (replace with your actual prompt)
 
-### Step 3: Test It
-
-1. Click **Test workflow**
-2. You should see output like:
+Output:
 ```json
 {
-  "content": "Your prompt content...",
-  "trace_id": "550e8400-e29b-...",
-  "variables": {...},
+  "slug": "your-prompt-slug",
+  "user_prompt": "Your prompt content...",
+  "trace_id": "evt_abc123_1634567890_xyz",
+  "variables": [...],
   "model_config": {...}
 }
 ```
+
+### Step 4: Track an Event
+
+1. Add another **xR2** node
+2. Configure:
+   - **Resource**: Event
+   - **Operation**: Track
+   - **Trace ID**: `{{ $('xR2').item.json.trace_id }}`
+   - **Event Name**: `workflow_completed`
+   - **User ID**: (optional) `user_123`
+   - **Value**: (optional) `99.99` for revenue tracking
+   - **Currency**: (optional) `USD`
+   - **Metadata**: `{"step": "completed", "workflow_id": "123"}`
 
 ## Example: Use with OpenAI
 
@@ -91,7 +127,7 @@ Configure xR2 node as above.
        "messages": [
          {
            "role": "system",
-           "content": "{{ $('xR2').item.json.content }}"
+           "content": "{{ $('xR2').item.json.system_prompt }}"
          },
          {
            "role": "user",
@@ -109,8 +145,7 @@ Configure xR2 node as above.
    - **Operation**: Track
    - **Trace ID**: `{{ $('xR2').item.json.trace_id }}`
    - **Event Name**: `openai_completion`
-   - **Category**: `llm`
-   - **Fields**:
+   - **Metadata**:
      ```json
      {
        "model": "{{ $('xR2').item.json.model_config.model_name }}",
@@ -118,9 +153,18 @@ Configure xR2 node as above.
      }
      ```
 
-### Step 4: Test the Complete Flow
+## Event Tracking Parameters
 
-Click **Test workflow** and verify all nodes execute successfully.
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| Trace ID | Yes | From Get Prompt response |
+| Event Name | Yes | Event name defined in dashboard |
+| Source Name | No | Auto `n8n_sdk` (not editable) |
+| User ID | No | User identifier for tracking |
+| Session ID | No | Session identifier for analytics |
+| Value | No | Numeric value for revenue tracking |
+| Currency | No | Currency code (USD, EUR, etc.) |
+| Metadata | No | Custom JSON fields |
 
 ## Common Use Cases
 
@@ -142,25 +186,11 @@ Click **Test workflow** and verify all nodes execute successfully.
   → [Webhook Response]
 ```
 
-### 3. Multi-Language Support
+### 3. Revenue Tracking
 
 ```
-[Manual Trigger]
-  → [xR2: Get Prompt slug="greeting-en"]
-  → [Switch: Based on language]
-      ├─ EN → [xR2: Get Prompt slug="greeting-en"]
-      ├─ ES → [xR2: Get Prompt slug="greeting-es"]
-      └─ FR → [xR2: Get Prompt slug="greeting-fr"]
-```
-
-### 4. A/B Testing
-
-```
-[Webhook]
-  → [Function: Random selection]
-  → [Switch]
-      ├─ A → [xR2: Get Prompt slug="version-a"] → [Track: "version_a_used"]
-      └─ B → [xR2: Get Prompt slug="version-b"] → [Track: "version_b_used"]
+[Webhook: Order Completed]
+  → [xR2: Track Event with value=order_total, currency=USD]
 ```
 
 ## Tips
@@ -171,7 +201,7 @@ Use expressions to reference xR2 data:
 
 ```javascript
 // Get the prompt content
-{{ $('xR2').item.json.content }}
+{{ $('xR2').item.json.user_prompt }}
 
 // Get the trace_id
 {{ $('xR2').item.json.trace_id }}
@@ -195,15 +225,6 @@ Add an **IF** node after xR2 to check for errors:
       └─ False → [Send error notification]
 ```
 
-### Debugging
-
-To see the full response:
-
-1. Run the workflow
-2. Click on the xR2 node
-3. Check the **Output** tab
-4. Expand the JSON to see all fields
-
 ## Troubleshooting
 
 ### Node not found
@@ -218,14 +239,7 @@ To see the full response:
 ### Prompt not found
 - Verify the slug exists in xR2
 - Check spelling of the slug
-- Ensure prompt is published
-
-## Next Steps
-
-- Read full documentation: [README.md](./README.md)
-- Learn about testing: [TESTING.md](./TESTING.md)
-- Explore xR2 dashboard: https://xr2.uk
-- Join n8n community: https://community.n8n.io
+- Ensure prompt is published (has production version)
 
 ## Support
 

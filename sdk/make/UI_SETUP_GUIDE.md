@@ -130,25 +130,13 @@ https://xr2.uk/api/v1
 Настройте тест, который проверит работу API ключа:
 
 **Request:**
-- **URL:** `/get-prompt`
-- **Method:** `POST`
-- **Body (JSON):**
-  ```json
-  {
-      "slug": "test",
-      "source_name": "make_connection_test"
-  }
-  ```
+- **URL:** `/check-api-key`
+- **Method:** `GET`
 
 **Response Validation:**
-- **Valid condition:**
-  ```
-  {{if(body.trace_id, true, if(body.detail.error == 'Prompt not found', true, false))}}
-  ```
+- **Valid condition:** `{{body.ok}}`
 
-Это означает: соединение валидно если:
-- Получен `trace_id` (промпт найден) ИЛИ
-- Получена ошибка "Prompt not found" (API работает, просто промпта нет)
+Это означает: соединение валидно если API вернуло `ok: true`.
 
 4. Нажмите **"Save"** или **"Create"**
 
@@ -230,8 +218,8 @@ POST
 {
     "slug": "{{parameters.slug}}",
     "source_name": "make_sdk",
-    "version_number": "{{if(parameters.version_number, parameters.version_number, undefined)}}",
-    "status": "{{if(parameters.status, parameters.status, undefined)}}"
+    "version_number": "{{if(parameters.version_number, parameters.version_number)}}",
+    "status": "{{if(parameters.status, parameters.status)}}"
 }
 ```
 
@@ -313,48 +301,70 @@ POST
 | **Name** | `event_name` |
 | **Type** | `text` |
 | **Label** | `Event Name` |
-| **Help** | `Event name (e.g., conversion, purchase, click, signup)` |
+| **Help** | `Event name configured in xR2 Analytics (e.g., signup, purchase_completed)` |
 | **Required** | ✅ Yes |
 
-#### Параметр 3: Category
+#### Параметр 3: Source Name
 
 | Поле | Значение |
 |------|----------|
-| **Name** | `category` |
-| **Type** | `select` |
-| **Label** | `Category` |
-| **Help** | `Event category` |
-| **Required** | ✅ Yes |
-
-**Options:**
-
-| Label | Value |
-|-------|-------|
-| `Conversion` | `conversion` |
-| `Revenue` | `revenue` |
-| `Engagement` | `engagement` |
-| `Custom` | `custom` |
-
-#### Параметр 4: Event Fields
-
-| Поле | Значение |
-|------|----------|
-| **Name** | `fields` |
-| **Type** | `collection` |
-| **Label** | `Event Fields` |
-| **Help** | `Additional event data (key-value pairs)` |
+| **Name** | `source_name` |
+| **Type** | `text` |
+| **Label** | `Source Name` |
+| **Help** | `Where the event happened (web_app, chatbot, workspace, etc.). Можно оставить пустым — будет make_sdk.` |
 | **Required** | ❌ No |
 
-**Spec для `fields`** (подполя):
+#### Параметр 4: User ID
 
-| Name | Type | Label | Help |
-|------|------|-------|------|
-| `amount` | number | Amount | Amount (for revenue events) |
-| `currency` | text | Currency | Currency code (USD, EUR, etc.) |
-| `product_id` | text | Product ID | |
-| `user_id` | text | User ID | |
-| `custom_field_1` | text | Custom Field 1 | |
-| `custom_field_2` | text | Custom Field 2 | |
+| Поле | Значение |
+|------|----------|
+| **Name** | `user_id` |
+| **Type** | `text` |
+| **Label** | `User ID` |
+| **Help** | `Optional user identifier` |
+| **Required** | ❌ No |
+
+#### Параметр 5: Session ID
+
+| Поле | Значение |
+|------|----------|
+| **Name** | `session_id` |
+| **Type** | `text` |
+| **Label** | `Session ID` |
+| **Help** | `Optional session identifier` |
+| **Required** | ❌ No |
+
+#### Параметр 6: Value
+
+| Поле | Значение |
+|------|----------|
+| **Name** | `value` |
+| **Type** | `number` |
+| **Label** | `Value` |
+| **Help** | `Numeric value (e.g., revenue)` |
+| **Required** | ❌ No |
+
+#### Параметр 7: Currency
+
+| Поле | Значение |
+|------|----------|
+| **Name** | `currency` |
+| **Type** | `text` |
+| **Label** | `Currency` |
+| **Help** | `Currency code for value (USD, EUR, etc.)` |
+| **Required** | ❌ No |
+
+#### Параметр 8: Metadata
+
+| Поле | Значение |
+|------|----------|
+| **Name** | `metadata` |
+| **Type** | `collection` |
+| **Label** | `Metadata` |
+| **Help** | `Custom fields defined in the event schema` |
+| **Required** | ❌ No |
+
+**Spec для `metadata`:** оставьте пустым (`spec: []`), чтобы структура была динамической.
 
 ### 6.3 Communication
 
@@ -373,8 +383,12 @@ POST
 {
     "trace_id": "{{parameters.trace_id}}",
     "event_name": "{{parameters.event_name}}",
-    "category": "{{parameters.category}}",
-    "fields": "{{ifempty(parameters.fields, emptyobject)}}"
+    "source_name": "{{ifempty(parameters.source_name, \"make_sdk\")}}",
+    "user_id": "{{if(parameters.user_id, parameters.user_id)}}",
+    "session_id": "{{if(parameters.session_id, parameters.session_id)}}",
+    "value": "{{if(parameters.value, parameters.value)}}",
+    "currency": "{{if(parameters.currency, parameters.currency)}}",
+    "metadata": "{{ifempty(parameters.metadata, emptyobject)}}"
 }
 ```
 
@@ -382,21 +396,26 @@ POST
 
 | Name | Type | Label |
 |------|------|-------|
-| `success` | boolean | Success |
+| `status` | text | Status |
 | `event_id` | text | Event ID |
 | `trace_id` | text | Trace ID |
-| `message` | text | Message |
+| `event_name` | text | Event Name |
+| `timestamp` | date | Timestamp |
+| `is_duplicate` | boolean | Is Duplicate |
 
 ### 6.5 Samples
 
 ```json
 {
     "trace_id": "evt_abc123_1634567890_xyz",
-    "event_name": "purchase",
-    "category": "revenue",
-    "fields": {
-        "amount": 99.99,
-        "currency": "USD"
+    "event_name": "purchase_completed",
+    "source_name": "make_sdk",
+    "user_id": "user_123",
+    "value": 99.99,
+    "currency": "USD",
+    "metadata": {
+        "order_id": "order_456",
+        "plan": "premium"
     }
 }
 ```
@@ -428,9 +447,10 @@ POST
 1. В том же сценарии добавьте модуль **xR2** → **Track Event**
 2. В поле `trace_id` вставьте значение из предыдущего шага (используйте mapping)
 3. Event Name: `test_event`
-4. Category: `custom`
-5. Нажмите **"Run once"**
-6. Должно вернуться: `{"success": true, "event_id": "...", ...}`
+4. Source Name: можно оставить пустым (по умолчанию `make_sdk`) или указать свой идентификатор
+5. При необходимости заполните user_id/session_id/value/currency/metadata
+6. Нажмите **"Run once"**
+7. Должно вернуться: `{"status": "success", "event_id": "...", "is_duplicate": false, ...}`
 
 ---
 

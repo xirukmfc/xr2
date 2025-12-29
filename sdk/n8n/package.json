@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-xr2",
-  "version": "0.1.1",
-  "description": "n8n community nodes for xR2 API (Get Prompt, Events)",
+  "version": "0.2.0",
+  "description": "n8n community nodes for xR2 API (Check API Key, Get Prompt, Track Events)",
   "license": "MIT",
   "author": "xR2",
   "keywords": [

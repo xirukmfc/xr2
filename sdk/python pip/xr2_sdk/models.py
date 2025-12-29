@@ -101,10 +101,21 @@ class PromptContentResponse(BaseModel):
 
 
 class EventRequest(BaseModel):
-    trace_id: str
-    event_name: str
-    category: str
-    fields: Dict[str, Any] = Field(default_factory=dict)
+    trace_id: str = Field(..., description="Trace ID from GET /get-prompt response")
+    event_name: str = Field(..., description="Event name as defined in dashboard event definitions")
+    source_name: str = Field(..., description="Source identifier for tracking where events come from")
+
+    # Standard optional fields
+    user_id: Optional[str] = Field(None, description="User identifier")
+    session_id: Optional[str] = Field(None, description="Session identifier")
+    value: Optional[float] = Field(None, description="Numeric value for analytics (revenue, order amount, etc.)")
+    currency: Optional[str] = Field(None, description="Currency code (USD, EUR, etc.)")
+
+    # Custom fields go in metadata
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Custom event fields as defined in event definition metadata_schema"
+    )
 
 
 class EventResponse(BaseModel):
@@ -112,8 +123,13 @@ class EventResponse(BaseModel):
     event_id: str
     trace_id: str
     event_name: str
-    category: str
     timestamp: str
     is_duplicate: bool
+
+
+class CheckAPIKeyResponse(BaseModel):
+    """Response model for API key validation"""
+    ok: bool
+    user: str
 
 

@@ -366,14 +366,14 @@ function AnalyticsPageContent() {
           setShowEventModal(open);
           if (!open) setEditingEvent(null);
         }}>
-          <DialogContent className="sm:max-w-4xl max-h-[90vh]">
+          <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
             <DialogHeader>
               <DialogTitle>{editingEvent ? t('analytics.modals.event.titleEdit') : t('analytics.modals.event.titleCreate')}</DialogTitle>
               <DialogDescription>
                 {editingEvent ? t('analytics.modals.event.descriptionEdit') : t('analytics.modals.event.descriptionCreate')}
               </DialogDescription>
             </DialogHeader>
-            <div className="overflow-y-auto flex-1">
+            <div className="overflow-y-auto flex-1 min-h-0">
               <NewEventModal
                 initialData={editingEvent}
                 onSave={(definition) => {

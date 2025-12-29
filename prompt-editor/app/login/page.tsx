@@ -220,9 +220,9 @@ export default function LoginPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <img
-          src="/logo.svg"
+          src="/tagline.svg"
           alt="xR2 Prompt Manager"
-          className="h-24 w-auto animate-fade-in"
+          className="h-12 w-auto animate-fade-in"
         />
       </div>
     )
@@ -233,9 +233,9 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 animate-slide-up">
         <div className="text-center">
           <img
-            src="/logo.svg"
+            src="/tagline.svg"
             alt="xR2 Prompt Manager"
-            className="mx-auto h-6 w-auto mb-6"
+            className="mx-auto h-8 w-auto mb-6"
           />
         </div>
 

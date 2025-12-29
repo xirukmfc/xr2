@@ -60,7 +60,8 @@ function ApiKeysPageContent() {
   const [newName, setNewName] = useState("")
   // Removed visibleKeys state - all keys are now always visible
   const { showNotification } = useNotification()
-  const { invalidateAndRefetch } = useCountsContext()
+  const countsContext = useCountsContext()
+  const invalidateAndRefetch = countsContext?.invalidateAndRefetch
 
   // Load API keys from backend
   useEffect(() => {
@@ -103,7 +104,7 @@ function ApiKeysPageContent() {
         setDeleteKeyId(null)
         showNotification("API key deleted successfully", "success")
         // Invalidate cache to update counts in sidebar
-        await invalidateAndRefetch()
+        await invalidateAndRefetch?.()
       } catch (err) {
         console.error('Error deleting API key:', err)
         showNotification("Failed to delete API key", "error")
@@ -157,7 +158,7 @@ function ApiKeysPageContent() {
       setApiKeys((prev) => [newApiKey, ...prev])
       showNotification("API key created successfully", "success")
       // Invalidate cache to update counts in sidebar
-      await invalidateAndRefetch()
+      await invalidateAndRefetch?.()
       return response.api_key // Return the full API key for the modal
     } catch (err) {
       console.error('Error creating API key:', err)

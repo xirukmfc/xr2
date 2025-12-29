@@ -1,7 +1,7 @@
 {
     "name": "trackEvent",
     "label": "Track Event",
-    "description": "Send a prompt usage event for analytics. Use the trace_id from the Get Prompt response.",
+    "description": "Track a business event tied to a prompt trace. Send trace_id from Get Prompt plus event details.",
     "connection": "xr2_api_key",
     "parameters": [
         {
@@ -15,75 +15,70 @@
             "name": "event_name",
             "type": "text",
             "label": "Event Name",
-            "help": "Event name (e.g., conversion, purchase, click, signup)",
+            "help": "Event name defined in xR2 Analytics (e.g., signup, purchase_completed).",
             "required": true
         },
         {
-            "name": "category",
-            "type": "select",
-            "label": "Category",
-            "help": "Event category",
-            "required": true,
-            "options": [
-                {"label": "Conversion", "value": "conversion"},
-                {"label": "Revenue", "value": "revenue"},
-                {"label": "Engagement", "value": "engagement"},
-                {"label": "Custom", "value": "custom"}
-            ]
+            "name": "source_name",
+            "type": "text",
+            "label": "Source Name",
+            "help": "Identifier for where the event happened (e.g., web_app, chatbot, workspace). Defaults to make_sdk.",
+            "required": false
         },
         {
-            "name": "fields",
+            "name": "user_id",
+            "type": "text",
+            "label": "User ID",
+            "help": "Optional user identifier for the event.",
+            "required": false
+        },
+        {
+            "name": "session_id",
+            "type": "text",
+            "label": "Session ID",
+            "help": "Optional session identifier for the event.",
+            "required": false
+        },
+        {
+            "name": "value",
+            "type": "number",
+            "label": "Value",
+            "help": "Numeric value (e.g., revenue amount).",
+            "required": false
+        },
+        {
+            "name": "currency",
+            "type": "text",
+            "label": "Currency",
+            "help": "Currency code for value (USD, EUR, etc.).",
+            "required": false
+        },
+        {
+            "name": "metadata",
             "type": "collection",
-            "label": "Event Fields",
-            "help": "Additional event data (key-value pairs)",
+            "label": "Metadata",
+            "help": "Custom fields defined in event metadata schema.",
             "required": false,
-            "spec": [
-                {
-                    "name": "amount",
-                    "type": "number",
-                    "label": "Amount",
-                    "help": "Amount (for revenue events)"
-                },
-                {
-                    "name": "currency",
-                    "type": "text",
-                    "label": "Currency",
-                    "help": "Currency code (USD, EUR, etc.)"
-                },
-                {
-                    "name": "product_id",
-                    "type": "text",
-                    "label": "Product ID"
-                },
-                {
-                    "name": "user_id",
-                    "type": "text",
-                    "label": "User ID"
-                },
-                {
-                    "name": "custom_field_1",
-                    "type": "text",
-                    "label": "Custom Field 1"
-                },
-                {
-                    "name": "custom_field_2",
-                    "type": "text",
-                    "label": "Custom Field 2"
-                }
-            ]
+            "spec": []
         }
     ],
     "expect": [
         {"name": "trace_id", "type": "text", "label": "Trace ID"},
         {"name": "event_name", "type": "text", "label": "Event Name"},
-        {"name": "category", "type": "select", "label": "Category"},
-        {"name": "fields", "type": "collection", "label": "Fields"}
+        {"name": "source_name", "type": "text", "label": "Source Name"},
+        {"name": "user_id", "type": "text", "label": "User ID"},
+        {"name": "session_id", "type": "text", "label": "Session ID"},
+        {"name": "value", "type": "number", "label": "Value"},
+        {"name": "currency", "type": "text", "label": "Currency"},
+        {"name": "metadata", "type": "collection", "label": "Metadata"}
     ],
     "interface": [
-        {"name": "success", "type": "boolean", "label": "Success"},
+        {"name": "status", "type": "text", "label": "Status"},
         {"name": "event_id", "type": "text", "label": "Event ID"},
         {"name": "trace_id", "type": "text", "label": "Trace ID"},
-        {"name": "message", "type": "text", "label": "Message"}
+        {"name": "event_name", "type": "text", "label": "Event Name"},
+        {"name": "timestamp", "type": "date", "label": "Timestamp"},
+        {"name": "is_duplicate", "type": "boolean", "label": "Is Duplicate"}
     ],
     "communication": {
         "url": "/events",
@@ -92,8 +87,12 @@
             "type": "json",
             "trace_id": "{{parameters.trace_id}}",
             "event_name": "{{parameters.event_name}}",
-            "category": "{{parameters.category}}",
-            "fields": "{{ifempty(parameters.fields, emptyobject)}}"
+            "source_name": "{{ifempty(parameters.source_name, \"make_sdk\")}}",
+            "user_id": "{{if(parameters.user_id, parameters.user_id)}}",
+            "session_id": "{{if(parameters.session_id, parameters.session_id)}}",
+            "value": "{{if(parameters.value, parameters.value)}}",
+            "currency": "{{if(parameters.currency, parameters.currency)}}",
+            "metadata": "{{ifempty(parameters.metadata, emptyobject)}}"
         },
         "response": {
             "output": "{{body}}"
@@ -102,11 +101,14 @@
     "samples": {
         "parameters": {
             "trace_id": "evt_abc123_1634567890_xyz",
-            "event_name": "purchase",
-            "category": "revenue",
-            "fields": {
-                "amount": 99.99,
-                "currency": "USD"
+            "event_name": "purchase_completed",
+            "source_name": "web_app",
+            "user_id": "user_123",
+            "value": 99.99,
+            "currency": "USD",
+            "metadata": {
+                "order_id": "order_456",
+                "plan": "premium"
             }
         }
     }

@@ -1,13 +1,44 @@
-from xr2_sdk import xR2Client
+# from xr2_sdk import xR2Client
 
-client = xR2Client(api_key="xr2_prod_YOUR_API_KEY")
+# client = xR2Client(
+#       api_key="xr2_prod_YOUR_API_KEY",
+#       base_url="http://localhost:8000"
+#   )
 
-response = client.get_prompt(slug="humor-vc")
-if response:
-    # Доступ к данным через .data
-    print(response.data.user_prompt)      # "Расскажиу мне шутку про {{topic}}"
-    print(response.data.system_prompt)    # "Ты опытный комик из Англии"
-    print(response.data.trace_id)         # "evt_b94323da..."
-    print(response.data.variables)        # [{'name': 'topic', ...}]
-else:
-    print(response.error)  # текст ошибки
+# Тест 1: check_api_key
+# r = client.check_api_key()
+# print(r)
+
+# # Тест 2: get_prompt
+# r = client.get_prompt(slug="welcome-email-generator")
+# print(r)
+
+# # Тест 3: track_event (если есть trace_id)
+# if r.ok:
+#     e = client.track_event(
+#         trace_id=r.data.trace_id,
+#         event_name="test_meta",
+#         user_id="123",
+#         source_name="pip_sdk",
+#         metadata=dict(user_name="pavel", product_id="123")
+#     )
+#     print(e)
+ #
+ # Тест async версии
+ #
+import asyncio
+from xr2_sdk import AsyncxR2Client
+ #
+async def test():
+  client = AsyncxR2Client(
+      api_key="xr2_prod_YOUR_API_KEY",
+      base_url="http://localhost:8000"
+  )
+  try:
+      r = await client.check_api_key()
+      print(r)
+  finally:
+      await client.aclose()
+
+asyncio.run(test())
+

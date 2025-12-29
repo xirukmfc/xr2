@@ -27,7 +27,7 @@
       "usernamePlaceholder": "Enter your username or email",
       "passwordLabel": "Password",
       "passwordPlaceholder": "Enter your password",
-      "remember": "Remember me for 90 days",
+      "remember": "remember me for 90 days",
       "button": "Sign in",
       "buttonLoading": "Signing in...",
       "divider": "Or continue with",

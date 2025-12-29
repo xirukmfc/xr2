@@ -13,6 +13,7 @@ from .models import (
     PromptContentResponse,
     EventRequest,
     EventResponse,
+    CheckAPIKeyResponse,
     Response,
 )
 from .config import BASE_URL
@@ -69,6 +70,21 @@ class xR2Client:
             "Accept": "application/json",
         }
 
+    def check_api_key(self) -> Response[CheckAPIKeyResponse]:
+        """Validate the API key and get the username associated with it.
+
+        Returns:
+            Response[CheckAPIKeyResponse]: Response containing ok=True and username if valid
+        """
+        url = f"{self.base_url}/api/v1/check-api-key"
+        try:
+            resp = self._session.get(url, headers=self._headers, timeout=self.timeout)
+            if not resp.ok:
+                return Response(error=_parse_error(resp), status_code=resp.status_code)
+            return Response(data=CheckAPIKeyResponse.model_validate(resp.json()))
+        except Exception as e:
+            return Response(error=str(e), status_code=0)
+
     def get_prompt(
         self,
         *,
@@ -97,15 +113,23 @@ class xR2Client:
         *,
         trace_id: str,
         event_name: str,
-        category: str,
-        fields: dict,
+        source_name: str,
+        user_id: Optional[str] = None,
+        session_id: Optional[str] = None,
+        value: Optional[float] = None,
+        currency: Optional[str] = None,
+        metadata: Optional[dict] = None,
     ) -> Response[EventResponse]:
         payload = EventRequest(
             trace_id=trace_id,
             event_name=event_name,
-            category=category,
-            fields=fields,
-        ).model_dump()
+            source_name=source_name,
+            user_id=user_id,
+            session_id=session_id,
+            value=value,
+            currency=currency,
+            metadata=metadata or {},
+        ).model_dump(exclude_none=True)
 
         url = f"{self.base_url}/api/v1/events"
         try:
@@ -155,6 +179,33 @@ class AsyncxR2Client:
                 time.sleep(sleep_s)
                 attempt += 1
 
+    async def _get_with_retry(self, url: str) -> httpx.Response:
+        attempt = 0
+        while True:
+            try:
+                return await self._client.get(url, headers=self._headers)
+            except (httpx.ConnectError, httpx.ReadError, httpx.RemoteProtocolError, httpx.HTTPStatusError) as exc:
+                if attempt >= self._total_retries:
+                    raise
+                sleep_s = self._backoff_factor * (2 ** attempt)
+                time.sleep(sleep_s)
+                attempt += 1
+
+    async def check_api_key(self) -> Response[CheckAPIKeyResponse]:
+        """Validate the API key and get the username associated with it.
+
+        Returns:
+            Response[CheckAPIKeyResponse]: Response containing ok=True and username if valid
+        """
+        url = f"{self.base_url}/api/v1/check-api-key"
+        try:
+            resp = await self._get_with_retry(url)
+            if resp.status_code >= 400:
+                return Response(error=_parse_error(resp), status_code=resp.status_code)
+            return Response(data=CheckAPIKeyResponse.model_validate(resp.json()))
+        except Exception as e:
+            return Response(error=str(e), status_code=0)
+
     async def get_prompt(
         self,
         *,
@@ -183,15 +234,23 @@ class AsyncxR2Client:
         *,
         trace_id: str,
         event_name: str,
-        category: str,
-        fields: dict,
+        source_name: str,
+        user_id: Optional[str] = None,
+        session_id: Optional[str] = None,
+        value: Optional[float] = None,
+        currency: Optional[str] = None,
+        metadata: Optional[dict] = None,
     ) -> Response[EventResponse]:
         payload = EventRequest(
             trace_id=trace_id,
             event_name=event_name,
-            category=category,
-            fields=fields,
-        ).model_dump()
+            source_name=source_name,
+            user_id=user_id,
+            session_id=session_id,
+            value=value,
+            currency=currency,
+            metadata=metadata or {},
+        ).model_dump(exclude_none=True)
 
         url = f"{self.base_url}/api/v1/events"
         try:

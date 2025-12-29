@@ -103,8 +103,11 @@ Sends an analytics event to xR2.
 **Parameters:**
 - **Trace ID** (required): UUID from Get Prompt response or custom identifier
 - **Event Name** (required): Name of the event (e.g., "prompt_used", "api_called")
-- **Category** (required): Event category (e.g., "workflow", "llm", "user_action")
-- **Fields** (optional): JSON object with additional event data
+- **Source Name**: Auto-filled as `n8n_sdk` (no need to set manually)
+- **User ID** (optional)
+- **Session ID** (optional)
+- **Value/Currency** (optional): numeric value with currency code
+- **Metadata** (optional): JSON object with additional event data
 
 **Output:**
 ```json

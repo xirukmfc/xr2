@@ -3,6 +3,7 @@ import { BASE_URL, XR2Connection } from '../shared/config';
 
 export interface GetPromptParams {
     slug: string;
+    source_name?: string;
     version_number?: number;
     status?: 'draft' | 'testing' | 'production' | 'inactive' | 'deprecated';
 }
@@ -56,7 +57,7 @@ export async function getPrompt(
     try {
         const response = await axios.post(url, {
             slug: params.slug,
-            source_name: 'make_sdk',  // Fixed source for analytics tracking
+            source_name: params.source_name || 'make_sdk',
             version_number: params.version_number,
             status: params.status
         }, {
@@ -86,15 +87,21 @@ export async function getPrompt(
 export interface TrackEventParams {
     trace_id: string;
     event_name: string;
-    category: 'conversion' | 'revenue' | 'engagement' | 'custom';
-    fields?: Record<string, any>;
+    source_name?: string;
+    user_id?: string;
+    session_id?: string;
+    value?: number;
+    currency?: string;
+    metadata?: Record<string, any>;
 }
 
 export interface EventResponse {
-    success: boolean;
-    event_id?: string;
+    status: string;
+    event_id: string;
     trace_id: string;
-    message?: string;
+    event_name: string;
+    timestamp: string;
+    is_duplicate: boolean;
 }
 
 export async function trackEvent(
@@ -107,8 +114,12 @@ export async function trackEvent(
         const response = await axios.post(url, {
             trace_id: params.trace_id,
             event_name: params.event_name,
-            category: params.category,
-            fields: params.fields || {}
+            source_name: params.source_name || 'make_sdk',
+            user_id: params.user_id,
+            session_id: params.session_id,
+            value: params.value,
+            currency: params.currency,
+            metadata: params.metadata || {}
         }, {
             headers: {
                 'Authorization': `Bearer ${conn.apiKey}`,

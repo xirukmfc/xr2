@@ -32,6 +32,8 @@ interface PromptEvent {
     category?: string;
     prompt_name?: string;
     version_number?: number;
+    source_name?: string;
+    metadata?: { [key: string]: any };
     [key: string]: any;
   } | null;
   created_at: string;
@@ -644,15 +646,14 @@ export default function PromptEventsViewer() {
 // Metadata Insights Component
 function MetadataInsights({ events }: { events: PromptEvent[] }) {
   const { t } = useLocale();
-  // Extract all metadata fields
+  // Extract all metadata fields from the nested metadata object
   const metadataFields = new Set<string>();
   events.forEach(event => {
-    if (event.event_metadata) {
-      Object.keys(event.event_metadata).forEach(key => {
-        // Skip standard fields
-        if (!['event_name', 'prompt_name', 'prompt_slug', 'version_number', 'source_name'].includes(key)) {
-          metadataFields.add(key);
-        }
+    // Custom events have metadata inside event_metadata.metadata
+    const customMetadata = event.event_metadata?.metadata;
+    if (customMetadata && typeof customMetadata === 'object') {
+      Object.keys(customMetadata).forEach(key => {
+        metadataFields.add(key);
       });
     }
   });
@@ -668,7 +669,9 @@ function MetadataInsights({ events }: { events: PromptEvent[] }) {
     const values: any[] = [];
 
     events.forEach(event => {
-      const value = event.event_metadata?.[fieldName];
+      // Get value from the nested metadata object
+      const customMetadata = event.event_metadata?.metadata;
+      const value = customMetadata?.[fieldName];
       if (value !== undefined && value !== null && value !== '') {
         values.push(value);
       }
