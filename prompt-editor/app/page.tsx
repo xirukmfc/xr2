@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
+import { useLocale } from "@/contexts/locale-context"
 import { Button } from "@/components/ui/button"
 import {
   Loader2,
@@ -22,6 +23,7 @@ import Image from "next/image"
 export default function LandingPage() {
   const router = useRouter()
   const { isAuthenticated, isLoading } = useAuth()
+  const { t, locale, setLocale } = useLocale()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -39,6 +41,10 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  const toggleLanguage = () => {
+    setLocale(locale === 'en' ? 'ru' : 'en')
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -55,10 +61,10 @@ export default function LandingPage() {
   }
 
   const features = [
-    { title: "No Dev Dependency", description: "Push prompt changes yourself. No tickets, no waiting.", icon: Zap },
-    { title: "Safe to Experiment", description: "One click to undo any change. Ship without fear.", icon: RefreshCcw },
-    { title: "Compare Performance Across Versions", description: "See how each edit impacts metrics. Make data-driven decisions.", icon: History },
-    { title: "Custom Metrics", description: "Track signups, purchases, retention — your KPIs, not vanity metrics.", icon: BarChart3 }
+    { titleKey: "landing.features.noDevDependency.title", descKey: "landing.features.noDevDependency.description", icon: Zap },
+    { titleKey: "landing.features.safeToExperiment.title", descKey: "landing.features.safeToExperiment.description", icon: RefreshCcw },
+    { titleKey: "landing.features.comparePerformance.title", descKey: "landing.features.comparePerformance.description", icon: History },
+    { titleKey: "landing.features.customMetrics.title", descKey: "landing.features.customMetrics.description", icon: BarChart3 }
   ]
 
   return (
@@ -74,29 +80,45 @@ export default function LandingPage() {
             </Link>
 
             <div className="hidden md:flex items-center gap-6">
-              <a href="#features" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Features</a>
-              <a href="#pricing" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Pricing</a>
-              <Link href="/docs" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Docs</Link>
-              <Button onClick={() => router.push("/login")} className="font-medium px-5">Sign In</Button>
+              <a href="#features" className="text-gray-600 hover:text-gray-900 text-sm font-medium">{t('landing.nav.features')}</a>
+              <a href="#pricing" className="text-gray-600 hover:text-gray-900 text-sm font-medium">{t('landing.nav.pricing')}</a>
+              <Link href="/docs" className="text-gray-600 hover:text-gray-900 text-sm font-medium">{t('landing.nav.docs')}</Link>
+              <button
+                onClick={toggleLanguage}
+                className="text-gray-600 hover:text-gray-900 text-sm font-semibold px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
+                title={locale === 'en' ? 'Переключить на русский' : 'Switch to English'}
+              >
+                {locale.toUpperCase()}
+              </button>
+              <Button onClick={() => router.push("/login")} className="font-medium px-5">{t('landing.nav.signIn')}</Button>
             </div>
 
-            <button
-              className="md:hidden p-2 text-gray-600 hover:text-gray-900"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+            <div className="md:hidden flex items-center gap-2">
+              <button
+                onClick={toggleLanguage}
+                className="text-gray-600 hover:text-gray-900 text-sm font-semibold px-2 py-1"
+                title={locale === 'en' ? 'Переключить на русский' : 'Switch to English'}
+              >
+                {locale.toUpperCase()}
+              </button>
+              <button
+                className="p-2 text-gray-600 hover:text-gray-900"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
           </div>
         </div>
 
         {mobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-100">
             <div className="px-6 py-4 space-y-4">
-              <a href="#features" className="block text-gray-600 hover:text-gray-900 py-2 font-medium">Features</a>
-              <a href="#pricing" className="block text-gray-600 hover:text-gray-900 py-2 font-medium">Pricing</a>
-              <Link href="/docs" className="block text-gray-600 hover:text-gray-900 py-2 font-medium">Docs</Link>
+              <a href="#features" className="block text-gray-600 hover:text-gray-900 py-2 font-medium">{t('landing.nav.features')}</a>
+              <a href="#pricing" className="block text-gray-600 hover:text-gray-900 py-2 font-medium">{t('landing.nav.pricing')}</a>
+              <Link href="/docs" className="block text-gray-600 hover:text-gray-900 py-2 font-medium">{t('landing.nav.docs')}</Link>
               <div className="pt-4">
-                <Button onClick={() => router.push("/login")} className="w-full">Get Started Free</Button>
+                <Button onClick={() => router.push("/login")} className="w-full">{t('landing.nav.getStartedFree')}</Button>
               </div>
             </div>
           </div>
@@ -104,34 +126,46 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-20">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-gray-50 to-transparent rounded-full blur-3xl" />
+      <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-20 overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#E63355]/5 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute top-20 right-1/4 w-[400px] h-[400px] bg-slate-200/50 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-t from-gray-100 to-transparent rounded-full blur-3xl" />
         </div>
 
         <div className="max-w-6xl mx-auto px-6 relative">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 text-slate-600 text-sm mb-6 font-medium">
-              <span className="w-2 h-2 rounded-full bg-[#E63355]"></span>
-              Prompt Management for Product Teams
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 text-slate-600 text-sm mb-6 font-medium border border-slate-200/50 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-[#E63355] animate-pulse"></span>
+              {t('landing.hero.badge')}
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-[1.1]">
-              Stop guessing which AI prompt works. <span className="text-[#E63355]">Start measuring.</span>
+              {t('landing.hero.titleStart')}{' '}
+              <span className="relative">
+                <span className="bg-gradient-to-r from-[#E63355] via-[#ff6b6b] to-[#E63355] bg-[length:200%_auto] animate-[gradient_3s_linear_infinite] bg-clip-text text-transparent">
+                  {t('landing.hero.titleAccent')}
+                </span>
+              </span>
             </h1>
 
             <p className="text-xl text-gray-500 mb-8 max-w-xl mx-auto">
-              Deploy, A/B test, and track revenue per prompt — without code changes or release cycles.
+              {t('landing.hero.subtitle')}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-              <Button onClick={() => router.push("/login")} size="lg" className="w-full sm:w-auto font-medium px-8">
-                Get Started Free
+              <Button
+                onClick={() => router.push("/login")}
+                size="lg"
+                className="w-full sm:w-auto font-medium px-8 shadow-lg shadow-slate-900/20 hover:shadow-xl hover:shadow-slate-900/30 transition-all hover:-translate-y-0.5"
+              >
+                {t('landing.hero.cta')}
               </Button>
             </div>
 
             <p className="text-sm text-gray-400">
-              Free up to 1K calls · No credit card · Live in 5 min
+              {t('landing.hero.differentiator')} <span className="text-gray-600">{t('landing.hero.differentiatorAccent')}</span>
             </p>
           </div>
 
@@ -209,7 +243,7 @@ export default function LandingPage() {
                             <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
-                            <input type="text" placeholder="Search..." className="w-full pl-6 pr-2 py-1 text-xs border border-slate-200 rounded-md bg-white" readOnly />
+                            <input type="text" placeholder="Search..." className="w-full pl-6 pr-2 py-1 text-xs border border-slate-200 rounded-md bg-white" readOnly aria-label="Search prompts" />
                           </div>
                           <div className="flex items-center bg-slate-100 p-0.5 rounded-md">
                             <button className="px-2 py-1 text-xs font-medium rounded bg-white text-slate-800 shadow-sm">All</button>
@@ -237,7 +271,7 @@ export default function LandingPage() {
                     <div className="hidden md:block bg-slate-50 px-4 py-3 border-b border-gray-200">
                       <div className="grid grid-cols-12 gap-4 text-xs font-medium text-slate-500 uppercase tracking-wide">
                         <div className="col-span-1 flex items-center">
-                          <input type="checkbox" className="rounded border-slate-300" readOnly />
+                          <input type="checkbox" className="rounded border-slate-300" readOnly aria-label="Select all prompts" />
                         </div>
                         <div className="col-span-4">Name</div>
                         <div className="col-span-2">Status</div>
@@ -259,7 +293,7 @@ export default function LandingPage() {
                         <div key={i} className="px-4 py-3 hover:bg-slate-50 transition-colors cursor-pointer group">
                           <div className="grid grid-cols-12 gap-4 items-center">
                             <div className="col-span-1">
-                              <input type="checkbox" className="rounded border-slate-300" readOnly />
+                              <input type="checkbox" className="rounded border-slate-300" readOnly aria-label={`Select ${prompt.name}`} />
                             </div>
                             <div className="col-span-4">
                               <div className="flex items-center gap-2">
@@ -359,8 +393,10 @@ export default function LandingPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Know which prompts make money</h2>
-            <p className="text-gray-500">Track conversions and revenue per prompt — not just vibes.</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">{t('landing.revenue.title')}</h2>
+            <div className="space-y-2">
+              <p className="text-gray-500">{t('landing.revenue.subtitle')}</p>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -369,9 +405,9 @@ export default function LandingPage() {
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
                   <LineChart className="w-5 h-5 text-slate-600" />
-                  <span className="text-slate-800 font-semibold">Revenue by Prompt</span>
+                  <span className="text-slate-800 font-semibold">{t('landing.revenue.revenueByPrompt')}</span>
                 </div>
-                <span className="text-gray-400 text-sm">Last 7 days</span>
+                <span className="text-gray-400 text-sm">{t('landing.revenue.last7days')}</span>
               </div>
 
               <div className="space-y-4">
@@ -393,7 +429,7 @@ export default function LandingPage() {
               </div>
 
               <div className="mt-5 pt-4 border-t border-gray-100 flex justify-between items-center">
-                <span className="text-gray-400 text-sm">3 prompts tracked</span>
+                <span className="text-gray-400 text-sm">3 {t('landing.revenue.promptsTracked')}</span>
                 <div className="text-xl font-bold text-emerald-600">$24,950</div>
               </div>
             </div>
@@ -403,7 +439,7 @@ export default function LandingPage() {
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
                   <FlaskConical className="w-5 h-5 text-slate-600" />
-                  <span className="text-slate-800 font-semibold">A/B Test Results</span>
+                  <span className="text-slate-800 font-semibold">{t('landing.revenue.abTestResults')}</span>
                 </div>
                 <span className="text-[#E63355] text-sm font-semibold bg-red-50 px-3 py-1 rounded-full">+23%</span>
               </div>
@@ -411,7 +447,7 @@ export default function LandingPage() {
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-gray-600 text-sm">Variant A — Original</span>
+                    <span className="text-gray-600 text-sm">{t('landing.revenue.variantA')}</span>
                     <span className="text-gray-500 text-sm">45%</span>
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-2">
@@ -421,8 +457,8 @@ export default function LandingPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-800 text-sm">Variant B — New CTA</span>
-                      <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">Winner</span>
+                      <span className="text-gray-800 text-sm">{t('landing.revenue.variantB')}</span>
+                      <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">{t('landing.revenue.winner')}</span>
                     </div>
                     <span className="text-emerald-600 text-sm font-semibold">68%</span>
                   </div>
@@ -433,11 +469,14 @@ export default function LandingPage() {
               </div>
 
               <div className="mt-5 pt-4 border-t border-gray-100 flex justify-between items-center">
-                <span className="text-gray-400 text-sm">95% confidence</span>
-                <button className="text-sm bg-slate-900 text-white px-4 py-2 rounded-lg font-medium">Deploy Winner</button>
+                <span className="text-gray-400 text-sm">95% {t('landing.revenue.confidence')}</span>
               </div>
             </div>
           </div>
+          <div className="mt-8 text-sm text-gray-500 text-center max-w-3xl mx-auto">
+            {t('landing.revenue.howItWorks')}
+          </div>
+
         </div>
       </section>
 
@@ -445,9 +484,9 @@ export default function LandingPage() {
       <section id="features" className="py-24 bg-gray-50">
         <div className="max-w-5xl mx-auto px-6">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-4">
-            Built for product teams
+            {t('landing.features.title')}
           </h2>
-          <p className="text-lg text-gray-500 text-center mb-16">Everything you need to own your AI prompts.</p>
+          <p className="text-lg text-gray-500 text-center mb-16">{t('landing.features.subtitle')}</p>
 
           <div className="grid md:grid-cols-2 gap-8">
             {features.map((feature, i) => (
@@ -456,8 +495,8 @@ export default function LandingPage() {
                   <feature.icon className="w-7 h-7 text-white" />
                 </div>
                 <div className="pt-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-500">{feature.description}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t(feature.titleKey)}</h3>
+                  <p className="text-gray-500">{t(feature.descKey)}</p>
                 </div>
               </div>
             ))}
@@ -470,20 +509,20 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto px-6">
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 md:p-12">
             <div className="text-center mb-10">
-              <p className="text-sm text-slate-400 uppercase tracking-wide mb-3">For solo builders & automation fans</p>
+              <p className="text-sm text-slate-400 uppercase tracking-wide mb-3">{t('landing.integrations.badge')}</p>
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                Using n8n, Make or Zapier?
+                {t('landing.integrations.title')}
               </h2>
               <p className="text-slate-300 mb-6 max-w-xl mx-auto">
-                Stop copy-pasting prompts across scenarios. Store them in one place, call via API, edit once — changes sync everywhere.
+                {t('landing.integrations.subtitle')}
               </p>
               <Button onClick={() => router.push("/login")} className="bg-white text-slate-900 hover:bg-slate-100">
-                Try Free
+                {t('landing.integrations.cta')}
               </Button>
             </div>
 
             <div className="border-t border-slate-700 pt-8">
-              <p className="text-center text-sm text-slate-400 mb-6">Works with your stack</p>
+              <p className="text-center text-sm text-slate-400 mb-6">{t('landing.integrations.worksWithYourStack')}</p>
               <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
                 {/* Python */}
                 <div className="flex flex-col items-center gap-2">
@@ -551,21 +590,21 @@ export default function LandingPage() {
       <section id="pricing" className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-3">
-            Start free. Scale as you grow.
+            {t('landing.pricing.title')}
           </h2>
-          <p className="text-gray-500 text-center mb-12">No credit card required.</p>
+          <p className="text-gray-500 text-center mb-12">{t('landing.pricing.subtitle')}</p>
 
           <div className="grid md:grid-cols-3 gap-5">
             {/* Free */}
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-              <div className="text-gray-500 text-sm font-medium mb-1">Free</div>
+              <div className="text-gray-500 text-sm font-medium mb-1">{t('landing.pricing.free.name')}</div>
               <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-3xl font-bold text-gray-900">$0</span>
-                <span className="text-gray-400 text-sm">/mo</span>
+                <span className="text-3xl font-bold text-gray-900">{t('landing.pricing.free.price')}</span>
+                <span className="text-gray-400 text-sm">{t('landing.pricing.free.period')}</span>
               </div>
 
               <ul className="space-y-2.5 mb-6 text-sm">
-                {['Up to 10 prompts', '1,000 API calls/month', 'Basic analytics', '1 workspace'].map((f, i) => (
+                {(locale === 'ru' ? ['До 10 промптов', '1 000 API запросов/мес', 'Базовая аналитика', '1 workspace'] : ['Up to 10 prompts', '1,000 API calls/month', 'Basic analytics', '1 workspace']).map((f, i) => (
                   <li key={i} className="flex items-center gap-2 text-gray-600">
                     <Check className="h-4 w-4 text-gray-400" />{f}
                   </li>
@@ -573,24 +612,24 @@ export default function LandingPage() {
               </ul>
 
               <Button onClick={() => router.push("/login")} variant="outline" className="w-full">
-                Get Started
+                {t('landing.pricing.free.cta')}
               </Button>
             </div>
 
             {/* Pro */}
             <div className="relative bg-white rounded-xl p-6 border-2 border-[#E63355] shadow-lg">
               <div className="absolute -top-3 left-6 px-3 py-1 bg-[#E63355] text-white rounded-full text-xs font-medium">
-                Popular
+                {t('landing.pricing.pro.popular')}
               </div>
 
-              <div className="text-gray-500 text-sm font-medium mb-1">Pro</div>
+              <div className="text-gray-500 text-sm font-medium mb-1">{t('landing.pricing.pro.name')}</div>
               <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-3xl font-bold text-gray-900">$29</span>
-                <span className="text-gray-400 text-sm">/mo</span>
+                <span className="text-3xl font-bold text-gray-900">{t('landing.pricing.pro.price')}</span>
+                <span className="text-gray-400 text-sm">{t('landing.pricing.pro.period')}</span>
               </div>
 
               <ul className="space-y-2.5 mb-6 text-sm">
-                {['Unlimited prompts', '100K API calls/month', 'A/B testing & revenue tracking', 'Unlimited workspaces', 'Team collaboration'].map((f, i) => (
+                {(locale === 'ru' ? ['Безлимит промптов', '100K API запросов/мес', 'A/B тесты и выручка', 'Безлимит workspaces', 'Командная работа'] : ['Unlimited prompts', '100K API calls/month', 'A/B testing & revenue tracking', 'Unlimited workspaces', 'Team collaboration']).map((f, i) => (
                   <li key={i} className="flex items-center gap-2 text-gray-600">
                     <Check className="h-4 w-4 text-[#E63355]" />{f}
                   </li>
@@ -598,17 +637,17 @@ export default function LandingPage() {
               </ul>
 
               <Button onClick={() => router.push("/login")} className="w-full bg-[#E63355] hover:bg-[#d42d4d]">
-                Get Started
+                {t('landing.pricing.pro.cta')}
               </Button>
             </div>
 
             {/* Enterprise */}
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-              <div className="text-gray-500 text-sm font-medium mb-1">Enterprise</div>
-              <div className="text-2xl font-bold text-gray-900 mb-4">Custom</div>
+              <div className="text-gray-500 text-sm font-medium mb-1">{t('landing.pricing.enterprise.name')}</div>
+              <div className="text-2xl font-bold text-gray-900 mb-4">{t('landing.pricing.enterprise.price')}</div>
 
               <ul className="space-y-2.5 mb-6 text-sm">
-                {['SSO & SAML', 'Dedicated support', 'Custom integrations', 'SLA'].map((f, i) => (
+                {(locale === 'ru' ? ['SSO и SAML', 'Выделенная поддержка', 'Кастомные интеграции', 'SLA'] : ['SSO & SAML', 'Dedicated support', 'Custom integrations', 'SLA']).map((f, i) => (
                   <li key={i} className="flex items-center gap-2 text-gray-600">
                     <Check className="h-4 w-4 text-gray-400" />{f}
                   </li>
@@ -616,7 +655,7 @@ export default function LandingPage() {
               </ul>
 
               <Button variant="outline" className="w-full" onClick={() => window.location.href = 'mailto:hello@xr2.uk'}>
-                Contact Sales
+                {t('landing.pricing.enterprise.cta')}
               </Button>
             </div>
           </div>
@@ -627,13 +666,13 @@ export default function LandingPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Your prompts deserve better than git commits.
+            {t('landing.cta.title')}
           </h2>
           <p className="text-lg text-gray-500 mb-8">
-            Join product teams who ship AI faster.
+            {t('landing.cta.subtitle')}
           </p>
           <Button onClick={() => router.push("/login")} size="lg" className="font-medium px-8">
-            Get Started Free
+            {t('landing.cta.button')}
           </Button>
         </div>
       </section>
@@ -642,9 +681,9 @@ export default function LandingPage() {
       <footer className="py-8 bg-white border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-6 text-sm">
-            <Link href="/docs" className="text-gray-500 hover:text-gray-900">Docs</Link>
-            <a href="#pricing" className="text-gray-500 hover:text-gray-900">Pricing</a>
-            <a href="mailto:hello@xr2.uk" className="text-gray-500 hover:text-gray-900">Contact</a>
+            <Link href="/docs" className="text-gray-500 hover:text-gray-900">{t('landing.footer.docs')}</Link>
+            <a href="#pricing" className="text-gray-500 hover:text-gray-900">{t('landing.footer.pricing')}</a>
+            <a href="mailto:hello@xr2.uk" className="text-gray-500 hover:text-gray-900">{t('landing.footer.contact')}</a>
           </div>
           <p className="text-sm text-gray-400">
             &copy; {new Date().getFullYear()} xR2

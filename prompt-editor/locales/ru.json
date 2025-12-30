@@ -4,6 +4,128 @@
     "en": "EN",
     "ru": "RU"
   },
+  "landing": {
+    "nav": {
+      "features": "Фичи",
+      "pricing": "Цены",
+      "docs": "Docs",
+      "signIn": "Войти",
+      "getStartedFree": "Попробовать"
+    },
+    "hero": {
+      "badge": "Промпты под контролем продакта",
+      "titleStart": "Какой промпт работает?",
+      "titleAccent": "Хватит гадать.",
+      "subtitle": "Деплой промптов, A/B тесты и трекинг выручки — без разработчиков и релизов.",
+      "cta": "Попробовать",
+      "differentiator": "Это не очередной Langfuse :)",
+      "differentiatorAccent": "Продукт для продактов, а не разработчиков."
+    },
+    "dashboard": {
+      "url": "xr2.uk/prompts",
+      "userName": "Алексей Иванов",
+      "userEmail": "alex@company.com",
+      "prompts": "Промпты",
+      "analytics": "Аналитика",
+      "apiKeys": "API ключи",
+      "settings": "Настройки",
+      "search": "Поиск...",
+      "all": "Все",
+      "active": "Активные",
+      "draft": "Черновик",
+      "newPrompt": "Новый промпт",
+      "new": "Новый",
+      "lastUpdated": "Обновление",
+      "name": "Название",
+      "status": "Статус",
+      "updated": "Обновлено",
+      "usage": "Вызовы",
+      "owner": "Автор",
+      "calls": "вызовов"
+    },
+    "revenue": {
+      "title": "Какие промпты приносят деньги?",
+      "subtitle": "Конверсии и выручка по каждому промпту. Не vibes, а цифры.",
+      "revenueByPrompt": "Выручка по промптам",
+      "last7days": "За 7 дней",
+      "promptsTracked": "промптов",
+      "abTestResults": "A/B тест",
+      "variantA": "Вариант A — старый",
+      "variantB": "Вариант B — новый",
+      "winner": "Победил",
+      "confidence": "уверенность",
+      "deployWinner": "Задеплоить",
+      "howItWorks": "Как это работает: при покупке шлёте событие с суммой и prompt_version_id. Всё."
+    },
+    "features": {
+      "title": "Для продуктовых команд",
+      "subtitle": "Всё для работы с промптами без боли.",
+      "noDevDependency": {
+        "title": "Без разработчиков",
+        "description": "Меняйте промпты сами. Никаких тикетов и ожидания."
+      },
+      "safeToExperiment": {
+        "title": "Эксперименты без страха",
+        "description": "Откатить любое изменение — один клик."
+      },
+      "comparePerformance": {
+        "title": "Сравнивайте версии",
+        "description": "Видно, как каждое изменение влияет на метрики. Data-driven решения."
+      },
+      "customMetrics": {
+        "title": "Свои метрики",
+        "description": "Регистрации, покупки, retention — трекайте то, что важно вам."
+      }
+    },
+    "integrations": {
+      "badge": "Для тех, кто автоматизирует всё",
+      "title": "Используете n8n, Make или Zapier?",
+      "subtitle": "Хватит копировать промпты между сценариями. Один источник, один API — меняете здесь, работает везде.",
+      "cta": "Попробовать",
+      "worksWithYourStack": "Работает с вашим стеком",
+      "python": "Python",
+      "nodejs": "Node.js",
+      "n8n": "n8n",
+      "make": "Make",
+      "zapier": "Zapier",
+      "restApi": "REST API"
+    },
+    "pricing": {
+      "title": "Бесплатно на старте. Растёте — апгрейдитесь.",
+      "subtitle": "",
+      "free": {
+        "name": "Free",
+        "price": "$0",
+        "period": "/мес",
+        "features": ["10 промптов", "1 000 запросов/мес", "Базовая аналитика", "1 workspace"],
+        "cta": "Начать"
+      },
+      "pro": {
+        "name": "Pro",
+        "popular": "Хит",
+        "price": "$29",
+        "period": "/мес",
+        "features": ["Без лимитов на промпты", "100K запросов/мес", "A/B тесты + выручка", "Любое кол-во workspaces", "Работа в команде"],
+        "cta": "Начать"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "По запросу",
+        "features": ["SSO / SAML", "Выделенная поддержка", "Кастомные интеграции", "SLA"],
+        "cta": "Написать"
+      }
+    },
+    "cta": {
+      "title": "Промпты заслуживают лучшего, чем git commit.",
+      "subtitle": "Команды, которые шипят AI быстрее, уже здесь.",
+      "button": "Попробовать"
+    },
+    "footer": {
+      "docs": "Docs",
+      "pricing": "Цены",
+      "contact": "Контакты"
+    }
+  },
   "sidebar": {
     "prompts": "Промпты",
     "analytics": "Аналитика",

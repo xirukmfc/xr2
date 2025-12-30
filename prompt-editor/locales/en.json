@@ -4,6 +4,128 @@
     "en": "EN",
     "ru": "RU"
   },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "docs": "Docs",
+      "signIn": "Sign In",
+      "getStartedFree": "Get Started Free"
+    },
+    "hero": {
+      "badge": "Prompt Management for Product Teams",
+      "titleStart": "Stop guessing which AI prompt works.",
+      "titleAccent": "Start measuring.",
+      "subtitle": "Deploy, A/B test, and track revenue per prompt — without code changes or release cycles.",
+      "cta": "Get Started Free",
+      "differentiator": "Not another Langfuse.",
+      "differentiatorAccent": "Revenue-first, owned by product."
+    },
+    "dashboard": {
+      "url": "xr2.uk/prompts",
+      "userName": "Alex Johnson",
+      "userEmail": "alex@company.com",
+      "prompts": "Prompts",
+      "analytics": "Analytics",
+      "apiKeys": "API Keys",
+      "settings": "Settings",
+      "search": "Search...",
+      "all": "All",
+      "active": "Active",
+      "draft": "Draft",
+      "newPrompt": "New Prompt",
+      "new": "New",
+      "lastUpdated": "Last Updated",
+      "name": "Name",
+      "status": "Status",
+      "updated": "Updated",
+      "usage": "Usage",
+      "owner": "Owner",
+      "calls": "calls"
+    },
+    "revenue": {
+      "title": "Know which prompts make money",
+      "subtitle": "Track conversions and revenue per prompt — not just vibes.",
+      "revenueByPrompt": "Revenue by Prompt",
+      "last7days": "Last 7 days",
+      "promptsTracked": "prompts tracked",
+      "abTestResults": "A/B Test Results",
+      "variantA": "Variant A — Original",
+      "variantB": "Variant B — New CTA",
+      "winner": "Winner",
+      "confidence": "confidence",
+      "deployWinner": "Deploy Winner",
+      "howItWorks": "How revenue tracking works: on a purchase/lead send a conversion event with the revenue amount and the prompt_version_id."
+    },
+    "features": {
+      "title": "Built for product teams",
+      "subtitle": "Everything you need to own your AI prompts.",
+      "noDevDependency": {
+        "title": "No Dev Dependency",
+        "description": "Push prompt changes yourself. No tickets, no waiting."
+      },
+      "safeToExperiment": {
+        "title": "Safe to Experiment",
+        "description": "One click to undo any change. Ship without fear."
+      },
+      "comparePerformance": {
+        "title": "Compare Performance Across Versions",
+        "description": "See how each edit impacts metrics. Make data-driven decisions."
+      },
+      "customMetrics": {
+        "title": "Custom Metrics",
+        "description": "Track signups, purchases, retention — your KPIs, not vanity metrics."
+      }
+    },
+    "integrations": {
+      "badge": "For solo builders & automation fans",
+      "title": "Using n8n, Make or Zapier?",
+      "subtitle": "Stop copy-pasting prompts across scenarios. Store them in one place, call via API, edit once — changes sync everywhere.",
+      "cta": "Try Free",
+      "worksWithYourStack": "Works with your stack",
+      "python": "Python",
+      "nodejs": "Node.js",
+      "n8n": "n8n",
+      "make": "Make",
+      "zapier": "Zapier",
+      "restApi": "REST API"
+    },
+    "pricing": {
+      "title": "Start free. Scale as you grow.",
+      "subtitle": "No credit card required.",
+      "free": {
+        "name": "Free",
+        "price": "$0",
+        "period": "/mo",
+        "features": ["Up to 10 prompts", "1,000 API calls/month", "Basic analytics", "1 workspace"],
+        "cta": "Get Started"
+      },
+      "pro": {
+        "name": "Pro",
+        "popular": "Popular",
+        "price": "$29",
+        "period": "/mo",
+        "features": ["Unlimited prompts", "100K API calls/month", "A/B testing & revenue tracking", "Unlimited workspaces", "Team collaboration"],
+        "cta": "Get Started"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Custom",
+        "features": ["SSO & SAML", "Dedicated support", "Custom integrations", "SLA"],
+        "cta": "Contact Sales"
+      }
+    },
+    "cta": {
+      "title": "Your prompts deserve better than git commits.",
+      "subtitle": "Join product teams who ship AI faster.",
+      "button": "Get Started Free"
+    },
+    "footer": {
+      "docs": "Docs",
+      "pricing": "Pricing",
+      "contact": "Contact"
+    }
+  },
   "sidebar": {
     "prompts": "Prompts",
     "analytics": "Analytics",
