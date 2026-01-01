@@ -42,8 +42,14 @@ export function Pagination({
   return (
     <div className={`flex items-center justify-between mt-4 px-4 mb-4 ${className}`}>
       <div className="text-xs text-slate-600">
-        {t('prompts.pagination.showing')} <span className="font-medium">{startIndex}</span> {t('prompts.pagination.of')}{" "}
-        <span className="font-medium">{totalItems}</span> {itemName}
+        {totalItems === 0 ? (
+          <>0 {itemName}</>
+        ) : (
+          <>
+            <span className="font-medium">{startIndex}-{endIndex}</span> {t('prompts.pagination.of')}{" "}
+            <span className="font-medium">{totalItems}</span> {itemName}
+          </>
+        )}
       </div>
       <div className="flex items-center space-x-1">
         <Button
