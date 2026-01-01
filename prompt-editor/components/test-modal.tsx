@@ -42,8 +42,6 @@ interface APIProvider {
 
 // Removed hardcoded PROVIDERS - now using dynamic data from API
 
-const LS_KEY_PREFIX = "tester:apiKey:"
-
 interface TestModal {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -81,6 +79,7 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
   const [needsApiKey, setNeedsApiKey] = useState(false)
 
   const [isRunning, setIsRunning] = useState(false)
+  const [isSavingKey, setIsSavingKey] = useState(false)
   const [response, setResponse] = useState("")
   const [metrics, setMetrics] = useState<{
       responseTime: string;
@@ -136,13 +135,6 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
     fetchProviders()
   }, [open])
 
-  // load key from localStorage for current provider
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    const saved = localStorage.getItem(LS_KEY_PREFIX + provider) || ""
-    setApiKey(saved)
-  }, [provider])
-
   // when changing provider — reset model to first
   useEffect(() => {
     if (!provider || apiProviders.length === 0) return
@@ -185,9 +177,32 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
     )
   }
 
-  const persistKey = () => {
-    localStorage.setItem(LS_KEY_PREFIX + provider, apiKey)
-    setNeedsApiKey(false)
+  const persistKey = async () => {
+    if (!apiKey.trim() || !provider) return
+
+    setIsSavingKey(true)
+    try {
+      const currentProvider = apiProviders.find(p => p.id === provider)
+      const keyName = `${currentProvider?.display_name || 'API'} Key`
+
+      await apiClient.request('/llm/api-keys', {
+        method: 'POST',
+        body: {
+          provider_id: provider,
+          name: keyName,
+          api_key: apiKey,
+        },
+      })
+
+      showNotification('API key saved successfully', 'success')
+      setNeedsApiKey(false)
+      setApiKey('')
+    } catch (error: any) {
+      console.error('[TestModal] Failed to save API key:', error)
+      showNotification(error?.message || 'Failed to save API key', 'error')
+    } finally {
+      setIsSavingKey(false)
+    }
   }
 
   const runTest = async () => {
@@ -489,17 +504,26 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
                         value={apiKey}
                         onChange={(e) => setApiKey(e.target.value)}
                         className="text-sm h-8 border-blue-200"
+                        disabled={isSavingKey}
                       />
                       <div className="flex gap-2">
-                        <Button onClick={persistKey} size="sm">
-                          Save key
+                        <Button onClick={persistKey} size="sm" disabled={isSavingKey || !apiKey.trim()}>
+                          {isSavingKey ? (
+                            <>
+                              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            'Save key'
+                          )}
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => setNeedsApiKey(false)}>
+                        <Button variant="outline" size="sm" onClick={() => setNeedsApiKey(false)} disabled={isSavingKey}>
                           Later
                         </Button>
                       </div>
                       <p className="text-xs text-blue-700">
-                        Key is stored locally in your browser for {apiProviders.find(p => p.id === provider)?.display_name || 'this provider'}.
+                        Key will be securely saved to your account. You can also manage keys in{' '}
+                        <a href="/settings" className="underline hover:text-blue-900">Settings → LLM Keys</a>.
                       </p>
                     </div>
                   </div>
