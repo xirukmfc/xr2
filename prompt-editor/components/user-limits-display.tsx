@@ -52,10 +52,10 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             <TooltipTrigger asChild>
               <div className="flex items-center justify-center">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  promptsPercent >= 90 ? 'bg-red-100' : promptsPercent >= 70 ? 'bg-yellow-100' : 'bg-green-100'
+                  promptsPercent >= 100 ? 'bg-red-100' : promptsPercent >= 70 ? 'bg-yellow-100' : 'bg-green-100'
                 }`}>
                   <span className={`text-xs font-bold ${
-                    promptsPercent >= 90 ? 'text-red-600' : promptsPercent >= 70 ? 'text-yellow-600' : 'text-green-600'
+                    promptsPercent >= 100 ? 'text-red-600' : promptsPercent >= 70 ? 'text-yellow-600' : 'text-green-600'
                   }`}>
                     {limits.limits.prompts.current}
                   </span>
@@ -77,10 +77,10 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             <TooltipTrigger asChild>
               <div className="flex items-center justify-center">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  apiPercent >= 90 ? 'bg-red-100' : apiPercent >= 70 ? 'bg-yellow-100' : 'bg-green-100'
+                  apiPercent >= 100 ? 'bg-red-100' : apiPercent >= 70 ? 'bg-yellow-100' : 'bg-green-100'
                 }`}>
                   <Zap className={`w-3 h-3 ${
-                    apiPercent >= 90 ? 'text-red-600' : apiPercent >= 70 ? 'text-yellow-600' : 'text-green-600'
+                    apiPercent >= 100 ? 'text-red-600' : apiPercent >= 70 ? 'text-yellow-600' : 'text-green-600'
                   }`} />
                 </div>
               </div>
@@ -110,16 +110,23 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             {limits.limits.prompts.current} / {limits.limits.prompts.max}
           </span>
         </div>
-        <Progress 
-          value={promptsPercent} 
+        <Progress
+          value={promptsPercent}
           className="h-1.5"
           indicatorClassName={
-            promptsPercent >= 90 ? 'bg-red-500' : 
+            promptsPercent >= 100 ? 'bg-red-500' :
+            promptsPercent >= 90 ? 'bg-yellow-500' :
             promptsPercent >= 70 ? 'bg-yellow-500' : 'bg-green-500'
           }
         />
-        {promptsPercent >= 90 && (
+        {promptsPercent >= 100 && (
           <div className="flex items-center gap-1 text-xs text-red-600">
+            <AlertTriangle className="w-3 h-3" />
+            <span>Limit reached</span>
+          </div>
+        )}
+        {promptsPercent >= 90 && promptsPercent < 100 && (
+          <div className="flex items-center gap-1 text-xs text-yellow-600">
             <AlertTriangle className="w-3 h-3" />
             <span>Limit almost reached</span>
           </div>
@@ -134,16 +141,23 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             {limits.limits.api_requests.current} / {limits.limits.api_requests.max}
           </span>
         </div>
-        <Progress 
-          value={apiPercent} 
+        <Progress
+          value={apiPercent}
           className="h-1.5"
           indicatorClassName={
-            apiPercent >= 90 ? 'bg-red-500' : 
+            apiPercent >= 100 ? 'bg-red-500' :
+            apiPercent >= 90 ? 'bg-yellow-500' :
             apiPercent >= 70 ? 'bg-yellow-500' : 'bg-green-500'
           }
         />
-        {apiPercent >= 90 && (
+        {apiPercent >= 100 && (
           <div className="flex items-center gap-1 text-xs text-red-600">
+            <AlertTriangle className="w-3 h-3" />
+            <span>Limit reached</span>
+          </div>
+        )}
+        {apiPercent >= 90 && apiPercent < 100 && (
+          <div className="flex items-center gap-1 text-xs text-yellow-600">
             <AlertTriangle className="w-3 h-3" />
             <span>Limit almost reached</span>
           </div>
