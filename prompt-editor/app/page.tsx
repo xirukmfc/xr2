@@ -85,10 +85,10 @@ export default function LandingPage() {
               <Link href="/docs" className="text-gray-600 hover:text-gray-900 text-sm font-medium">{t('landing.nav.docs')}</Link>
               <button
                 onClick={toggleLanguage}
-                className="text-gray-600 hover:text-gray-900 text-sm font-semibold px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
+                className="text-xl px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
                 title={locale === 'en' ? 'Переключить на русский' : 'Switch to English'}
               >
-                {locale.toUpperCase()}
+                {locale === 'en' ? '🇬🇧' : '🇷🇺'}
               </button>
               <Button onClick={() => router.push("/login")} className="font-medium px-5">{t('landing.nav.signIn')}</Button>
             </div>
@@ -96,10 +96,10 @@ export default function LandingPage() {
             <div className="md:hidden flex items-center gap-2">
               <button
                 onClick={toggleLanguage}
-                className="text-gray-600 hover:text-gray-900 text-sm font-semibold px-2 py-1"
+                className="text-xl px-2 py-1"
                 title={locale === 'en' ? 'Переключить на русский' : 'Switch to English'}
               >
-                {locale.toUpperCase()}
+                {locale === 'en' ? '🇬🇧' : '🇷🇺'}
               </button>
               <button
                 className="p-2 text-gray-600 hover:text-gray-900"
