@@ -190,7 +190,7 @@ const VisualIllustration = ({ type, t }: { type: string, t: (key: string, params
             </div>
             <div className="flex-1 bg-slate-900 rounded p-2 font-mono text-[10px] text-green-400 space-y-1">
               <div className="text-slate-400">curl -X POST \</div>
-              <div className="text-green-300">http://localhost:8000/api/v1/get-prompt</div>
+              <div className="text-green-300">https://xr2.uk/api/v1/get-prompt</div>
               <div className="text-slate-400">-H "Authorization: Bearer xr2_..."</div>
               <div className="text-slate-400">-d '{"{"}"slug": "welcome", "source_name": "user"{"}"}'</div>
               <div className="mt-1 pt-1 border-t border-slate-700">

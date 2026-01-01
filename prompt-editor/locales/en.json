@@ -178,14 +178,14 @@
     }
   },
   "onboarding": {
-    "title": "Get started with xR2",
-    "subtitle": "Quick tour of prompts, API, analytics, and tests",
+    "title": "Welcome to xR2",
+    "subtitle": "Own your AI prompts. No developers needed.",
     "progress": "Step {current} of {total}",
     "goToStep": "Go to step {step}",
-    "skip": "Skip",
-    "prev": "Prev",
+    "skip": "Skip tour",
+    "prev": "Back",
     "next": "Next",
-    "getStarted": "Get Started",
+    "getStarted": "Create First Prompt",
     "visual": {
       "variantA": "Variant A",
       "variantB": "Variant B",
@@ -209,53 +209,53 @@
     },
     "steps": {
       "prompts": {
-        "title": "Manage prompts and versions",
-        "description": "Create prompts with variables, keep versions, and update without redeploying.",
+        "title": "Edit prompts without developers",
+        "description": "Change AI prompts yourself. No tickets, no waiting, no code deployments.",
         "features": {
-          "history": "Version history for every change",
-          "variables": "Variables for dynamic content",
-          "instantUpdates": "Update prompts instantly across apps",
-          "collaboration": "Share and edit with your team"
+          "history": "One-click rollback to any version",
+          "variables": "Dynamic variables like {{user_name}}",
+          "instantUpdates": "Changes go live instantly across all apps",
+          "collaboration": "Team collaboration in real-time"
         }
       },
       "api": {
-        "title": "Call prompts via REST",
-        "description": "Fetch prompts from any service with a simple HTTP call.",
+        "title": "Simple REST API",
+        "description": "Replace hardcoded prompts with one API call. Works with any language or platform.",
         "features": {
-          "rest": "REST API for any stack",
-          "examples": "Copy/paste code snippets",
-          "auth": "API key authentication",
-          "platforms": "Works for web, mobile, backend"
+          "rest": "GET /api/v1/get-prompt — that's it",
+          "examples": "Copy-paste examples for Python, JS, curl",
+          "auth": "Secure API key authentication",
+          "platforms": "Web, mobile, backend, automation tools"
         }
       },
       "sdk": {
-        "title": "Use SDKs and no-code integrations",
-        "description": "Connect xR2 to Make, n8n, and other tools without custom code.",
+        "title": "No-code integrations",
+        "description": "Using Make, n8n, or Zapier? Connect xR2 in minutes without writing code.",
         "features": {
-          "make": "Make.com module",
-          "n8n": "n8n custom node",
-          "nocode": "Zapier integration",
-          "templates": "Ready configs and examples"
+          "make": "Make.com — drag & drop module",
+          "n8n": "n8n — custom node ready",
+          "nocode": "Zapier — webhook integration",
+          "templates": "Pre-built templates to get started"
         }
       },
       "analytics": {
-        "title": "Monitor usage and cost",
-        "description": "Track events, latency, cost, and outcomes in one place.",
+        "title": "Track revenue per prompt",
+        "description": "See which prompts make money. Not just usage — actual conversions and revenue.",
         "features": {
-          "realtime": "Usage and event stats",
-          "costs": "Cost per prompt",
-          "performance": "Latency and performance metrics",
-          "trends": "Trends and breakdowns"
+          "realtime": "Real-time usage by source (web, mobile, API)",
+          "costs": "Cost tracking per prompt and version",
+          "performance": "Response time and latency metrics",
+          "trends": "Revenue attribution to specific prompts"
         }
       },
       "ab": {
-        "title": "Run A/B tests",
-        "description": "Compare prompt versions and measure conversions.",
+        "title": "A/B test and optimize",
+        "description": "Compare prompt versions with real traffic. Pick winners based on data, not guesses.",
         "features": {
-          "multiple": "Test multiple versions",
-          "traffic": "Split traffic and track conversions",
-          "significance": "Check statistical significance",
-          "decisions": "Pick winners based on data"
+          "multiple": "Test 2+ versions simultaneously",
+          "traffic": "Automatic traffic splitting (50/50)",
+          "significance": "Statistical significance detection",
+          "decisions": "Deploy winner with one click"
         }
       }
     }
