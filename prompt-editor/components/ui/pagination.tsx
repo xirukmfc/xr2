@@ -23,7 +23,7 @@ export function Pagination({
   className = "",
 }: PaginationProps) {
   const { t } = useLocale()
-  const startIndex = (currentPage - 1) * itemsPerPage + 1
+  const startIndex = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1
   const endIndex = Math.min(currentPage * itemsPerPage, totalItems)
 
   const getVisiblePages = () => {
