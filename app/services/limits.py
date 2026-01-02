@@ -34,7 +34,7 @@ class LimitsService:
         user_limits = UserLimits(
             user_id=user_id,
             max_prompts=global_limits.default_max_prompts,
-            max_api_requests_per_day=global_limits.default_max_api_requests_per_day
+            max_api_requests_per_month=global_limits.default_max_api_requests_per_month
         )
 
         self.session.add(user_limits)
@@ -65,8 +65,8 @@ class LimitsService:
         if not global_limits:
             # Create default global limits
             global_limits = GlobalLimits(
-                default_max_prompts=10,
-                default_max_api_requests_per_day=100,
+                default_max_prompts=5,
+                default_max_api_requests_per_month=100,
                 is_active=True
             )
             self.session.add(global_limits)
@@ -81,11 +81,11 @@ class LimitsService:
         # If user has custom limits set (different from defaults), use them
         global_limits = await self.get_global_limits()
         if (user_limits.max_prompts != global_limits.default_max_prompts or
-                user_limits.max_api_requests_per_day != global_limits.default_max_api_requests_per_day):
-            return user_limits.max_prompts, user_limits.max_api_requests_per_day
+                user_limits.max_api_requests_per_month != global_limits.default_max_api_requests_per_month):
+            return user_limits.max_prompts, user_limits.max_api_requests_per_month
 
         # Otherwise use global limits
-        return global_limits.default_max_prompts, global_limits.default_max_api_requests_per_day
+        return global_limits.default_max_prompts, global_limits.default_max_api_requests_per_month
 
     async def check_prompt_limit(self, user_id: UUID) -> Tuple[bool, int, int]:
         """
@@ -128,13 +128,13 @@ class LimitsService:
             reset_time = UserAPIUsage.get_next_reset_time()
             return True, 0, -1, reset_time  # -1 indicates unlimited
 
-        # Get today's usage
-        today = UserAPIUsage.get_today_date()
+        # Get current month's usage
+        current_month = UserAPIUsage.get_current_month_start()
         usage_result = await self.session.execute(
             select(UserAPIUsage).where(
                 and_(
                     UserAPIUsage.user_id == user_id,
-                    UserAPIUsage.date == today
+                    UserAPIUsage.date == current_month
                 )
             )
         )
@@ -145,7 +145,7 @@ class LimitsService:
         # Get limits
         _, max_api_requests = await self.get_effective_limits(user_id)
 
-        # Calculate reset time (next day at 00:00 UTC)
+        # Calculate reset time (start of next month in UTC)
         reset_time = UserAPIUsage.get_next_reset_time()
 
         can_request = current_count < max_api_requests
@@ -153,17 +153,17 @@ class LimitsService:
 
     async def increment_api_usage(self, user_id: UUID) -> int:
         """
-        Increment API usage for today
+        Increment API usage for current month
         Returns: new count
         """
-        today = UserAPIUsage.get_today_date()
+        current_month = UserAPIUsage.get_current_month_start()
 
         # Try to get existing usage record
         usage_result = await self.session.execute(
             select(UserAPIUsage).where(
                 and_(
                     UserAPIUsage.user_id == user_id,
-                    UserAPIUsage.date == today
+                    UserAPIUsage.date == current_month
                 )
             )
         )
@@ -174,10 +174,10 @@ class LimitsService:
             usage.api_requests_count += 1
             new_count = usage.api_requests_count
         else:
-            # Create new record
+            # Create new record for current month
             usage = UserAPIUsage(
                 user_id=user_id,
-                date=today,
+                date=current_month,
                 api_requests_count=1
             )
             self.session.add(usage)
@@ -194,7 +194,7 @@ class LimitsService:
         if max_prompts is not None:
             user_limits.max_prompts = max_prompts
         if max_api_requests is not None:
-            user_limits.max_api_requests_per_day = max_api_requests
+            user_limits.max_api_requests_per_month = max_api_requests
 
         await self.session.flush()
         return user_limits
@@ -207,7 +207,7 @@ class LimitsService:
         if max_prompts is not None:
             global_limits.default_max_prompts = max_prompts
         if max_api_requests is not None:
-            global_limits.default_max_api_requests_per_day = max_api_requests
+            global_limits.default_max_api_requests_per_month = max_api_requests
 
         await self.session.flush()
         return global_limits

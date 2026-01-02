@@ -1050,7 +1050,7 @@ class GlobalLimitsAdmin(ModelView, model=GlobalLimits):
     """Admin interface for Global Limits"""
     column_list = [
         GlobalLimits.default_max_prompts,
-        GlobalLimits.default_max_api_requests_per_day,
+        GlobalLimits.default_max_api_requests_per_month,
         GlobalLimits.is_active,
         GlobalLimits.created_at,
         GlobalLimits.updated_at
@@ -1060,7 +1060,7 @@ class GlobalLimitsAdmin(ModelView, model=GlobalLimits):
 
     column_labels = {
         GlobalLimits.default_max_prompts: "Default Max Prompts",
-        GlobalLimits.default_max_api_requests_per_day: "Default Max API Requests/Day",
+        GlobalLimits.default_max_api_requests_per_month: "Default Max API Requests/Month",
         GlobalLimits.is_active: "Active",
         GlobalLimits.created_at: "Created",
         GlobalLimits.updated_at: "Updated"
@@ -1085,7 +1085,7 @@ class UserLimitsAdmin(ModelView, model=UserLimits):
     column_list = [
         UserLimits.user,
         UserLimits.max_prompts,
-        UserLimits.max_api_requests_per_day,
+        UserLimits.max_api_requests_per_month,
         UserLimits.created_at,
         UserLimits.updated_at
     ]
@@ -1100,7 +1100,7 @@ class UserLimitsAdmin(ModelView, model=UserLimits):
     column_labels = {
         UserLimits.user: "User",
         UserLimits.max_prompts: "Max Prompts",
-        UserLimits.max_api_requests_per_day: "Max API Requests/Day",
+        UserLimits.max_api_requests_per_month: "Max API Requests/Month",
         UserLimits.created_at: "Created",
         UserLimits.updated_at: "Updated"
     }
@@ -1163,14 +1163,14 @@ class UserAPIUsageAdmin(ModelView, model=UserAPIUsage):
 
     column_labels = {
         UserAPIUsage.user: "User",
-        UserAPIUsage.date: "Date",
+        UserAPIUsage.date: "Month",
         UserAPIUsage.api_requests_count: "API Requests Count",
         UserAPIUsage.created_at: "Created"
     }
 
     column_formatters = {
         UserAPIUsage.user: lambda obj, attr: getattr(obj.user, "username", None) if obj.user else str(obj.user_id),
-        UserAPIUsage.date: lambda obj, attr: obj.date.date() if obj.date else "Unknown"
+        UserAPIUsage.date: lambda obj, attr: obj.date.strftime('%Y-%m') if obj.date else "Unknown"
     }
 
     # Read-only - usage is automatically tracked
