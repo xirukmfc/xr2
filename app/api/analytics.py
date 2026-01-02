@@ -153,8 +153,8 @@ async def analyze_funnel_test(
     from app.models.analytics import ABTest, PromptEvent
     from sqlalchemy import func
 
-    # Get first workspace for testing
-    workspace_query = await db.execute(select(Workspace.id).limit(1))
+    # Get first workspace for testing (sorted by created_at for consistency)
+    workspace_query = await db.execute(select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1))
     workspace_row = workspace_query.first()
 
     if not workspace_row:

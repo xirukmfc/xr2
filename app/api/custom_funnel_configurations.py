@@ -210,7 +210,7 @@ async def update_test_custom_funnel_configuration(
         # Get first real workspace_id from the database
         from app.models.workspace import Workspace
         workspace_query = await db.execute(
-            select(Workspace.id).limit(1)
+            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
         )
         workspace_row = workspace_query.first()
 

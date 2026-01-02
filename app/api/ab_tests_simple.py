@@ -153,7 +153,7 @@ async def get_test_ab_tests(db: AsyncSession = Depends(get_db)):
         # Get first real workspace_id from the database
         from app.models.workspace import Workspace
         workspace_query = await db.execute(
-            select(Workspace.id).limit(1)
+            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
         )
         workspace_row = workspace_query.first()
 
@@ -212,7 +212,7 @@ async def create_test_ab_test(
         # Get first real workspace_id from the database
         from app.models.workspace import Workspace
         workspace_query = await db.execute(
-            select(Workspace.id).limit(1)
+            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
         )
         workspace_row = workspace_query.first()
 
@@ -302,7 +302,7 @@ async def get_test_funnels(db: AsyncSession = Depends(get_db)):
         # Get first real workspace_id from the database
         from app.models.workspace import Workspace
         workspace_query = await db.execute(
-            select(Workspace.id).limit(1)
+            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
         )
         workspace_row = workspace_query.first()
 
@@ -340,7 +340,7 @@ async def get_test_prompts_with_versions(db: AsyncSession = Depends(get_db)):
         # Get first real workspace_id from the database
         from app.models.workspace import Workspace
         workspace_query = await db.execute(
-            select(Workspace.id).limit(1)
+            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
         )
         workspace_row = workspace_query.first()
 
