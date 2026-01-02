@@ -11,7 +11,7 @@ import json
 from app.models.analytics import CustomFunnelConfiguration
 from app.models.user import User
 from app.core.database import get_session as get_db
-from app.core.auth import get_current_user
+from app.core.auth import get_current_user, get_current_user_optional
 
 router = APIRouter(prefix="/custom-funnel-configurations", tags=["custom-funnel-configurations"])
 
@@ -67,22 +67,28 @@ class CustomFunnelConfigurationResponse(BaseModel):
     updated_at: datetime
 
 
-# Test endpoints (no authentication required)
+# Test endpoints (uses auth if token provided, otherwise fallback to first workspace)
 @router.get("/test")
-async def get_test_custom_funnel_configurations(db: AsyncSession = Depends(get_db)):
-    """Get custom funnel configurations for testing (no authentication)"""
+async def get_test_custom_funnel_configurations(
+    current_user: Optional[User] = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get custom funnel configurations for testing (uses auth if available)"""
     try:
-        # Get first real workspace_id from the database (sorted by created_at for consistency)
-        from app.models.workspace import Workspace
-        workspace_query = await db.execute(
-            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
-        )
-        workspace_row = workspace_query.first()
-
-        if not workspace_row:
-            return []
-
-        workspace_id = workspace_row.id
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                return []
+            workspace_id = workspace_row.id
+        
         print(f"[FUNNEL GET] Using workspace_id: {workspace_id}")
 
         # Get all custom funnel configurations for this workspace
@@ -135,9 +141,10 @@ async def debug_funnel_request(request: Request):
 @router.post("/test", response_model=CustomFunnelConfigurationResponse)
 async def create_test_custom_funnel_configuration(
     config_data: CustomFunnelConfigurationCreate,
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
-    """Create a new custom funnel configuration for testing (no authentication)"""
+    """Create a new custom funnel configuration for testing (uses auth if available)"""
     print(f"[FUNNEL CREATE] Received data: name={config_data.name}, description={config_data.description}, event_steps={config_data.event_steps}")
 
     # Validate event_steps
@@ -150,17 +157,20 @@ async def create_test_custom_funnel_configuration(
         raise HTTPException(422, "All event steps must be non-empty")
 
     try:
-        # Get first real workspace_id from the database (sorted by created_at for consistency)
-        from app.models.workspace import Workspace
-        workspace_query = await db.execute(
-            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
-        )
-        workspace_row = workspace_query.first()
-
-        if not workspace_row:
-            raise HTTPException(404, "No workspace found")
-
-        workspace_id = workspace_row.id
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                raise HTTPException(404, "No workspace found")
+            workspace_id = workspace_row.id
+        
         print(f"[FUNNEL CREATE] Using workspace_id: {workspace_id}")
 
         # Check name uniqueness
@@ -203,21 +213,24 @@ async def create_test_custom_funnel_configuration(
 async def update_test_custom_funnel_configuration(
     config_id: str,
     config_data: CustomFunnelConfigurationUpdate,
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
-    """Update a custom funnel configuration for testing (no authentication)"""
+    """Update a custom funnel configuration for testing (uses auth if available)"""
     try:
-        # Get first real workspace_id from the database
-        from app.models.workspace import Workspace
-        workspace_query = await db.execute(
-            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
-        )
-        workspace_row = workspace_query.first()
-
-        if not workspace_row:
-            raise HTTPException(404, "No workspace found")
-
-        workspace_id = workspace_row.id
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                raise HTTPException(404, "No workspace found")
+            workspace_id = workspace_row.id
 
         # Find the configuration
         result = await db.execute(
@@ -259,21 +272,24 @@ async def update_test_custom_funnel_configuration(
 @router.delete("/test/{config_id}")
 async def delete_test_custom_funnel_configuration(
     config_id: str,
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
-    """Delete a custom funnel configuration for testing (no authentication)"""
+    """Delete a custom funnel configuration for testing (uses auth if available)"""
     try:
-        # Get first real workspace_id from the database (sorted by created_at for consistency)
-        from app.models.workspace import Workspace
-        workspace_query = await db.execute(
-            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
-        )
-        workspace_row = workspace_query.first()
-
-        if not workspace_row:
-            raise HTTPException(404, "No workspace found")
-
-        workspace_id = workspace_row.id
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                raise HTTPException(404, "No workspace found")
+            workspace_id = workspace_row.id
 
         # Find and delete the configuration
         result = await db.execute(

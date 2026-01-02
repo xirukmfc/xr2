@@ -12,7 +12,8 @@ from app.models.analytics import ABTest, PromptEvent, CustomFunnelConfiguration
 from app.models.prompt import Prompt, PromptVersion
 from app.models.user import User
 from app.core.database import get_session as get_db
-from app.core.auth import get_current_user
+from app.core.auth import get_current_user, get_current_user_optional
+from app.api.analytics import get_user_workspace
 
 router = APIRouter(prefix="/ab-tests-simple", tags=["ab-tests-simple"])
 
@@ -145,22 +146,27 @@ class ABTestResponse(BaseModel):
     updated_at: datetime
 
 
-# Test endpoints (no authentication required)
+# Test endpoints (uses auth if token provided, otherwise fallback to first workspace)
 @router.get("/test")
-async def get_test_ab_tests(db: AsyncSession = Depends(get_db)):
-    """Get A/B tests for testing (no authentication)"""
+async def get_test_ab_tests(
+    current_user: Optional[User] = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get A/B tests for testing (uses auth if available)"""
     try:
-        # Get first real workspace_id from the database
-        from app.models.workspace import Workspace
-        workspace_query = await db.execute(
-            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
-        )
-        workspace_row = workspace_query.first()
-
-        if not workspace_row:
-            return []
-
-        workspace_id = workspace_row.id
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                return []
+            workspace_id = workspace_row.id
 
         # Get all A/B tests for this workspace
         result = await db.execute(
@@ -205,21 +211,24 @@ async def get_test_ab_tests(db: AsyncSession = Depends(get_db)):
 @router.post("/test")
 async def create_test_ab_test(
     test_data: ABTestCreate,
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
-    """Create a new A/B test for testing (no authentication)"""
+    """Create a new A/B test for testing (uses auth if available)"""
     try:
-        # Get first real workspace_id from the database
-        from app.models.workspace import Workspace
-        workspace_query = await db.execute(
-            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
-        )
-        workspace_row = workspace_query.first()
-
-        if not workspace_row:
-            raise HTTPException(404, "No workspace found")
-
-        workspace_id = workspace_row.id
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                raise HTTPException(404, "No workspace found")
+            workspace_id = workspace_row.id
 
         # Validate prompt exists
         prompt_result = await db.execute(
@@ -296,20 +305,25 @@ async def create_test_ab_test(
 
 
 @router.get("/test/funnels")
-async def get_test_funnels(db: AsyncSession = Depends(get_db)):
-    """Get funnel configurations for testing (no authentication)"""
+async def get_test_funnels(
+    current_user: Optional[User] = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get funnel configurations for testing (uses auth if available)"""
     try:
-        # Get first real workspace_id from the database
-        from app.models.workspace import Workspace
-        workspace_query = await db.execute(
-            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
-        )
-        workspace_row = workspace_query.first()
-
-        if not workspace_row:
-            return []
-
-        workspace_id = workspace_row.id
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                return []
+            workspace_id = workspace_row.id
 
         # Get all active funnels
         result = await db.execute(
@@ -334,15 +348,40 @@ async def get_test_funnels(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/test/prompts")
-async def get_test_prompts_with_versions(db: AsyncSession = Depends(get_db)):
-    """Get prompts with their versions for testing (no authentication)"""
+async def get_test_prompts_with_versions(
+    current_user: Optional[User] = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get prompts with their versions for testing (uses auth if available)"""
     try:
-        # Get ALL prompts from ALL workspaces for testing
-        result = await db.execute(
-            select(Prompt).options(
-                selectinload(Prompt.versions)
-            ).order_by(Prompt.name)
-        )
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+            result = await db.execute(
+                select(Prompt).options(
+                    selectinload(Prompt.versions)
+                ).where(
+                    Prompt.workspace_id == workspace_id
+                ).order_by(Prompt.name)
+            )
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                return []
+            workspace_id = workspace_row.id
+            result = await db.execute(
+                select(Prompt).options(
+                    selectinload(Prompt.versions)
+                ).where(
+                    Prompt.workspace_id == workspace_id
+                ).order_by(Prompt.name)
+            )
+        
         prompts = result.scalars().all()
 
         return [
