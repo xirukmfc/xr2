@@ -28,7 +28,7 @@ from app.services.analytics import (
 # These imports will need to be created or imported from your auth system
 from app.models.user import User
 from app.core.database import get_session as get_db
-from app.core.auth import get_current_user
+from app.core.auth import get_current_user, get_current_user_optional
 
 
 class FunnelAnalysisRequest(BaseModel):
@@ -146,21 +146,26 @@ async def analyze_funnel(
 @router.post("/funnel-test")
 async def analyze_funnel_test(
         request: FunnelAnalysisRequest,
+        current_user: Optional[User] = Depends(get_current_user_optional),
         db: AsyncSession = Depends(get_db)
 ):
-    """Test endpoint for funnel analysis with optional A/B test split"""
+    """Test endpoint for funnel analysis with optional A/B test split (uses auth if available)"""
     from app.models.workspace import Workspace
     from app.models.analytics import ABTest, PromptEvent
     from sqlalchemy import func
 
-    # Get first workspace for testing (sorted by created_at for consistency)
-    workspace_query = await db.execute(select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1))
-    workspace_row = workspace_query.first()
+    # If user is authenticated, get their workspace
+    if current_user:
+        workspace_id = await get_user_workspace(db, current_user)
+    else:
+        # Fallback: get first workspace for unauthenticated requests
+        workspace_query = await db.execute(select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1))
+        workspace_row = workspace_query.first()
 
-    if not workspace_row:
-        raise HTTPException(404, "No workspace found")
+        if not workspace_row:
+            raise HTTPException(404, "No workspace found")
 
-    workspace_id = workspace_row.id
+        workspace_id = workspace_row.id
 
     # If A/B test ID provided, return split funnel data
     if request.ab_test_id:
@@ -330,7 +335,9 @@ async def analyze_funnel_test(
             # Get all version IDs for this prompt
             versions_query = select(PromptVersion.id).where(PromptVersion.prompt_id == prompt_uuid)
             versions_result = await db.execute(versions_query)
-            version_ids = [row[0] for row in versions_result.fetchall()]
+            version_ids = [row[0] for row in versions_result.all()]
+            
+            logger.info(f"Found {len(version_ids)} versions for prompt {prompt_uuid}: {version_ids}")
             
             # Filter by prompt_id OR by prompt_version_id that belongs to this prompt
             # Use OR because events can be linked either way
@@ -377,13 +384,53 @@ async def analyze_funnel_test(
             and_(*base_conditions)
         )
         
-        # Log the query for debugging (first 100 chars)
-        logger.info(f"Query for event '{event_name}': {str(query)[:200]}...")
+        # Log the query for debugging
+        logger.info(f"Query for event '{event_name}': {str(query)[:500]}...")
+        logger.info(f"Base conditions count: {len(base_conditions)}")
         
         count_result = await db.execute(query)
         event_count = count_result.scalar() or 0
         
         logger.info(f"Event '{event_name}' count: {event_count}")
+        
+        # Debug: if count is 0 and we have a prompt filter, check if any events exist for this prompt
+        if event_count == 0 and request.prompt_id:
+            from uuid import UUID as PyUUID
+            from app.models.prompt import PromptVersion as PV
+            debug_prompt_uuid = PyUUID(request.prompt_id)
+            
+            # Check events with direct prompt_id
+            debug_query1 = select(func.count(PromptEvent.id)).where(
+                PromptEvent.workspace_id == workspace_id,
+                PromptEvent.prompt_id == debug_prompt_uuid
+            )
+            debug_result1 = await db.execute(debug_query1)
+            debug_count1 = debug_result1.scalar() or 0
+            logger.info(f"DEBUG: Events with direct prompt_id match: {debug_count1}")
+            
+            # Get versions for debug
+            debug_versions_query = select(PV.id).where(PV.prompt_id == debug_prompt_uuid)
+            debug_versions_result = await db.execute(debug_versions_query)
+            debug_version_ids = [row[0] for row in debug_versions_result.all()]
+            logger.info(f"DEBUG: Found {len(debug_version_ids)} versions for prompt")
+            
+            # Check events with prompt_version_id
+            if debug_version_ids:
+                debug_query2 = select(func.count(PromptEvent.id)).where(
+                    PromptEvent.workspace_id == workspace_id,
+                    PromptEvent.prompt_version_id.in_(debug_version_ids)
+                )
+                debug_result2 = await db.execute(debug_query2)
+                debug_count2 = debug_result2.scalar() or 0
+                logger.info(f"DEBUG: Events with prompt_version_id match: {debug_count2}")
+            
+            # Check total events in workspace
+            debug_query3 = select(func.count(PromptEvent.id)).where(
+                PromptEvent.workspace_id == workspace_id
+            )
+            debug_result3 = await db.execute(debug_query3)
+            debug_count3 = debug_result3.scalar() or 0
+            logger.info(f"DEBUG: Total events in workspace: {debug_count3}")
 
         if i == 0:
             first_step_count = event_count

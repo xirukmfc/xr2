@@ -408,13 +408,31 @@ async def get_test_prompts_with_versions(
 @router.post("/test/{test_id}/start")
 async def start_test_ab_test(
     test_id: str,
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
-    """Start an A/B test for testing (no authentication)"""
+    """Start an A/B test for testing (uses auth if available)"""
     try:
-        # Get A/B test
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                raise HTTPException(404, "No workspace found")
+            workspace_id = workspace_row.id
+
+        # Get A/B test (only from user's workspace)
         result = await db.execute(
-            select(ABTest).where(ABTest.id == test_id)
+            select(ABTest).where(
+                ABTest.id == test_id,
+                ABTest.workspace_id == workspace_id
+            )
         )
         ab_test = result.scalar_one_or_none()
 
@@ -447,13 +465,31 @@ async def start_test_ab_test(
 @router.post("/test/{test_id}/stop")
 async def stop_test_ab_test(
     test_id: str,
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
-    """Stop an A/B test for testing (no authentication)"""
+    """Stop an A/B test for testing (uses auth if available)"""
     try:
-        # Get A/B test
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                raise HTTPException(404, "No workspace found")
+            workspace_id = workspace_row.id
+
+        # Get A/B test (only from user's workspace)
         result = await db.execute(
-            select(ABTest).where(ABTest.id == test_id)
+            select(ABTest).where(
+                ABTest.id == test_id,
+                ABTest.workspace_id == workspace_id
+            )
         )
         ab_test = result.scalar_one_or_none()
 
@@ -483,13 +519,31 @@ async def stop_test_ab_test(
 @router.post("/test/{test_id}/complete")
 async def complete_test_ab_test(
     test_id: str,
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
-    """Complete an A/B test for testing (no authentication)"""
+    """Complete an A/B test for testing (uses auth if available)"""
     try:
-        # Get A/B test
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                raise HTTPException(404, "No workspace found")
+            workspace_id = workspace_row.id
+
+        # Get A/B test (only from user's workspace)
         result = await db.execute(
-            select(ABTest).where(ABTest.id == test_id)
+            select(ABTest).where(
+                ABTest.id == test_id,
+                ABTest.workspace_id == workspace_id
+            )
         )
         ab_test = result.scalar_one_or_none()
 
@@ -521,13 +575,31 @@ async def complete_test_ab_test(
 @router.delete("/test/{test_id}")
 async def delete_test_ab_test(
     test_id: str,
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
-    """Delete an A/B test for testing (no authentication)"""
+    """Delete an A/B test for testing (uses auth if available)"""
     try:
-        # Get A/B test
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                raise HTTPException(404, "No workspace found")
+            workspace_id = workspace_row.id
+
+        # Get A/B test (only from user's workspace)
         result = await db.execute(
-            select(ABTest).where(ABTest.id == test_id)
+            select(ABTest).where(
+                ABTest.id == test_id,
+                ABTest.workspace_id == workspace_id
+            )
         )
         ab_test = result.scalar_one_or_none()
 
@@ -653,18 +725,36 @@ async def get_metadata_aggregations(
 @router.get("/test/{test_id}/results")
 async def get_test_ab_test_results(
     test_id: str,
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get A/B test results with metrics and statistical significance"""
+    """Get A/B test results with metrics and statistical significance (uses auth if available)"""
     try:
-        # Get A/B test with relationships
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
+            if not workspace_row:
+                raise HTTPException(404, "No workspace found")
+            workspace_id = workspace_row.id
+
+        # Get A/B test with relationships (only from user's workspace)
         result = await db.execute(
             select(ABTest).options(
                 selectinload(ABTest.prompt),
                 selectinload(ABTest.version_a),
                 selectinload(ABTest.version_b),
                 selectinload(ABTest.funnel_config)
-            ).where(ABTest.id == test_id)
+            ).where(
+                ABTest.id == test_id,
+                ABTest.workspace_id == workspace_id
+            )
         )
         ab_test = result.scalar_one_or_none()
 

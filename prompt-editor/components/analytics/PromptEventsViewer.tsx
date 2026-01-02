@@ -352,11 +352,12 @@ export default function PromptEventsViewer() {
       };
     }).sort((a, b) => a.number - b.number);
 
-    // Convert to array format for rendering, with prompt_request (get_prompt) always first
+    // Convert to array format for rendering, with get_prompt always first, then alphabetically
     const rows = Object.entries(pivot)
       .sort(([eventTypeA], [eventTypeB]) => {
-        if (eventTypeA === 'prompt_request') return -1;
-        if (eventTypeB === 'prompt_request') return 1;
+        // get_prompt (or prompt_request which maps to it) always first
+        if (eventTypeA === 'get_prompt' || eventTypeA === 'prompt_request') return -1;
+        if (eventTypeB === 'get_prompt' || eventTypeB === 'prompt_request') return 1;
         return eventTypeA.localeCompare(eventTypeB);
       })
       .map(([eventType, versionCounts]) => ({

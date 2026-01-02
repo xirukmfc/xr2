@@ -10,7 +10,7 @@ from sqlalchemy import select, and_
 from app.models.analytics import EventDefinition
 from app.models.user import User
 from app.core.database import get_session as get_db
-from app.core.auth import get_current_user
+from app.core.auth import get_current_user, get_current_user_optional
 
 class EventDefinitionRequest(BaseModel):
     event_name: str
@@ -224,23 +224,31 @@ async def delete_event_definition(
 
 
 @router.get("/test")
-async def get_test_event_definitions(db: AsyncSession = Depends(get_db)):
-    """Get event definitions for testing (no authentication)"""
+async def get_test_event_definitions(
+    current_user: Optional[User] = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get event definitions for testing (uses auth if available)"""
     try:
-        # Get first workspace from the database for testing
-        from app.models.workspace import Workspace
-        workspace_query = await db.execute(
-            select(Workspace).limit(1)
-        )
-        workspace = workspace_query.scalar_one_or_none()
+        # If user is authenticated, get their workspace
+        if current_user:
+            workspace_id = await get_user_workspace(db, current_user)
+        else:
+            # Fallback: get first workspace for unauthenticated requests
+            from app.models.workspace import Workspace
+            workspace_query = await db.execute(
+                select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
+            )
+            workspace_row = workspace_query.first()
 
-        if not workspace:
-            return []
+            if not workspace_row:
+                return []
+            workspace_id = workspace_row.id
 
         # Get event definitions for this workspace
         result = await db.execute(
             select(EventDefinition).where(
-                EventDefinition.workspace_id == workspace.id,
+                EventDefinition.workspace_id == workspace_id,
                 EventDefinition.is_active == True
             )
         )
