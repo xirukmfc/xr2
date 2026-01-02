@@ -40,6 +40,15 @@ def calculate_statistical_significance(
     rate_a = conversions_a / total_a if total_a > 0 else 0
     rate_b = conversions_b / total_b if total_b > 0 else 0
     
+    # Check for invalid data (conversions > total)
+    if conversions_a > total_a or conversions_b > total_b:
+        return {
+            "confidence": 0,
+            "is_significant": False,
+            "p_value": 1.0,
+            "message": "Invalid data: conversions exceed total requests"
+        }
+    
     # Pooled conversion rate
     pooled_rate = (conversions_a + conversions_b) / (total_a + total_b)
     
@@ -807,11 +816,12 @@ async def get_test_ab_test_results(
         ).label('event_name')
         
         # Get events for version A by trace_id (no date restrictions)
+        # Count unique trace_ids per event type (not total events) to avoid duplicates
         if trace_ids_a:
             events_a_result = await db.execute(
                 select(
                     event_name_expr,
-                    func.count(PromptEvent.id.distinct()).label('count')
+                    func.count(func.distinct(PromptEvent.trace_id)).label('count')
                 ).where(
                     PromptEvent.trace_id.in_(trace_ids_a)
                 ).group_by(event_name_expr)
@@ -830,6 +840,7 @@ async def get_test_ab_test_results(
                 events_a[alias] = events_a_raw[actual]
 
         # Get events for version B by trace_id (no date restrictions)
+        # Count unique trace_ids per event type (not total events) to avoid duplicates
         event_name_expr_b = case(
             (PromptEvent.event_type == 'custom_event', 
              func.coalesce(PromptEvent.event_metadata['event_name'].astext, 'custom_event')),
@@ -840,7 +851,7 @@ async def get_test_ab_test_results(
             events_b_result = await db.execute(
                 select(
                     event_name_expr_b,
-                    func.count(PromptEvent.id.distinct()).label('count')
+                    func.count(func.distinct(PromptEvent.trace_id)).label('count')
                 ).where(
                     PromptEvent.trace_id.in_(trace_ids_b)
                 ).group_by(event_name_expr_b)
@@ -862,32 +873,36 @@ async def get_test_ab_test_results(
         if ab_test.funnel_config and ab_test.funnel_config.event_steps:
             funnel_steps = ab_test.funnel_config.event_steps
             
+            # Use actual trace_id counts instead of test request counters for accuracy
+            total_requests_a = len(trace_ids_a) if trace_ids_a else ab_test.version_a_requests
+            total_requests_b = len(trace_ids_b) if trace_ids_b else ab_test.version_b_requests
+            
             # Calculate funnel for version A
             funnel_a = []
             for step in funnel_steps:
-                # For get_prompt/prompt_request, use the A/B test request counters
+                # For get_prompt/prompt_request, use actual trace_id count
                 if step in ('get_prompt', 'prompt_request'):
-                    count = ab_test.version_a_requests
+                    count = total_requests_a
                 else:
                     count = events_a.get(step, 0)
                 funnel_a.append({
                     "step": step,
                     "count": count,
-                    "conversion_rate": (count / ab_test.version_a_requests * 100) if ab_test.version_a_requests > 0 else 0
+                    "conversion_rate": (count / total_requests_a * 100) if total_requests_a > 0 else 0
                 })
             
             # Calculate funnel for version B
             funnel_b = []
             for step in funnel_steps:
-                # For get_prompt/prompt_request, use the A/B test request counters
+                # For get_prompt/prompt_request, use actual trace_id count
                 if step in ('get_prompt', 'prompt_request'):
-                    count = ab_test.version_b_requests
+                    count = total_requests_b
                 else:
                     count = events_b.get(step, 0)
                 funnel_b.append({
                     "step": step,
                     "count": count,
-                    "conversion_rate": (count / ab_test.version_b_requests * 100) if ab_test.version_b_requests > 0 else 0
+                    "conversion_rate": (count / total_requests_b * 100) if total_requests_b > 0 else 0
                 })
             
             # Final conversion rate (last step / first step)
@@ -902,14 +917,14 @@ async def get_test_ab_test_results(
                 "version_b": funnel_b,
                 "final_conversion_a": conversions_a,
                 "final_conversion_b": conversions_b,
-                "conversion_rate_a": (conversions_a / ab_test.version_a_requests * 100) if ab_test.version_a_requests > 0 else 0,
-                "conversion_rate_b": (conversions_b / ab_test.version_b_requests * 100) if ab_test.version_b_requests > 0 else 0,
+                "conversion_rate_a": (conversions_a / total_requests_a * 100) if total_requests_a > 0 else 0,
+                "conversion_rate_b": (conversions_b / total_requests_b * 100) if total_requests_b > 0 else 0,
             }
             
             # Calculate statistical significance for funnel
             statistical_significance = calculate_statistical_significance(
-                conversions_a, ab_test.version_a_requests,
-                conversions_b, ab_test.version_b_requests
+                conversions_a, total_requests_a,
+                conversions_b, total_requests_b
             )
             funnel_results["statistical_significance"] = statistical_significance
             
@@ -917,20 +932,20 @@ async def get_test_ab_test_results(
             if statistical_significance["is_significant"]:
                 if funnel_results["conversion_rate_b"] > funnel_results["conversion_rate_a"]:
                     funnel_results["winner"] = "B"
-                    # Calculate lift: if A is 0%, lift is infinity (represented as very large number)
+                    # Calculate lift: if A is 0%, lift cannot be calculated (division by zero)
                     if funnel_results["conversion_rate_a"] > 0:
                         funnel_results["lift"] = round(((funnel_results["conversion_rate_b"] - funnel_results["conversion_rate_a"]) / funnel_results["conversion_rate_a"] * 100), 1)
                     else:
-                        # If A has 0% and B has >0%, lift is infinite (use a very large number for JSON serialization)
-                        funnel_results["lift"] = 999999.0 if funnel_results["conversion_rate_b"] > 0 else 0.0
+                        # If A has 0% and B has >0%, lift is undefined (frontend can show "N/A" or "∞")
+                        funnel_results["lift"] = None
                 else:
                     funnel_results["winner"] = "A"
-                    # Calculate lift: if B is 0%, lift is infinity
+                    # Calculate lift: if B is 0%, lift cannot be calculated
                     if funnel_results["conversion_rate_b"] > 0:
                         funnel_results["lift"] = round(((funnel_results["conversion_rate_a"] - funnel_results["conversion_rate_b"]) / funnel_results["conversion_rate_b"] * 100), 1)
                     else:
-                        # If B has 0% and A has >0%, lift is infinite
-                        funnel_results["lift"] = 999999.0 if funnel_results["conversion_rate_a"] > 0 else 0.0
+                        # If B has 0% and A has >0%, lift is undefined
+                        funnel_results["lift"] = None
             else:
                 funnel_results["winner"] = None
                 funnel_results["lift"] = None
