@@ -5,7 +5,7 @@ from uuid import UUID
 from datetime import datetime, timezone
 import math
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, func, text
+from sqlalchemy import select, and_, func, text, case
 from sqlalchemy.orm import selectinload
 
 from app.models.analytics import ABTest, PromptEvent, CustomFunnelConfiguration
@@ -767,37 +767,42 @@ async def get_test_ab_test_results(
             "prompt_request": "prompt_request",
         }
 
-        # Build date filter conditions
-        date_conditions_a = [PromptEvent.prompt_version_id == ab_test.version_a_id]
-        date_conditions_b = [PromptEvent.prompt_version_id == ab_test.version_b_id]
+        # Build filter conditions for version A and B
+        # Filter by version_id and optionally by date range
+        # For completed tests, we still include events after ended_at to capture delayed conversions
+        conditions_a = [PromptEvent.prompt_version_id == ab_test.version_a_id]
+        conditions_b = [PromptEvent.prompt_version_id == ab_test.version_b_id]
         
-        # Apply date filters for both running and completed tests
-        # PostgreSQL stores timestamps with timezone, so we compare directly
-        # The database handles timezone conversion automatically
+        # Apply start date filter if test was started
+        # This ensures we only count events from when the test actually began
         if ab_test.started_at:
-            # Use the stored timestamp directly - PostgreSQL handles timezone comparison
-            date_conditions_a.append(PromptEvent.created_at >= ab_test.started_at)
-            date_conditions_b.append(PromptEvent.created_at >= ab_test.started_at)
+            conditions_a.append(PromptEvent.created_at >= ab_test.started_at)
+            conditions_b.append(PromptEvent.created_at >= ab_test.started_at)
         
-        if ab_test.ended_at:
-            date_conditions_a.append(PromptEvent.created_at <= ab_test.ended_at)
-            date_conditions_b.append(PromptEvent.created_at <= ab_test.ended_at)
+        # Note: We don't filter by ended_at for completed tests
+        # This allows capturing delayed conversions that happen after test completion
+        # Events are still linked to the correct version via prompt_version_id
 
         # Get events for version A
+        # For custom_event, we need to check event_metadata['event_name'] as well
         events_a_result = await db.execute(
             select(
-                PromptEvent.event_type,
+                case(
+                    (PromptEvent.event_type == 'custom_event', 
+                     func.coalesce(PromptEvent.event_metadata['event_name'].astext, 'custom_event')),
+                    else_=PromptEvent.event_type
+                ).label('event_name'),
                 func.count(PromptEvent.id).label('count')
             ).where(
-                and_(*date_conditions_a)
-            ).group_by(PromptEvent.event_type)
+                and_(*conditions_a)
+            ).group_by('event_name')
         )
-        events_a_raw = {row.event_type: row.count for row in events_a_result}
+        events_a_raw = {row.event_name: row.count for row in events_a_result}
         
         # Apply aliases - merge aliased events
         events_a = {}
-        for event_type, count in events_a_raw.items():
-            events_a[event_type] = count
+        for event_name, count in events_a_raw.items():
+            events_a[event_name] = count
         # Also add alias mappings for lookups
         for alias, actual in EVENT_ALIASES.items():
             if actual in events_a_raw and alias not in events_a:
@@ -806,18 +811,22 @@ async def get_test_ab_test_results(
         # Get events for version B
         events_b_result = await db.execute(
             select(
-                PromptEvent.event_type,
+                case(
+                    (PromptEvent.event_type == 'custom_event', 
+                     func.coalesce(PromptEvent.event_metadata['event_name'].astext, 'custom_event')),
+                    else_=PromptEvent.event_type
+                ).label('event_name'),
                 func.count(PromptEvent.id).label('count')
             ).where(
-                and_(*date_conditions_b)
-            ).group_by(PromptEvent.event_type)
+                and_(*conditions_b)
+            ).group_by('event_name')
         )
-        events_b_raw = {row.event_type: row.count for row in events_b_result}
+        events_b_raw = {row.event_name: row.count for row in events_b_result}
         
         # Apply aliases for version B
         events_b = {}
-        for event_type, count in events_b_raw.items():
-            events_b[event_type] = count
+        for event_name, count in events_b_raw.items():
+            events_b[event_name] = count
         for alias, actual in EVENT_ALIASES.items():
             if actual in events_b_raw and alias not in events_b:
                 events_b[alias] = events_b_raw[actual]
