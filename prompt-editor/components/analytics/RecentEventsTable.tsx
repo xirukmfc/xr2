@@ -133,6 +133,7 @@ export default function RecentEventsTable() {
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
   const startIndex = (currentPage - 1) * eventsPerPage;
   const displayedEvents = filteredEvents.slice(startIndex, startIndex + eventsPerPage);
+  const hasNoEvents = filteredEvents.length === 0;
 
   if (loading) {
     return (
@@ -183,74 +184,74 @@ export default function RecentEventsTable() {
       {/* Table Block */}
       <Card>
         <CardContent className="px-4 py-3">
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent border-b">
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.time')}</TableHead>
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.traceId')}</TableHead>
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.prompt')}</TableHead>
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.version')}</TableHead>
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.type')}</TableHead>
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.source')}</TableHead>
-                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.event')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {displayedEvents.map((event) => (
-                <TableRow key={event.id} className="hover:bg-muted/50">
-                  <TableCell className="px-4 py-2 font-mono text-xs text-muted-foreground">
-                    {new Date(event.created_at).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false
-                    })}
-                  </TableCell>
-                  <TableCell className="px-4 py-2">
-                    <code className="text-xs bg-muted/50 px-1.5 py-0.5 rounded font-mono break-all">
-                      {event.trace_id}
-                    </code>
-                  </TableCell>
-                <TableCell className="px-4 py-2">
-                  {event.event_metadata?.prompt_name ? (
-                    <span className="text-xs">{event.event_metadata.prompt_name}</span>
-                  ) : (
-                    <span className="text-muted-foreground text-xs">{t('analytics.recentEvents.noPrompt')}</span>
-                  )}
-                </TableCell>
-                <TableCell className="px-4 py-2 text-xs">
-                  {event.event_metadata?.version_number
-                    ? `v${event.event_metadata.version_number}`
-                      : '—'}
-                  </TableCell>
-                  <TableCell className="px-4 py-2 text-xs">{formatEventType(event.event_type)}</TableCell>
-                <TableCell className="px-4 py-2 text-xs">
-                  {event.event_metadata?.source_name ? (
-                    <span>{event.event_metadata.source_name}</span>
-                  ) : (
-                    <span className="text-muted-foreground">{t('analytics.recentEvents.noSource')}</span>
-                  )}
-                </TableCell>
-                <TableCell className="px-4 py-2 text-xs">
-                  {event.event_type === 'custom_event' && event.event_metadata?.event_name ? (
-                    <span>{event.event_metadata.event_name}</span>
-                  ) : (
-                    <span className="text-muted-foreground">{t('analytics.recentEvents.noEvent')}</span>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-          </Table>
-        </div>
-
-        {filteredEvents.length === 0 && !loading && (
-          <div className="text-center text-muted-foreground py-8">
-            {t('analytics.recentEvents.empty')}
-          </div>
-        )}
+          {hasNoEvents ? (
+            <div className="text-center py-6">
+              <p className="text-sm text-muted-foreground">{t('analytics.recentEvents.empty')}</p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent border-b">
+                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.time')}</TableHead>
+                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.traceId')}</TableHead>
+                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.prompt')}</TableHead>
+                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.version')}</TableHead>
+                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.type')}</TableHead>
+                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.source')}</TableHead>
+                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.event')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {displayedEvents.map((event) => (
+                    <TableRow key={event.id} className="hover:bg-muted/50">
+                      <TableCell className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                        {new Date(event.created_at).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false
+                        })}
+                      </TableCell>
+                      <TableCell className="px-4 py-2">
+                        <code className="text-xs bg-muted/50 px-1.5 py-0.5 rounded font-mono break-all">
+                          {event.trace_id}
+                        </code>
+                      </TableCell>
+                      <TableCell className="px-4 py-2">
+                        {event.event_metadata?.prompt_name ? (
+                          <span className="text-xs">{event.event_metadata.prompt_name}</span>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">{t('analytics.recentEvents.noPrompt')}</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="px-4 py-2 text-xs">
+                        {event.event_metadata?.version_number
+                          ? `v${event.event_metadata.version_number}`
+                          : '—'}
+                      </TableCell>
+                      <TableCell className="px-4 py-2 text-xs">{formatEventType(event.event_type)}</TableCell>
+                      <TableCell className="px-4 py-2 text-xs">
+                        {event.event_metadata?.source_name ? (
+                          <span>{event.event_metadata.source_name}</span>
+                        ) : (
+                          <span className="text-muted-foreground">{t('analytics.recentEvents.noSource')}</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="px-4 py-2 text-xs">
+                        {event.event_type === 'custom_event' && event.event_metadata?.event_name ? (
+                          <span>{event.event_metadata.event_name}</span>
+                        ) : (
+                          <span className="text-muted-foreground">{t('analytics.recentEvents.noEvent')}</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
 
         {/* Pagination */}
         {totalPages > 1 && (

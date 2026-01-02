@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, X, Trash2, Lightbulb, Pencil, ArrowRight, TrendingDown, GitCompare, ArrowUpRight, ArrowDownRight, Calendar } from 'lucide-react';
+import { Plus, X, Trash2, Lightbulb, Pencil, ArrowRight, TrendingDown, GitCompare, ArrowUpRight, ArrowDownRight, Calendar, Search } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { useLocale } from '@/contexts/locale-context';
 
@@ -201,7 +201,7 @@ const ModernFunnel = ({ data, color = "#6366f1" }: { data: FunnelStep[], color?:
           : 0;
         
         return (
-          <div key={step.step}>
+          <div key={`${step.step}-${index}`}>
             {/* Step row */}
             <div className="flex items-center gap-3 py-2 group hover:bg-muted/30 rounded px-2 -mx-2 transition-colors">
               {/* Step number */}
@@ -359,6 +359,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
   const [savedConfigurations, setSavedConfigurations] = useState<CustomFunnelConfiguration[]>([]);
   const [currentConfiguration, setCurrentConfiguration] = useState<CustomFunnelConfiguration | null>(null);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [funnelDataFromAPI, setFunnelDataFromAPI] = useState<FunnelStep[] | null>(null);
   const [editingConfiguration, setEditingConfiguration] = useState<CustomFunnelConfiguration | null>(null);
   const [eventDefinitions, setEventDefinitions] = useState<EventDefinition[]>([]);
@@ -565,7 +566,9 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
 
   const loadSavedConfigurations = async () => {
     try {
+      console.log('[FunnelAnalysis] Loading saved configurations...');
       const configurations = await apiClient.request<CustomFunnelConfiguration[]>('/custom-funnel-configurations/test');
+      console.log('[FunnelAnalysis] Loaded configurations:', configurations);
       setSavedConfigurations(configurations);
 
       // Load the first active configuration if available
@@ -595,7 +598,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
 
   const loadEventDefinitions = async () => {
     try {
-      const definitions = await apiClient.request<any[]>('/event-definitions/test');
+      const definitions = await apiClient.request<any[]>('/event-definitions');
       setEventDefinitions(definitions);
     } catch (error) {
       console.error('Failed to load event definitions:', error);
@@ -898,63 +901,60 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
 
   if (!data || data.length === 0) {
     return (
-      <div className="space-y-6">
-        {/* Saved Configurations Section - only show when NOT using separate filters */}
-        {!showCreateForm && !showEditForm && !renderFiltersSeparately && savedConfigurations.length > 0 && (
-          <Card>
-            <CardHeader className="px-4 py-3">
-              <h3 className="text-xs font-medium">{t('analytics.funnelForm.savedConfigs')}</h3>
-              <p className="text-xs text-muted-foreground mt-1">{t('analytics.funnelForm.savedConfigsDescription')}</p>
-            </CardHeader>
-            <CardContent className="px-4 py-3">
-              <div className="grid gap-2">
-                {savedConfigurations.map((config) => (
-                  <div key={config.id} className="flex items-center justify-between p-2 border rounded">
-                    <div>
-                      <div className="font-medium text-xs">{config.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        Steps: {config.event_steps.join(' → ')}
-                      </div>
-                        <div className="text-xs text-muted-foreground">
-                          {t('analytics.funnelForm.createdDate')} {new Date(config.created_at).toLocaleDateString()}
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => loadConfiguration(config)}
-                        variant={currentConfiguration?.id === config.id ? "default" : "outline"}
-                        size="sm"
-                        className="text-xs"
-                      >
-                        {currentConfiguration?.id === config.id ? t('analytics.funnelForm.active') : t('analytics.funnelForm.load')}
-                      </Button>
-                      <Button
-                        onClick={() => startEditConfiguration(config)}
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button
-                        onClick={() => deleteFunnelConfiguration(config.id)}
-                        variant="outline"
-                        size="sm"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
-                        disabled={loading}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
+      <div className="space-y-0">
+        {/* Filters Block - Search, Funnel selector and +New button */}
+        {(showCreateButton || onNewClick || renderFiltersSeparately) && (
+          <>
+            <Card>
+              <CardContent className="px-4 py-3">
+                <div className="flex gap-2 items-center">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder={t('analytics.funnelForm.searchPlaceholder')}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-8 h-9 text-xs"
+                    />
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  {savedConfigurations.length > 0 && (
+                    <Select
+                      value={currentConfiguration?.id || ''}
+                      onValueChange={(value) => {
+                        const config = savedConfigurations.find(c => c.id === value);
+                        if (config) loadConfiguration(config);
+                      }}
+                    >
+                      <SelectTrigger className="h-9 w-[200px]">
+                        <SelectValue placeholder={t('analytics.funnelForm.selectFunnelPlaceholder')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {savedConfigurations.map((config) => (
+                          <SelectItem key={config.id} value={config.id}>
+                            {config.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <Button
+                    data-testid="funnel-new-button"
+                    onClick={() => onNewClick ? onNewClick() : setShowCreateForm(true)}
+                    size="sm"
+                    className="bg-black hover:bg-gray-800 text-xs h-9 px-3 gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    {t('analytics.funnelForm.new')}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <div className="h-4"></div>
+          </>
         )}
 
-        <div className="space-y-4">
-          {(showCreateForm || showEditForm) ? (
+        {/* Create/Edit Form or Empty State */}
+        {(showCreateForm || showEditForm) ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -1109,12 +1109,13 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
               </div>
             </div>
           ) : (
-            <div className="text-center text-muted-foreground py-8">
-              <p>{t('analytics.funnelForm.noData')}</p>
-              <p className="text-sm">{t('analytics.funnelForm.customFunnelCta')}</p>
-            </div>
+            <Card>
+              <CardContent className="text-center py-6">
+                <p className="text-sm text-muted-foreground">{t('analytics.funnelForm.noData')}</p>
+                <p className="text-xs text-muted-foreground">{t('analytics.funnelForm.customFunnelCta')}</p>
+              </CardContent>
+            </Card>
           )}
-        </div>
       </div>
     );
   }

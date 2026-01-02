@@ -72,17 +72,18 @@ class CustomFunnelConfigurationResponse(BaseModel):
 async def get_test_custom_funnel_configurations(db: AsyncSession = Depends(get_db)):
     """Get custom funnel configurations for testing (no authentication)"""
     try:
-        # Get first real workspace_id from the database
-        from app.models.analytics import PromptEvent
+        # Get first real workspace_id from the database (sorted by created_at for consistency)
+        from app.models.workspace import Workspace
         workspace_query = await db.execute(
-            select(PromptEvent.workspace_id).limit(1)
+            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
         )
         workspace_row = workspace_query.first()
 
         if not workspace_row:
             return []
 
-        workspace_id = workspace_row.workspace_id
+        workspace_id = workspace_row.id
+        print(f"[FUNNEL GET] Using workspace_id: {workspace_id}")
 
         # Get all custom funnel configurations for this workspace
         result = await db.execute(
@@ -149,10 +150,10 @@ async def create_test_custom_funnel_configuration(
         raise HTTPException(422, "All event steps must be non-empty")
 
     try:
-        # Get first real workspace_id from the database
+        # Get first real workspace_id from the database (sorted by created_at for consistency)
         from app.models.workspace import Workspace
         workspace_query = await db.execute(
-            select(Workspace.id).limit(1)
+            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
         )
         workspace_row = workspace_query.first()
 
@@ -160,6 +161,7 @@ async def create_test_custom_funnel_configuration(
             raise HTTPException(404, "No workspace found")
 
         workspace_id = workspace_row.id
+        print(f"[FUNNEL CREATE] Using workspace_id: {workspace_id}")
 
         # Check name uniqueness
         existing = await db.execute(
@@ -261,17 +263,17 @@ async def delete_test_custom_funnel_configuration(
 ):
     """Delete a custom funnel configuration for testing (no authentication)"""
     try:
-        # Get first real workspace_id from the database
-        from app.models.analytics import PromptEvent
+        # Get first real workspace_id from the database (sorted by created_at for consistency)
+        from app.models.workspace import Workspace
         workspace_query = await db.execute(
-            select(PromptEvent.workspace_id).limit(1)
+            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
         )
         workspace_row = workspace_query.first()
 
         if not workspace_row:
             raise HTTPException(404, "No workspace found")
 
-        workspace_id = workspace_row.workspace_id
+        workspace_id = workspace_row.id
 
         # Find and delete the configuration
         result = await db.execute(

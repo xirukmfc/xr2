@@ -547,8 +547,8 @@ export default function PromptEventsViewer() {
         </Card>
       ) : selectedPromptId && !loading ? (
         <Card>
-          <CardContent className="flex items-center justify-center h-48 text-muted-foreground">
-            <p>{t('analytics.promptEvents.chartEmpty')}</p>
+          <CardContent className="text-center py-6">
+            <p className="text-sm text-muted-foreground">{t('analytics.promptEvents.chartEmpty')}</p>
           </CardContent>
         </Card>
       ) : null}
@@ -621,16 +621,16 @@ export default function PromptEventsViewer() {
 
       {loading && (
         <Card>
-          <CardContent className="flex items-center justify-center h-48">
-            <p>{t('analytics.promptEvents.loading')}</p>
+          <CardContent className="text-center py-6">
+            <p className="text-sm text-muted-foreground">{t('analytics.promptEvents.loading')}</p>
           </CardContent>
         </Card>
       )}
 
       {!selectedPromptId && (
         <Card>
-          <CardContent className="flex items-center justify-center h-48 text-muted-foreground">
-            <p>{t('analytics.promptEvents.selectPromptHint')}</p>
+          <CardContent className="text-center py-6">
+            <p className="text-sm text-muted-foreground">{t('analytics.promptEvents.selectPromptHint')}</p>
           </CardContent>
         </Card>
       )}
@@ -800,8 +800,8 @@ function MetadataInsights({ events }: { events: PromptEvent[] }) {
 
           {/* Empty State */}
           {numericFields.length === 0 && categoricalFields.length === 0 && (
-            <div className="text-center py-6 text-muted-foreground text-xs">
-              {t('analytics.promptEvents.metadata.empty')}
+            <div className="text-center py-6">
+              <p className="text-sm text-muted-foreground">{t('analytics.promptEvents.metadata.empty')}</p>
             </div>
           )}
         </div>

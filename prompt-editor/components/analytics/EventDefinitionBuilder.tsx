@@ -4,11 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Plus, Trash2, ChevronDown, ChevronUp, Edit, Code, Copy, Zap, Search } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, Edit, Code, Copy, Search } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorState } from "@/components/ui/error-state";
-import { EmptyState } from "@/components/ui/empty-state";
 import { useLocale } from '@/contexts/locale-context';
 
 export interface MetadataField {
@@ -352,6 +351,8 @@ export default function EventDefinitionBuilder({
     event.event_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+  const visibleEvents = filteredEventsList.filter(event => editingEvent?.id !== event.id);
+  const hasNoVisibleEvents = visibleEvents.length === 0 && !editingEvent;
 
   return (
     <div className="space-y-0">
@@ -524,17 +525,20 @@ export default function EventDefinitionBuilder({
       )}
 
       {/* Empty State for event list */}
-      <div className="space-y-2">
-        {filteredEventsList.filter(event => editingEvent?.id !== event.id).length === 0 && !editingEvent ? (
-          <EmptyState
-            icon={Zap}
-            title={t('analytics.eventsBuilder.empty.title')}
-            description={t('analytics.eventsBuilder.empty.description')}
-            actionLabel={t('analytics.eventsBuilder.form.titleCreate')}
-            onAction={() => setEditingEvent(createNewEvent())}
-          />
-        ) : (
-          filteredEventsList.filter(event => editingEvent?.id !== event.id).map((event) => (
+      {hasNoVisibleEvents ? (
+        <Card>
+          <CardContent className="text-center py-6">
+            <p className="text-sm text-muted-foreground">
+              No event definitions yet
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Create your first event definition to start tracking user actions.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {visibleEvents.map((event) => (
             <Card key={`${event.id}-${refreshKey}`} className="p-3">
               <div className="flex items-center justify-between">
                 <div
@@ -627,9 +631,9 @@ export default function EventDefinitionBuilder({
                 </div>
               )}
             </Card>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
