@@ -337,24 +337,10 @@ async def get_test_funnels(db: AsyncSession = Depends(get_db)):
 async def get_test_prompts_with_versions(db: AsyncSession = Depends(get_db)):
     """Get prompts with their versions for testing (no authentication)"""
     try:
-        # Get first real workspace_id from the database
-        from app.models.workspace import Workspace
-        workspace_query = await db.execute(
-            select(Workspace.id).order_by(Workspace.created_at.asc()).limit(1)
-        )
-        workspace_row = workspace_query.first()
-
-        if not workspace_row:
-            return []
-
-        workspace_id = workspace_row.id
-
-        # Get prompts with their versions
+        # Get ALL prompts from ALL workspaces for testing
         result = await db.execute(
             select(Prompt).options(
                 selectinload(Prompt.versions)
-            ).where(
-                Prompt.workspace_id == workspace_id
             ).order_by(Prompt.name)
         )
         prompts = result.scalars().all()
