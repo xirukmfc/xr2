@@ -52,10 +52,10 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             <TooltipTrigger asChild>
               <div className="flex items-center justify-center">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  promptsPercent >= 100 ? 'bg-red-100' : promptsPercent >= 70 ? 'bg-yellow-100' : 'bg-green-100'
+                  promptsPercent >= 100 ? 'bg-red-50' : promptsPercent >= 70 ? 'bg-amber-50' : 'bg-emerald-50'
                 }`}>
                   <span className={`text-xs font-bold ${
-                    promptsPercent >= 100 ? 'text-red-600' : promptsPercent >= 70 ? 'text-yellow-600' : 'text-green-600'
+                    promptsPercent >= 100 ? 'text-red-400' : promptsPercent >= 70 ? 'text-amber-400' : 'text-emerald-400'
                   }`}>
                     {limits.limits.prompts.current}
                   </span>
@@ -77,10 +77,10 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             <TooltipTrigger asChild>
               <div className="flex items-center justify-center">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  apiPercent >= 100 ? 'bg-red-100' : apiPercent >= 70 ? 'bg-yellow-100' : 'bg-green-100'
+                  apiPercent >= 100 ? 'bg-red-50' : apiPercent >= 70 ? 'bg-amber-50' : 'bg-emerald-50'
                 }`}>
                   <Zap className={`w-3 h-3 ${
-                    apiPercent >= 100 ? 'text-red-600' : apiPercent >= 70 ? 'text-yellow-600' : 'text-green-600'
+                    apiPercent >= 100 ? 'text-red-400' : apiPercent >= 70 ? 'text-amber-400' : 'text-emerald-400'
                   }`} />
                 </div>
               </div>
@@ -114,19 +114,19 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
           value={promptsPercent}
           className="h-1.5"
           indicatorClassName={
-            promptsPercent >= 100 ? 'bg-red-500' :
-            promptsPercent >= 90 ? 'bg-yellow-500' :
-            promptsPercent >= 70 ? 'bg-yellow-500' : 'bg-green-500'
+            promptsPercent >= 100 ? 'bg-red-300' :
+            promptsPercent >= 90 ? 'bg-amber-300' :
+            promptsPercent >= 70 ? 'bg-amber-300' : 'bg-emerald-300'
           }
         />
         {promptsPercent >= 100 && (
-          <div className="flex items-center gap-1 text-xs text-red-600">
+          <div className="flex items-center gap-1 text-xs text-red-400">
             <AlertTriangle className="w-3 h-3" />
             <span>Limit reached</span>
           </div>
         )}
         {promptsPercent >= 90 && promptsPercent < 100 && (
-          <div className="flex items-center gap-1 text-xs text-yellow-600">
+          <div className="flex items-center gap-1 text-xs text-amber-500">
             <AlertTriangle className="w-3 h-3" />
             <span>Limit almost reached</span>
           </div>
@@ -145,19 +145,19 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
           value={apiPercent}
           className="h-1.5"
           indicatorClassName={
-            apiPercent >= 100 ? 'bg-red-500' :
-            apiPercent >= 90 ? 'bg-yellow-500' :
-            apiPercent >= 70 ? 'bg-yellow-500' : 'bg-green-500'
+            apiPercent >= 100 ? 'bg-red-300' :
+            apiPercent >= 90 ? 'bg-amber-300' :
+            apiPercent >= 70 ? 'bg-amber-300' : 'bg-emerald-300'
           }
         />
         {apiPercent >= 100 && (
-          <div className="flex items-center gap-1 text-xs text-red-600">
+          <div className="flex items-center gap-1 text-xs text-red-400">
             <AlertTriangle className="w-3 h-3" />
             <span>Limit reached</span>
           </div>
         )}
         {apiPercent >= 90 && apiPercent < 100 && (
-          <div className="flex items-center gap-1 text-xs text-yellow-600">
+          <div className="flex items-center gap-1 text-xs text-amber-500">
             <AlertTriangle className="w-3 h-3" />
             <span>Limit almost reached</span>
           </div>

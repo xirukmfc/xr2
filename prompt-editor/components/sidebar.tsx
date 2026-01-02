@@ -200,8 +200,8 @@ export function Sidebar() {
                       value={limits.limits.prompts.max > 0 ? (limits.limits.prompts.current / limits.limits.prompts.max) * 100 : 0} 
                       className="h-2"
                       indicatorClassName={
-                        (limits.limits.prompts.current / limits.limits.prompts.max) >= 0.9 ? 'bg-red-500' : 
-                        (limits.limits.prompts.current / limits.limits.prompts.max) >= 0.7 ? 'bg-yellow-500' : 'bg-green-500'
+                        (limits.limits.prompts.current / limits.limits.prompts.max) >= 0.9 ? 'bg-red-300' : 
+                        (limits.limits.prompts.current / limits.limits.prompts.max) >= 0.7 ? 'bg-amber-300' : 'bg-emerald-300'
                       }
                     />
                     <div className="text-xs text-slate-500">
@@ -221,8 +221,8 @@ export function Sidebar() {
                       value={limits.limits.api_requests.max > 0 ? (limits.limits.api_requests.current / limits.limits.api_requests.max) * 100 : 0} 
                       className="h-2"
                       indicatorClassName={
-                        (limits.limits.api_requests.current / limits.limits.api_requests.max) >= 0.9 ? 'bg-red-500' : 
-                        (limits.limits.api_requests.current / limits.limits.api_requests.max) >= 0.7 ? 'bg-yellow-500' : 'bg-green-500'
+                        (limits.limits.api_requests.current / limits.limits.api_requests.max) >= 0.9 ? 'bg-red-300' : 
+                        (limits.limits.api_requests.current / limits.limits.api_requests.max) >= 0.7 ? 'bg-amber-300' : 'bg-emerald-300'
                       }
                     />
                     <div className="text-xs text-slate-500">
