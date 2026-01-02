@@ -74,28 +74,59 @@ def calculate_statistical_significance(
     # Z-score
     z_score = abs(rate_a - rate_b) / se
     
+    # Minimum sample size check for reliable z-test
+    # Z-test assumes normal distribution, which requires sufficient sample size
+    # Rule of thumb: need at least 30 observations per group, or at least 5 successes AND failures in BOTH groups
+    min_sample_size = 30
+    min_successes = 5
+    
+    # Check if sample size is too small for reliable z-test
+    # Need sufficient data in BOTH groups
+    group_a_ok = (total_a >= min_sample_size) or \
+                 (conversions_a >= min_successes and (total_a - conversions_a) >= min_successes)
+    group_b_ok = (total_b >= min_sample_size) or \
+                 (conversions_b >= min_successes and (total_b - conversions_b) >= min_successes)
+    
+    has_sufficient_sample = group_a_ok and group_b_ok
+    
     # Convert z-score to confidence (approximation)
     # 1.645 = 90%, 1.96 = 95%, 2.576 = 99%
     if z_score >= 2.576:
-        confidence = 99
+        base_confidence = 99
     elif z_score >= 1.96:
-        confidence = 95
+        base_confidence = 95
     elif z_score >= 1.645:
-        confidence = 90
+        base_confidence = 90
     elif z_score >= 1.28:
-        confidence = 80
+        base_confidence = 80
     else:
-        confidence = min(int(z_score / 1.96 * 95), 79)
+        base_confidence = min(int(z_score / 1.96 * 95), 79)
+    
+    # For small samples, reduce confidence but still show significance if z-score is high
+    if not has_sufficient_sample:
+        # Reduce confidence by 5-10% for small samples
+        if base_confidence >= 95:
+            confidence = max(85, base_confidence - 10)  # Reduce 99% to 89%, 95% to 85%
+        else:
+            confidence = max(75, base_confidence - 5)   # Reduce other levels by 5%
+        message = f"Small sample size ({total_a}+{total_b} requests) - results may not be reliable. Need at least {min_sample_size} requests per version for higher confidence."
+    else:
+        confidence = base_confidence
+        message = "Statistically significant" if confidence >= 95 else f"Need more data for 95% confidence"
+    
+    # Still consider significant if z-score is high enough (>= 1.96), even with small sample
+    # But with reduced confidence
+    is_significant = z_score >= 1.96
     
     # P-value approximation (simplified)
     p_value = 2 * (1 - min(0.5 + z_score * 0.2, 0.9999))
     
     return {
         "confidence": confidence,
-        "is_significant": confidence >= 95,
+        "is_significant": is_significant,
         "p_value": round(p_value, 4),
         "z_score": round(z_score, 3),
-        "message": "Statistically significant" if confidence >= 95 else f"Need more data for 95% confidence"
+        "message": message
     }
 
 
@@ -873,9 +904,10 @@ async def get_test_ab_test_results(
         if ab_test.funnel_config and ab_test.funnel_config.event_steps:
             funnel_steps = ab_test.funnel_config.event_steps
             
-            # Use actual trace_id counts instead of test request counters for accuracy
-            total_requests_a = len(trace_ids_a) if trace_ids_a else ab_test.version_a_requests
-            total_requests_b = len(trace_ids_b) if trace_ids_b else ab_test.version_b_requests
+            # Use test request counters - these are the actual number of requests in the test
+            # trace_ids are used only to find related events (get_success, buy_premium, etc.)
+            total_requests_a = ab_test.version_a_requests
+            total_requests_b = ab_test.version_b_requests
             
             # Calculate funnel for version A
             funnel_a = []
