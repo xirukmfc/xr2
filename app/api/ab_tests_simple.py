@@ -785,17 +785,19 @@ async def get_test_ab_test_results(
 
         # Get events for version A
         # For custom_event, we need to check event_metadata['event_name'] as well
+        event_name_expr = case(
+            (PromptEvent.event_type == 'custom_event', 
+             func.coalesce(PromptEvent.event_metadata['event_name'].astext, 'custom_event')),
+            else_=PromptEvent.event_type
+        ).label('event_name')
+        
         events_a_result = await db.execute(
             select(
-                case(
-                    (PromptEvent.event_type == 'custom_event', 
-                     func.coalesce(PromptEvent.event_metadata['event_name'].astext, 'custom_event')),
-                    else_=PromptEvent.event_type
-                ).label('event_name'),
+                event_name_expr,
                 func.count(PromptEvent.id).label('count')
             ).where(
                 and_(*conditions_a)
-            ).group_by('event_name')
+            ).group_by(event_name_expr)
         )
         events_a_raw = {row.event_name: row.count for row in events_a_result}
         
@@ -809,17 +811,19 @@ async def get_test_ab_test_results(
                 events_a[alias] = events_a_raw[actual]
 
         # Get events for version B
+        event_name_expr_b = case(
+            (PromptEvent.event_type == 'custom_event', 
+             func.coalesce(PromptEvent.event_metadata['event_name'].astext, 'custom_event')),
+            else_=PromptEvent.event_type
+        ).label('event_name')
+        
         events_b_result = await db.execute(
             select(
-                case(
-                    (PromptEvent.event_type == 'custom_event', 
-                     func.coalesce(PromptEvent.event_metadata['event_name'].astext, 'custom_event')),
-                    else_=PromptEvent.event_type
-                ).label('event_name'),
+                event_name_expr_b,
                 func.count(PromptEvent.id).label('count')
             ).where(
                 and_(*conditions_b)
-            ).group_by('event_name')
+            ).group_by(event_name_expr_b)
         )
         events_b_raw = {row.event_name: row.count for row in events_b_result}
         
