@@ -427,3 +427,5 @@ For support and questions, please open an issue in the repository or contact the
 - REST API
 - Modern web UI
 - Multi-tenancy support
+
+---***REMOVED_OPENAI_KEY***

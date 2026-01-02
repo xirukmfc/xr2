@@ -212,7 +212,7 @@ export function Sidebar() {
                   {/* API Requests Limit */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-600">{t('sidebar.dailyApiRequests')}</span>
+                      <span className="text-slate-600">{t('sidebar.monthlyApiRequests')}</span>
                       <span className="text-slate-700 font-medium">
                         {limits.limits.api_requests.current} / {limits.limits.api_requests.max}
                       </span>

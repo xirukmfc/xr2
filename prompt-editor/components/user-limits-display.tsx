@@ -87,7 +87,7 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             </TooltipTrigger>
             <TooltipContent side="right">
               <div className="text-sm">
-                <div className="font-medium">API Requests (24h)</div>
+                <div className="font-medium">API Requests (monthly)</div>
                 <div>{limits.limits.api_requests.current} / {limits.limits.api_requests.max}</div>
               </div>
             </TooltipContent>
@@ -136,7 +136,7 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
       {/* API Requests Limit */}
       <div className="space-y-1">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-600">API Requests (24h)</span>
+          <span className="text-slate-600">API Requests (monthly)</span>
           <span className="text-slate-700 font-medium">
             {limits.limits.api_requests.current} / {limits.limits.api_requests.max}
           </span>

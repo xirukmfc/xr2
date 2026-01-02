@@ -97,15 +97,15 @@
         "name": "Free",
         "price": "$0",
         "period": "/mo",
-        "features": ["Up to 10 prompts", "1,000 API calls/month", "Basic analytics", "1 workspace"],
+        "features": ["Up to 5 prompts", "100 API calls/month", "Basic analytics", "1 workspace"],
         "cta": "Get Started"
       },
       "pro": {
         "name": "Pro",
         "popular": "Popular",
-        "price": "$29",
+        "price": "$19",
         "period": "/mo",
-        "features": ["Unlimited prompts", "100K API calls/month", "A/B testing & revenue tracking", "Unlimited workspaces", "Team collaboration"],
+        "features": ["Unlimited prompts", "1,000 API calls/month", "A/B testing & revenue tracking", "Unlimited workspaces", "Team collaboration"],
         "cta": "Get Started"
       },
       "enterprise": {
@@ -137,7 +137,7 @@
     "collapse": "Collapse",
     "usageLimits": "Usage Limits",
     "availablePrompts": "Available Prompts",
-    "dailyApiRequests": "Daily API Requests",
+    "monthlyApiRequests": "Monthly API Requests",
     "remaining": "remaining",
     "resetsAt": "Resets at"
   },
