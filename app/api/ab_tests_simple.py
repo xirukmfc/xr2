@@ -767,23 +767,38 @@ async def get_test_ab_test_results(
             "prompt_request": "prompt_request",
         }
 
-        # Build filter conditions for version A and B
-        # Filter by version_id and optionally by date range
-        # For completed tests, we still include events after ended_at to capture delayed conversions
-        conditions_a = [PromptEvent.prompt_version_id == ab_test.version_a_id]
-        conditions_b = [PromptEvent.prompt_version_id == ab_test.version_b_id]
+        # Find all trace_ids from prompt_request events during the test
+        # This is the correct way to link events to the test - via trace_id
+        trace_conditions_a = [
+            PromptEvent.prompt_version_id == ab_test.version_a_id,
+            PromptEvent.event_type == 'prompt_request'
+        ]
+        trace_conditions_b = [
+            PromptEvent.prompt_version_id == ab_test.version_b_id,
+            PromptEvent.event_type == 'prompt_request'
+        ]
         
-        # Apply start date filter if test was started
-        # This ensures we only count events from when the test actually began
+        # Apply date filters only for prompt_request events (to identify test traces)
         if ab_test.started_at:
-            conditions_a.append(PromptEvent.created_at >= ab_test.started_at)
-            conditions_b.append(PromptEvent.created_at >= ab_test.started_at)
+            trace_conditions_a.append(PromptEvent.created_at >= ab_test.started_at)
+            trace_conditions_b.append(PromptEvent.created_at >= ab_test.started_at)
+        if ab_test.ended_at:
+            trace_conditions_a.append(PromptEvent.created_at <= ab_test.ended_at)
+            trace_conditions_b.append(PromptEvent.created_at <= ab_test.ended_at)
         
-        # Note: We don't filter by ended_at for completed tests
-        # This allows capturing delayed conversions that happen after test completion
-        # Events are still linked to the correct version via prompt_version_id
-
-        # Get events for version A
+        # Get trace_ids for version A
+        trace_ids_a_result = await db.execute(
+            select(PromptEvent.trace_id.distinct()).where(and_(*trace_conditions_a))
+        )
+        trace_ids_a = {row[0] for row in trace_ids_a_result}
+        
+        # Get trace_ids for version B
+        trace_ids_b_result = await db.execute(
+            select(PromptEvent.trace_id.distinct()).where(and_(*trace_conditions_b))
+        )
+        trace_ids_b = {row[0] for row in trace_ids_b_result}
+        
+        # Now get ALL events (regardless of time) for these trace_ids
         # For custom_event, we need to check event_metadata['event_name'] as well
         event_name_expr = case(
             (PromptEvent.event_type == 'custom_event', 
@@ -791,15 +806,19 @@ async def get_test_ab_test_results(
             else_=PromptEvent.event_type
         ).label('event_name')
         
-        events_a_result = await db.execute(
-            select(
-                event_name_expr,
-                func.count(PromptEvent.id).label('count')
-            ).where(
-                and_(*conditions_a)
-            ).group_by(event_name_expr)
-        )
-        events_a_raw = {row.event_name: row.count for row in events_a_result}
+        # Get events for version A by trace_id (no date restrictions)
+        if trace_ids_a:
+            events_a_result = await db.execute(
+                select(
+                    event_name_expr,
+                    func.count(PromptEvent.id.distinct()).label('count')
+                ).where(
+                    PromptEvent.trace_id.in_(trace_ids_a)
+                ).group_by(event_name_expr)
+            )
+            events_a_raw = {row.event_name: row.count for row in events_a_result}
+        else:
+            events_a_raw = {}
         
         # Apply aliases - merge aliased events
         events_a = {}
@@ -810,22 +829,25 @@ async def get_test_ab_test_results(
             if actual in events_a_raw and alias not in events_a:
                 events_a[alias] = events_a_raw[actual]
 
-        # Get events for version B
+        # Get events for version B by trace_id (no date restrictions)
         event_name_expr_b = case(
             (PromptEvent.event_type == 'custom_event', 
              func.coalesce(PromptEvent.event_metadata['event_name'].astext, 'custom_event')),
             else_=PromptEvent.event_type
         ).label('event_name')
         
-        events_b_result = await db.execute(
-            select(
-                event_name_expr_b,
-                func.count(PromptEvent.id).label('count')
-            ).where(
-                and_(*conditions_b)
-            ).group_by(event_name_expr_b)
-        )
-        events_b_raw = {row.event_name: row.count for row in events_b_result}
+        if trace_ids_b:
+            events_b_result = await db.execute(
+                select(
+                    event_name_expr_b,
+                    func.count(PromptEvent.id.distinct()).label('count')
+                ).where(
+                    PromptEvent.trace_id.in_(trace_ids_b)
+                ).group_by(event_name_expr_b)
+            )
+            events_b_raw = {row.event_name: row.count for row in events_b_result}
+        else:
+            events_b_raw = {}
         
         # Apply aliases for version B
         events_b = {}
@@ -895,10 +917,20 @@ async def get_test_ab_test_results(
             if statistical_significance["is_significant"]:
                 if funnel_results["conversion_rate_b"] > funnel_results["conversion_rate_a"]:
                     funnel_results["winner"] = "B"
-                    funnel_results["lift"] = ((funnel_results["conversion_rate_b"] - funnel_results["conversion_rate_a"]) / funnel_results["conversion_rate_a"] * 100) if funnel_results["conversion_rate_a"] > 0 else 0
+                    # Calculate lift: if A is 0%, lift is infinity (represented as very large number)
+                    if funnel_results["conversion_rate_a"] > 0:
+                        funnel_results["lift"] = round(((funnel_results["conversion_rate_b"] - funnel_results["conversion_rate_a"]) / funnel_results["conversion_rate_a"] * 100), 1)
+                    else:
+                        # If A has 0% and B has >0%, lift is infinite (use a very large number for JSON serialization)
+                        funnel_results["lift"] = 999999.0 if funnel_results["conversion_rate_b"] > 0 else 0.0
                 else:
                     funnel_results["winner"] = "A"
-                    funnel_results["lift"] = ((funnel_results["conversion_rate_a"] - funnel_results["conversion_rate_b"]) / funnel_results["conversion_rate_b"] * 100) if funnel_results["conversion_rate_b"] > 0 else 0
+                    # Calculate lift: if B is 0%, lift is infinity
+                    if funnel_results["conversion_rate_b"] > 0:
+                        funnel_results["lift"] = round(((funnel_results["conversion_rate_a"] - funnel_results["conversion_rate_b"]) / funnel_results["conversion_rate_b"] * 100), 1)
+                    else:
+                        # If B has 0% and A has >0%, lift is infinite
+                        funnel_results["lift"] = 999999.0 if funnel_results["conversion_rate_a"] > 0 else 0.0
             else:
                 funnel_results["winner"] = None
                 funnel_results["lift"] = None
