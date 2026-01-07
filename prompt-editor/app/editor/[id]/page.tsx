@@ -10,6 +10,17 @@ import {CenterPanel} from "@/components/center-panel"
 import {AddVariableModal} from "@/components/add-variable-modal"
 import {TestModal} from "@/components/test-modal"
 import {NotificationProvider, useNotification} from "@/components/notification-provider"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {Button} from "@/components/ui/button"
 import {apiClient} from "@/lib/api"
 import type {ModelId} from "@/lib/tokens"
 import {findVariablesInText, VARIABLE_REGEX} from "@/lib/variable-regex"
@@ -251,6 +262,17 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
     const [versions, setVersions] = useState<Version[]>([])
     const [publishedVersion, setPublishedVersion] = useState<string>("")
     const editorSnapshotGetterRef = useRef<(() => { system: string; user: string; assistant: string }) | null>(null)
+
+    // State for unsaved changes dialog
+    const [pendingVersionSwitch, setPendingVersionSwitch] = useState<{
+        versionId: string;
+        id: string;
+        systemPrompt: string;
+        userPrompt: string;
+        assistantPrompt: string | undefined;
+        variables: Variable[];
+    } | null>(null)
+    const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false)
 
     // Ref to prevent circular updates
     const updateInProgressRef = useRef(false)
@@ -615,6 +637,19 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
             assistantPrompt: latestAssistantPrompt,
         })
 
+        // Update versions array with saved data so switching versions works correctly
+        setVersions(prev => prev.map(v =>
+            v.id === originalVersionData.id
+                ? {
+                    ...v,
+                    systemPrompt: latestSystemPrompt,
+                    userPrompt: latestUserPrompt,
+                    assistantPrompt: latestAssistantPrompt,
+                    variables: currentPromptData.variables.filter(var_ => var_.isDefined),
+                }
+                : v
+        ))
+
         // Show success notification
         showNotification("Saved successfully", "success")
         } catch (error) {
@@ -803,7 +838,40 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
         }))
     }
 
-    const handleViewVersion = (
+    // Check if there are unsaved changes
+    const hasUnsavedChanges = useCallback((): boolean => {
+        // Get current editor content
+        let currentSystem = promptData.systemPrompt
+        let currentUser = promptData.userPrompt
+        let currentAssistant = promptData.assistantPrompt || ""
+
+        if (editorSnapshotGetterRef.current) {
+            try {
+                const snap = editorSnapshotGetterRef.current()
+                currentSystem = snap.system || ""
+                currentUser = snap.user || ""
+                currentAssistant = snap.assistant || ""
+            } catch (error) {
+                console.error("Error getting snapshot for unsaved changes check:", error)
+            }
+        }
+
+        // Compare with original version data
+        const hasPromptChanges = (
+            currentSystem !== originalVersionData.systemPrompt ||
+            currentUser !== originalVersionData.userPrompt ||
+            currentAssistant !== (originalVersionData.assistantPrompt || "")
+        )
+
+        // Compare variables (only defined ones)
+        const currentDefinedVars = promptData.variables.filter(v => v.isDefined)
+        const hasVariableChanges = JSON.stringify(currentDefinedVars) !== JSON.stringify(originalVersionData.variables)
+
+        return hasPromptChanges || hasVariableChanges
+    }, [promptData, originalVersionData])
+
+    // Actually perform the version switch
+    const performVersionSwitch = useCallback((
         versionId: string,
         id: string,
         systemPrompt: string,
@@ -814,7 +882,6 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
         if (!originalPromptData) {
             setOriginalPromptData(promptData)
         }
-        const selectedVersion = versions.find(v => v.version === versionId)
         const syncedVariables = syncVariablesWithPrompts(systemPrompt, userPrompt, assistantPrompt || "", variables)
 
         const newData = {
@@ -838,6 +905,80 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
             assistantPrompt: newData.assistantPrompt || "",
         })
         setCurrentViewingVersion(versionId)
+    }, [promptData, originalPromptData])
+
+    // Handle version switch with unsaved changes check
+    const handleViewVersion = (
+        versionId: string,
+        id: string,
+        systemPrompt: string,
+        userPrompt: string,
+        assistantPrompt: string | undefined,
+        variables: Variable[]
+    ) => {
+        // If switching to the same version, do nothing
+        if (currentViewingVersion === versionId) {
+            return
+        }
+
+        // Check for unsaved changes
+        if (hasUnsavedChanges()) {
+            // Store pending switch data and show dialog
+            setPendingVersionSwitch({
+                versionId,
+                id,
+                systemPrompt,
+                userPrompt,
+                assistantPrompt,
+                variables
+            })
+            setShowUnsavedChangesDialog(true)
+            return
+        }
+
+        // No unsaved changes, switch directly
+        performVersionSwitch(versionId, id, systemPrompt, userPrompt, assistantPrompt, variables)
+    }
+
+    // Handle dialog actions
+    const handleDiscardChanges = () => {
+        if (pendingVersionSwitch) {
+            performVersionSwitch(
+                pendingVersionSwitch.versionId,
+                pendingVersionSwitch.id,
+                pendingVersionSwitch.systemPrompt,
+                pendingVersionSwitch.userPrompt,
+                pendingVersionSwitch.assistantPrompt,
+                pendingVersionSwitch.variables
+            )
+        }
+        setPendingVersionSwitch(null)
+        setShowUnsavedChangesDialog(false)
+    }
+
+    const handleSaveAndSwitch = async () => {
+        try {
+            await handleSave()
+            if (pendingVersionSwitch) {
+                performVersionSwitch(
+                    pendingVersionSwitch.versionId,
+                    pendingVersionSwitch.id,
+                    pendingVersionSwitch.systemPrompt,
+                    pendingVersionSwitch.userPrompt,
+                    pendingVersionSwitch.assistantPrompt,
+                    pendingVersionSwitch.variables
+                )
+            }
+        } catch (error) {
+            showNotification("Failed to save. Please try again.", "error")
+        }
+        setPendingVersionSwitch(null)
+        setShowUnsavedChangesDialog(false)
+    }
+
+    const handleCancelSwitch = () => {
+        setPendingVersionSwitch(null)
+        setShowUnsavedChangesDialog(false)
     }
 
     const handleReturnToActive = () => {
@@ -845,7 +986,24 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
             setPromptData(originalPromptData)
             setOriginalPromptData(null)
         }
-        setCurrentViewingVersion(publishedVersion || undefined)
+
+        // Also update originalVersionData to match the version we're returning to
+        const targetVersionNumber = publishedVersion || undefined
+        if (targetVersionNumber) {
+            const targetVersion = versions.find(v => v.version === targetVersionNumber)
+            if (targetVersion) {
+                setOriginalVersionData({
+                    id: targetVersion.id,
+                    version: targetVersion.version,
+                    variables: targetVersion.variables.filter(v => v.isDefined),
+                    systemPrompt: targetVersion.systemPrompt,
+                    userPrompt: targetVersion.userPrompt,
+                    assistantPrompt: targetVersion.assistantPrompt || "",
+                })
+            }
+        }
+
+        setCurrentViewingVersion(targetVersionNumber)
     }
 
     const handleCreateVersion = async (option: "current" | "history" | "scratch", versionId?: string) => {
@@ -855,7 +1013,29 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
 
     switch (option) {
         case "current":
-            newVersionData = {...promptData, status: "draft"}
+            // Get latest data from editor snapshot (same as handleSave)
+            let latestSystemPrompt = promptData.systemPrompt
+            let latestUserPrompt = promptData.userPrompt
+            let latestAssistantPrompt = promptData.assistantPrompt || ""
+
+            if (editorSnapshotGetterRef.current) {
+                try {
+                    const snap = editorSnapshotGetterRef.current()
+                    latestSystemPrompt = snap.system || ""
+                    latestUserPrompt = snap.user || ""
+                    latestAssistantPrompt = snap.assistant || ""
+                } catch (error) {
+                    console.error("Error getting snapshot for version creation:", error)
+                }
+            }
+
+            newVersionData = {
+                ...promptData,
+                systemPrompt: latestSystemPrompt,
+                userPrompt: latestUserPrompt,
+                assistantPrompt: latestAssistantPrompt,
+                status: "draft"
+            }
             break
         case "history":
             const versionData = getVersionData(versionId || "")
@@ -1187,6 +1367,35 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
                     onOpenChange={setIsTestModalOpen}
                     prompt={promptData}
                 />
+
+                {/* Unsaved Changes Dialog */}
+                <AlertDialog open={showUnsavedChangesDialog} onOpenChange={setShowUnsavedChangesDialog}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                You have unsaved changes in the current version. What would you like to do?
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                            <AlertDialogCancel onClick={handleCancelSwitch}>
+                                Cancel
+                            </AlertDialogCancel>
+                            <Button
+                                variant="destructive"
+                                onClick={handleDiscardChanges}
+                            >
+                                Discard Changes
+                            </Button>
+                            <Button
+                                onClick={handleSaveAndSwitch}
+                                className="bg-blue-600 hover:bg-blue-700"
+                            >
+                                Save & Switch
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
     )
 }
