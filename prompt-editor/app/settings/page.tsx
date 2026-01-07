@@ -688,7 +688,7 @@ function SettingsPageContent() {
         header: t('settings.llmKeys.columns.actions'),
         width: "col-span-2",
         render: (llm: LLMApiKey) => (
-          <div className="flex items-center space-x-1 justify-end">
+          <div className="flex items-center space-x-1">
             <Button variant="ghost" size="sm" onClick={() => openLLMModal(llm)} className="p-1 h-auto" title={t('settings.llmKeys.modal.titleEdit')}>
               <Edit2 className="w-4 h-4 text-slate-400 hover:text-blue-600" />
             </Button>
@@ -863,20 +863,20 @@ function SettingsPageContent() {
             </div>
             <div>
               <Label htmlFor="tag-color">{t('settings.tags.modal.colorLabel')}</Label>
-              <div className="grid grid-cols-4 gap-2 mt-2">
+              <div className="grid grid-cols-2 gap-2 mt-2">
                 {translatedColorOptions.map((color) => (
                   <button
                     key={color.value}
                     type="button"
                     onClick={() => setTagForm({ ...tagForm, color: color.value })}
-                    className={`flex items-center space-x-2 p-2 rounded-md border transition-colors ${
+                    className={`flex items-center gap-2 p-2 rounded-md border transition-colors ${
                       tagForm.color === color.value
                         ? "border-slate-400 bg-slate-50"
                         : "border-slate-200 hover:border-slate-300"
                     }`}
                   >
-                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color.value }} />
-                    <span className="text-sm">{color.label}</span>
+                    <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: color.value }} />
+                    <span className="text-sm truncate">{color.label}</span>
                   </button>
                 ))}
               </div>

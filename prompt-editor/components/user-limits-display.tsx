@@ -5,8 +5,10 @@ import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { AlertTriangle, Zap } from "lucide-react"
 import { getUserLimits, UserLimits } from "@/lib/api"
+import { useLocale } from "@/contexts/locale-context"
 
 export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boolean }) {
+  const { t } = useLocale()
   const [limits, setLimits] = useState<UserLimits | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -64,10 +66,10 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             </TooltipTrigger>
             <TooltipContent side="right">
               <div className="text-sm">
-                <div className="font-medium">Prompts</div>
+                <div className="font-medium">{t('sidebar.prompts')}</div>
                 <div>{limits.limits.prompts.current} / {limits.limits.prompts.max}</div>
                 <div className="text-xs text-gray-500 mt-1">
-                  {limits.limits.prompts.max - limits.limits.prompts.current} remaining
+                  {limits.limits.prompts.max - limits.limits.prompts.current} {t('sidebar.remaining')}
                 </div>
               </div>
             </TooltipContent>
@@ -87,7 +89,7 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             </TooltipTrigger>
             <TooltipContent side="right">
               <div className="text-sm">
-                <div className="font-medium">API Requests (monthly)</div>
+                <div className="font-medium">{t('sidebar.apiRequestsMonthly')}</div>
                 <div>{limits.limits.api_requests.current} / {limits.limits.api_requests.max}</div>
               </div>
             </TooltipContent>
@@ -100,12 +102,12 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
   // Full view for expanded sidebar
   return (
     <div className="px-4 py-2 space-y-3 border-t border-slate-200">
-      <div className="text-xs font-medium text-slate-600 uppercase tracking-wide">Usage</div>
-      
+      <div className="text-xs font-medium text-slate-600 uppercase tracking-wide">{t('sidebar.usage')}</div>
+
       {/* Prompts Limit */}
       <div className="space-y-1">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-600">Prompts</span>
+          <span className="text-slate-600">{t('sidebar.prompts')}</span>
           <span className="text-slate-700 font-medium">
             {limits.limits.prompts.current} / {limits.limits.prompts.max}
           </span>
@@ -122,13 +124,13 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
         {promptsPercent >= 100 && (
           <div className="flex items-center gap-1 text-xs text-red-400">
             <AlertTriangle className="w-3 h-3" />
-            <span>Limit reached</span>
+            <span>{t('sidebar.limitReached')}</span>
           </div>
         )}
         {promptsPercent >= 90 && promptsPercent < 100 && (
           <div className="flex items-center gap-1 text-xs text-amber-500">
             <AlertTriangle className="w-3 h-3" />
-            <span>Limit almost reached</span>
+            <span>{t('sidebar.limitAlmostReached')}</span>
           </div>
         )}
       </div>
@@ -136,7 +138,7 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
       {/* API Requests Limit */}
       <div className="space-y-1">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-600">API Requests (monthly)</span>
+          <span className="text-slate-600">{t('sidebar.apiRequestsMonthly')}</span>
           <span className="text-slate-700 font-medium">
             {limits.limits.api_requests.current} / {limits.limits.api_requests.max}
           </span>
@@ -153,13 +155,13 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
         {apiPercent >= 100 && (
           <div className="flex items-center gap-1 text-xs text-red-400">
             <AlertTriangle className="w-3 h-3" />
-            <span>Limit reached</span>
+            <span>{t('sidebar.limitReached')}</span>
           </div>
         )}
         {apiPercent >= 90 && apiPercent < 100 && (
           <div className="flex items-center gap-1 text-xs text-amber-500">
             <AlertTriangle className="w-3 h-3" />
-            <span>Limit almost reached</span>
+            <span>{t('sidebar.limitAlmostReached')}</span>
           </div>
         )}
       </div>

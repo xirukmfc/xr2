@@ -139,7 +139,11 @@
     "availablePrompts": "Доступно промптов",
     "monthlyApiRequests": "Запросов в месяц",
     "remaining": "осталось",
-    "resetsAt": "Обновится в"
+    "resetsAt": "Обновится в",
+    "usage": "Использование",
+    "apiRequestsMonthly": "API запросы (месяц)",
+    "limitReached": "Лимит достигнут",
+    "limitAlmostReached": "Лимит почти достигнут"
   },
   "auth": {
     "login": {
@@ -722,8 +726,8 @@
       "loadError": "Не удалось загрузить теги",
       "searchPlaceholder": "Поиск тегов...",
       "empty": {
-        "title": "Пока нет тегов",
-        "description": "Создайте первый тег, чтобы начать.",
+        "title": "",
+        "description": "Пока нет тегов",
         "filteredTitle": "Теги не найдены",
         "filteredDescription": "Попробуйте изменить поисковый запрос."
       },

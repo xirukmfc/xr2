@@ -97,7 +97,7 @@
         "name": "Free",
         "price": "$0",
         "period": "/mo",
-        "features": ["Up to 5 prompts", "100 API calls/month", "Basic analytics", "1 workspace"],
+        "features": ["Up to 10 prompts", "100 API calls/month", "Basic analytics", "1 workspace"],
         "cta": "Get Started"
       },
       "pro": {
@@ -139,7 +139,11 @@
     "availablePrompts": "Available Prompts",
     "monthlyApiRequests": "Monthly API Requests",
     "remaining": "remaining",
-    "resetsAt": "Resets at"
+    "resetsAt": "Resets at",
+    "usage": "Usage",
+    "apiRequestsMonthly": "API Requests (monthly)",
+    "limitReached": "Limit reached",
+    "limitAlmostReached": "Limit almost reached"
   },
   "auth": {
     "login": {

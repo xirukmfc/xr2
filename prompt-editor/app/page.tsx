@@ -604,7 +604,7 @@ export default function LandingPage() {
               </div>
 
               <ul className="space-y-2.5 mb-6 text-sm">
-                {(locale === 'ru' ? ['До 5 промптов', '100 API запросов/мес', 'Базовая аналитика', '1 workspace'] : ['Up to 5 prompts', '100 API calls/month', 'Basic analytics', '1 workspace']).map((f, i) => (
+                {(locale === 'ru' ? ['До 10 промптов', '100 API запросов/мес', 'Базовая аналитика', '1 workspace'] : ['Up to 10 prompts', '100 API calls/month', 'Basic analytics', '1 workspace']).map((f, i) => (
                   <li key={i} className="flex items-center gap-2 text-gray-600">
                     <Check className="h-4 w-4 text-gray-400" />{f}
                   </li>
