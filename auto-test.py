@@ -755,22 +755,78 @@ class XR2AutoTester:
             settings_button = await self.page.query_selector('button:has-text("Settings")')
             if settings_button:
                 await settings_button.click()
-                await self.page.wait_for_timeout(1000)
+                await self.page.wait_for_timeout(1500)  # Увеличиваем время ожидания
+                # Ждем появления секции Settings
+                try:
+                    await self.page.wait_for_selector('div:has-text("Prompt Name"), div:has-text("Slug")', timeout=5000, state="visible")
+                    logger.info("✅ Секция Settings открыта")
+                except:
+                    logger.warning("⚠️ Не удалось подтвердить открытие секции Settings, продолжаем...")
 
             # Найти поле описания в раскрывшейся секции Settings
-            # Попробуем несколько вариантов селекторов
+            # Попробуем несколько вариантов селекторов (включая локализованные варианты)
             description_selectors = [
+                'textarea[maxlength="250"]',  # Самый надежный селектор
                 'textarea[placeholder="Description"]',
                 'textarea[placeholder*="Description"]',
                 'textarea[placeholder*="description"]',
-                'textarea[maxlength="250"]',
-                'textarea.resize-none'
+                'textarea[placeholder*="Описание"]',  # Русская локализация
+                'textarea[placeholder*="описание"]',  # Русская локализация (lowercase)
+                'label:has-text("Description") + textarea, label:has-text("Описание") + textarea',  # По label
+                'div:has(label:has-text("Description")) textarea, div:has(label:has-text("Описание")) textarea',  # По контейнеру с label
+                'textarea.resize-none',
+                'textarea.w-full.text-sm'  # По классам из кода
             ]
             description_field = None
             for selector in description_selectors:
-                description_field = await self.page.query_selector(selector)
-                if description_field:
-                    break
+                try:
+                    description_field = await self.page.query_selector(selector)
+                    if description_field:
+                        # Проверяем что поле видимо
+                        is_visible = await description_field.is_visible()
+                        if is_visible:
+                            logger.info(f"✅ Поле описания найдено через селектор: {selector}")
+                            break
+                        else:
+                            description_field = None
+                except Exception as sel_err:
+                    logger.debug(f"Селектор {selector} не сработал: {sel_err}")
+                    continue
+
+            # Если не нашли через селекторы, пробуем найти через JavaScript
+            if not description_field:
+                logger.info("🔍 Пробуем найти поле описания через JavaScript...")
+                try:
+                    js_handle = await self.page.evaluate_handle('''() => {
+                        // Ищем textarea с maxlength="250" в секции Settings
+                        const textareas = document.querySelectorAll('textarea[maxlength="250"]');
+                        for (let textarea of textareas) {
+                            // Проверяем что textarea находится в секции Settings (рядом с полями Name и Slug)
+                            const parent = textarea.closest('div');
+                            if (parent) {
+                                const parentText = parent.textContent || '';
+                                if (parentText.includes('Prompt Name') || parentText.includes('Slug') || 
+                                    parentText.includes('Name') || parentText.includes('Slug')) {
+                                    return textarea;
+                                }
+                            }
+                        }
+                        // Если не нашли по контексту, возвращаем первый textarea с maxlength="250"
+                        return textareas.length > 0 ? textareas[0] : null;
+                    }''')
+                    if js_handle:
+                        # Конвертируем JSHandle в ElementHandle
+                        element_handle = js_handle.as_element()
+                        if element_handle:
+                            description_field = element_handle
+                            logger.info("✅ Поле описания найдено через JavaScript")
+                        else:
+                            description_field = None
+                    else:
+                        description_field = None
+                except Exception as js_err:
+                    logger.warning(f"⚠️ Ошибка при поиске через JavaScript: {js_err}")
+                    description_field = None
 
             if description_field:
                 new_description = f"Updated description - {datetime.now().strftime('%H:%M:%S')}"
@@ -8904,16 +8960,17 @@ class XR2AutoTester:
                 try:
                     # Ждем появления элемента с data-testid
                     await self.page.wait_for_selector('[data-testid="ab-test-start-button"]', timeout=15000, state="visible")
-                    start_btn = self.page.get_by_test_id("ab-test-start-button")
-                    logger.info("✅ Кнопка Start найдена через data-testid")
+                    # Используем .first() чтобы выбрать первую кнопку, если их несколько
+                    start_btn = self.page.get_by_test_id("ab-test-start-button").first
+                    logger.info("✅ Кнопка Start найдена через data-testid (первая из найденных)")
                 except Exception as e1:
                     logger.warning(f"⚠️ Кнопка не найдена через data-testid: {e1}")
-                    # Способ 2: Прямой поиск через query_selector
+                    # Способ 2: Прямой поиск через query_selector (выбираем первую)
                     try:
                         start_btn_elem = await self.page.query_selector('[data-testid="ab-test-start-button"]')
                         if start_btn_elem:
                             start_btn = start_btn_elem
-                            logger.info("✅ Кнопка Start найдена через query_selector")
+                            logger.info("✅ Кнопка Start найдена через query_selector (первая из найденных)")
                     except Exception as e2:
                         logger.warning(f"⚠️ Кнопка не найдена через query_selector: {e2}")
                 
@@ -9031,13 +9088,23 @@ class XR2AutoTester:
                             await start_btn.evaluate('el => el.click()')
                         logger.info("✅ Нажата кнопка Start через UI (force click)")
                     except Exception as force_err:
-                        # Последняя попытка - JS клик напрямую
+                        # Последняя попытка - JS клик напрямую (выбираем первую кнопку)
                         try:
                             await self.page.evaluate('''() => {
-                                const btn = document.querySelector('[data-testid="ab-test-start-button"]');
-                                if (btn) btn.click();
+                                const btns = document.querySelectorAll('[data-testid="ab-test-start-button"]');
+                                if (btns && btns.length > 0) {
+                                    // Выбираем первую видимую и доступную кнопку
+                                    for (let btn of btns) {
+                                        if (btn.offsetParent !== null && !btn.disabled) {
+                                            btn.click();
+                                            return;
+                                        }
+                                    }
+                                    // Если не нашли видимую, кликаем первую
+                                    btns[0].click();
+                                }
                             }''')
-                            logger.info("✅ Нажата кнопка Start через UI (JS click)")
+                            logger.info("✅ Нажата кнопка Start через UI (JS click - первая кнопка)")
                         except Exception as js_err:
                             raise Exception(f"Не удалось кликнуть кнопку Start: {force_err}, JS: {js_err}")
                             
