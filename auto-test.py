@@ -7752,7 +7752,7 @@ class XR2AutoTester:
             logger.info(f"✅ Авторизация подтверждена, URL: {current_url}")
 
             # Get API access token for internal API calls
-            access_token = await self.get_api_token("www", "***REMOVED_ADMIN_PWD***")
+            access_token = await self.get_api_token()
 
             # Create event definitions via API instead of UI for reliability
             async with aiohttp.ClientSession() as session:
@@ -7886,7 +7886,7 @@ class XR2AutoTester:
             # ===== Создание конверсий через API (более надежно) =====
             logger.info("📡 Создаем конверсии через API...")
 
-            access_token = await self.get_api_token("www", "***REMOVED_ADMIN_PWD***")
+            access_token = await self.get_api_token()
 
             async with aiohttp.ClientSession() as session:
                 headers = {
@@ -8039,7 +8039,7 @@ class XR2AutoTester:
             # Проверяем что воронка создана через API
             logger.info("🔍 Проверяем воронку через API...")
 
-            access_token = await self.get_api_token("www", "***REMOVED_ADMIN_PWD***")
+            access_token = await self.get_api_token()
             async with aiohttp.ClientSession() as check_session:
                 headers = {"Authorization": f"Bearer {access_token}"}
                 resp = await check_session.get(
@@ -8124,7 +8124,7 @@ class XR2AutoTester:
                 try:
                     logger.info(f"🔍 Проверяем статус промпта {prompt_slug}...")
 
-                    access_token = await self.get_api_token("www", "***REMOVED_ADMIN_PWD***")
+                    access_token = await self.get_api_token()
                     headers = {"Authorization": f"Bearer {access_token}"}
 
                     async with aiohttp.ClientSession() as session:
@@ -8200,7 +8200,7 @@ class XR2AutoTester:
             # Финальная проверка - убедимся что промпт задеплоен
             if self.created_prompt_id:
                 try:
-                    access_token = await self.get_api_token("www", "***REMOVED_ADMIN_PWD***")
+                    access_token = await self.get_api_token()
                     headers = {"Authorization": f"Bearer {access_token}"}
 
                     async with aiohttp.ClientSession() as check_session:
@@ -8266,7 +8266,7 @@ class XR2AutoTester:
 
             # ВАЖНО: Создать event definitions перед отправкой событий
             logger.info("📋 Создаем event definitions для событий...")
-            access_token = await self.get_api_token("www", "***REMOVED_ADMIN_PWD***")
+            access_token = await self.get_api_token()
 
             event_definitions_to_create = [
                 {
@@ -8506,7 +8506,7 @@ class XR2AutoTester:
         try:
             # Триггерим агрегацию статистики перед проверкой воронки
             try:
-                access_token = await self.get_api_token("www", "***REMOVED_ADMIN_PWD***")
+                access_token = await self.get_api_token()
                 async with aiohttp.ClientSession() as session:
                     headers = {"Authorization": f"Bearer {access_token}"}
                     await session.post(
@@ -8745,7 +8745,7 @@ class XR2AutoTester:
                 # Воронка не найдена на UI - проверим через API
                 logger.warning(f"⚠️ Воронка '{funnel_name}' не найдена на UI, проверяем через API...")
 
-                access_token = await self.get_api_token("www", "***REMOVED_ADMIN_PWD***")
+                access_token = await self.get_api_token()
                 async with aiohttp.ClientSession() as session:
                     headers = {"Authorization": f"Bearer {access_token}"}
 
@@ -8848,7 +8848,7 @@ class XR2AutoTester:
             logger.info(f"   Prompt ID: {selected_prompt_id}")
 
             # Получаем slug промпта для последующих тестов
-            access_token = await self.get_api_token("www", "***REMOVED_ADMIN_PWD***")
+            access_token = await self.get_api_token()
             async with aiohttp.ClientSession() as session:
                 headers = {"Authorization": f"Bearer {access_token}"}
                 resp = await session.get(f"{self.backend_url}/internal/prompts/{selected_prompt_id}", headers=headers)
@@ -9046,7 +9046,7 @@ class XR2AutoTester:
                 logger.info("📡 Запускаем A/B тест через API...")
 
                 # Получаем список тестов и запускаем первый не запущенный
-                access_token = await self.get_api_token("www", "***REMOVED_ADMIN_PWD***")
+                access_token = await self.get_api_token()
                 async with aiohttp.ClientSession() as api_session:
                     headers = {"Authorization": f"Bearer {access_token}"}
 
@@ -9073,7 +9073,7 @@ class XR2AutoTester:
                 await self.page.wait_for_timeout(2000)
 
                 # Проверка через API что тест создан и запущен
-                access_token = await self.get_api_token("www", "***REMOVED_ADMIN_PWD***")
+                access_token = await self.get_api_token()
                 async with aiohttp.ClientSession() as session:
                     headers = {"Authorization": f"Bearer {access_token}"}
                     resp = await session.get(f"{self.backend_url}/internal/ab-tests-simple/test", headers=headers)
@@ -9131,7 +9131,7 @@ class XR2AutoTester:
             versions_received = []
 
             # Перед запросами проверим статус A/B теста
-            access_token = await self.get_api_token("www", "***REMOVED_ADMIN_PWD***")
+            access_token = await self.get_api_token()
             async with aiohttp.ClientSession() as session:
                 headers = {"Authorization": f"Bearer {access_token}"}
                 resp = await session.get(f"{self.backend_url}/internal/ab-tests-simple/test", headers=headers)
