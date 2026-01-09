@@ -8886,10 +8886,14 @@ class XR2AutoTester:
             await self.page.wait_for_timeout(500)
             logger.info("✅ Нажата кнопка New A/B Test")
 
-            # Заполнение имени теста
+            # Заполнение имени теста (с уникальным суффиксом, чтобы избежать конфликта имен)
+            import time
+            unique_suffix = f"{int(time.time())}"[-6:]  # Последние 6 цифр timestamp
+            test_name = f"Test AB Prompt Versions {unique_suffix}"
             name_input = self.page.get_by_test_id("ab-test-name-input")
             await expect(name_input).to_be_visible()
-            await name_input.fill("Test AB Prompt Versions")
+            await name_input.fill(test_name)
+            self.ab_test_name = test_name  # Сохраняем для использования в проверках
             logger.info("✅ Заполнено имя теста")
 
             # Выбор промпта с 2+ версиями
@@ -9009,10 +9013,11 @@ class XR2AutoTester:
                 resp_check = await check_session.get(f"{self.backend_url}/internal/ab-tests-simple/test", headers=headers_check)
                 if resp_check.status == 200:
                     tests_data_check = await resp_check.json()
-                    # Ищем наш созданный тест
+                    # Ищем наш созданный тест (по имени с уникальным суффиксом)
                     our_test = None
                     for test in tests_data_check:
-                        if test.get('name') == "Test AB Prompt Versions":
+                        test_name_check = test.get('name', '')
+                        if test_name_check == test_name or test_name_check.startswith("Test AB Prompt Versions"):
                             our_test = test
                             break
                     
@@ -9251,7 +9256,7 @@ class XR2AutoTester:
                         logger.warning(f"⚠️ Не удалось получить A/B тесты: {resp.status}")
 
                 self.test_data['ab_test_created'] = True
-                test_result.pass_test({"ab_test_name": "Test AB Prompt Versions", "limit": 4})
+                test_result.pass_test({"ab_test_name": test_name, "limit": 4})
                 logger.info("✅ A/B тест успешно создан и запущен")
 
         except Exception as e:
