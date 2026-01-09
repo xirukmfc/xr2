@@ -71,6 +71,10 @@ if ! python3 -c "import playwright" 2>/dev/null; then
     MISSING_DEPS+=("playwright")
 fi
 
+if ! python3 -c "import dotenv" 2>/dev/null; then
+    MISSING_DEPS+=("python-dotenv")
+fi
+
 if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
     echo -e "${YELLOW}⚠️  Не установлены зависимости: ${MISSING_DEPS[*]}${NC}"
     echo ""
@@ -78,9 +82,10 @@ if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
         echo "Установить зависимости? (y/n)"
         read -r answer
         if [ "$answer" = "y" ]; then
-            echo "Установка зависимостей..."
-            pip3 install requests aiohttp playwright python-dotenv
-            playwright install chromium
+        echo "Установка зависимостей..."
+        pip3 install requests aiohttp playwright python-dotenv
+        playwright install chromium
+        echo -e "${GREEN}✅ Зависимости установлены${NC}"
             echo -e "${GREEN}✅ Зависимости установлены${NC}"
         else
             echo -e "${RED}❌ Для запуска тестов необходимы зависимости${NC}"
