@@ -9424,7 +9424,7 @@ class XR2AutoTester:
                 logger.info("🔑 API ключ не найден, создаем...")
                 result = await self.test_create_api_key()
                 self.add_test_result(result)
-                if not result.passed:
+                if result.status != "passed":
                     logger.error("❌ Не удалось создать API ключ!")
                     return
             
@@ -9433,7 +9433,7 @@ class XR2AutoTester:
                 logger.info("📝 Промпт не найден, создаем...")
                 result = await self.test_create_prompt()
                 self.add_test_result(result)
-                if not result.passed:
+                if result.status != "passed":
                     logger.error("❌ Не удалось создать промпт!")
                     return
             
