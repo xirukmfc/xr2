@@ -206,7 +206,7 @@ class XR2AutoTester:
         # Тестовые данные - берутся из переменных окружения для прода
         self.test_user = {
             "username": os.getenv('TEST_USERNAME', 'www'),
-            "password": os.getenv('TEST_PASSWORD', os.getenv('ADMIN_PASSWORD', '***REMOVED_ADMIN_PWD***'))
+            "password": os.getenv('TEST_PASSWORD', os.getenv('ADMIN_PASSWORD', '***REMOVED_TEST_PWD***'))
         }
 
         self.test_data = {
