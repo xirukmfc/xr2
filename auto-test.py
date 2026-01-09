@@ -9402,13 +9402,95 @@ class XR2AutoTester:
 
         logger.info("=" * 60)
 
+    async def run_ab_tests_only(self):
+        """Запустить только тесты A/B (быстрый запуск)"""
+        logger.info("🚀 Запуск только тестов A/B")
+        
+        start_time = datetime.now()
+        try:
+            logger.info(f"🚀 Начало тестирования A/B в {start_time.strftime('%H:%M:%S')}")
+            
+            # Настройка браузера
+            await self.setup_browser()
+            
+            # Проверка доступности серверов
+            await self.check_servers_availability()
+            
+            # Обеспечить авторизацию под www
+            await self.ensure_logged_in_as("www")
+            
+            # Убедиться что есть API ключ (нужен для тестов A/B)
+            if not self.created_api_key:
+                logger.info("🔑 API ключ не найден, создаем...")
+                result = await self.test_create_api_key()
+                self.add_test_result(result)
+                if not result.passed:
+                    logger.error("❌ Не удалось создать API ключ!")
+                    return
+            
+            # Убедиться что есть промпт с версиями (нужен для A/B теста)
+            if not self.created_prompt_id:
+                logger.info("📝 Промпт не найден, создаем...")
+                result = await self.test_create_prompt()
+                self.add_test_result(result)
+                if not result.passed:
+                    logger.error("❌ Не удалось создать промпт!")
+                    return
+            
+            # T17.9: Create and Run A/B Test
+            logger.info("=" * 60)
+            logger.info("📊 ТЕСТЫ A/B")
+            logger.info("=" * 60)
+            result = await self.test_create_and_run_ab_test()
+            self.add_test_result(result)
+            
+            # T17.10: A/B Test Version Alternation
+            result = await self.test_ab_test_version_alternation()
+            self.add_test_result(result)
+            
+            # Генерация отчета
+            self.generate_report()
+            
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
+            logger.info(f"✅ Тестирование A/B завершено за {duration:.1f} секунд")
+            
+        except Exception as e:
+            logger.error(f"❌ Ошибка при выполнении тестов A/B: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+        finally:
+            await self.cleanup_browser()
+
 
 async def main():
     """Основная функция запуска тестов"""
+    import sys
+    
+    # Проверяем аргументы командной строки
+    if len(sys.argv) > 1 and sys.argv[1] == "--ab-only":
+        print("\n" + "=" * 70)
+        print("🤖 xR2 PLATFORM AUTO-TESTER - A/B TESTS ONLY")
+        print("Запуск только тестов A/B")
+        print("=" * 70)
+        
+        tester = XR2AutoTester()
+        try:
+            await tester.run_ab_tests_only()
+        except KeyboardInterrupt:
+            logger.info("\n⏹️ Тестирование прервано пользователем")
+            await tester.cleanup_browser()
+        except Exception as e:
+            logger.error(f"\n❌ Неожиданная ошибка: {e}")
+            await tester.cleanup_browser()
+            raise
+        return
+    
     print("\n" + "=" * 70)
     print("🤖 xR2 PLATFORM AUTO-TESTER")
     print("Автоматическое тестирование всех функций приложения")
     print("=" * 70)
+    print("\n💡 Для запуска только A/B тестов используйте: python3 auto-test.py --ab-only")
 
     tester = XR2AutoTester()
     try:
