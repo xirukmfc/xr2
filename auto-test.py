@@ -195,8 +195,22 @@ class TestResult:
 
 class XR2AutoTester:
     def __init__(self):
-        self.frontend_url = os.getenv('FRONTEND_URL', 'http://127.0.0.1:3000')
-        self.backend_url = os.getenv('BACKEND_URL', 'http://127.0.0.1:8000')
+        # Автоматическое определение окружения на проде
+        # Если frontend_url указывает на xr2.uk, значит мы на проде
+        frontend_env = os.getenv('FRONTEND_URL', '')
+        backend_env = os.getenv('BACKEND_URL', '')
+        
+        # Определяем, запущены ли мы на проде
+        is_production = 'xr2.uk' in frontend_env or 'xr2.uk' in backend_env or os.path.exists('/opt/xr2')
+        
+        if is_production and not backend_env:
+            # На проде используем https://xr2.uk если BACKEND_URL не установлен
+            self.backend_url = 'https://xr2.uk'
+            self.frontend_url = os.getenv('FRONTEND_URL', 'https://xr2.uk')
+            logger.info(f"🌐 Обнаружено production окружение, используем: {self.backend_url}")
+        else:
+            self.frontend_url = os.getenv('FRONTEND_URL', 'http://127.0.0.1:3000')
+            self.backend_url = os.getenv('BACKEND_URL', 'http://127.0.0.1:8000')
         self.test_results: List[TestResult] = []
         self.browser: Optional[Browser] = None
         self.context: Optional[BrowserContext] = None
