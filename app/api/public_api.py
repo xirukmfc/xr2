@@ -86,10 +86,25 @@ async def get_ab_test_version(session: AsyncSession, prompt_id: UUID, workspace_
 
         # Debug logging to understand what's happening
         if not ab_test:
-            print(f"[A/B TEST DEBUG] No active tests found for prompt {prompt_id}, using production version")
+            print(f"[A/B TEST DEBUG] No active tests found for prompt {prompt_id}, workspace {workspace_id}, using production version")
+            # Debug: check if there are any tests for this prompt at all
+            all_tests_result = await session.execute(
+                select(ABTest).where(ABTest.prompt_id == prompt_id)
+            )
+            all_tests = all_tests_result.scalars().all()
+            if all_tests:
+                print(f"[A/B TEST DEBUG] Found {len(all_tests)} tests for prompt {prompt_id}, but none are running:")
+                for test in all_tests:
+                    print(f"  - {test.name}: status={test.status}, workspace={test.workspace_id}, version_a_id={test.version_a_id}, version_b_id={test.version_b_id}")
             return None
 
         print(f"[A/B TEST DEBUG] Found running test: {ab_test.name} (ID: {ab_test.id}, Status: {ab_test.status}, Created: {ab_test.created_at})")
+        print(f"[A/B TEST DEBUG] Version A ID: {ab_test.version_a_id}, Version B ID: {ab_test.version_b_id}")
+
+        # Validate that versions are set
+        if not ab_test.version_a_id or not ab_test.version_b_id:
+            print(f"[A/B TEST DEBUG] ERROR: A/B test {ab_test.id} has missing versions! version_a_id={ab_test.version_a_id}, version_b_id={ab_test.version_b_id}")
+            return None  # Can't serve test without versions
 
         # Check if we've reached the total request limit
         total_served = ab_test.version_a_requests + ab_test.version_b_requests
@@ -100,6 +115,7 @@ async def get_ab_test_version(session: AsyncSession, prompt_id: UUID, workspace_
                 ab_test.status = 'completed'
                 ab_test.ended_at = datetime.utcnow()
                 await session.commit()
+            print(f"[A/B TEST DEBUG] Test {ab_test.id} has reached limit ({total_served}/{ab_test.total_requests}), completing")
             return None  # Use production version when test is exhausted
 
         # Determine which version to serve for 50/50 split
@@ -109,11 +125,13 @@ async def get_ab_test_version(session: AsyncSession, prompt_id: UUID, workspace_
             ab_test.version_a_requests += 1
             version_to_serve = ab_test.version_a_id
             variant = "version_a"
+            print(f"[A/B TEST DEBUG] Serving version A (requests: A={ab_test.version_a_requests}, B={ab_test.version_b_requests})")
         else:
             # Serve version B
             ab_test.version_b_requests += 1
             version_to_serve = ab_test.version_b_id
             variant = "version_b"
+            print(f"[A/B TEST DEBUG] Serving version B (requests: A={ab_test.version_a_requests}, B={ab_test.version_b_requests})")
 
         await session.commit()
 
@@ -125,7 +143,9 @@ async def get_ab_test_version(session: AsyncSession, prompt_id: UUID, workspace_
         }
 
     except Exception as e:
-        print(f"Error in A/B testing: {e}")
+        import traceback
+        print(f"[A/B TEST DEBUG] Error in A/B testing: {e}")
+        traceback.print_exc()
         return None  # Fall back to production version
 
 
