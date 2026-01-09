@@ -40,12 +40,18 @@ export LOG_TO_FILE="true"
 export LOG_DIR="logs/auto-tests"
 export LOG_LEVEL="${LOG_LEVEL:-INFO}"
 
+# Учетные данные для тестов (берутся из переменных окружения или используются значения по умолчанию для прода)
+export TEST_USERNAME="${TEST_USERNAME:-www}"
+export TEST_PASSWORD="${TEST_PASSWORD:-${ADMIN_PASSWORD:-***REMOVED_TEST_PWD***}}"
+
 echo -e "${GREEN}📋 Конфигурация тестов:${NC}"
 echo "  FRONTEND_URL: $FRONTEND_URL"
 echo "  BACKEND_URL:  $BACKEND_URL"
 echo "  LOG_TO_FILE:  $LOG_TO_FILE"
 echo "  LOG_DIR:      $LOG_DIR"
 echo "  LOG_LEVEL:    $LOG_LEVEL"
+echo "  TEST_USERNAME: $TEST_USERNAME"
+echo "  TEST_PASSWORD: ${TEST_PASSWORD:0:3}***"
 echo ""
 
 # Проверка наличия Python

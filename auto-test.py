@@ -203,10 +203,10 @@ class XR2AutoTester:
         self.page: Optional[Page] = None
         self.playwright = None
 
-        # Тестовые данные
+        # Тестовые данные - берутся из переменных окружения для прода
         self.test_user = {
-            "username": "www",
-            "password": "***REMOVED_ADMIN_PWD***"
+            "username": os.getenv('TEST_USERNAME', 'www'),
+            "password": os.getenv('TEST_PASSWORD', os.getenv('ADMIN_PASSWORD', '***REMOVED_ADMIN_PWD***'))
         }
 
         self.test_data = {
@@ -322,8 +322,12 @@ class XR2AutoTester:
         except Exception:
             pass
 
-    async def login_as_user(self, username: str = "www", password: str = "***REMOVED_ADMIN_PWD***"):
+    async def login_as_user(self, username: str = None, password: str = None):
         """Выполнить авторизацию под указанным пользователем"""
+        # Используем значения по умолчанию из test_user если не переданы
+        username = username or self.test_user["username"]
+        password = password or self.test_user["password"]
+        
         try:
             await self.page.goto(f"{self.frontend_url}/login")
             await self.page.wait_for_load_state("networkidle")
@@ -362,15 +366,23 @@ class XR2AutoTester:
             logger.error(f"❌ Ошибка авторизации как {username}: {e}")
             raise
 
-    async def ensure_logged_in_as(self, username: str = "www", password: str = "***REMOVED_ADMIN_PWD***"):
+    async def ensure_logged_in_as(self, username: str = None, password: str = None):
         """Убедиться что авторизован под указанным пользователем (logout + login)"""
+        # Используем значения по умолчанию из test_user если не переданы
+        username = username or self.test_user["username"]
+        password = password or self.test_user["password"]
+        
         logger.info(f"🔐 Обеспечение авторизации как {username}...")
         await self.logout_user()
         await asyncio.sleep(1)
         await self.login_as_user(username, password)
 
-    async def get_api_token(self, username: str = "www", password: str = "***REMOVED_ADMIN_PWD***") -> str:
+    async def get_api_token(self, username: str = None, password: str = None) -> str:
         """Получить access token через API для использования в внутренних запросах"""
+        # Используем значения по умолчанию из test_user если не переданы
+        username = username or self.test_user["username"]
+        password = password or self.test_user["password"]
+        
         try:
             async with aiohttp.ClientSession() as session:
                 resp = await session.post(
@@ -398,8 +410,12 @@ class XR2AutoTester:
             logger.error(f"❌ Ошибка получения API token: {e}")
             raise
 
-    async def ensure_on_page(self, url: str, username: str = "www", password: str = "***REMOVED_ADMIN_PWD***"):
+    async def ensure_on_page(self, url: str, username: str = None, password: str = None):
         """Перейти на страницу и убедиться что авторизован"""
+        # Используем значения по умолчанию из test_user если не переданы
+        username = username or self.test_user["username"]
+        password = password or self.test_user["password"]
+        
         # Сначала проверяем текущую страницу
         try:
             current_url = self.page.url
@@ -2010,7 +2026,7 @@ class XR2AutoTester:
                 if not (u and p):
                     raise RuntimeError("Admin login form not found")
                 await u.fill("www")
-                await p.fill("***REMOVED_ADMIN_PWD***")
+                await p.fill(self.test_user["password"])
                 btn = await self.page.query_selector('button[type="submit"], input[type="submit"]')
                 if not btn:
                     raise RuntimeError("Admin login submit button not found")
@@ -2790,7 +2806,7 @@ class XR2AutoTester:
                 try:
                     await self.page.wait_for_selector('#username', timeout=30000)
                     await self.page.fill('#username', 'www')
-                    await self.page.fill('#password', '***REMOVED_ADMIN_PWD***')
+                    await self.page.fill('#password', self.test_user["password"])
                     await self.page.click('button:has-text("Sign in")')
                     await self.page.wait_for_timeout(2000)
                 except Exception:
@@ -3011,7 +3027,7 @@ class XR2AutoTester:
             # Используем существующего тестового пользователя с правами
             test_user_data = {
                 "username": "www",
-                "password": "***REMOVED_ADMIN_PWD***"
+                "password": self.test_user["password"]
             }
 
             # Создать connector с отключенным SSL для локального тестирования
@@ -4165,7 +4181,7 @@ class XR2AutoTester:
                 await self.page.click('button:has-text("Sign in")')
                 await self.page.wait_for_timeout(2000)
 
-            await login_as("www", "***REMOVED_ADMIN_PWD***")
+            await login_as(self.test_user["username"], self.test_user["password"])
 
             # Перейти в редактор
             await self.page.goto(f"{self.frontend_url}/editor/{self.created_prompt_id}")
@@ -4294,7 +4310,7 @@ class XR2AutoTester:
                 try:
                     await self.page.wait_for_selector('#username', timeout=30000)
                     await self.page.fill('#username', 'www')
-                    await self.page.fill('#password', '***REMOVED_ADMIN_PWD***')
+                    await self.page.fill('#password', self.test_user["password"])
                     await self.page.click('button:has-text("Sign in")')
                     await self.page.wait_for_timeout(2000)
                 except Exception:
@@ -4590,7 +4606,7 @@ class XR2AutoTester:
                 try:
                     await self.page.wait_for_selector('#username', timeout=30000)
                     await self.page.fill('#username', 'www')
-                    await self.page.fill('#password', '***REMOVED_ADMIN_PWD***')
+                    await self.page.fill('#password', self.test_user["password"])
                     await self.page.click('button:has-text("Sign in")')
                     await self.page.wait_for_timeout(2000)
                 except Exception:
@@ -5692,7 +5708,7 @@ class XR2AutoTester:
                 pass
             await self.page.wait_for_selector('#username', timeout=30000)
             await self.page.fill('#username', 'www')
-            await self.page.fill('#password', '***REMOVED_ADMIN_PWD***')
+            await self.page.fill('#password', self.test_user["password"])
             await self.page.click('button:has-text("Sign in")')
             await self.page.wait_for_timeout(2000)
 
@@ -5813,7 +5829,7 @@ class XR2AutoTester:
         logger.info("📈 Запуск тестов аналитики...")
 
         # Обеспечить авторизацию под www
-        await self.ensure_logged_in_as("www", "***REMOVED_ADMIN_PWD***")
+        await self.ensure_logged_in_as()
 
         # T7.1: Доступ к логам
         result = await self.test_logs_page_access()
@@ -5929,7 +5945,7 @@ class XR2AutoTester:
                 try:
                     await self.page.wait_for_selector('#username', timeout=30000)
                     await self.page.fill('#username', 'www')
-                    await self.page.fill('#password', '***REMOVED_ADMIN_PWD***')
+                    await self.page.fill('#password', self.test_user["password"])
                     await self.page.click('button:has-text("Sign in")')
                     await self.page.wait_for_timeout(2000)
                 except Exception:
@@ -6978,7 +6994,7 @@ class XR2AutoTester:
         logger.info("="*70)
 
         # Обеспечить авторизацию под www
-        await self.ensure_logged_in_as("www", "***REMOVED_ADMIN_PWD***")
+        await self.ensure_logged_in_as()
 
         tests = [
             self.test_share_button_presence,
@@ -7013,7 +7029,7 @@ class XR2AutoTester:
                 try:
                     await self.page.wait_for_selector('#username', timeout=5000)
                     await self.page.fill('#username', 'www')
-                    await self.page.fill('#password', '***REMOVED_ADMIN_PWD***')
+                    await self.page.fill('#password', self.test_user["password"])
                     await self.page.click('button:has-text("Sign in")')
                     await self.page.wait_for_timeout(2000)
 
@@ -7342,7 +7358,7 @@ class XR2AutoTester:
         try:
             # Проверка и получение токена если его нет
             await self.logout_user()
-            await login_as('www', '***REMOVED_ADMIN_PWD***')
+            await login_as(self.test_user["username"], self.test_user["password"])
 
             if not hasattr(self, 'auth_token') or not self.auth_token:
                 logger.info("Auth token отсутствует, выполняем повторный логин...")
@@ -7355,7 +7371,7 @@ class XR2AutoTester:
                     pass
                 await self.page.wait_for_selector('#username', timeout=30000)
                 await self.page.fill('#username', 'www')
-                await self.page.fill('#password', '***REMOVED_ADMIN_PWD***')
+                await self.page.fill('#password', self.test_user["password"])
                 await self.page.click('button:has-text("Sign in")')
                 await self.page.wait_for_timeout(2000)
 
@@ -7484,7 +7500,7 @@ class XR2AutoTester:
 
         try:
             await self.logout_user()
-            await login_as('www', '***REMOVED_ADMIN_PWD***')
+            await login_as(self.test_user["username"], self.test_user["password"])
 
             # Проверка и получение токена если его нет
             if not hasattr(self, 'auth_token') or not self.auth_token:
@@ -7606,7 +7622,7 @@ class XR2AutoTester:
 
         try:
             await self.logout_user()
-            await login_as('www', '***REMOVED_ADMIN_PWD***')
+            await login_as(self.test_user["username"], self.test_user["password"])
 
             # Авторизация перед проверкой UI если нужно
             if "/login" not in self.page.url:
@@ -7619,7 +7635,7 @@ class XR2AutoTester:
                 try:
                     await self.page.wait_for_selector('#username', timeout=30000)
                     await self.page.fill('#username', 'www')
-                    await self.page.fill('#password', '***REMOVED_ADMIN_PWD***')
+                    await self.page.fill('#password', self.test_user["password"])
                     await self.page.click('button:has-text("Sign in")')
                     await self.page.wait_for_timeout(2000)
                 except Exception:
@@ -7720,7 +7736,7 @@ class XR2AutoTester:
 
             if "/login" in current_url:
                 logger.warning("⚠️ Обнаружен redirect на login, повторная авторизация...")
-                await self.login_as_user("www", "***REMOVED_ADMIN_PWD***")
+                await self.login_as_user()
 
             # Navigate to prompts or dashboard to ensure we have valid session
             await self.page.goto(f"{self.frontend_url}/prompts")
@@ -9199,7 +9215,7 @@ class XR2AutoTester:
         logger.info("=" * 60)
 
         # Обеспечить авторизацию под www
-        await self.ensure_logged_in_as("www", "***REMOVED_ADMIN_PWD***")
+        await self.ensure_logged_in_as()
 
         # T17.1: Event Definitions
         result = await self.test_create_event_definitions()
