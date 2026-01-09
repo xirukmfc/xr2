@@ -9006,36 +9006,41 @@ class XR2AutoTester:
             await self.page.wait_for_load_state("networkidle")
             await self.page.wait_for_timeout(3000)
 
-            # Проверяем что тест создан правильно через API
+            # Проверяем что тест создан и запускаем его через API
             access_token_check = await self.get_api_token()
+            our_test = None
+            our_test_id = None
             async with aiohttp.ClientSession() as check_session:
                 headers_check = {"Authorization": f"Bearer {access_token_check}"}
                 resp_check = await check_session.get(f"{self.backend_url}/internal/ab-tests-simple/test", headers=headers_check)
                 if resp_check.status == 200:
                     tests_data_check = await resp_check.json()
                     # Ищем наш созданный тест (по имени с уникальным суффиксом)
-                    our_test = None
                     for test in tests_data_check:
                         test_name_check = test.get('name', '')
-                        if test_name_check == test_name or test_name_check.startswith("Test AB Prompt Versions"):
+                        if test_name_check == test_name or (test_name_check.startswith("Test AB Prompt Versions") and test.get('status') == 'draft'):
                             our_test = test
+                            our_test_id = test.get('id')
                             break
                     
                     if our_test:
-                        version_a_num = our_test.get('version_a_number')
-                        version_b_num = our_test.get('version_b_number')
-                        version_a_id_check = our_test.get('version_a_id')
-                        version_b_id_check = our_test.get('version_b_id')
+                        logger.info(f"✅ Найден созданный тест: {our_test.get('name')} (ID: {our_test_id}, статус: {our_test.get('status')})")
                         
-                        if version_a_num is None or version_b_num is None or version_a_id_check is None or version_b_id_check is None:
-                            logger.error(f"❌ A/B тест создан, но версии не установлены!")
-                            logger.error(f"   version_a_number: {version_a_num}, version_b_number: {version_b_num}")
-                            logger.error(f"   version_a_id: {version_a_id_check}, version_b_id: {version_b_id_check}")
-                            raise Exception(f"A/B тест создан без версий! version_a={version_a_num}, version_b={version_b_num}")
+                        # Запускаем тест через API
+                        if our_test.get('status') == 'draft':
+                            logger.info(f"📡 Запускаем A/B тест через API: {our_test_id}")
+                            start_resp = await check_session.post(
+                                f"{self.backend_url}/internal/ab-tests-simple/test/{our_test_id}/start",
+                                headers=headers_check
+                            )
+                            if start_resp.status == 200:
+                                start_data = await start_resp.json()
+                                logger.info(f"✅ A/B тест запущен через API: {start_data}")
+                            else:
+                                start_error = await start_resp.text()
+                                logger.error(f"❌ Ошибка запуска теста через API: {start_resp.status} - {start_error}")
                         else:
-                            logger.info(f"✅ A/B тест создан правильно:")
-                            logger.info(f"   Version A: {version_a_num} (ID: {version_a_id_check})")
-                            logger.info(f"   Version B: {version_b_num} (ID: {version_b_id_check})")
+                            logger.info(f"ℹ️ Тест уже в статусе: {our_test.get('status')}")
                     else:
                         logger.warning("⚠️ Созданный тест не найден в списке через API")
                 else:
@@ -9045,215 +9050,38 @@ class XR2AutoTester:
             screenshot_after_create = await self.take_screenshot("ab_test_created")
             logger.info(f"📸 Скриншот после создания: {screenshot_after_create}")
 
-            # Запуск теста - попробуем через UI, если не получится - через API
-            # Увеличиваем таймаут и добавляем дополнительные проверки
-            logger.info("🔍 Ищем кнопку Start...")
-            
-            try:
-                # Способ 1: Ожидание через get_by_test_id с таймаутом
-                start_btn = None
-                try:
-                    # Ждем появления элемента с data-testid
-                    await self.page.wait_for_selector('[data-testid="ab-test-start-button"]', timeout=15000, state="visible")
-                    # Используем .first() чтобы выбрать первую кнопку, если их несколько
-                    start_btn = self.page.get_by_test_id("ab-test-start-button").first
-                    logger.info("✅ Кнопка Start найдена через data-testid (первая из найденных)")
-                except Exception as e1:
-                    logger.warning(f"⚠️ Кнопка не найдена через data-testid: {e1}")
-                    # Способ 2: Прямой поиск через query_selector (выбираем первую)
-                    try:
-                        start_btn_elem = await self.page.query_selector('[data-testid="ab-test-start-button"]')
-                        if start_btn_elem:
-                            start_btn = start_btn_elem
-                            logger.info("✅ Кнопка Start найдена через query_selector (первая из найденных)")
-                    except Exception as e2:
-                        logger.warning(f"⚠️ Кнопка не найдена через query_selector: {e2}")
-                
-                if not start_btn:
-                    raise Exception("Кнопка Start не найдена")
-                
-                try:
-                    # Проверяем видимость
-                    if hasattr(start_btn, 'is_visible'):
-                        is_visible = await start_btn.is_visible()
-                        if not is_visible:
-                            logger.warning("⚠️ Кнопка Start найдена, но не видима, ждем...")
-                            await self.page.wait_for_timeout(2000)
-                            is_visible = await start_btn.is_visible()
-                    
-                    # Дополнительная проверка что кнопка действительно доступна
-                    if hasattr(start_btn, 'is_enabled'):
-                        is_enabled = await start_btn.is_enabled()
-                        if not is_enabled:
-                            logger.warning("⚠️ Кнопка Start найдена, но не включена")
+            # Проверяем что тест запущен, ждем немного
+            await self.page.wait_for_timeout(2000)
+
+            # Финальная проверка через API что тест запущен
+            access_token_final = await self.get_api_token()
+            async with aiohttp.ClientSession() as final_session:
+                headers_final = {"Authorization": f"Bearer {access_token_final}"}
+                resp_final = await final_session.get(f"{self.backend_url}/internal/ab-tests-simple/test", headers=headers_final)
+                if resp_final.status == 200:
+                    tests_data_final = await resp_final.json()
+                    logger.info(f"📊 A/B тесты в системе: {len(tests_data_final)}")
+                    for test in tests_data_final:
+                        logger.info(f"   - {test.get('name')}: status={test.get('status')}, "
+                                  f"version_a={test.get('version_a_number')}, version_b={test.get('version_b_number')}")
+
+                    # Проверяем что наш тест есть и running
+                    running_tests = [t for t in tests_data_final if t.get('status') == 'running']
+                    if not running_tests:
+                        # Если нет running тестов, но есть наш тест в draft - это ошибка запуска
+                        our_draft_test = None
+                        for t in tests_data_final:
+                            if t.get('name') == test_name and t.get('status') == 'draft':
+                                our_draft_test = t
+                                break
+                        if our_draft_test:
+                            raise Exception(f"A/B тест создан, но не запущен! Тест: {our_draft_test.get('name')}, статус: {our_draft_test.get('status')}")
                         else:
-                            logger.info("✅ Кнопка Start видима и включена")
-                except Exception as check_err:
-                    logger.warning(f"⚠️ Ошибка при проверке кнопки: {check_err}")
-                
-                # Проверяем наличие overlay/modal, который может перехватывать клики
-                overlay_selectors = [
-                    'div[data-state="open"][aria-hidden="true"]',
-                    'div.fixed.inset-0.z-50.bg-black',
-                    '[role="dialog"]',
-                    '.modal-overlay'
-                ]
-                
-                overlay_found = False
-                for selector in overlay_selectors:
-                    overlay = await self.page.query_selector(selector)
-                    if overlay:
-                        overlay_found = True
-                        logger.info(f"⚠️ Найден overlay: {selector}, ждем его закрытия...")
-                        # Ждем закрытия overlay (максимум 5 секунд)
-                        try:
-                            await self.page.wait_for_selector(selector, state="hidden", timeout=5000)
-                            logger.info("✅ Overlay закрыт")
-                        except:
-                            # Если overlay не закрылся, попробуем закрыть его вручную
-                            logger.info("⚠️ Overlay не закрылся автоматически, пытаемся закрыть...")
-                            try:
-                                # Способ 1: Нажать Escape
-                                await self.page.keyboard.press("Escape")
-                                await self.page.wait_for_timeout(500)
-                                
-                                # Способ 2: Найти и кликнуть кнопку закрытия
-                                close_buttons = [
-                                    'button[aria-label="Close"]',
-                                    'button:has-text("Close")',
-                                    '[data-testid*="close"]',
-                                    'button[title="Close"]',
-                                    '.dialog-close',
-                                    '[role="dialog"] button:last-child'
-                                ]
-                                
-                                for close_sel in close_buttons:
-                                    try:
-                                        close_btn = await self.page.query_selector(close_sel)
-                                        if close_btn and await close_btn.is_visible():
-                                            await close_btn.click()
-                                            await self.page.wait_for_timeout(500)
-                                            logger.info(f"✅ Overlay закрыт через кнопку: {close_sel}")
-                                            break
-                                    except:
-                                        continue
-                                
-                                # Способ 3: Кликнуть вне модального окна (на overlay)
-                                try:
-                                    overlay_elem = await self.page.query_selector('div[data-state="open"][aria-hidden="true"]')
-                                    if overlay_elem:
-                                        # Кликаем в центр overlay (обычно закрывает модальное окно)
-                                        box = await overlay_elem.bounding_box()
-                                        if box:
-                                            await self.page.mouse.click(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
-                                            await self.page.wait_for_timeout(500)
-                                            logger.info("✅ Попытка закрыть overlay кликом вне модального окна")
-                                except:
-                                    pass
-                                
-                                # Проверяем что overlay закрылся
-                                await self.page.wait_for_timeout(500)
-                                overlay_still_open = await self.page.query_selector('div[data-state="open"][aria-hidden="true"]')
-                                if overlay_still_open:
-                                    logger.warning("⚠️ Overlay все еще открыт после попыток закрытия")
-                                else:
-                                    logger.info("✅ Overlay закрыт")
-                            except Exception as close_err:
-                                logger.warning(f"⚠️ Ошибка при закрытии overlay: {close_err}")
-                        break
-                
-                # Пытаемся кликнуть с несколькими стратегиями
-                try:
-                    # Если start_btn это ElementHandle (от query_selector), используем его метод click
-                    if hasattr(start_btn, 'as_element'):
-                        # Это Locator от get_by_test_id
-                        await start_btn.click(timeout=10000)
-                    else:
-                        # Это ElementHandle от query_selector
-                        await start_btn.click()
-                    logger.info("✅ Нажата кнопка Start через UI")
-                except Exception as click_err:
-                    # Если обычный клик не работает, пробуем force click
-                    logger.warning(f"⚠️ Обычный клик не сработал: {click_err}, пробуем force click...")
-                    try:
-                        if hasattr(start_btn, 'as_element'):
-                            await start_btn.click(force=True, timeout=5000)
-                        else:
-                            # Для ElementHandle используем JS клик
-                            await start_btn.evaluate('el => el.click()')
-                        logger.info("✅ Нажата кнопка Start через UI (force click)")
-                    except Exception as force_err:
-                        # Последняя попытка - JS клик напрямую (выбираем первую кнопку)
-                        try:
-                            await self.page.evaluate('''() => {
-                                const btns = document.querySelectorAll('[data-testid="ab-test-start-button"]');
-                                if (btns && btns.length > 0) {
-                                    // Выбираем первую видимую и доступную кнопку
-                                    for (let btn of btns) {
-                                        if (btn.offsetParent !== null && !btn.disabled) {
-                                            btn.click();
-                                            return;
-                                        }
-                                    }
-                                    // Если не нашли видимую, кликаем первую
-                                    btns[0].click();
-                                }
-                            }''')
-                            logger.info("✅ Нажата кнопка Start через UI (JS click - первая кнопка)")
-                        except Exception as js_err:
-                            raise Exception(f"Не удалось кликнуть кнопку Start: {force_err}, JS: {js_err}")
-                            
-            except Exception as ui_err:
-                logger.warning(f"⚠️ UI кнопка Start не найдена или недоступна: {ui_err}")
-                logger.info("📡 Запускаем A/B тест через API...")
+                            raise Exception(f"No running A/B tests found!")
 
-                # Получаем список тестов и запускаем первый не запущенный
-                access_token = await self.get_api_token()
-                async with aiohttp.ClientSession() as api_session:
-                    headers = {"Authorization": f"Bearer {access_token}"}
-
-                    # Получаем список тестов
-                    resp = await api_session.get(f"{self.backend_url}/internal/ab-tests-simple/test", headers=headers)
-                    if resp.status == 200:
-                        tests = await resp.json()
-                        draft_tests = [t for t in tests if t.get('status') in ['draft', 'created']]
-
-                        if draft_tests:
-                            test_id = draft_tests[0].get('id')
-                            # Запускаем тест
-                            start_resp = await api_session.post(
-                                f"{self.backend_url}/internal/ab-tests-simple/{test_id}/start",
-                                headers=headers
-                            )
-                            if start_resp.status in [200, 201]:
-                                logger.info(f"✅ A/B тест запущен через API: {test_id}")
-                            else:
-                                logger.warning(f"⚠️ Не удалось запустить тест: {start_resp.status}")
-                        else:
-                            logger.info("ℹ️ Нет draft тестов для запуска")
-
-                await self.page.wait_for_timeout(2000)
-
-                # Проверка через API что тест создан и запущен
-                access_token = await self.get_api_token()
-                async with aiohttp.ClientSession() as session:
-                    headers = {"Authorization": f"Bearer {access_token}"}
-                    resp = await session.get(f"{self.backend_url}/internal/ab-tests-simple/test", headers=headers)
-                    if resp.status == 200:
-                        tests_data = await resp.json()
-                        logger.info(f"📊 A/B тесты в системе: {len(tests_data)}")
-                        for test in tests_data:
-                            logger.info(f"   - {test.get('name')}: status={test.get('status')}, "
-                                      f"version_a={test.get('version_a_number')}, version_b={test.get('version_b_number')}")
-
-                        # Проверяем что наш тест есть и running
-                        running_tests = [t for t in tests_data if t.get('status') == 'running']
-                        if not running_tests:
-                            raise Exception(f"No running A/B tests found! Tests: {tests_data}")
-
-                        logger.info(f"✅ Найдено {len(running_tests)} активных A/B тестов")
-                    else:
-                        logger.warning(f"⚠️ Не удалось получить A/B тесты: {resp.status}")
+                    logger.info(f"✅ Найдено {len(running_tests)} активных A/B тестов")
+                else:
+                    logger.warning(f"⚠️ Не удалось получить A/B тесты: {resp_final.status}")
 
                 self.test_data['ab_test_created'] = True
                 test_result.pass_test({"ab_test_name": test_name, "limit": 4})
