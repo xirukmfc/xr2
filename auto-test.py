@@ -8915,19 +8915,61 @@ class XR2AutoTester:
                 else:
                     logger.warning(f"⚠️ Не удалось получить slug промпта: {resp.status}")
 
-            await self.page.wait_for_timeout(500)
+            await self.page.wait_for_timeout(1000)  # Ждем загрузки опций версий
 
-            # Выбор Version A
+            # Выбор Version A - выбираем первую реальную версию (не placeholder)
             version_a_select = self.page.get_by_test_id("ab-test-version-a-select")
             await expect(version_a_select).to_be_visible()
-            await version_a_select.select_option(index=1)
-            logger.info("✅ Выбрана Version A")
+            # Ждем появления опций версий
+            await self.page.wait_for_timeout(500)
+            
+            # Получаем все опции и выбираем первую реальную версию (пропускаем placeholder)
+            version_a_options = await version_a_select.locator("option").all()
+            version_a_id = None
+            if len(version_a_options) > 1:  # Есть хотя бы одна версия (первая - placeholder)
+                # Берем первую реальную версию (index 1, так как index 0 - placeholder)
+                version_a_id = await version_a_options[1].get_attribute("value")
+                if version_a_id:
+                    await version_a_select.select_option(value=version_a_id)
+                    version_a_text = await version_a_options[1].text_content()
+                    logger.info(f"✅ Выбрана Version A: {version_a_text} (ID: {version_a_id})")
+                else:
+                    # Fallback на index если value не работает
+                    await version_a_select.select_option(index=1)
+                    logger.info("✅ Выбрана Version A (по index)")
+            else:
+                raise Exception("Нет доступных версий для Version A")
 
-            # Выбор Version B
+            # Выбор Version B - выбираем вторую реальную версию
             version_b_select = self.page.get_by_test_id("ab-test-version-b-select")
             await expect(version_b_select).to_be_visible()
-            await version_b_select.select_option(index=2)
-            logger.info("✅ Выбрана Version B")
+            await self.page.wait_for_timeout(500)
+            
+            version_b_options = await version_b_select.locator("option").all()
+            version_b_id = None
+            if len(version_b_options) > 2:  # Есть хотя бы две версии (первая - placeholder)
+                # Берем вторую реальную версию (index 2, так как index 0 - placeholder, index 1 - уже выбрана в A)
+                version_b_id = await version_b_options[2].get_attribute("value")
+                if version_b_id and version_b_id != version_a_id:  # Убеждаемся что это другая версия
+                    await version_b_select.select_option(value=version_b_id)
+                    version_b_text = await version_b_options[2].text_content()
+                    logger.info(f"✅ Выбрана Version B: {version_b_text} (ID: {version_b_id})")
+                else:
+                    # Если вторая версия совпадает с первой, берем следующую
+                    if len(version_b_options) > 3:
+                        version_b_id = await version_b_options[3].get_attribute("value")
+                        if version_b_id:
+                            await version_b_select.select_option(value=version_b_id)
+                            version_b_text = await version_b_options[3].text_content()
+                            logger.info(f"✅ Выбрана Version B: {version_b_text} (ID: {version_b_id})")
+                        else:
+                            await version_b_select.select_option(index=2)
+                            logger.info("✅ Выбрана Version B (по index)")
+                    else:
+                        await version_b_select.select_option(index=2)
+                        logger.info("✅ Выбрана Version B (по index)")
+            else:
+                raise Exception("Нет доступных версий для Version B (нужно минимум 2 версии)")
 
             # Установка лимита запросов
             total_requests_input = self.page.get_by_test_id("ab-test-total-requests-input")
@@ -8945,6 +8987,40 @@ class XR2AutoTester:
             # Ждем создания и появления новой страницы
             await self.page.wait_for_load_state("networkidle")
             await self.page.wait_for_timeout(3000)
+
+            # Проверяем что тест создан правильно через API
+            access_token_check = await self.get_api_token()
+            async with aiohttp.ClientSession() as check_session:
+                headers_check = {"Authorization": f"Bearer {access_token_check}"}
+                resp_check = await check_session.get(f"{self.backend_url}/internal/ab-tests-simple/test", headers=headers_check)
+                if resp_check.status == 200:
+                    tests_data_check = await resp_check.json()
+                    # Ищем наш созданный тест
+                    our_test = None
+                    for test in tests_data_check:
+                        if test.get('name') == "Test AB Prompt Versions":
+                            our_test = test
+                            break
+                    
+                    if our_test:
+                        version_a_num = our_test.get('version_a_number')
+                        version_b_num = our_test.get('version_b_number')
+                        version_a_id_check = our_test.get('version_a_id')
+                        version_b_id_check = our_test.get('version_b_id')
+                        
+                        if version_a_num is None or version_b_num is None or version_a_id_check is None or version_b_id_check is None:
+                            logger.error(f"❌ A/B тест создан, но версии не установлены!")
+                            logger.error(f"   version_a_number: {version_a_num}, version_b_number: {version_b_num}")
+                            logger.error(f"   version_a_id: {version_a_id_check}, version_b_id: {version_b_id_check}")
+                            raise Exception(f"A/B тест создан без версий! version_a={version_a_num}, version_b={version_b_num}")
+                        else:
+                            logger.info(f"✅ A/B тест создан правильно:")
+                            logger.info(f"   Version A: {version_a_num} (ID: {version_a_id_check})")
+                            logger.info(f"   Version B: {version_b_num} (ID: {version_b_id_check})")
+                    else:
+                        logger.warning("⚠️ Созданный тест не найден в списке через API")
+                else:
+                    logger.warning(f"⚠️ Не удалось проверить созданный тест через API: {resp_check.status}")
 
             # Скриншот после создания
             screenshot_after_create = await self.take_screenshot("ab_test_created")
