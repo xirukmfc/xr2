@@ -390,6 +390,9 @@ async def get_prompt(
         else:
             # Default: find deployed (production) version, but check for A/B tests first
 
+            # Initialize ab_test_info to None
+            ab_test_info = None
+
             # Check for active A/B tests
             workspace_id = await get_user_workspace(session, user)
             ab_test_result = await get_ab_test_version(session, prompt.id, workspace_id)
@@ -405,6 +408,7 @@ async def get_prompt(
                     production_versions = [v for v in prompt.versions if v.status == VersionStatus.PRODUCTION]
                     if production_versions:
                         target_version = sorted(production_versions, key=lambda v: v.created_at, reverse=True)[0]
+                    ab_test_info = None  # Clear A/B test info if version not found
             else:
                 # Use production version
                 production_versions = [v for v in prompt.versions if v.status == VersionStatus.PRODUCTION]
