@@ -3,22 +3,47 @@
 import { getEncoding, type TiktokenEncoding } from 'js-tiktoken';
 
 export type ModelId =
-  | "gpt-5" | "gpt-5-mini" | "gpt-4o" | "gpt-4o-mini" | "gpt-4-turbo" | "gpt-4" | "gpt-3.5-turbo"
-  | "claude-4.1-opus" | "claude-4-sonnet" | "claude-3.5-sonnet" | "claude-3.5-haiku" | "claude-3-opus" | "claude-3-sonnet" | "claude-3-haiku"
-  | "gemini-2.5-flash" | "gemini-2.5-pro" | "gemini-2.0-flash-exp" | "gemini-2.0-flash" | "gemini-1.5-pro" | "gemini-1.5-flash"
-  | "deepseek-v3" | "deepseek-chat" | "deepseek-coder";
+  // OpenAI GPT models
+  | "gpt-5.2" | "gpt-5.1" | "gpt-5" | "gpt-5-mini" | "gpt-4.1" | "gpt-4.1-mini" | "gpt-4.1-nano" 
+  | "gpt-4o" | "gpt-4o-mini" | "gpt-4-turbo" | "gpt-4" | "gpt-3.5-turbo"
+  | "o3-pro" | "o3" | "o4-mini" | "o1"
+  // Anthropic Claude models
+  | "claude-opus-4.5" | "claude-sonnet-4.5" | "claude-haiku-4.5"
+  | "claude-opus-4.1" | "claude-sonnet-4" | "claude-opus-4"
+  | "claude-3.7-sonnet" | "claude-3.5-sonnet" | "claude-3.5-haiku" 
+  | "claude-3-opus" | "claude-3-sonnet" | "claude-3-haiku"
+  // Google Gemini models
+  | "gemini-3-pro" | "gemini-2.5-pro" | "gemini-2.5-flash" | "gemini-2.5-flash-lite"
+  | "gemini-2.0-flash" | "gemini-2.0-flash-lite" | "gemini-2.0-flash-exp" 
+  | "gemini-1.5-pro" | "gemini-1.5-flash"
+  // DeepSeek models
+  | "deepseek-chat" | "deepseek-reasoner" | "deepseek-v3" | "deepseek-coder"
+  // xAI Grok models
+  | "grok-4" | "grok-4-fast" | "grok-3" | "grok-3-mini" | "grok-2";
 
 export const MODEL_OPTIONS: { id: ModelId; label: string; provider: string }[] = [
+    // OpenAI
     { id: "gpt-5", label: "GPT-5", provider: "OpenAI" },
     { id: "gpt-4o", label: "GPT-4o", provider: "OpenAI" },
-    { id: "gpt-4", label: "GPT-4", provider: "OpenAI" },
-    { id: "claude-4.1-opus", label: "Claude 4.1 Opus", provider: "Anthropic" },
-    { id: "claude-4-sonnet", label: "Claude 4 Sonnet", provider: "Anthropic" },
+    { id: "gpt-4.1", label: "GPT-4.1", provider: "OpenAI" },
+    { id: "o3", label: "o3", provider: "OpenAI" },
+    // Anthropic
+    { id: "claude-opus-4.5", label: "Claude 4.5 Opus", provider: "Anthropic" },
+    { id: "claude-sonnet-4.5", label: "Claude 4.5 Sonnet", provider: "Anthropic" },
+    { id: "claude-opus-4.1", label: "Claude 4.1 Opus", provider: "Anthropic" },
+    { id: "claude-sonnet-4", label: "Claude 4 Sonnet", provider: "Anthropic" },
     { id: "claude-3.5-sonnet", label: "Claude 3.5 Sonnet", provider: "Anthropic" },
     { id: "claude-3.5-haiku", label: "Claude 3.5 Haiku", provider: "Anthropic" },
+    // Google
+    { id: "gemini-3-pro", label: "Gemini 3 Pro", provider: "Google" },
     { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro", provider: "Google" },
     { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash", provider: "Google" },
-    { id: "deepseek-v3", label: "DeepSeek V3", provider: "DeepSeek" },
+    // DeepSeek
+    { id: "deepseek-chat", label: "DeepSeek Chat (V3)", provider: "DeepSeek" },
+    { id: "deepseek-reasoner", label: "DeepSeek Reasoner", provider: "DeepSeek" },
+    // xAI
+    { id: "grok-4", label: "Grok 4", provider: "xAI" },
+    { id: "grok-3", label: "Grok 3", provider: "xAI" },
 ]
 
 const openaiEncoderCache = new Map<TiktokenEncoding, ReturnType<typeof getEncoding>>();
@@ -26,8 +51,10 @@ const tokenCache = new Map<string, { tokens: number; t: number }>();
 const CACHE_TTL = 60_000;
 
 function pickOpenAIEncoding(model: ModelId): TiktokenEncoding {
-  if (model.includes('4o') || model.includes('5')) {
-    return 'o200k_base';  // GPT-4o and GPT-5 use o200k_base
+  // o200k_base: GPT-4o, GPT-4.1, GPT-5.x, o1, o3, o4 series
+  if (model.includes('4o') || model.includes('4.1') || model.includes('5') || 
+      model.startsWith('o3') || model.startsWith('o4') || model.startsWith('o1')) {
+    return 'o200k_base';
   } else {
     return 'cl100k_base'; // GPT-3.x and GPT-4 use cl100k_base
   }
@@ -128,17 +155,32 @@ function approxDeepseek(text: string) {
   return Math.ceil(text.length / cpt);
 }
 
+function approxGrok(text: string) {
+  // Grok uses similar tokenization to GPT models
+  const hasCyr = /[А-Яа-яЁё]/.test(text);
+  const cpt = hasCyr ? 2.5 : 4.0;
+  return Math.ceil(text.length / cpt);
+}
+
 export async function estimateTokens(text: string, model: ModelId): Promise<number> {
   if (!text) return 0;
   const cached = getCached(model, text);
   if (cached != null) return cached;
 
   let n = 0;
-  if (model.startsWith('gpt-')) n = countOpenAITokens(text, model);
-  else if (model.startsWith('claude-')) n = approxClaude(text);
-  else if (model.startsWith('gemini-')) n = approxGemini(text);
-  else if (model.startsWith('deepseek-')) n = approxDeepseek(text);
-  else n = Math.ceil(text.length / 4);
+  if (model.startsWith('gpt-') || model.startsWith('o3') || model.startsWith('o4') || model.startsWith('o1')) {
+    n = countOpenAITokens(text, model);
+  } else if (model.startsWith('claude-')) {
+    n = approxClaude(text);
+  } else if (model.startsWith('gemini-')) {
+    n = approxGemini(text);
+  } else if (model.startsWith('deepseek-')) {
+    n = approxDeepseek(text);
+  } else if (model.startsWith('grok-')) {
+    n = approxGrok(text);
+  } else {
+    n = Math.ceil(text.length / 4);
+  }
 
   setCached(model, text, n);
   return n;
@@ -150,11 +192,19 @@ export function estimateTokensSync(text: string, model: ModelId): number {
   if (cached != null) return cached;
 
   let n = 0;
-  if (model.startsWith('gpt-')) n = countOpenAITokens(text, model);
-  else if (model.startsWith('claude-')) n = approxClaude(text);
-  else if (model.startsWith('gemini-')) n = approxGemini(text);
-  else if (model.startsWith('deepseek-')) n = approxDeepseek(text);
-  else n = Math.ceil(text.length / 4);
+  if (model.startsWith('gpt-') || model.startsWith('o3') || model.startsWith('o4') || model.startsWith('o1')) {
+    n = countOpenAITokens(text, model);
+  } else if (model.startsWith('claude-')) {
+    n = approxClaude(text);
+  } else if (model.startsWith('gemini-')) {
+    n = approxGemini(text);
+  } else if (model.startsWith('deepseek-')) {
+    n = approxDeepseek(text);
+  } else if (model.startsWith('grok-')) {
+    n = approxGrok(text);
+  } else {
+    n = Math.ceil(text.length / 4);
+  }
 
   setCached(model, text, n);
   return n;

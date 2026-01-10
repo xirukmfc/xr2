@@ -123,7 +123,10 @@
     "footer": {
       "docs": "Доки",
       "pricing": "Цены",
-      "contact": "Контакты"
+      "contact": "Контакты",
+      "cookies": "Cookies",
+      "privacy": "Конфиденциальность",
+      "terms": "Правила"
     }
   },
   "sidebar": {
@@ -140,7 +143,7 @@
     "monthlyApiRequests": "Запросов в месяц",
     "remaining": "осталось",
     "resetsAt": "Обновится в",
-    "usage": "Использование",
+    "usage": "Лимиты",
     "apiRequestsMonthly": "API запросы (месяц)",
     "limitReached": "Лимит достигнут",
     "limitAlmostReached": "Лимит почти достигнут"

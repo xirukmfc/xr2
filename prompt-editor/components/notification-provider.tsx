@@ -60,7 +60,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }
 
   const showNotification = (message: string, type: Kind = "info", options?: ShowOptions) => {
-    const duration = Math.max(1600, Math.min(6000, options?.duration ?? 3000))
+    // For errors, allow longer duration (up to 10 seconds)
+    const maxDuration = type === "error" ? 10000 : 6000
+    const defaultDuration = type === "error" ? 5000 : 3000
+    const duration = Math.max(1600, Math.min(maxDuration, options?.duration ?? defaultDuration))
     const now = Date.now()
 
     setList((prev) => {

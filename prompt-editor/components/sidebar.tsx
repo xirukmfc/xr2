@@ -80,7 +80,7 @@ export function Sidebar() {
   const { preloadPageData } = useDataPreloader()
   const [limits, setLimits] = useState<UserLimits | null>(null)
   const [limitsLoading, setLimitsLoading] = useState(true)
-  const { locale, setLocale } = useLocale()
+  const { locale, setLocale, t } = useLocale()
 
   // Initialize collapse state from localStorage
   useEffect(() => {
@@ -140,8 +140,6 @@ export function Sidebar() {
   const toggleLanguage = () => {
     setLocale(locale === 'en' ? 'ru' : 'en')
   }
-
-  const { t } = useLocale()
 
   const navigationItems = [
     { name: t('sidebar.prompts'), href: "/prompts", icon: MessageSquare, count: promptsCount },

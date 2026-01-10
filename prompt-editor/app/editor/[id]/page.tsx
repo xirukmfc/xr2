@@ -255,7 +255,7 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
     const [isAddVariableModalOpen, setIsAddVariableModalOpen] = useState(false)
     const [isTestModalOpen, setIsTestModalOpen] = useState(false)
     const [isPublished, setIsPublished] = useState(false)
-    const [selectedModels, setSelectedModels] = useState<ModelId[]>(["gpt-5", "claude-4-sonnet"])
+    const [selectedModels, setSelectedModels] = useState<ModelId[]>(["gpt-5", "claude-sonnet-4"])
     const [isPreviewMode, setIsPreviewMode] = useState(false)
     const [currentViewingVersion, setCurrentViewingVersion] = useState<string | undefined>(undefined)
     const [originalPromptData, setOriginalPromptData] = useState<PromptData | null>(null)

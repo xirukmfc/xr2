@@ -429,3 +429,12 @@ For support and questions, please open an issue in the repository or contact the
 - Multi-tenancy support
 
 ---***REMOVED_OPENAI_KEY***
+
+``` bash
+brew services stop postgresql
+brew services start postgresql
+
+/
+# Найдем PID процесса и остановим его
+kill -9 $(lsof -ti:8000)
+```

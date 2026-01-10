@@ -31,20 +31,36 @@ class TokenizeResponse(BaseModel):
 
 # Model mappings (same as in TypeScript version)
 CLAUDE_MODEL_MAPPING = {
-    "claude-4.1-opus": "claude-3-5-sonnet-20241022",
-    "claude-4-sonnet": "claude-3-5-sonnet-20241022",
+    # Claude 4.x family
+    "claude-opus-4.5": "claude-opus-4-5-20251001",
+    "claude-sonnet-4.5": "claude-sonnet-4-5-20250929",
+    "claude-haiku-4.5": "claude-haiku-4-5-20251001",
+    "claude-opus-4.1": "claude-opus-4-1-20250805",
+    "claude-sonnet-4": "claude-sonnet-4-20250514",
+    "claude-opus-4": "claude-opus-4-20250514",
+    # Claude 3.x family
+    "claude-3.7-sonnet": "claude-3-7-sonnet-20250219",
     "claude-3.5-sonnet": "claude-3-5-sonnet-20241022",
     "claude-3.5-haiku": "claude-3-5-haiku-20241022",
     "claude-3-opus": "claude-3-opus-20240229",
     "claude-3-sonnet": "claude-3-sonnet-20240229",
     "claude-3-haiku": "claude-3-haiku-20240307",
+    # Legacy aliases for backward compatibility
+    "claude-4.1-opus": "claude-opus-4-1-20250805",
+    "claude-4-sonnet": "claude-sonnet-4-20250514",
 }
 
 GEMINI_MODEL_MAPPING = {
+    # Gemini 3.x family
+    "gemini-3-pro": "gemini-3.0-pro",
+    # Gemini 2.x family
     "gemini-2.5-pro": "gemini-2.5-pro",
     "gemini-2.5-flash": "gemini-2.5-flash",
+    "gemini-2.5-flash-lite": "gemini-2.5-flash-lite",
+    "gemini-2.0-flash": "gemini-2.0-flash",
+    "gemini-2.0-flash-lite": "gemini-2.0-flash-lite",
     "gemini-2.0-flash-exp": "gemini-2.0-flash-exp",
-    "gemini-2.0-flash": "gemini-2.0-flash-exp",
+    # Gemini 1.5 family
     "gemini-1.5-pro": "gemini-1.5-pro",
     "gemini-1.5-flash": "gemini-1.5-flash",
 }
@@ -75,6 +91,12 @@ def set_cached(model: str, text: str, tokens: int):
     }
 
 
+def is_openai_model(model: str) -> bool:
+    """Check if model is an OpenAI model (GPT or o-series)"""
+    m = model.lower()
+    return m.startswith('gpt-') or m.startswith('o3') or m.startswith('o4') or m.startswith('o1')
+
+
 def estimate_tokens_sync(text: str, model: str) -> int:
     """
     Synchronous version with tiktoken - simple without extra coefficients
@@ -82,10 +104,12 @@ def estimate_tokens_sync(text: str, model: str) -> int:
     if not text:
         return 0
 
-    if model.startswith('gpt-'):
+    if is_openai_model(model):
         try:
             # Select correct encoding
-            if '4o' in model.lower() or '5' in model.lower():
+            # o200k_base: GPT-4o, GPT-4.1, GPT-5.x, o1, o3, o4 series
+            m = model.lower()
+            if '4o' in m or '4.1' in m or '5' in m or m.startswith('o3') or m.startswith('o4') or m.startswith('o1'):
                 encoding = tiktoken.get_encoding("o200k_base")
             else:
                 encoding = tiktoken.get_encoding("cl100k_base")
@@ -100,7 +124,7 @@ def estimate_tokens_sync(text: str, model: str) -> int:
     # Fallback for all other cases
     has_cyrillic = bool(re.search(r'[А-Яа-яЁё]', text))
 
-    if model.startswith('gpt-'):
+    if is_openai_model(model):
         if has_cyrillic:
             cpt = 2.5  # Simple coefficient for Cyrillic
         else:
@@ -112,6 +136,9 @@ def estimate_tokens_sync(text: str, model: str) -> int:
         cpt = 3.2 if has_cyrillic else 4.2
     elif model.startswith('deepseek-'):
         cpt = 3.0 if has_cyrillic else 4.0
+    elif model.startswith('grok-'):
+        # Grok uses similar tokenization to GPT
+        cpt = 2.5 if has_cyrillic else 4.0
     else:
         cpt = 4.0
 
@@ -123,7 +150,9 @@ async def count_openai_tokens(system_text: str, user_text: str, assistant_text: 
     Accurate OpenAI token count using official algorithm
     """
     try:
-        if '4o' in model.lower() or '5' in model.lower():
+        m = model.lower()
+        # o200k_base: GPT-4o, GPT-4.1, GPT-5.x, o1, o3, o4 series
+        if '4o' in m or '4.1' in m or '5' in m or m.startswith('o3') or m.startswith('o4') or m.startswith('o1'):
             encoding = tiktoken.get_encoding("o200k_base")
         else:
             encoding = tiktoken.get_encoding("cl100k_base")
@@ -171,7 +200,8 @@ async def count_openai_tokens(system_text: str, user_text: str, assistant_text: 
         logger.warning(f"OpenAI token counting failed for {model}: {e}, using fallback")
         combined_text = (system_text or "") + (user_text or "") + (assistant_text or "")
         try:
-            if '4o' in model.lower() or '5' in model.lower():
+            m = model.lower()
+            if '4o' in m or '4.1' in m or '5' in m or m.startswith('o3') or m.startswith('o4') or m.startswith('o1'):
                 encoding = tiktoken.get_encoding("o200k_base")
             else:
                 encoding = tiktoken.get_encoding("cl100k_base")
@@ -337,8 +367,8 @@ async def estimate_tokens(system_text: str, user_text: str, assistant_text: str,
         return cached
 
     try:
-        if model.startswith('gpt-'):
-            # Use fixed function for OpenAI
+        if is_openai_model(model):
+            # Use fixed function for OpenAI (GPT and o-series)
             tokens = await count_openai_tokens(system_text, user_text, assistant_text, model)
         elif model.startswith('claude-'):
             tokens = await count_claude_tokens(system_text, user_text, assistant_text, model)
@@ -346,6 +376,9 @@ async def estimate_tokens(system_text: str, user_text: str, assistant_text: str,
             tokens = await count_gemini_tokens(system_text, user_text, assistant_text, model)
         elif model.startswith('deepseek-'):
             tokens = await count_deepseek_tokens(system_text, user_text, assistant_text, model)
+        elif model.startswith('grok-'):
+            # Grok uses similar tokenization to GPT, use estimation
+            tokens = estimate_tokens_sync(combined_text, model)
         else:
             tokens = estimate_tokens_sync(combined_text, model)
 

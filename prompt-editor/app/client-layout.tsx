@@ -17,10 +17,11 @@ export default function ClientLayout({
   const isLoginPage = pathname === "/login"
   const isLandingPage = pathname === "/"
   const isSharePage = pathname.startsWith("/share/")
+  const isLegalPage = pathname.startsWith("/legal/")
   const isSidebarCollapsed = useSidebarCollapse()
 
-  // If it's the login page, landing page, or share page, don't show sidebar and render full width
-  if (isLoginPage || isLandingPage || isSharePage) {
+  // If it's the login page, landing page, share page, or legal page, don't show sidebar and render full width
+  if (isLoginPage || isLandingPage || isSharePage || isLegalPage) {
     return (
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
         <NotificationProvider>

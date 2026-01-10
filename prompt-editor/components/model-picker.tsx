@@ -4,6 +4,9 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { MODEL_OPTIONS, type ModelId } from "@/lib/tokens"
 
+// Valid model IDs from MODEL_OPTIONS
+const VALID_MODEL_IDS = new Set(MODEL_OPTIONS.map(m => m.id))
+
 interface ModelPickerProps {
   selected: ModelId[]
   onChange: (next: ModelId[]) => void
@@ -21,6 +24,9 @@ export function ModelPicker({
 }: ModelPickerProps) {
   const [open, setOpen] = useState(false)
   const popRef = useRef<HTMLDivElement | null>(null)
+  
+  // Filter out invalid model IDs (e.g., from old localStorage values)
+  const validSelected = selected.filter(id => VALID_MODEL_IDS.has(id))
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -32,12 +38,25 @@ export function ModelPicker({
     return () => document.removeEventListener("mousedown", handler)
   }, [])
 
+  // Auto-fix invalid selections on mount
+  useEffect(() => {
+    if (validSelected.length !== selected.length) {
+      // Some selected models were invalid, update with valid ones
+      if (validSelected.length === 0 && MODEL_OPTIONS.length > 0) {
+        // If no valid selections, default to first model
+        onChange([MODEL_OPTIONS[0].id])
+      } else {
+        onChange(validSelected)
+      }
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const toggleId = (id: ModelId) => {
-    const isChecked = selected.includes(id)
+    const isChecked = validSelected.includes(id)
     if (isChecked) {
-      onChange(selected.filter((x) => x !== id) as ModelId[])
-    } else if (selected.length < max) {
-      onChange([...(selected as ModelId[]), id])
+      onChange(validSelected.filter((x) => x !== id) as ModelId[])
+    } else if (validSelected.length < max) {
+      onChange([...(validSelected as ModelId[]), id])
     }
   }
 
@@ -49,14 +68,14 @@ export function ModelPicker({
       {open && (
         <div
           className={[
-            "absolute z-[1000] bottom-full mb-2 w-56 bg-white border border-slate-200 rounded shadow-lg p-2",
+            "absolute z-[1000] bottom-full mb-2 w-56 bg-white border border-slate-200 rounded shadow-lg p-2 max-h-80 overflow-y-auto",
             align === "right" ? "right-0" : "left-0",
           ].join(" ")}
         >
           <div className="text-[10px] text-slate-500 mb-2">Select up to {max}</div>
           {MODEL_OPTIONS.map((opt) => {
-            const checked = selected.includes(opt.id)
-            const disabled = !checked && selected.length >= max
+            const checked = validSelected.includes(opt.id)
+            const disabled = !checked && validSelected.length >= max
             return (
               <label
                 key={opt.id}

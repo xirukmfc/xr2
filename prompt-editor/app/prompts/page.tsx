@@ -509,10 +509,7 @@ function PromptsPageContent() {
             header: t('prompts.columns.owner'),
             width: "col-span-2",
             render: (prompt) => (
-                <div className="flex items-center space-x-2">
-                    <img src={prompt.owner.avatar} alt={prompt.owner.name} className="w-5 h-5 rounded-full flex-shrink-0"/>
-                    <span className="text-sm text-slate-700 truncate">{prompt.owner.name}</span>
-                </div>
+                <span className="text-sm text-slate-700 truncate">{prompt.owner.name}</span>
             ),
         },
     ]

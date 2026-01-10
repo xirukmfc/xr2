@@ -679,15 +679,24 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="py-8 bg-white border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-6 text-sm">
-            <Link href="/docs" className="text-gray-500 hover:text-gray-900">{t('landing.footer.docs')}</Link>
-            <a href="#pricing" className="text-gray-500 hover:text-gray-900">{t('landing.footer.pricing')}</a>
-            <a href="mailto:hello@xr2.uk" className="text-gray-500 hover:text-gray-900">{t('landing.footer.contact')}</a>
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-6 text-sm">
+              <Link href="/docs" className="text-gray-500 hover:text-gray-900">{t('landing.footer.docs')}</Link>
+              <a href="#pricing" className="text-gray-500 hover:text-gray-900">{t('landing.footer.pricing')}</a>
+              <a href="mailto:hello@xr2.uk" className="text-gray-500 hover:text-gray-900">{t('landing.footer.contact')}</a>
+            </div>
+            <div className="flex items-center gap-6 text-sm">
+              <Link href="/legal/cookies" className="text-gray-400 hover:text-gray-600">{t('landing.footer.cookies')}</Link>
+              <Link href="/legal/privacy" className="text-gray-400 hover:text-gray-600">{t('landing.footer.privacy')}</Link>
+              <Link href="/legal/terms" className="text-gray-400 hover:text-gray-600">{t('landing.footer.terms')}</Link>
+            </div>
           </div>
-          <p className="text-sm text-gray-400">
-            &copy; {new Date().getFullYear()} xR2
-          </p>
+          <div className="mt-4 text-center md:text-left">
+            <p className="text-sm text-gray-400">
+              &copy; {new Date().getFullYear()} xR2
+            </p>
+          </div>
         </div>
       </footer>
     </div>

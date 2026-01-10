@@ -123,7 +123,10 @@
     "footer": {
       "docs": "Docs",
       "pricing": "Pricing",
-      "contact": "Contact"
+      "contact": "Contact",
+      "cookies": "Cookies",
+      "privacy": "Privacy",
+      "terms": "Terms"
     }
   },
   "sidebar": {

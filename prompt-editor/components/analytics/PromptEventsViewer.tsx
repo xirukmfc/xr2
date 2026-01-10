@@ -647,6 +647,22 @@ export default function PromptEventsViewer() {
 // Metadata Insights Component
 function MetadataInsights({ events }: { events: PromptEvent[] }) {
   const { t } = useLocale();
+  const [eventDefinitions, setEventDefinitions] = useState<any[]>([]);
+
+  // Load event definitions
+  useEffect(() => {
+    const loadEventDefinitions = async () => {
+      try {
+        const definitions = await apiClient.request<any[]>('/event-definitions');
+        setEventDefinitions(definitions || []);
+      } catch (error) {
+        console.error('Failed to load event definitions:', error);
+        setEventDefinitions([]);
+      }
+    };
+    loadEventDefinitions();
+  }, []);
+
   // Extract all metadata fields from the nested metadata object
   const metadataFields = new Set<string>();
   events.forEach(event => {
@@ -663,11 +679,25 @@ function MetadataInsights({ events }: { events: PromptEvent[] }) {
     return null;
   }
 
+  // Build a map of event_name -> field_name -> field_type from event definitions
+  const fieldTypeMap: { [eventName: string]: { [fieldName: string]: string } } = {};
+  eventDefinitions.forEach(def => {
+    if (def.metadata_schema && Array.isArray(def.metadata_schema)) {
+      fieldTypeMap[def.event_name] = {};
+      def.metadata_schema.forEach((field: any) => {
+        if (field.name && field.type) {
+          fieldTypeMap[def.event_name][field.name] = field.type;
+        }
+      });
+    }
+  });
+
   // Analyze each field
   const fieldAnalysis: { [key: string]: any } = {};
 
   metadataFields.forEach(fieldName => {
     const values: any[] = [];
+    const eventNames = new Set<string>();
 
     events.forEach(event => {
       // Get value from the nested metadata object
@@ -675,25 +705,31 @@ function MetadataInsights({ events }: { events: PromptEvent[] }) {
       const value = customMetadata?.[fieldName];
       if (value !== undefined && value !== null && value !== '') {
         values.push(value);
+        // Track which event names use this field
+        if (event.event_metadata?.event_name) {
+          eventNames.add(event.event_metadata.event_name);
+        }
       }
     });
 
     if (values.length === 0) return;
 
-    // Check if field is numeric
-    const isNumeric = values.every(v => !isNaN(Number(v)));
+    // Check field type from event definitions
+    // Collect all types for this field across all event definitions
+    const fieldTypes = new Set<string>();
+    eventNames.forEach(eventName => {
+      if (fieldTypeMap[eventName] && fieldTypeMap[eventName][fieldName]) {
+        fieldTypes.add(fieldTypeMap[eventName][fieldName]);
+      }
+    });
 
-    if (isNumeric) {
-      const numbers = values.map(v => Number(v));
-      fieldAnalysis[fieldName] = {
-        type: 'numeric',
-        count: numbers.length,
-        avg: numbers.reduce((a, b) => a + b, 0) / numbers.length,
-        min: Math.min(...numbers),
-        max: Math.max(...numbers),
-        total: numbers.reduce((a, b) => a + b, 0)
-      };
-    } else {
+    // If field is defined as "string" in any event definition, treat it as categorical
+    const isStringField = fieldTypes.has('string');
+    // If field is defined as "number" in any event definition, treat it as numeric
+    const isNumberField = fieldTypes.has('number');
+
+    // If field is defined as string in schema, treat as categorical
+    if (isStringField) {
       // Categorical field - count occurrences
       const counts: { [value: string]: number } = {};
       values.forEach(v => {
@@ -708,6 +744,37 @@ function MetadataInsights({ events }: { events: PromptEvent[] }) {
           .sort((a, b) => b[1] - a[1])
           .slice(0, 10) // Top 10 values
       };
+    } else {
+      // Check if field is numeric
+      // If explicitly defined as number in schema, or if all values can be converted to numbers
+      const isNumeric = isNumberField || values.every(v => !isNaN(Number(v)));
+
+      if (isNumeric) {
+        const numbers = values.map(v => Number(v));
+        fieldAnalysis[fieldName] = {
+          type: 'numeric',
+          count: numbers.length,
+          avg: numbers.reduce((a, b) => a + b, 0) / numbers.length,
+          min: Math.min(...numbers),
+          max: Math.max(...numbers),
+          total: numbers.reduce((a, b) => a + b, 0)
+        };
+      } else {
+        // Categorical field - count occurrences
+        const counts: { [value: string]: number } = {};
+        values.forEach(v => {
+          const strValue = String(v);
+          counts[strValue] = (counts[strValue] || 0) + 1;
+        });
+
+        fieldAnalysis[fieldName] = {
+          type: 'categorical',
+          count: values.length,
+          values: Object.entries(counts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10) // Top 10 values
+        };
+      }
     }
   });
 

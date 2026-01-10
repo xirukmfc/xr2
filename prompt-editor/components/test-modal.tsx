@@ -264,7 +264,7 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
     console.log('[TestModal] Request body:', requestBody)
     const fetchStart = performance.now()
 
-    const res = await fetch("/internal/llm/test-run", {
+    const res = await fetch("/api/test-run", {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
@@ -272,14 +272,54 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
 
     console.log(`[TestModal] API request took: ${(performance.now() - fetchStart).toFixed(2)}ms`)
 
-    if (res.status === 401) {
-      setNeedsApiKey(true)
-      showNotification("API key required for selected model", "error")
-      return
-    }
     if (!res.ok) {
-      const err = await res.text()
-      throw new Error(err || "Request failed")
+      // Read response body once as text
+      const errorText = await res.text()
+      
+      // Try to parse as JSON and extract readable error message
+      let errorMessage = "Request failed"
+      let rawError = errorText
+      try {
+        const errorData = JSON.parse(errorText)
+        // Handle nested error structures from LLM APIs
+        if (errorData.detail) {
+          // FastAPI HTTPException format
+          errorMessage = errorData.detail
+        } else if (errorData.error) {
+          // Handle nested error object (Anthropic, OpenAI format)
+          if (typeof errorData.error === 'object' && errorData.error.message) {
+            errorMessage = errorData.error.message
+          } else if (typeof errorData.error === 'string') {
+            errorMessage = errorData.error
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message
+        }
+        rawError = JSON.stringify(errorData, null, 2)
+      } catch {
+        // If not JSON, use raw text
+        errorMessage = errorText || "Request failed"
+      }
+
+      // Check if it's an API key error (401 or specific message)
+      if (res.status === 401 || errorMessage.toLowerCase().includes("api key")) {
+        setNeedsApiKey(true)
+        showNotification(errorMessage, "error", { duration: 8000 })
+        return
+      }
+
+      // Check for billing/credit errors
+      if (errorMessage.toLowerCase().includes("credit") || 
+          errorMessage.toLowerCase().includes("billing") ||
+          errorMessage.toLowerCase().includes("balance")) {
+        setResponse(`❌ **Billing Error**\n\n${errorMessage}\n\n---\n\nPlease check your account balance with the LLM provider.`)
+        showNotification(errorMessage, "error", { duration: 8000 })
+        return
+      }
+
+      // For other errors, show in response area for better visibility
+      setResponse(`❌ **API Error**\n\n${errorMessage}`)
+      throw new Error(errorMessage)
     }
 
     const parseStart = performance.now()
@@ -309,7 +349,8 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
     })
   } catch (e: any) {
     console.error('[TestModal] Error during test run:', e)
-    showNotification(e?.message || "Request error", "error")
+    const errorMsg = e?.message || "Request error"
+    showNotification(errorMsg, "error", { duration: 8000 })
   } finally {
     setIsRunning(false)
   }

@@ -1,8 +1,8 @@
 {
-  "timestamp": "2025-10-09T18:53:43.524930",
+  "timestamp": "2026-01-09T09:39:23.952281",
   "summary": {
-    "total": 46,
-    "passed": 46,
+    "total": 52,
+    "passed": 52,
     "failed": 0,
     "skipped": 0,
     "success_rate": "100.0%"
@@ -12,7 +12,7 @@
       "id": "T1.2",
       "name": "Неудачный вход - неверные credentials",
       "status": "passed",
-      "duration": 6.313136,
+      "duration": 7.432918,
       "error": null,
       "screenshots": [],
       "details": {
@@ -24,7 +24,7 @@
       "id": "T1.1",
       "name": "Успешный вход в систему",
       "status": "passed",
-      "duration": 2.932388,
+      "duration": 4.066014,
       "error": null,
       "screenshots": [],
       "details": {
@@ -36,58 +36,58 @@
       "id": "T2.2",
       "name": "Создание нового промпта",
       "status": "passed",
-      "duration": 7.236992,
+      "duration": 5.280711,
       "error": null,
       "screenshots": [],
       "details": {
         "prompt_created": true,
-        "redirect_url": "http://127.0.0.1:3000/editor/9bf7eec5-db02-4d0f-80f3-d4a8b8fb0dd5",
-        "prompt_id": "9bf7eec5-db02-4d0f-80f3-d4a8b8fb0dd5",
-        "prompt_slug": "auto-test-prompt-ec3f3a8d"
+        "redirect_url": "http://127.0.0.1:3000/editor/0849d1ca-b4bd-4b16-bbae-af1ee9fdee8f",
+        "prompt_id": "0849d1ca-b4bd-4b16-bbae-af1ee9fdee8f",
+        "prompt_slug": "auto-test-prompt-db5b8753"
       }
     },
     {
       "id": "T2.6",
       "name": "Редактирование описания промпта",
       "status": "passed",
-      "duration": 10.932166,
+      "duration": 13.331459,
       "error": null,
       "screenshots": [],
       "details": {
         "description_updated": true,
-        "new_description": "Updated description - 18:46:27"
+        "new_description": "Updated description - 09:32:20"
       }
     },
     {
       "id": "T3.2",
       "name": "Создание нового API ключа",
       "status": "passed",
-      "duration": 6.251027,
+      "duration": 5.474756,
       "error": null,
       "screenshots": [],
       "details": {
         "api_key_created": true,
         "api_key_length": 41,
-        "api_key_preview": "xr2_prod_wTY6eUrbFs1..."
+        "api_key_preview": "xr2_prod_ir3AiNWkMmw..."
       }
     },
     {
       "id": "T4.1",
       "name": "Создание нового тега",
       "status": "passed",
-      "duration": 11.135773,
+      "duration": 10.359147,
       "error": null,
       "screenshots": [],
       "details": {
         "tag_created": true,
-        "tag_name": "TestTagc58ee5"
+        "tag_name": "TestTag5245a6"
       }
     },
     {
       "id": "T4.2",
       "name": "Присвоение тега промпту",
       "status": "passed",
-      "duration": 4.003005,
+      "duration": 3.691648,
       "error": null,
       "screenshots": [],
       "details": {
@@ -98,7 +98,7 @@
       "id": "T5.1",
       "name": "Поиск промптов по названию",
       "status": "passed",
-      "duration": 4.152275,
+      "duration": 3.433572,
       "error": null,
       "screenshots": [],
       "details": {
@@ -112,24 +112,24 @@
       "id": "T5.2",
       "name": "Фильтрация и поиск промптов",
       "status": "passed",
-      "duration": 13.993666,
+      "duration": 13.070538,
       "error": null,
       "screenshots": [],
       "details": {
         "filter_buttons_work": true,
         "search_by_prompt_name_works": true,
         "search_by_tag_name_works": true,
-        "total_prompts_initial": 11,
-        "filtered_prompts_count": 9,
-        "search_prompt_results": 8,
-        "search_tag_results": 8
+        "total_prompts_initial": 10,
+        "filtered_prompts_count": 10,
+        "search_prompt_results": 1,
+        "search_tag_results": 1
       }
     },
     {
       "id": "T6.1",
       "name": "Отображение и функциональность пользовательских лимитов",
       "status": "passed",
-      "duration": 56.540681,
+      "duration": 53.948201,
       "error": null,
       "screenshots": [],
       "details": {
@@ -144,7 +144,7 @@
       "id": "T7.1",
       "name": "Доступ к странице логов",
       "status": "passed",
-      "duration": 2.622505,
+      "duration": 1.36701,
       "error": null,
       "screenshots": [],
       "details": {
@@ -163,28 +163,28 @@
       "id": "T7.2",
       "name": "Отслеживание использования API",
       "status": "passed",
-      "duration": 6.697031,
+      "duration": 5.966172,
       "error": null,
       "screenshots": [],
       "details": {
         "requests_made": 3,
         "api_entries_found": 7,
-        "api_key_used": "xr2_prod_wTY6eUrbFs1...",
+        "api_key_used": "xr2_prod_ir3AiNWkMmw...",
         "request_details": [
           {
             "request_num": 1,
             "status": 200,
-            "response_preview": "{\"slug\":\"auto-test-prompt-ec3f3a8d\",\"source_name\":\"auto-test\",\"version_number\":1,\"status\":\"productio"
+            "response_preview": "{\"slug\":\"auto-test-prompt-db5b8753\",\"source_name\":\"auto-test\",\"version_number\":1,\"status\":\"productio"
           },
           {
             "request_num": 2,
             "status": 200,
-            "response_preview": "{\"slug\":\"auto-test-prompt-ec3f3a8d\",\"source_name\":\"auto-test\",\"version_number\":1,\"status\":\"productio"
+            "response_preview": "{\"slug\":\"auto-test-prompt-db5b8753\",\"source_name\":\"auto-test\",\"version_number\":1,\"status\":\"productio"
           },
           {
             "request_num": 3,
             "status": 200,
-            "response_preview": "{\"slug\":\"auto-test-prompt-ec3f3a8d\",\"source_name\":\"auto-test\",\"version_number\":1,\"status\":\"productio"
+            "response_preview": "{\"slug\":\"auto-test-prompt-db5b8753\",\"source_name\":\"auto-test\",\"version_number\":1,\"status\":\"productio"
           }
         ]
       }
@@ -238,14 +238,14 @@
       "id": "T7.4",
       "name": "Комплексное тестирование всех API endpoints",
       "status": "passed",
-      "duration": 2.354672,
+      "duration": 2.906305,
       "error": null,
       "screenshots": [],
       "details": {
-        "total_endpoints_tested": 68,
-        "successful_tests": 67,
-        "failed_tests": 1,
-        "success_rate": "98.5%",
+        "total_endpoints_tested": 72,
+        "successful_tests": 72,
+        "failed_tests": 0,
+        "success_rate": "100.0%",
         "test_user": "www",
         "categories": {
           "Аутентификация": [
@@ -343,16 +343,19 @@
             "has_cookies": true,
             "response_data": {
               "access_token": "***REMOVED_JWT_TOKEN***",
+              "refresh_token": null,
               "token_type": "bearer",
               "user": {
                 "id": "38a19a81-8681-45e8-bdfa-3701e9fe3909",
                 "username": "www",
                 "email": "admin@xr2.com",
-                "full_name": "Updated Test User 1760030657",
+                "full_name": "Updated Test User 1767925308",
                 "is_active": true,
+                "onboarding_completed": true,
                 "created_at": "2025-10-01T16:57:57.134470+00:00",
-                "last_login": "2025-10-09T17:49:14.743165+00:00"
-              }
+                "last_login": "2026-01-09T02:35:02.427126+00:00"
+              },
+              "api_key": "xr2_prod_o8B...••••••••••••••••••••••••••••••••"
             }
           },
           "auth_me": {
@@ -362,10 +365,11 @@
               "id": "38a19a81-8681-45e8-bdfa-3701e9fe3909",
               "username": "www",
               "email": "admin@xr2.com",
-              "full_name": "Updated Test User 1760030657",
+              "full_name": "Updated Test User 1767925308",
               "is_active": true,
+              "onboarding_completed": true,
               "created_at": "2025-10-01T16:57:57.134470+00:00",
-              "last_login": "2025-10-09T17:49:14.743165+00:00"
+              "last_login": "2026-01-09T02:35:02.427126+00:00"
             }
           },
           "user_workspaces": {
@@ -646,14 +650,30 @@
             "success": true
           },
           "create_conversion_funnel": {
-            "status": 404,
-            "success": false
+            "status": 200,
+            "success": true
           },
           "list_conversion_funnels": {
             "status": 200,
             "success": true
           },
           "conversion_funnel_metrics": {
+            "status": 200,
+            "success": true
+          },
+          "get_conversion_funnel": {
+            "status": 200,
+            "success": true
+          },
+          "update_conversion_funnel": {
+            "status": 200,
+            "success": true
+          },
+          "get_funnel_metrics": {
+            "status": 200,
+            "success": true
+          },
+          "delete_conversion_funnel": {
             "status": 200,
             "success": true
           },
@@ -681,40 +701,40 @@
       "id": "T8.1",
       "name": "Функциональность Monaco Editor",
       "status": "passed",
-      "duration": 15.631617,
+      "duration": 15.709921,
       "error": null,
       "screenshots": [],
       "details": {
-        "deployment_attempted": true,
         "editor_loaded": true,
         "editor_type": "monaco",
         "text_input_works": true,
-        "save_attempted": true
+        "save_attempted": true,
+        "unpublish_attempted": true
       }
     },
     {
       "id": "T8.2",
       "name": "Подсчет токенов в редакторе",
       "status": "passed",
-      "duration": 12.250959,
+      "duration": 11.15069,
       "error": null,
       "screenshots": [],
       "details": {
         "token_counter_visible": true,
-        "token_display": "GPT-5: 5 | Claude 4 Sonnet: 12"
+        "token_display": "GPT-5: 5 | Claude 4 Sonnet: 4"
       }
     },
     {
       "id": "T7.3",
       "name": "Тестирование AI подключения через редактор промптов",
       "status": "passed",
-      "duration": 21.700598,
+      "duration": 33.571491,
       "error": null,
       "screenshots": [],
       "details": {
         "ai_response_received": true,
-        "response_length": 67,
-        "response_preview": "Why don't scientists trust atoms?\n\nBecause they make up everything!",
+        "response_length": 162,
+        "response_preview": "Model\nAnthropic\nDeepSeek\nGoogle (DeepMind)\nOpenAI\nxAI (Grok)\nClaude 4.5 Sonnet\nClaude 4.1 Opus\nClaud...",
         "stats_found": true,
         "found_metrics": [
           "Response Time",
@@ -724,20 +744,20 @@
           "Cost"
         ],
         "stats_data": {
-          "response_time": "2.17s",
-          "total_tokens": "2.17s",
-          "input_tokens": "2.17s",
-          "output_tokens": "2.17s",
-          "cost": "2.17s"
+          "response_time": "—",
+          "total_tokens": "—",
+          "input_tokens": "—",
+          "output_tokens": "—",
+          "cost": "—"
         },
-        "screenshot": "test_screenshots/ai_connection_test_success_20251009_185006.png"
+        "screenshot": "test_screenshots/ai_connection_test_success_20260109_093605.png"
       }
     },
     {
       "id": "T9.1",
       "name": "Доступ к странице настроек",
       "status": "passed",
-      "duration": 7.105373,
+      "duration": 6.913367,
       "error": null,
       "screenshots": [],
       "details": {
@@ -749,7 +769,7 @@
       "id": "T10.1",
       "name": "Функциональность выхода из системы",
       "status": "passed",
-      "duration": 8.360442,
+      "duration": 6.512209,
       "error": null,
       "screenshots": [],
       "details": {
@@ -762,7 +782,7 @@
       "id": "T10.2",
       "name": "Проверка защиты от неавторизованного доступа",
       "status": "passed",
-      "duration": 26.354361,
+      "duration": 23.428938,
       "error": null,
       "screenshots": [],
       "details": {
@@ -775,7 +795,7 @@
       "id": "T13.1",
       "name": "Создание новой версии промпта",
       "status": "passed",
-      "duration": 9.176673,
+      "duration": 8.97815,
       "error": null,
       "screenshots": [],
       "details": {
@@ -786,7 +806,7 @@
       "id": "T13.2",
       "name": "Развертывание версии промпта",
       "status": "passed",
-      "duration": 6.62841,
+      "duration": 5.736544,
       "error": null,
       "screenshots": [],
       "details": {
@@ -797,33 +817,33 @@
       "id": "T12.1",
       "name": "Производительность загрузки страниц",
       "status": "passed",
-      "duration": 8.725225,
+      "duration": 4.5499,
       "error": null,
       "screenshots": [],
       "details": {
         "performance_results": [
           {
             "page": "Промпты",
-            "load_time": 1.89,
+            "load_time": 1.59,
             "acceptable": true
           },
           {
             "page": "API Ключи",
-            "load_time": 2.3,
+            "load_time": 1.03,
             "acceptable": true
           },
           {
             "page": "Логи",
-            "load_time": 2.48,
+            "load_time": 0.95,
             "acceptable": true
           },
           {
             "page": "Настройки",
-            "load_time": 2.06,
+            "load_time": 0.97,
             "acceptable": true
           }
         ],
-        "average_load_time": 2.18,
+        "average_load_time": 1.14,
         "acceptable_performance": true
       }
     },
@@ -831,7 +851,7 @@
       "id": "T14.2",
       "name": "Горячая клавиша Cmd+S для сохранения в редакторе",
       "status": "passed",
-      "duration": 13.358555,
+      "duration": 14.029203,
       "error": null,
       "screenshots": [],
       "details": {
@@ -842,7 +862,7 @@
       "id": "T14.3",
       "name": "Горячая клавиша Cmd+P для отправки в продакшн",
       "status": "passed",
-      "duration": 8.995283,
+      "duration": 8.310682,
       "error": null,
       "screenshots": [],
       "details": {
@@ -853,7 +873,7 @@
       "id": "T15.1",
       "name": "Выделение промптов в таблице",
       "status": "passed",
-      "duration": 4.333218,
+      "duration": 3.265114,
       "error": null,
       "screenshots": [],
       "details": {
@@ -864,7 +884,7 @@
       "id": "T15.2",
       "name": "Массовое удаление промптов",
       "status": "passed",
-      "duration": 4.768983,
+      "duration": 3.657435,
       "error": null,
       "screenshots": [],
       "details": {
@@ -875,7 +895,7 @@
       "id": "T15.3",
       "name": "Массовое развертывание промптов",
       "status": "passed",
-      "duration": 5.85663,
+      "duration": 4.731091,
       "error": null,
       "screenshots": [],
       "details": {
@@ -886,7 +906,7 @@
       "id": "T15.4",
       "name": "Массовое снятие с развертывания",
       "status": "passed",
-      "duration": 5.582947,
+      "duration": 4.796456,
       "error": null,
       "screenshots": [],
       "details": {
@@ -914,7 +934,7 @@
       "screenshots": [],
       "details": {
         "share_link_created": true,
-        "share_url": "http://localhost:3000/share/1GtHwbp9Y_RQYlwK3DMQl-..."
+        "share_url": "http://127.0.0.1:3000/share/WQ6g85jA5CVjv8wjxs6-60..."
       }
     },
     {
@@ -951,7 +971,7 @@
       "id": "T17.1",
       "name": "Создание Event Definitions",
       "status": "passed",
-      "duration": 3.681116,
+      "duration": 2.289434,
       "error": null,
       "screenshots": [],
       "details": {
@@ -965,14 +985,17 @@
       "id": "T17.2",
       "name": "Создание Conversions",
       "status": "passed",
-      "duration": 17.554024,
+      "duration": 5.171879,
       "error": null,
       "screenshots": [],
       "details": {
-        "conversion_funnels_created": 2,
+        "conversion_funnels_created": 7,
         "funnel_names": [
-          "Revenue Conversion",
-          "Signup Conversion"
+          "Revenue Conversion 1767924576",
+          "Revenue Conversion 1767925514",
+          "Revenue Conversion 1767926307",
+          "Sign-to-pay",
+          "Signup Conversion 1767924576"
         ]
       }
     },
@@ -980,7 +1003,7 @@
       "id": "T17.3",
       "name": "Создание Conversion Funnel",
       "status": "passed",
-      "duration": 8.814581,
+      "duration": 0.324969,
       "error": null,
       "screenshots": [],
       "details": {
@@ -991,19 +1014,20 @@
       "id": "T17.4",
       "name": "Получение промпта и отправка событий",
       "status": "passed",
-      "duration": 0.558941,
+      "duration": 4.932809,
       "error": null,
       "screenshots": [],
       "details": {
-        "trace_id": "evt_90fb2234_1760032384_08219040",
-        "events_sent": 2
+        "trace_id": "evt_37620313_1767926310_2a5cea36",
+        "events_sent": 2,
+        "event_definitions_created": 2
       }
     },
     {
       "id": "T17.5",
       "name": "Проверка Recent Events",
       "status": "passed",
-      "duration": 5.930348,
+      "duration": 5.41589,
       "error": null,
       "screenshots": [],
       "details": {
@@ -1017,15 +1041,14 @@
       "id": "T17.6",
       "name": "Проверка Monthly Events",
       "status": "passed",
-      "duration": 5.345916,
+      "duration": 2.633968,
       "error": null,
       "screenshots": [],
       "details": {
         "indicators_found": [
           "user_signup",
           "purchase_completed",
-          "chart",
-          "metric"
+          "chart"
         ]
       }
     },
@@ -1033,30 +1056,38 @@
       "id": "T17.7",
       "name": "Проверка Performance Dashboard",
       "status": "passed",
-      "duration": 5.233683,
+      "duration": 2.032499,
       "error": null,
       "screenshots": [],
       "details": {
-        "metrics_elements_found": 18
+        "metrics_elements_found": 17
       }
     },
     {
       "id": "T17.8",
       "name": "Проверка Funnel Analysis",
       "status": "passed",
-      "duration": 8.545887,
+      "duration": 8.623811,
       "error": null,
       "screenshots": [],
       "details": {
-        "funnel_found": "Purchase Funnel",
-        "funnel_elements": 1
+        "funnels_in_api": [
+          "Revenue Conversion 1767924576",
+          "Revenue Conversion 1767925514",
+          "Revenue Conversion 1767926307",
+          "Sign-to-pay",
+          "Signup Conversion 1767924576",
+          "Signup Conversion 1767925514",
+          "Signup Conversion 1767926307"
+        ],
+        "note": "Воронки найдены через API, UI может не отображать"
       }
     },
     {
       "id": "T17.9",
       "name": "Создание и запуск A/B теста",
       "status": "passed",
-      "duration": 11.132471,
+      "duration": 28.501049,
       "error": null,
       "screenshots": [],
       "details": {
@@ -1068,30 +1099,38 @@
       "id": "T17.10",
       "name": "Проверка чередования версий A/B теста",
       "status": "passed",
-      "duration": 2.151218,
+      "duration": 2.414208,
       "error": null,
       "screenshots": [],
       "details": {
         "versions_received": [
           {
             "request": 1,
-            "version": 2,
-            "ab_variant": "version_a"
+            "version": 1,
+            "ab_variant": "version_a",
+            "ab_test_id": "f0105a1a-821f-45b3-9890-64a1315a548c",
+            "ab_test_name": "new"
           },
           {
             "request": 2,
-            "version": 1,
-            "ab_variant": "version_b"
+            "version": 2,
+            "ab_variant": "version_b",
+            "ab_test_id": "f0105a1a-821f-45b3-9890-64a1315a548c",
+            "ab_test_name": "new"
           },
           {
             "request": 3,
-            "version": 2,
-            "ab_variant": "version_a"
+            "version": 1,
+            "ab_variant": "version_a",
+            "ab_test_id": "f0105a1a-821f-45b3-9890-64a1315a548c",
+            "ab_test_name": "new"
           },
           {
             "request": 4,
-            "version": 1,
-            "ab_variant": "version_b"
+            "version": 2,
+            "ab_variant": "version_b",
+            "ab_test_id": "f0105a1a-821f-45b3-9890-64a1315a548c",
+            "ab_test_name": "new"
           }
         ],
         "unique_versions": [
@@ -1105,7 +1144,7 @@
       "id": "T3.4",
       "name": "Тестирование External API",
       "status": "passed",
-      "duration": 0.035367,
+      "duration": 0.027396,
       "error": null,
       "screenshots": [],
       "details": {
@@ -1113,11 +1152,153 @@
         "api_key_valid": true,
         "test_response_status": 200,
         "test_payload": {
-          "slug": "auto-test-prompt-ec3f3a8d",
+          "slug": "auto-test-prompt-db5b8753",
           "source_name": "auto-test",
           "version_number": 1
         },
-        "response_preview": "{\"slug\":\"auto-test-prompt-ec3f3a8d\",\"source_name\":\"auto-test\",\"version_number\":1,\"status\":\"inactive\",\"system_prompt\":\"\",\"user_prompt\":\"Tell me a joke.\",\"assistant_prompt\":\"\",\"variables\":[],\"deployed_a"
+        "response_preview": "{\"slug\":\"auto-test-prompt-db5b8753\",\"source_name\":\"auto-test\",\"version_number\":1,\"status\":\"inactive\",\"system_prompt\":\"\",\"user_prompt\":\"Tell me a joke.\",\"assistant_prompt\":\"\",\"variables\":[],\"deployed_a"
+      }
+    },
+    {
+      "id": "T19.1",
+      "name": "Проверка обновления токена",
+      "status": "passed",
+      "duration": 0.295788,
+      "error": null,
+      "screenshots": [],
+      "details": {
+        "refresh_successful": true,
+        "new_token_received": true,
+        "response_status": 200
+      }
+    },
+    {
+      "id": "T19.2",
+      "name": "Удаление промпта",
+      "status": "passed",
+      "duration": 0.298177,
+      "error": null,
+      "screenshots": [],
+      "details": {
+        "prompt_deleted": true,
+        "verified_404": true,
+        "deleted_prompt_id": "4770f900-0582-4956-9667-be5fa5f4496a"
+      }
+    },
+    {
+      "id": "T19.3",
+      "name": "Custom Funnel Configurations CRUD",
+      "status": "passed",
+      "duration": 0.395304,
+      "error": null,
+      "screenshots": [],
+      "details": {
+        "operations_tested": 5,
+        "successful_operations": 5,
+        "results": {
+          "list": {
+            "status": 200,
+            "success": true
+          },
+          "create": {
+            "status": 200,
+            "success": true
+          },
+          "get_by_id": {
+            "status": 200,
+            "success": true
+          },
+          "update": {
+            "status": 200,
+            "success": true
+          },
+          "delete": {
+            "status": 200,
+            "success": true
+          }
+        }
+      }
+    },
+    {
+      "id": "T19.4",
+      "name": "Проверка обработки ошибок API",
+      "status": "passed",
+      "duration": 0.279418,
+      "error": null,
+      "screenshots": [],
+      "details": {
+        "error_handling_tests": 4,
+        "passed_tests": 3,
+        "results": {
+          "401_unauthorized": {
+            "expected": 401,
+            "actual": 403,
+            "passed": false
+          },
+          "404_not_found": {
+            "expected": 404,
+            "actual": 404,
+            "passed": true
+          },
+          "422_validation": {
+            "expected": 422,
+            "actual": 422,
+            "passed": true
+          },
+          "401_invalid_api_key": {
+            "expected": 401,
+            "actual": 401,
+            "passed": true
+          }
+        }
+      }
+    },
+    {
+      "id": "T19.5",
+      "name": "Получение текущего workspace",
+      "status": "passed",
+      "duration": 0.257,
+      "error": null,
+      "screenshots": [],
+      "details": {
+        "workspace_retrieved": true,
+        "workspace_id": "03615122-9927-4d54-8db5-912eb1a4202d",
+        "workspace_name": null,
+        "response_status": 200
+      }
+    },
+    {
+      "id": "T19.6",
+      "name": "Тестирование endpoints токенизации",
+      "status": "passed",
+      "duration": 0.285088,
+      "error": null,
+      "screenshots": [],
+      "details": {
+        "endpoints_tested": 4,
+        "successful": 4,
+        "results": {
+          "tokenize": {
+            "status": 200,
+            "success": true,
+            "token_counts": {}
+          },
+          "quick": {
+            "status": 200,
+            "success": true,
+            "token_counts": {}
+          },
+          "precise": {
+            "status": 200,
+            "success": true,
+            "token_counts": {}
+          },
+          "estimate": {
+            "status": 200,
+            "success": true,
+            "token_counts": {}
+          }
+        }
       }
     }
   ]
