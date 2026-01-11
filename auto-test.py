@@ -337,43 +337,57 @@ class XR2AutoTester:
             pass
 
     async def login_as_user(self, username: str = None, password: str = None):
-        """Выполнить авторизацию под указанным пользователем"""
+        """Выполнить авторизацию под указанным пользователем через API"""
         # Используем значения по умолчанию из test_user если не переданы
         username = username or self.test_user["username"]
         password = password or self.test_user["password"]
         
         try:
+            # Получаем токен через API (работает даже если форма логина скрыта в UI)
+            access_token = await self.get_api_token(username, password)
+            self.auth_token = access_token
+            
+            # Устанавливаем токен в localStorage браузера и перезагружаем страницу
             await self.page.goto(f"{self.frontend_url}/login")
+            await self.page.evaluate(f"""
+                localStorage.setItem('auth_token', '{access_token}');
+                // Перезагружаем страницу чтобы приложение подхватило токен
+                window.location.href = '/prompts';
+            """)
+            
+            # Ждем перехода на страницу prompts
+            await self.page.wait_for_url(f"**/prompts**", timeout=10000)
             await self.page.wait_for_load_state("networkidle")
-
-            # Проверяем что мы действительно на странице login
-            current_url = self.page.url
-            if "/login" not in current_url:
-                logger.info(f"✅ Уже авторизован (URL: {current_url}), пропускаю логин")
-                return
-
-            await self.page.fill('input[type="text"], input[type="email"]', username)
-            await asyncio.sleep(0.5)  # Пауза после ввода username
-
-            # Проверяем не произошел ли редирект после ввода username (например автокомплит)
-            current_url = self.page.url
-            if "/login" not in current_url:
-                logger.info(f"✅ Автоматический логин после ввода username (URL: {current_url})")
-                await asyncio.sleep(2)  # Даем время на сохранение cookies
-                return
-
-            # Все еще на странице login - вводим password
-            await self.page.fill('input[type="password"]', password)
-            await self.page.click('button[type="submit"]')
-            await self.page.wait_for_load_state("networkidle")
-            await asyncio.sleep(3)  # Увеличено до 3 сек для сохранения cookies
-
+            await asyncio.sleep(1)  # Даем время на применение токена
+            
             # Проверка успешности авторизации
             current_url = self.page.url
             if "/login" in current_url:
-                logger.error(f"❌ Авторизация провалилась - остались на {current_url}")
-                screenshot = await self.take_screenshot(f"login_failed_{username}")
-                raise Exception(f"Login failed for {username}. Still on login page. Screenshot: {screenshot}")
+                logger.warning(f"⚠️ Возможно требуется дополнительная авторизация, пробую через UI форму...")
+                # Fallback: пробуем через UI форму если она доступна
+                try:
+                    # Проверяем наличие формы логина
+                    form_exists = await self.page.query_selector('input[type="text"], input[type="email"]')
+                    if form_exists:
+                        await self.page.fill('input[type="text"], input[type="email"]', username)
+                        await asyncio.sleep(0.5)
+                        password_input = await self.page.query_selector('input[type="password"]')
+                        if password_input:
+                            await self.page.fill('input[type="password"]', password)
+                            submit_button = await self.page.query_selector('button[type="submit"]')
+                            if submit_button:
+                                await self.page.click('button[type="submit"]')
+                                await self.page.wait_for_load_state("networkidle")
+                                await asyncio.sleep(2)
+                except Exception as ui_err:
+                    logger.warning(f"⚠️ UI форма недоступна (это нормально для продакшена): {ui_err}")
+                
+                # Проверяем еще раз
+                current_url = self.page.url
+                if "/login" in current_url:
+                    logger.error(f"❌ Авторизация провалилась - остались на {current_url}")
+                    screenshot = await self.take_screenshot(f"login_failed_{username}")
+                    raise Exception(f"Login failed for {username}. Still on login page. Screenshot: {screenshot}")
 
             logger.info(f"✅ Авторизован как {username}, URL: {current_url}")
         except Exception as e:

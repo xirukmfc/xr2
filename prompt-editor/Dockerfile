@@ -25,13 +25,15 @@ COPY . .
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Set environment variable for build
-# API URL and Google Client ID can be overridden via build args
+# API URL, Google Client ID, and Password Login flag can be overridden via build args
 ARG NEXT_PUBLIC_API_URL=https://xr2.uk/internal
 ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ARG NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN=false
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+ENV NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN=${NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN}
 # Increase Node.js memory limit for build
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 

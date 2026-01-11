@@ -52,6 +52,9 @@ export default function LoginPage() {
 
   const hasGoogleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && 
     !process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID.includes('your-google-client-id')
+  
+  // Enable password login only if explicitly enabled (for testing/development)
+  const enablePasswordLogin = process.env.NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN === 'true'
 
   useEffect(() => {
     if (!hasGoogleClientId) {
@@ -236,99 +239,107 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                  {t('auth.login.usernameLabel')}
-                </label>
-                <Input
-                  id="username"
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder={t('auth.login.usernamePlaceholder')}
-                  className="mt-1"
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  {t('auth.login.passwordLabel')}
-                </label>
-                <div className="relative mt-1">
+            {enablePasswordLogin && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                    {t('auth.login.usernameLabel')}
+                  </label>
                   <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
+                    id="username"
+                    type="text"
                     required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t('auth.login.passwordPlaceholder')}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder={t('auth.login.usernamePlaceholder')}
+                    className="mt-1"
                     disabled={isLoading}
                   />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </button>
                 </div>
-              </div>
 
-              {error && (
-                <div className="text-red-600 text-sm">{error}</div>
-              )}
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    {t('auth.login.passwordLabel')}
+                  </label>
+                  <div className="relative mt-1">
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t('auth.login.passwordPlaceholder')}
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
+                </div>
 
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 text-primary border-input rounded focus:ring-primary"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                  {t('auth.login.remember')}
-                </label>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {t('auth.login.buttonLoading')}
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="h-4 w-4" />
-                    {t('auth.login.button')}
-                  </>
+                {error && (
+                  <div className="text-red-600 text-sm">{error}</div>
                 )}
-              </Button>
-            </form>
 
-            {hasGoogleClientId && (
-              <div className="mt-6">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">{t('auth.login.divider')}</span>
-                  </div>
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 text-primary border-input rounded focus:ring-primary"
+                  />
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                    {t('auth.login.remember')}
+                  </label>
                 </div>
 
-                <div className="mt-6">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {t('auth.login.buttonLoading')}
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="h-4 w-4" />
+                      {t('auth.login.button')}
+                    </>
+                  )}
+                </Button>
+              </form>
+            )}
+
+            {!enablePasswordLogin && error && (
+              <div className="text-red-600 text-sm mb-4">{error}</div>
+            )}
+
+            {hasGoogleClientId ? (
+              <div className={enablePasswordLogin ? "mt-6" : ""}>
+                {enablePasswordLogin && (
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300" />
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">{t('auth.login.divider')}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className={enablePasswordLogin ? "mt-6" : ""}>
                   <Button
                     type="button"
                     variant="outline"
@@ -346,15 +357,21 @@ export default function LoginPage() {
                   </Button>
                 </div>
               </div>
+            ) : (
+              <div className="text-center text-gray-500 text-sm">
+                {t('auth.login.googleNotConfigured') || 'Google OAuth не настроен'}
+              </div>
             )}
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                {t('auth.login.demo.title')} <br />
-                {t('auth.login.demo.username')}: <code className="bg-gray-100 px-2 py-1 rounded">www</code> <br />
-                {t('auth.login.demo.password')}: <code className="bg-gray-100 px-2 py-1 rounded">***REMOVED_ADMIN_PWD***</code>
-              </p>
-            </div>
+            {enablePasswordLogin && (
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600">
+                  {t('auth.login.demo.title')} <br />
+                  {t('auth.login.demo.username')}: <code className="bg-gray-100 px-2 py-1 rounded">www</code> <br />
+                  {t('auth.login.demo.password')}: <code className="bg-gray-100 px-2 py-1 rounded">***REMOVED_ADMIN_PWD***</code>
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

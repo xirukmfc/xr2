@@ -136,6 +136,7 @@ services:
       args:
         NEXT_PUBLIC_API_URL: https://xr2.uk/internal
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
+        NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN: ${NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN:-false}
         BUILDKIT_INLINE_CACHE: 1
       shm_size: '2gb'
     container_name: xr2_frontend_prod

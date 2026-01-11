@@ -158,6 +158,7 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: http://localhost/internal
+        NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN: ${NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN:-true}
     container_name: xr2_frontend
     environment:
       NODE_ENV: production
