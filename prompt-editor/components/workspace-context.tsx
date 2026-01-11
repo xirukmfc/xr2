@@ -19,7 +19,6 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      console.log('[WorkspaceProvider] Auth state changed:', { user: !!user, isAuthenticated });
       
       // Reset state when user logs out
       if (!user || !isAuthenticated) {
@@ -36,9 +35,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
       setIsLoading(true);
       try {
-        console.log('[WorkspaceProvider] Fetching workspace...');
         const ws = await getCurrentWorkspace();
-        console.log('[WorkspaceProvider] Got workspace:', ws);
         setCurrentWorkspaceId(ws.id)
       } catch (e) {
         console.error("Failed to fetch current workspace", e);

@@ -14,6 +14,7 @@ from app.models.user import User
 from app.core.database import get_session as get_db
 from app.core.auth import get_current_user, get_current_user_optional
 from app.api.analytics import get_user_workspace
+from app.services.event_logger import EventLogger
 
 router = APIRouter(prefix="/ab-tests-simple", tags=["ab-tests-simple"])
 
@@ -192,11 +193,29 @@ async def get_test_ab_tests(
     current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get A/B tests for testing (uses auth if available)"""
+    """Get A/B tests. Superusers can see all tests across all workspaces."""
     try:
-        # If user is authenticated, get their workspace
-        if current_user:
+        # Build base query with options
+        base_query = select(ABTest).options(
+            selectinload(ABTest.prompt),
+            selectinload(ABTest.version_a),
+            selectinload(ABTest.version_b),
+            selectinload(ABTest.funnel_config)
+        )
+
+        # Superusers can see all A/B tests
+        if current_user and current_user.is_superuser:
+            result = await db.execute(
+                base_query.order_by(ABTest.created_at.desc())
+            )
+        elif current_user:
+            # Regular user - get their workspace
             workspace_id = await get_user_workspace(db, current_user)
+            result = await db.execute(
+                base_query.where(
+                    ABTest.workspace_id == workspace_id
+                ).order_by(ABTest.created_at.desc())
+            )
         else:
             # Fallback: get first workspace for unauthenticated requests
             from app.models.workspace import Workspace
@@ -207,18 +226,11 @@ async def get_test_ab_tests(
             if not workspace_row:
                 return []
             workspace_id = workspace_row.id
-
-        # Get all A/B tests for this workspace
-        result = await db.execute(
-            select(ABTest).options(
-                selectinload(ABTest.prompt),
-                selectinload(ABTest.version_a),
-                selectinload(ABTest.version_b),
-                selectinload(ABTest.funnel_config)
-            ).where(
-                ABTest.workspace_id == workspace_id
-            ).order_by(ABTest.created_at.desc())
-        )
+            result = await db.execute(
+                base_query.where(
+                    ABTest.workspace_id == workspace_id
+                ).order_by(ABTest.created_at.desc())
+            )
         tests = result.scalars().all()
 
         return [
@@ -351,11 +363,23 @@ async def get_test_funnels(
     current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get funnel configurations for testing (uses auth if available)"""
+    """Get funnel configurations. Superusers can see all funnels."""
     try:
-        # If user is authenticated, get their workspace
-        if current_user:
+        # Superusers can see all funnels
+        if current_user and current_user.is_superuser:
+            result = await db.execute(
+                select(CustomFunnelConfiguration).where(
+                    CustomFunnelConfiguration.is_active == True
+                ).order_by(CustomFunnelConfiguration.name)
+            )
+        elif current_user:
             workspace_id = await get_user_workspace(db, current_user)
+            result = await db.execute(
+                select(CustomFunnelConfiguration).where(
+                    CustomFunnelConfiguration.workspace_id == workspace_id,
+                    CustomFunnelConfiguration.is_active == True
+                ).order_by(CustomFunnelConfiguration.name)
+            )
         else:
             # Fallback: get first workspace for unauthenticated requests
             from app.models.workspace import Workspace
@@ -366,14 +390,12 @@ async def get_test_funnels(
             if not workspace_row:
                 return []
             workspace_id = workspace_row.id
-
-        # Get all active funnels
-        result = await db.execute(
-            select(CustomFunnelConfiguration).where(
-                CustomFunnelConfiguration.workspace_id == workspace_id,
-                CustomFunnelConfiguration.is_active == True
-            ).order_by(CustomFunnelConfiguration.name)
-        )
+            result = await db.execute(
+                select(CustomFunnelConfiguration).where(
+                    CustomFunnelConfiguration.workspace_id == workspace_id,
+                    CustomFunnelConfiguration.is_active == True
+                ).order_by(CustomFunnelConfiguration.name)
+            )
         funnels = result.scalars().all()
 
         return [
@@ -394,15 +416,19 @@ async def get_test_prompts_with_versions(
     current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get prompts with their versions for testing (uses auth if available)"""
+    """Get prompts with their versions. Superusers can see all prompts."""
     try:
-        # If user is authenticated, get their workspace
-        if current_user:
+        base_query = select(Prompt).options(selectinload(Prompt.versions))
+
+        # Superusers can see all prompts
+        if current_user and current_user.is_superuser:
+            result = await db.execute(
+                base_query.order_by(Prompt.name)
+            )
+        elif current_user:
             workspace_id = await get_user_workspace(db, current_user)
             result = await db.execute(
-                select(Prompt).options(
-                    selectinload(Prompt.versions)
-                ).where(
+                base_query.where(
                     Prompt.workspace_id == workspace_id
                 ).order_by(Prompt.name)
             )
@@ -417,9 +443,7 @@ async def get_test_prompts_with_versions(
                 return []
             workspace_id = workspace_row.id
             result = await db.execute(
-                select(Prompt).options(
-                    selectinload(Prompt.versions)
-                ).where(
+                base_query.where(
                     Prompt.workspace_id == workspace_id
                 ).order_by(Prompt.name)
             )
@@ -491,6 +515,17 @@ async def start_test_ab_test(
 
         await db.commit()
         await db.refresh(ab_test)
+
+        # Log A/B test start event
+        user_id = current_user.id if current_user else None
+        await EventLogger.log_ab_test_started(
+            db=db,
+            ab_test_id=ab_test.id,
+            user_id=user_id,
+            workspace_id=workspace_id,
+            test_name=ab_test.name,
+        )
+        await db.commit()
 
         return {
             "id": str(ab_test.id),
@@ -601,6 +636,17 @@ async def complete_test_ab_test(
 
         await db.commit()
         await db.refresh(ab_test)
+
+        # Log A/B test completion event
+        user_id = current_user.id if current_user else None
+        await EventLogger.log_ab_test_completed(
+            db=db,
+            ab_test_id=ab_test.id,
+            user_id=user_id,
+            workspace_id=workspace_id,
+            test_name=ab_test.name,
+        )
+        await db.commit()
 
         return {
             "id": str(ab_test.id),
@@ -1123,6 +1169,18 @@ async def create_ab_test(
     db.add(ab_test)
     await db.commit()
     await db.refresh(ab_test)
+
+    # Log A/B test creation event
+    await EventLogger.log_ab_test_created(
+        db=db,
+        ab_test_id=ab_test.id,
+        user_id=current_user.id,
+        workspace_id=workspace_id,
+        test_name=test_data.name,
+        prompt_id=test_data.prompt_id,
+        total_requests=test_data.total_requests,
+    )
+    await db.commit()
 
     return ABTestResponse(
         id=ab_test.id,

@@ -11,6 +11,7 @@ from app.models.product_api_key import ProductAPIKey, ProductAPILog
 from app.models.user import User
 from app.core.auth import get_current_user
 from app.services.statistics import StatisticsService
+from app.services.event_logger import EventLogger
 
 router = APIRouter(prefix="/keys-for-external-use", tags=["keys for external use"])
 
@@ -61,11 +62,16 @@ async def get_product_api_keys(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    """Get all product API keys for the current user"""
+    """Get all product API keys. Superusers can see all keys across all users."""
     try:
-        stmt = select(ProductAPIKey).where(
-            ProductAPIKey.user_id == current_user.id
-        ).offset(skip).limit(limit).order_by(ProductAPIKey.created_at.desc())
+        # Superusers can see all API keys
+        if current_user.is_superuser:
+            stmt = select(ProductAPIKey)
+        else:
+            stmt = select(ProductAPIKey).where(
+                ProductAPIKey.user_id == current_user.id
+            )
+        stmt = stmt.offset(skip).limit(limit).order_by(ProductAPIKey.created_at.desc())
         
         result = await session.execute(stmt)
         api_keys = result.scalars().all()
@@ -139,12 +145,21 @@ async def create_product_api_key(
         session.add(new_key)
         await session.commit()
         await session.refresh(new_key)
-        
+
+        # Log API key creation event
+        await EventLogger.log_api_key_created(
+            db=session,
+            api_key_id=new_key.id,
+            user_id=current_user.id,
+            key_name=key_data.name,
+        )
+        await session.commit()
+
         # Return the key with the secret (only time it's shown)
         response_data = new_key.to_dict()
         response_data["api_key"] = full_key
         response_data["total_usage"] = 0  # New key has no usage
-        
+
         return ProductAPIKeyWithSecret(**response_data)
         
     except HTTPException:
@@ -163,14 +178,18 @@ async def get_product_api_key(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    """Get a specific product API key"""
+    """Get a specific product API key. Superusers can access any key."""
     try:
-        stmt = select(ProductAPIKey).where(
-            and_(
-                ProductAPIKey.id == key_id,
-                ProductAPIKey.user_id == current_user.id
+        # Superusers can access any key
+        if current_user.is_superuser:
+            stmt = select(ProductAPIKey).where(ProductAPIKey.id == key_id)
+        else:
+            stmt = select(ProductAPIKey).where(
+                and_(
+                    ProductAPIKey.id == key_id,
+                    ProductAPIKey.user_id == current_user.id
+                )
             )
-        )
         result = await session.execute(stmt)
         api_key = result.scalar_one_or_none()
         

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { apiCache } from './api-cache'
 import { apiClient } from './api'
+import { logger } from './logger'
 
 // Предзагрузчик данных для повышения производительности
 export function useDataPreloader() {
@@ -14,7 +15,7 @@ export function useDataPreloader() {
     const preloadCriticalData = async () => {
       // Проверяем аутентификацию перед предзагрузкой
       if (!apiClient.isAuthenticated()) {
-        console.debug('User not authenticated, skipping preload')
+        logger.debug('User not authenticated, skipping preload')
         return
       }
 
@@ -31,12 +32,12 @@ export function useDataPreloader() {
       } catch (error) {
         // Если ошибка 401/403 - очищаем токен и пропускаем предзагрузку
         if (error instanceof Error && (error.message.includes('401') || error.message.includes('403'))) {
-          console.debug('Token invalid, clearing and skipping preload')
+          logger.debug('Token invalid, clearing and skipping preload')
           apiClient.clearToken()
           return
         }
         // Игнорируем остальные ошибки предзагрузки - данные загрузятся по требованию
-        console.debug('Preload failed:', error)
+        logger.debug('Preload failed:', error)
       }
     }
 

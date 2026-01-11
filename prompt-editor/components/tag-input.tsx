@@ -61,9 +61,6 @@ export function TagInput({
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Debug log for verification
-  useEffect(() => {
-    console.log('TagInput received myTags:', myTags?.length, myTags)
-  }, [myTags])
 
   // Suggestions: filter by tags + add option to create new
   const suggestions = useMemo((): SuggestionsData => {

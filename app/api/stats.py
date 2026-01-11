@@ -43,23 +43,30 @@ async def get_counts(
         session: AsyncSession = Depends(get_session),
         current_user: User = Depends(get_current_user)
 ):
-    """Get counts of prompts and API keys for the current user"""
+    """Get counts of prompts and API keys. Superusers see all counts."""
     cache_key = get_cache_key(str(current_user.id), workspace_id)
 
     # Check cache first
     if is_cache_valid(cache_key):
         return _cache[cache_key]
 
-    # Get prompts count
-    prompts_query = select(func.count(Prompt.id)).where(Prompt.created_by == current_user.id)
-    if workspace_id:
-        prompts_query = prompts_query.where(Prompt.workspace_id == workspace_id)
+    # Superusers see all counts
+    if current_user.is_superuser:
+        prompts_query = select(func.count(Prompt.id))
+        if workspace_id:
+            prompts_query = prompts_query.where(Prompt.workspace_id == workspace_id)
+        api_keys_query = select(func.count(ProductAPIKey.id))
+    else:
+        # Get prompts count for current user
+        prompts_query = select(func.count(Prompt.id)).where(Prompt.created_by == current_user.id)
+        if workspace_id:
+            prompts_query = prompts_query.where(Prompt.workspace_id == workspace_id)
+        # Get Product API keys count (external API keys) for current user
+        api_keys_query = select(func.count(ProductAPIKey.id)).where(ProductAPIKey.user_id == current_user.id)
 
     prompts_result = await session.execute(prompts_query)
     prompts_count = prompts_result.scalar() or 0
 
-    # Get Product API keys count (external API keys)
-    api_keys_query = select(func.count(ProductAPIKey.id)).where(ProductAPIKey.user_id == current_user.id)
     api_keys_result = await session.execute(api_keys_query)
     api_keys_count = api_keys_result.scalar() or 0
 

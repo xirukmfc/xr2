@@ -13,6 +13,7 @@ from app.models.user import User
 from app.core.database import get_session as get_db
 from app.core.auth import get_current_user
 from app.services.conversion_calculator import calculate_conversion_metrics
+from app.services.event_logger import EventLogger
 
 router = APIRouter(prefix="/conversion-funnels", tags=["conversion-funnels"])
 
@@ -175,6 +176,17 @@ async def create_conversion_funnel(
     db.add(funnel)
     await db.commit()
     await db.refresh(funnel)
+
+    # Log funnel creation event
+    await EventLogger.log_funnel_created(
+        db=db,
+        funnel_id=funnel.id,
+        user_id=current_user.id,
+        workspace_id=workspace_id,
+        funnel_name=funnel_data.name,
+        funnel_type="conversion",
+    )
+    await db.commit()
 
     # Load relationships for response
     await db.execute(

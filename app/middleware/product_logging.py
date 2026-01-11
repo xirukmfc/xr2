@@ -226,20 +226,6 @@ class ProductAPILoggingMiddleware(BaseHTTPMiddleware):
                 session.add(log_entry)
                 await session.commit()
                 
-                # Console logging for debugging
-                source_name = request_body.get('source_name', 'unknown') if request_body else 'unknown'
-                print(f"[EXTERNAL API LOG] User: {api_key.user_id}")
-                print(f"[EXTERNAL API LOG] Source: {source_name}")
-                print(f"[EXTERNAL API LOG] Endpoint: {endpoint}")
-                print(f"[EXTERNAL API LOG] Status: {status_code}")
-                print(f"[EXTERNAL API LOG] Latency: {latency_seconds:.3f}s")
-                print(f"[EXTERNAL API LOG] Response body logged: {response_body is not None}")
-                if response_body:
-                    print(f"[EXTERNAL API LOG] Response body type: {type(response_body)}")
-                    if isinstance(response_body, dict):
-                        print(f"[EXTERNAL API LOG] Response body keys: {list(response_body.keys())[:5]}")
-                if error_message:
-                    print(f"[EXTERNAL API LOG] Error: {error_message}")
-                
         except Exception as e:
-            print(f"Failed to log API request in middleware: {e}")
+            # Log errors silently - they're already handled by the application logger
+            pass

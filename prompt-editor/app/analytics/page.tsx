@@ -230,7 +230,7 @@ function AnalyticsPageContent() {
       <EventDefinitionBuilder
         key={eventsKey}
         onSave={(definition) => {
-          console.log('Saving event definition:', definition);
+          // Event definition saved
         }}
         showCreateButton={true}
         onNewClick={() => {
@@ -377,7 +377,6 @@ function AnalyticsPageContent() {
               <NewEventModal
                 initialData={editingEvent}
                 onSave={(definition) => {
-                  console.log('Saving event definition:', definition);
                   setShowEventModal(false);
                   setEditingEvent(null);
                   showNotification(

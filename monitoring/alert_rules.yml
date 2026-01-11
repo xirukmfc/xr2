@@ -1,0 +1,189 @@
+groups:
+  - name: system_alerts
+    rules:
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 5 minutes (current: {{ $value | printf \"%.1f\" }}%)"
+
+      - alert: CriticalCPUUsage
+        expr: 100 - (avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical CPU usage"
+          description: "CPU usage is above 95% (current: {{ $value | printf \"%.1f\" }}%)"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 80% (current: {{ $value | printf \"%.1f\" }}%)"
+
+      - alert: CriticalMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical memory usage"
+          description: "Memory usage is above 95% (current: {{ $value | printf \"%.1f\" }}%)"
+
+      # Disk Space
+      - alert: LowDiskSpace
+        expr: (1 - (node_filesystem_avail_bytes{mountpoint=~"/|/var/lib/docker",fstype=~"ext4|xfs"} / node_filesystem_size_bytes{mountpoint=~"/|/var/lib/docker",fstype=~"ext4|xfs"})) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space"
+          description: "Disk usage is above 80% (current: {{ $value | printf \"%.1f\" }}%)"
+
+      - alert: CriticalDiskSpace
+        expr: (1 - (node_filesystem_avail_bytes{mountpoint=~"/|/var/lib/docker",fstype=~"ext4|xfs"} / node_filesystem_size_bytes{mountpoint=~"/|/var/lib/docker",fstype=~"ext4|xfs"})) * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical disk space"
+          description: "Disk usage is above 90% (current: {{ $value | printf \"%.1f\" }}%)"
+
+      # High Load Average
+      - alert: HighLoadAverage
+        expr: node_load1 > 4
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High load average"
+          description: "Load average (1m) is above 4 (current: {{ $value | printf \"%.2f\" }})"
+
+  - name: ddos_alerts
+    rules:
+      # Sudden spike in network packets (potential DDoS)
+      - alert: NetworkPacketSpike
+        expr: sum(rate(node_network_receive_packets_total[1m])) > 10000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High network packet rate detected"
+          description: "Incoming packets rate is {{ $value | printf \"%.0f\" }}/sec - potential DDoS attack"
+
+      - alert: NetworkPacketFlood
+        expr: sum(rate(node_network_receive_packets_total[1m])) > 50000
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Network flood detected - possible DDoS"
+          description: "Incoming packets rate is {{ $value | printf \"%.0f\" }}/sec - likely DDoS attack"
+
+      # Too many TCP connections
+      - alert: HighTCPConnections
+        expr: node_netstat_Tcp_CurrEstab > 1000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of TCP connections"
+          description: "{{ $value | printf \"%.0f\" }} established TCP connections - potential slowloris attack"
+
+      - alert: TCPConnectionFlood
+        expr: node_netstat_Tcp_CurrEstab > 5000
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "TCP connection flood detected"
+          description: "{{ $value | printf \"%.0f\" }} TCP connections - likely connection flood attack"
+
+      # High rate of new connections (SYN flood indicator)
+      - alert: HighNewConnectionRate
+        expr: rate(node_netstat_Tcp_PassiveOpens[1m]) > 500
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High rate of new connections"
+          description: "{{ $value | printf \"%.0f\" }} new connections/sec - potential SYN flood"
+
+      - alert: SYNFloodDetected
+        expr: rate(node_netstat_Tcp_PassiveOpens[1m]) > 2000
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "SYN flood attack detected"
+          description: "{{ $value | printf \"%.0f\" }} new connections/sec - SYN flood attack"
+
+      # Connection drops (server overloaded)
+      - alert: ConnectionDrops
+        expr: rate(node_netstat_TcpExt_ListenDrops[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TCP connections being dropped"
+          description: "{{ $value | printf \"%.1f\" }} connections/sec being dropped - server overloaded"
+
+      # High bandwidth usage (volumetric DDoS)
+      - alert: HighBandwidthUsage
+        expr: sum(rate(node_network_receive_bytes_total[1m])) > 100000000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High incoming bandwidth"
+          description: "Incoming bandwidth is {{ $value | humanize }}B/s - potential volumetric attack"
+
+      - alert: BandwidthFlood
+        expr: sum(rate(node_network_receive_bytes_total[1m])) > 500000000
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Bandwidth flood detected"
+          description: "Incoming bandwidth is {{ $value | humanize }}B/s - volumetric DDoS attack"
+
+  - name: container_alerts
+    rules:
+      # Container down
+      - alert: ContainerDown
+        expr: absent(container_last_seen{name=~"xr2_app|xr2_postgres|xr2_redis|xr2_nginx"})
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container is down"
+          description: "Critical container is not running"
+
+      # Container high CPU
+      - alert: ContainerHighCPU
+        expr: rate(container_cpu_usage_seconds_total{name=~"xr2_.*"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container high CPU usage"
+          description: "Container {{ $labels.name }} CPU usage is {{ $value | printf \"%.1f\" }}%"
+
+      # Container high memory
+      - alert: ContainerHighMemory
+        expr: container_memory_usage_bytes{name=~"xr2_.*"} / container_spec_memory_limit_bytes{name=~"xr2_.*"} * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container high memory usage"
+          description: "Container {{ $labels.name }} memory usage is {{ $value | printf \"%.1f\" }}%"

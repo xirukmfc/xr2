@@ -131,4 +131,3 @@ class CheckAPIKeyResponse(BaseModel):
     """Response model for API key validation"""
     ok: bool
     user: str
-

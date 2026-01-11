@@ -14,7 +14,6 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      console.log('[AuthGuard] User not authenticated, redirecting to /login')
       router.push('/login')
     }
   }, [isAuthenticated, isLoading, router])

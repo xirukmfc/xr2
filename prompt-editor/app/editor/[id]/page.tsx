@@ -138,12 +138,6 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
         const originalHandler = window.onunhandledrejection
 
         const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-            console.log('=== UNHANDLED PROMISE REJECTION CAUGHT ===')
-            console.log('Event:', event)
-            console.log('Reason type:', typeof event.reason)
-            console.log('Reason value:', event.reason)
-            console.log('Reason constructor:', event.reason?.constructor?.name)
-            
             // Check if this is a Monaco cancelation error
             if (
                 event.reason &&
@@ -151,55 +145,31 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
                 event.reason.type === 'cancelation'
             ) {
                 // Ignore cancelation errors from Monaco
-                console.log('Monaco cancelation error ignored:', event.reason.msg)
                 event.preventDefault()
                 return
             }
 
-            // ALWAYS prevent showing [object Object] and log details
-            console.error('=== PREVENTING [object Object] ERROR ===')
-            console.error('Full event.reason:', event.reason)
-            
+            // Log only meaningful errors (not [object Object])
             if (event.reason && typeof event.reason === 'object') {
-                console.error('Object keys:', Object.keys(event.reason))
-                console.error('Object entries:', Object.entries(event.reason))
-                
-                try {
-                    console.error('JSON stringify:', JSON.stringify(event.reason, null, 2))
-                } catch (jsonError) {
-                    console.error('Cannot JSON.stringify reason:', jsonError)
+                const errorMessage = event.reason.message || event.reason.error || event.reason.statusText || event.reason.details
+                if (errorMessage) {
+                    console.error('Unhandled promise rejection:', errorMessage)
                 }
-                
-                // Try to extract useful information
-                const possibleMessages = [
-                    event.reason.message,
-                    event.reason.error,
-                    event.reason.statusText,
-                    event.reason.details,
-                    event.reason.toString?.(),
-                ]
-                console.error('Possible error messages:', possibleMessages.filter(Boolean))
+            } else if (event.reason) {
+                console.error('Unhandled promise rejection:', event.reason)
             }
             
-            // ALWAYS prevent default behavior
+            // Prevent default behavior
             event.preventDefault()
         }
 
         const handleError = (event: ErrorEvent) => {
-            console.log('=== GLOBAL ERROR CAUGHT ===')
-            console.log('Error event:', event)
-            console.log('Error message:', event.message)
-            console.log('Error:', event.error)
-            console.log('Error type:', typeof event.error)
-            console.log('Error constructor:', event.error?.constructor?.name)
-            
-            if (event.error && typeof event.error === 'object') {
-                console.log('Error object keys:', Object.keys(event.error))
-                try {
-                    console.log('Error JSON:', JSON.stringify(event.error, null, 2))
-                } catch (e) {
-                    console.log('Cannot stringify error:', e)
-                }
+            // Log only meaningful error messages
+            if (event.message) {
+                console.error('Global error:', event.message)
+            }
+            if (event.error && typeof event.error === 'object' && event.error.message) {
+                console.error('Error details:', event.error.message)
             }
         }
 
@@ -331,7 +301,6 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
             }
             return "Unknown User";
         };
-        console.log(apiVersion)
 
         const creatorName = getDisplayName(apiVersion.creator_full_name, apiVersion.creator_name);
         const updaterName = getDisplayName((apiVersion as any).updater_full_name, (apiVersion as any).updater_name);
@@ -511,8 +480,6 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
                 latestSystemPrompt = snap.system || ""
                 latestUserPrompt = snap.user || ""
                 latestAssistantPrompt = snap.assistant || ""
-
-                console.log("Using snapshot data:", snap)
             } catch (error) {
                 console.error("Error getting snapshot:", error)
             }
@@ -554,12 +521,6 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
             latestAssistantPrompt !== (originalVersionData.assistantPrompt || "")
         )
 
-        console.log("Save check:", {
-            hasPromptMetaChanges,
-            hasTagChanges,
-            hasVersionChanges,
-        })
-
         if (hasPromptMetaChanges) {
             const promptMetaPayload: any = {}
             if (currentPromptData.name !== originalPromptMeta.name) promptMetaPayload.name = currentPromptData.name
@@ -573,25 +534,16 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
 
         // Handle tags separately since they're now on the Prompt, not PromptVersion
         if (hasTagChanges) {
-            console.log("Current tags:", currentPromptData.tags)
-            console.log("Original tags:", originalPromptMeta.tags)
-            
             const validTagIds = currentPromptData.tags
-                .map(tag => {
-                    console.log("Processing tag:", tag)
-                    return tag.id || tag.name
-                })
+                .map(tag => tag.id || tag.name)
                 .filter(tagId => tagId !== null && tagId !== undefined && tagId !== "")
             
             const promptTagsPayload = {
                 tag_ids: validTagIds
             }
             
-            console.log("Updating tags:", promptTagsPayload)
             await apiClient.updatePrompt(promptId, promptTagsPayload)
         }
-
-        console.log("Saving prompt:", originalVersionData)
 
         if (hasVersionChanges) {
             if (!originalVersionData.id) {
@@ -612,8 +564,6 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
             versionPayload.system_prompt = latestSystemPrompt
             versionPayload.user_prompt = latestUserPrompt
             versionPayload.assistant_prompt = latestAssistantPrompt
-
-            console.log("Sending to API:", versionPayload)
 
             await apiClient.updatePromptVersion(promptId, originalVersionData.id, versionPayload)
         }
@@ -713,11 +663,8 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
 
     const updatePromptData = (updates: Partial<PromptData>) => {
         if (updateInProgressRef.current) {
-            console.log("Skipping update - already in progress")
             return // Prevent circular updates
         }
-
-        console.log("updatePromptData called with:", Object.keys(updates))
 
         setPromptData(prevData => {
             updateInProgressRef.current = true
@@ -781,7 +728,6 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
                 return prevData
             }
 
-            console.log("Data actually changed, updating state")
             return newData
         })
     }

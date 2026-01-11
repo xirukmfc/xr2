@@ -127,7 +127,6 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
 
       // Use apiClient with JWT authentication
       const analyticsData = await apiClient.request(endpoint);
-      console.log('Analytics data received:', analyticsData);
       setData(analyticsData);
     } catch (error) {
       console.error('Failed to fetch analytics:', error);
@@ -148,7 +147,6 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
     try {
       // Fetch conversion funnels using protected endpoint
       const conversionsData = await apiClient.request('/conversion-funnels/');
-      console.log('Conversions loaded:', conversionsData);
       setConversions(conversionsData);
 
       // Auto-select all conversions initially if none selected and user hasn't interacted yet
@@ -161,7 +159,6 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
 
       // Skip metrics if no conversions are selected
       if (selectedConversions.length === 0) {
-        console.log('No conversions selected, skipping metrics fetch');
         setConversionMetrics([]);
         return;
       }
@@ -186,26 +183,18 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
         queryParams = `start_date=${encodeURIComponent(startDate.toISOString())}&end_date=${encodeURIComponent(endDate.toISOString())}`;
       }
 
-      console.log('Selected conversions for API:', selectedConversions);
-      console.log('Show active prompts:', showActivePrompts);
-      console.log('Custom date range:', customDateRange);
-      console.log('Query params for metrics:', queryParams);
-
       // Fetch metrics for each selected conversion
       const allMetrics: any[] = [];
 
       for (const funnelId of selectedConversions) {
         try {
-          console.log('Fetching funnel metrics for:', funnelId);
           const metrics = await apiClient.request(`/conversion-funnels/${funnelId}/metrics?${queryParams}`);
-          console.log(`Metrics for funnel ${funnelId}:`, metrics);
           allMetrics.push(metrics);
         } catch (error) {
           console.error(`Error fetching metrics for funnel ${funnelId}:`, error);
         }
       }
 
-      console.log('All conversion metrics collected:', allMetrics);
       setConversionMetrics(allMetrics);
     } catch (error) {
       console.error('Failed to fetch conversions:', error);

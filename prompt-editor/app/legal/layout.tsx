@@ -29,7 +29,7 @@ export default function LegalLayout({
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-6 text-sm">
-              <Link href="/docs" className="text-gray-500 hover:text-gray-900">{t('landing.footer.docs')}</Link>
+              <a href="https://xr2.gitbook.io/docs" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-900">{t('landing.footer.docs')}</a>
               <a href="/#pricing" className="text-gray-500 hover:text-gray-900">{t('landing.footer.pricing')}</a>
               <a href="mailto:hello@xr2.uk" className="text-gray-500 hover:text-gray-900">{t('landing.footer.contact')}</a>
             </div>

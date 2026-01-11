@@ -127,48 +127,33 @@ export function LeftPanel({
 
         ;(async () => {
             try {
-                console.log('[LeftPanel] Starting to load user tags...')
                 const data = await apiClient.getUserTags()
-                console.log('[LeftPanel] Received tags from API:', data, 'Type:', typeof data, 'Array?', Array.isArray(data))
 
-                console.log('[LeftPanel] Processing tags data...')
                 // More reliable data processing
                 let tagsArray: MyTag[] = []
 
                 if (Array.isArray(data)) {
-                    console.log('[LeftPanel] Data is array, processing...')
                     // Ensure each tag has required fields
-                    tagsArray = data.map((tag: any) => {
-                        const processedTag = {
-                            id: tag.id || '',
-                            name: tag.name || '',
-                            color: tag.color || '#e5e7eb'
-                        }
-                        console.log('[LeftPanel] Processing tag:', tag, '->', processedTag)
-                        return processedTag
-                    })
+                    tagsArray = data.map((tag: any) => ({
+                        id: tag.id || '',
+                        name: tag.name || '',
+                        color: tag.color || '#e5e7eb'
+                    }))
                 } else if (data && typeof data === 'object' && Array.isArray((data as any).tags)) {
-                    console.log('[LeftPanel] Data has tags property, processing...')
                     tagsArray = (data as any).tags.map((tag: any) => ({
                         id: tag.id || '',
                         name: tag.name || '',
                         color: tag.color || '#e5e7eb'
                     }))
                 } else if (data && typeof data === 'object' && Array.isArray((data as any).data)) {
-                    console.log('[LeftPanel] Data has data property, processing...')
                     tagsArray = (data as any).data.map((tag: any) => ({
                         id: tag.id || '',
                         name: tag.name || '',
                         color: tag.color || '#e5e7eb'
                     }))
-                } else {
-                    console.log('[LeftPanel] Data format not recognized')
                 }
 
-                console.log('[LeftPanel] Processed tags array:', tagsArray)
-                console.log('[LeftPanel] About to set myTags state with:', tagsArray?.length, 'tags')
                 setMyTags(tagsArray)
-                console.log('[LeftPanel] setMyTags called')
 
             } catch (e) {
                 console.error("load user tags failed", e)
@@ -178,15 +163,6 @@ export function LeftPanel({
         })()
     }, [])
 
-    // Debug log to check tags state
-    useEffect(() => {
-        console.log('[LeftPanel] myTags state updated:', myTags?.length, myTags)
-
-        // Additional debugging - check after a small delay
-        setTimeout(() => {
-            console.log('[LeftPanel] myTags after timeout:', myTags?.length, myTags)
-        }, 100)
-    }, [myTags])
 
     // Load performance stats when promptId changes
     useEffect(() => {
@@ -195,10 +171,8 @@ export function LeftPanel({
 
             try {
                 setStatsLoading(true);
-                console.log('[LeftPanel] Loading performance stats for prompt:', promptId);
                 
                 const stats: PromptPerformanceStats = await apiClient.request(`/prompts/${promptId}/performance-stats`);
-                console.log('[LeftPanel] Performance stats loaded:', stats);
                 setPerformanceStats(stats);
 
             } catch (error) {
@@ -260,12 +234,8 @@ export function LeftPanel({
 
     const createTag = async (name: string, color: string) => {
         try {
-            console.log('[LeftPanel] Creating new tag:', name, color)
-
             // Create tag using API
             const newTag = await apiClient.createTag({ name, color })
-
-            console.log('[LeftPanel] Created tag:', newTag)
 
             // Add new tag to local state
             setMyTags(prev => [...prev, newTag])

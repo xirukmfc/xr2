@@ -22,6 +22,7 @@ from app.schemas.prompt import (
     PromptUpdate,
     PromptResponse,
 )
+from app.services.event_logger import EventLogger
 
 router = APIRouter(prefix="/prompts", tags=["prompts"])
 
@@ -126,7 +127,9 @@ async def get_prompts(
         session: AsyncSession = Depends(get_session),
         current_user: User = Depends(get_current_user)
 ):
-    """Get all prompts with filtering - optimized for list view"""
+    """Get all prompts with filtering - optimized for list view.
+    Superusers can see all prompts across all workspaces.
+    """
     query = select(Prompt).options(
         # Only load essential relationships for list view
         joinedload(Prompt.creator),  # Always needed for creator info
@@ -137,8 +140,17 @@ async def get_prompts(
     )
 
     # Apply filters
-    if workspace_id:
+    # Superusers can see all prompts; regular users are restricted to their workspace
+    if not current_user.is_superuser:
+        if workspace_id:
+            query = query.where(Prompt.workspace_id == workspace_id)
+        else:
+            # For non-superusers without workspace_id, filter by created_by
+            query = query.where(Prompt.created_by == current_user.id)
+    elif workspace_id:
+        # Superuser with workspace_id filter
         query = query.where(Prompt.workspace_id == workspace_id)
+
     if status:
         query = query.where(Prompt.status == status)
 
@@ -153,9 +165,7 @@ async def get_prompts(
         stats_service = StatisticsService(session)
         prompt_ids = [prompt.id for prompt in prompts]
         usage_stats = await stats_service.get_multiple_prompts_request_counts_24h(prompt_ids)
-        print(f"[Prompts API] Loaded usage stats for {len(usage_stats)} prompts")
-    except Exception as e:
-        print(f"[Prompts API] Error loading usage stats: {e}")
+    except Exception:
         usage_stats = {}
     
     # Build response with usage stats
@@ -307,6 +317,17 @@ async def create_prompt(
 
         await session.commit()
 
+        # Log prompt creation event
+        await EventLogger.log_prompt_created(
+            db=session,
+            prompt_id=new_prompt.id,
+            user_id=current_user.id,
+            workspace_id=prompt_data.workspace_id,
+            prompt_name=prompt_data.name,
+            prompt_slug=slug,
+        )
+        await session.commit()
+
         # Reload with relationships
         await session.refresh(new_prompt)
         query = select(Prompt).options(
@@ -324,9 +345,6 @@ async def create_prompt(
         await session.rollback()
         raise
     except Exception as e:
-        print(f"Error creating prompt: {e}")
-        import traceback
-        traceback.print_exc()
         await session.rollback()
         raise HTTPException(status_code=500, detail=f"Error creating prompt: {str(e)}")
 
@@ -522,6 +540,17 @@ async def create_prompt_version(
 
     await session.commit()
 
+    # Log prompt version creation event
+    await EventLogger.log_prompt_version_created(
+        db=session,
+        version_id=new_version.id,
+        prompt_id=uuid.UUID(prompt_id),
+        user_id=current_user.id,
+        workspace_id=prompt.workspace_id,
+        version_number=new_version_number,
+    )
+    await session.commit()
+
     # Reload version
     query = select(PromptVersion).where(PromptVersion.id == new_version.id)
 
@@ -540,8 +569,6 @@ async def update_prompt_version(
         current_user: User = Depends(get_current_user)
 ):
     """Update a specific prompt version"""
-    print(f"[update_prompt_version] Received data: {version_update.model_dump()}")
-
     # Check that prompt exists
     prompt_result = await session.execute(
         select(Prompt).where(Prompt.id == prompt_id)
@@ -570,7 +597,6 @@ async def update_prompt_version(
 
     # Update only provided fields (exclude None values for required fields)
     update_data = version_update.model_dump(exclude_unset=True)
-    print(f"[update_prompt_version] Update data after exclude_unset: {update_data}")
 
     # Set updated_by field
     version.updated_by = current_user.id
@@ -586,11 +612,9 @@ async def update_prompt_version(
     for field, value in update_data.items():
         if field == 'status' and value is None:
             continue  # Don't update status if it's None
-        print(f"[update_prompt_version] Setting {field} = {value}")
         setattr(version, field, value)
 
     await session.commit()
-    print(f"[update_prompt_version] Committed changes")
 
     # Reload version
     query = select(PromptVersion).options(
@@ -667,6 +691,17 @@ async def deploy_prompt_version(
     prompt.status = PromptStatus.ACTIVE
     prompt.updated_by = current_user.id
 
+    # Log prompt published event
+    await EventLogger.log_prompt_published(
+        db=session,
+        prompt_id=prompt.id,
+        version_id=uuid.UUID(version_id),
+        user_id=current_user.id,
+        workspace_id=prompt.workspace_id,
+        prompt_name=prompt.name,
+        version_number=version_to_deploy.version_number,
+    )
+
     await session.commit()
 
     return {
@@ -730,6 +765,17 @@ async def undeploy_prompt_version(
     )
     if not has_active_versions:
         prompt.status = PromptStatus.DRAFT
+
+    # Log prompt unpublished event
+    await EventLogger.log_prompt_unpublished(
+        db=session,
+        prompt_id=prompt.id,
+        version_id=uuid.UUID(version_id),
+        user_id=current_user.id,
+        workspace_id=prompt.workspace_id,
+        prompt_name=prompt.name,
+        version_number=version_to_undeploy.version_number,
+    )
 
     await session.commit()
 
@@ -998,16 +1044,12 @@ async def get_prompt_performance_stats(
 ):
     """Get 24h performance statistics for prompt editor panel"""
     try:
-        print(f"[Performance Stats] Request for prompt_id: {prompt_id}")
-        print(f"[Performance Stats] Current user: {current_user.username if current_user else 'None'}")
-        
         # Verify prompt exists
         prompt_result = await session.execute(
             select(Prompt).where(Prompt.id == prompt_id)
         )
         prompt = prompt_result.scalar_one_or_none()
         if not prompt:
-            print(f"[Performance Stats] Prompt not found: {prompt_id}")
             raise HTTPException(status_code=404, detail="Prompt not found")
         
         stats_service = StatisticsService(session)

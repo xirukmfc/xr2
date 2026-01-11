@@ -55,7 +55,7 @@ services:
       SECRET_KEY: ${SECRET_KEY:-your_super_secret_key_change_in_production}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-***REMOVED_ADMIN_PWD***}
-      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@xr2.com}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-pavel.kuzko@gmail.com}
 
       # OAuth
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-dummy_client_id}
@@ -102,7 +102,7 @@ services:
       SECRET_KEY: ${SECRET_KEY:-your_super_secret_key_change_in_production}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-***REMOVED_ADMIN_PWD***}
-      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@xr2.com}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-pavel.kuzko@gmail.com}
 
       # OAuth
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-dummy_client_id}
@@ -200,10 +200,88 @@ services:
       timeout: 10s
       retries: 3
 
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: xr2_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    networks:
+      - xr2_network
+    restart: unless-stopped
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: xr2_grafana
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - postgres
+      - prometheus
+    networks:
+      - xr2_network
+    restart: unless-stopped
+
+  # Node Exporter for system metrics (CPU, RAM, Disk, Network)
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: xr2_node_exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - xr2_network
+    restart: unless-stopped
+
+  # cAdvisor for Docker container metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: xr2_cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg
+    networks:
+      - xr2_network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
   nginx_logs:
+  prometheus_data:
+  grafana_data:
 
 networks:
   xr2_network:

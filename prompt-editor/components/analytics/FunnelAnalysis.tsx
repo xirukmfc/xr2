@@ -426,16 +426,9 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
       // Use API if any filter is selected (prompt, version, or dates)
       // All selected filters will be applied together (AND)
       if (selectedPromptId || selectedVersionId || startDate || endDate) {
-        console.log('useEffect: Filters detected, calling fetchFunnelData', {
-          selectedPromptId,
-          selectedVersionId,
-          startDate,
-          endDate
-        });
         fetchFunnelData();
       } else {
         // If no filters selected, clear API data to use props data
-        console.log('useEffect: No filters, clearing API data');
         setFunnelDataFromAPI(null);
       }
     }
@@ -452,17 +445,8 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
 
   const fetchFunnelData = async () => {
     if (!currentConfiguration) {
-      console.log('fetchFunnelData: No configuration selected');
       return;
     }
-    
-    console.log('fetchFunnelData: Starting fetch', {
-      selectedPromptId,
-      selectedVersionId,
-      startDate,
-      endDate,
-      eventSteps: currentConfiguration.event_steps
-    });
     
     setLoading(true);
     try {
@@ -474,13 +458,11 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
       // Add prompt filter if provided (AND condition)
       if (selectedPromptId) {
         requestBody.prompt_id = selectedPromptId;
-        console.log('fetchFunnelData: Adding prompt_id filter:', selectedPromptId);
       }
       
       // Add version filter if provided (AND condition - filters within selected prompt)
       if (selectedVersionId) {
         requestBody.version_id = selectedVersionId;
-        console.log('fetchFunnelData: Adding version_id filter:', selectedVersionId);
       }
       
       if (startDate) {
@@ -488,17 +470,13 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
         const startDateTime = new Date(startDate);
         startDateTime.setHours(0, 0, 0, 0);
         requestBody.start_date = startDateTime.toISOString();
-        console.log('fetchFunnelData: Adding start_date filter:', requestBody.start_date);
       }
       if (endDate) {
         // Set end date to end of day
         const endDateTime = new Date(endDate);
         endDateTime.setHours(23, 59, 59, 999);
         requestBody.end_date = endDateTime.toISOString();
-        console.log('fetchFunnelData: Adding end_date filter:', requestBody.end_date);
       }
-      
-      console.log('fetchFunnelData: Sending request with body:', JSON.stringify(requestBody, null, 2));
       
       const result = await apiClient.request<FunnelStep[]>(
         '/analytics/funnel-test',
@@ -507,7 +485,6 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
           body: JSON.stringify(requestBody)
         }
       );
-      console.log('fetchFunnelData: Received result:', result);
       setFunnelDataFromAPI(result || []);
     } catch (error) {
       console.error('fetchFunnelData: Failed to fetch funnel data:', error);
@@ -566,9 +543,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
 
   const loadSavedConfigurations = async () => {
     try {
-      console.log('[FunnelAnalysis] Loading saved configurations...');
       const configurations = await apiClient.request<CustomFunnelConfiguration[]>('/custom-funnel-configurations/test');
-      console.log('[FunnelAnalysis] Loaded configurations:', configurations);
       setSavedConfigurations(configurations);
 
       // Load the first active configuration if available
@@ -625,12 +600,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
   };
 
   const saveFunnelConfiguration = async () => {
-    console.log('saveFunnelConfiguration called');
-    console.log('funnelName:', funnelName);
-    console.log('funnelSteps:', funnelSteps);
-
     const validSteps = funnelSteps.filter(step => step.trim());
-    console.log('validSteps:', validSteps);
 
     // Validate
     if (!funnelName.trim()) {

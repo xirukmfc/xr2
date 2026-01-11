@@ -68,7 +68,7 @@ async def create_admin_user():
             admin_user = User(
                 id=str(uuid.uuid4()),
                 username="WWW",
-                email="admin@xr2.local",
+                email="pavel.kuzko@gmail.com",
                 hashed_password=hashed_password,
                 is_active=True,
                 is_superuser=True

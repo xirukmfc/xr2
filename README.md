@@ -1,440 +1,209 @@
-# xR2 Prompt Management Platform
+# xR2 Platform
 
-A comprehensive prompt management and analytics platform built with FastAPI, PostgreSQL, and modern web technologies.
+AI Prompt Management & Analytics platform with A/B testing, conversion funnels, and multi-LLM support.
 
-## 🚀 Quick Start
+**Production:** https://xr2.uk
+**Documentation:** https://xr2.gitbook.io/docs
 
-### 🖥️ Для сервера (Production)
+## Quick Start
 
-Запустить ВСЁ в Docker (backend + frontend):
+### Production (Docker)
 
 ```bash
-make up
+make deploy
 ```
 
-**Готово!** Откройте http://localhost
-
----
-
-### 💻 Для локальной разработки
-
-Автоматический запуск (backend в Docker + frontend локально):
+### Local Development
 
 ```bash
 ./start.sh
 ```
 
-Или вручную:
+Or manually:
 
 ```bash
-# Терминал 1: Backend в Docker
+# Terminal 1: Backend
 make up-local
 
-# Терминал 2: Frontend локально
+# Terminal 2: Frontend
 cd prompt-editor && pnpm dev
 ```
 
-**Готово!** Откройте http://localhost
+Open http://localhost
 
----
+## Features
 
-### ⚙️ Основные команды
+- **Prompt Management** - Create, version, and organize AI prompts
+- **A/B Testing** - Test prompt variations with statistical analysis
+- **Analytics** - Track usage, performance, and conversion metrics
+- **Conversion Funnels** - Monitor user journeys and drop-off points
+- **Multi-LLM Support** - OpenAI, Anthropic, Google, DeepSeek, and more
+- **Public API** - RESTful API with SDK support
+- **Real-time Monitoring** - Prometheus + Grafana dashboards
 
-```bash
-make help        # Показать справку
-make up          # Запустить ВСЁ для сервера (production)
-make up-local    # Запустить только backend для разработки
-make down        # Остановить всё
-make status      # Показать статус
-make logs        # Показать логи
-make health      # Проверить здоровье
-```
+## Architecture
 
-**Полный список команд**: `make help`
+| Component | Technology |
+|-----------|------------|
+| Backend | FastAPI (Python 3.11+) |
+| Frontend | Next.js 14 + TypeScript |
+| Database | PostgreSQL 15 |
+| Cache | Redis 7 |
+| Proxy | Nginx + Cloudflare |
+| Monitoring | Prometheus + Grafana |
 
----
+## Services
 
-### 🌐 Доступные URL
-
-- **http://localhost** - Главная страница (пользовательский интерфейс)
-- **http://localhost/admin** - Админ панель
-- **http://localhost/docs** - API документация
-- **http://localhost/admin-docs** - Полное API для админов
-
----
-
-### 🔐 Учетные данные
-
-- **Username**: `admin`
-- **Password**: `***REMOVED_ADMIN_PWD***`
-
-⚠️ **ВАЖНО**: Измените пароли в `.env` перед production деплоем!
-
----
-
-### 📦 Сервисы
-
-| Сервис | Порт | Описание |
-|--------|------|----------|
-| PostgreSQL | 5432 | База данных |
-| Redis | 6379 | Кэш и очереди |
+| Service | Port | Description |
+|---------|------|-------------|
+| PostgreSQL | 5432 | Database |
+| Redis | 6379 | Cache & rate limiting |
 | FastAPI | 8000 | Backend API |
 | Next.js | 3000 | Frontend |
 | Nginx | 80, 443 | Reverse proxy |
+| Prometheus | 9090 | Metrics collection |
+| Grafana | 3002 | Dashboards |
 
-## 🚀 Features
-
-- **Prompt Management**: Create, edit, delete, and version AI prompts
-- **Multi-tenancy**: Workspace-based organization for teams
-- **Analytics**: Track API usage, performance metrics, and user behavior
-- **Admin Interface**: Built-in admin panel for system management
-- **REST API**: Comprehensive API for integration
-- **Modern UI**: Responsive web interface inspired by PromptLayer
-
-## 🏗️ Architecture
-
-- **Backend**: FastAPI with async/await support
-- **Database**: PostgreSQL with SQLAlchemy ORM
-- **Admin**: FastAPI Admin with authentication
-- **Frontend**: Modern responsive web interface
-- **Authentication**: JWT-based security
-- **API Documentation**: Automatic OpenAPI/Swagger docs
-
-## 📋 Prerequisites
-
-- Python 3.11+
-- PostgreSQL 12+
-- Redis 6+ (for caching and background tasks)
-
-## 🛠️ Local Development Setup
-
-### 1. Clone and Setup Environment
+## Main Commands
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd xR2
-
-# Create virtual environment
-python -m venv .venv
-
-# Activate virtual environment
-# On macOS/Linux:
-source .venv/bin/activate
-# On Windows:
-.venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
+make help           # Show all commands
+make deploy         # Deploy to production
+make up-local       # Start backend for development
+make down           # Stop all services
+make status         # Show service status
+make logs           # View logs
+make health         # Health check
+make db-backup      # Backup database
+make db-restore     # Restore from backup
+make test-local     # Run tests locally
 ```
 
-### 2. Database Setup
-
-#### Install PostgreSQL
-
-**macOS (using Homebrew):**
-```bash
-brew install postgresql
-brew services start postgresql
-brew services stop postgresql
-```
-
-**Ubuntu/Debian:**
-```bash
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-```
-
-#### Create Database and User
-
-```bash
-# Connect to PostgreSQL
-sudo -u postgres psql
-
-# In PostgreSQL prompt:
-CREATE USER xr2_user WITH PASSWORD '***REMOVED_PG_PWD***';
-CREATE DATABASE xr2_db OWNER xr2_user;
-GRANT ALL PRIVILEGES ON DATABASE xr2_db TO xr2_user;
-\q
-```
-
-### 3. Redis Setup (Optional)
-
-**macOS (using Homebrew):**
-```bash
-brew install redis
-brew services start redis
-```
-
-**Ubuntu/Debian:**
-```bash
-sudo apt install redis-server
-sudo systemctl start redis-server
-sudo systemctl enable redis-server
-```
-
-### 4. Environment Configuration
-
-Create a `.env` file in the project root:
-
-```env
-# Database
-DATABASE_URL=postgresql+asyncpg://xr2_user:***REMOVED_PG_PWD***@localhost:5432/xr2_db
-
-# Security
-SECRET_KEY=your-super-secret-key-change-in-production-please
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-
-# Admin Credentials
-ADMIN_USERNAME=www
-ADMIN_PASSWORD=***REMOVED_ADMIN_PWD***
-ADMIN_EMAIL=admin@xr2.com
-
-# Application
-PROJECT_NAME=xR2 Platform
-VERSION=1.0.0
-DEBUG=true
-
-# Redis
-REDIS_URL=redis://localhost:6379/0
-```
-
-### 5. Initialize Database
-
-The database will be automatically initialized when you start the application for the first time. Tables will be created and the default admin user will be set up.
-
-### 6. Run the Application
-
-```bash
-# Start the development server
-python main.py
-
-# Or use uvicorn directly:
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 xR2/
 ├── app/
-│   ├── __init__.py
-│   ├── admin/
-│   │   ├── __init__.py
-│   │   └── admin.py          # FastAPI Admin configuration
-│   ├── api/
-│   │   ├── __init__.py
-│   │   └── prompts.py        # Prompt API endpoints
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── config.py         # Application settings
-│   │   ├── database.py       # Database configuration
-│   │   └── security.py       # Authentication utilities
-│   └── models/
-│       ├── __init__.py
-│       ├── api_request.py    # API request tracking model
-│       ├── prompt.py         # Prompt and version models
-│       ├── user.py           # User model
-│       └── workspace.py      # Workspace model
-├── static/                   # Static files (CSS, JS, images)
-├── templates/
-│   └── index.html           # Main frontend interface
-├── main.py                  # Application entry point
-├── requirements.txt         # Python dependencies
-├── .env                     # Environment variables
-└── README.md               # This file
+│   ├── api/                 # API endpoints
+│   │   ├── prompts.py       # Prompt management
+│   │   ├── ab_tests_simple.py  # A/B testing
+│   │   ├── analytics.py     # Analytics
+│   │   ├── conversion_funnels.py
+│   │   ├── events.py        # Event tracking
+│   │   ├── llm.py           # LLM providers
+│   │   └── public_api.py    # Public API
+│   ├── models/              # Database models
+│   ├── core/                # Config, DB, security
+│   └── services/            # Business logic
+├── prompt-editor/           # Next.js frontend
+├── sdk/                     # Client SDKs
+│   ├── python pip/          # Python SDK
+│   ├── make/                # Make integration
+│   ├── n8n/                 # n8n integration
+│   └── zapier/              # Zapier integration
+├── monitoring/              # Prometheus & Grafana configs
+├── nginx/                   # Nginx configuration
+├── scripts/                 # Utility scripts
+└── docker-compose*.yml      # Docker configurations
 ```
 
-## 🔧 API Usage
+## API Endpoints
 
-### Authentication
+Full API documentation: https://xr2.uk/docs
 
-Most API endpoints require authentication. The system uses JWT tokens for authentication.
+## SDKs
 
-### Prompt Management
-
-#### Create a Prompt
+### Python
 
 ```bash
-curl -X POST "http://localhost:8000/internal/prompts/" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Customer Support Assistant",
-    "description": "AI assistant for customer support",
-    "template": "You are a helpful customer support assistant. Help the user with: {{user_question}}",
-    "variables": ["user_question"],
-    "category": "chat",
-    "tags": ["support", "assistant"],
-    "workspace_id": "your-workspace-id"
-  }'
+pip install xr2-sdk
 ```
 
-#### Get All Prompts
+```python
+from xr2_sdk import XR2Client
 
+client = XR2Client(api_key="your-api-key")
+result = client.prompts.run("my-prompt", variables={"name": "World"})
+```
+
+## Environment Variables
+
+```env
+# Database
+DATABASE_URL=postgresql+asyncpg://user:pass@localhost:5432/xr2_db
+
+# Security
+SECRET_KEY=your-secret-key
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your-password
+ADMIN_EMAIL=admin@example.com
+
+# Redis
+REDIS_URL=redis://localhost:6379/0
+
+# LLM Providers (optional)
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=...
+```
+
+## URLs
+
+| URL | Description |
+|-----|-------------|
+| `/` | Landing page |
+| `/login` | Authentication |
+| `/prompts` | Prompt library |
+| `/editor/[id]` | Prompt editor |
+| `/analytics` | Analytics overview |
+| `/api-keys` | API key management |
+| `/logs` | API usage logs |
+| `/settings` | User settings |
+| `/docs` | Swagger API docs |
+| `/admin` | Admin panel (SQLAdmin) |
+
+## Security
+
+- JWT authentication with refresh tokens
+- Rate limiting via Redis
+- Cloudflare WAF & DDoS protection
+- UFW firewall (SSH + Cloudflare IPs only)
+- Password hashing with bcrypt
+
+## Monitoring
+
+Access Grafana at http://localhost:3002 (or https://xr2.uk:3002 in production)
+
+Default dashboards:
+- System metrics (CPU, RAM, Disk)
+- API performance
+- Database queries
+- Container resources
+
+## Troubleshooting
+
+**Database connection error:**
 ```bash
-curl "http://localhost:8000/internal/prompts/"
+make db-shell  # Connect to PostgreSQL
 ```
 
-#### Get Specific Prompt
-
+**View logs:**
 ```bash
-curl "http://localhost:8000/internal/prompts/{prompt_id}"
+make logs-app      # Backend logs
+make logs-frontend # Frontend logs
+make logs-nginx    # Nginx logs
 ```
 
-#### Update Prompt
-
+**Health check:**
 ```bash
-curl -X PUT "http://localhost:8000/internal/prompts/{prompt_id}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Updated Prompt Name",
-    "description": "Updated description"
-  }'
+make health
 ```
 
-#### Delete Prompt
-
+**Rebuild containers:**
 ```bash
-curl -X DELETE "http://localhost:8000/internal/prompts/{prompt_id}"
+make rebuild && make up
 ```
 
-## 🎨 Frontend Features
+## License
 
-The web interface provides:
-
-- **Dashboard**: Overview of prompts and usage
-- **Prompt Library**: Browse, search, and filter prompts
-- **Prompt Editor**: Create and edit prompts with syntax highlighting
-- **Version History**: Track prompt changes over time
-- **Analytics**: View usage statistics and performance metrics
-
-### Frontend Technology Stack
-
-- **Styling**: Tailwind CSS for responsive design
-- **Icons**: Font Awesome for iconography
-- **JavaScript**: Vanilla JavaScript for interactivity
-- **Design**: Inspired by PromptLayer's clean, modern interface
-
-## 🔒 Security Features
-
-- **JWT Authentication**: Secure token-based authentication
-- **Password Hashing**: Bcrypt for secure password storage
-- **Row-Level Security**: Multi-tenant data isolation
-- **CORS Configuration**: Configurable cross-origin requests
-- **Input Validation**: Pydantic models for data validation
-
-## 📊 Database Schema
-
-### Core Models
-
-1. **Users**: User accounts and authentication
-2. **Workspaces**: Multi-tenant organization units
-3. **Prompts**: AI prompts with versioning
-4. **Prompt Versions**: Historical versions of prompts
-5. **API Requests**: Usage tracking and analytics
-
-### Relationships
-
-- Users can belong to multiple workspaces
-- Workspaces contain prompts
-- Prompts have multiple versions
-- API requests track prompt usage
-
-## 🚀 Deployment
-
-### Production Setup
-
-1. **Environment Variables**: Update `.env` with production values
-2. **Database**: Use production PostgreSQL instance
-3. **Security**: Change default admin credentials
-4. **HTTPS**: Configure SSL/TLS certificates
-5. **Process Manager**: Use Gunicorn or similar for production
-
-### Docker Deployment (Optional)
-
-```bash
-# Build Docker image
-docker build -t xr2-platform .
-
-# Run with Docker Compose
-docker-compose up -d
-```
-
-## 🧪 Testing
-
-```bash
-# Run tests (when test suite is added)
-pytest
-
-# Run with coverage
-pytest --cov=app
-```
-
-## 📝 API Documentation
-
-Once the server is running, visit:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Troubleshooting
-
-### Common Issues
-
-**Database Connection Error:**
-- Verify PostgreSQL is running
-- Check database credentials in `.env`
-- Ensure database and user exist
-
-**Import Errors:**
-- Activate virtual environment
-- Install dependencies: `pip install -r requirements.txt`
-
-**Admin Login Issues:**
-- Check admin credentials in `.env`
-- Verify admin user was created during initialization
-
-**Port Already in Use:**
-- Change port in `main.py` or use different port:
-  ```bash
-  uvicorn main:app --port 8001
-  ```
-
-### Support
-
-For support and questions, please open an issue in the repository or contact the development team.
-
-## 🔄 Updates and Changelog
-
-### Version 1.0.0
-- Initial release
-- Core prompt management features
-- Admin interface
-- REST API
-- Modern web UI
-- Multi-tenancy support
-
----***REMOVED_OPENAI_KEY***
-
-``` bash
-brew services stop postgresql
-brew services start postgresql
-
-/
-# Найдем PID процесса и остановим его
-kill -9 $(lsof -ti:8000)
-```
+MIT License

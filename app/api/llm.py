@@ -13,6 +13,7 @@ from app.core.database import get_session
 from app.models.llm import LLMProvider, UserAPIKey
 from app.models.user import User
 from app.core.auth import get_current_user
+from app.services.event_logger import EventLogger
 
 # Optimized HTTP client with connection pooling for external API calls
 # This will reuse connections instead of creating new ones for each request
@@ -655,6 +656,8 @@ async def test_run_prompt(
             detail=f"No API key found for provider '{request.provider}'. Please add an API key first."
         )
 
+    result = None
+    error_message = None
     try:
         # Determine which API to call based on provider
         provider_lower = request.provider.lower()
@@ -662,7 +665,7 @@ async def test_run_prompt(
         logger.info(f'Calling {provider_lower} API...')
 
         if 'openai' in provider_lower or 'gpt' in provider_lower:
-            res = await call_openai_api(
+            result = await call_openai_api(
                 api_key=api_key,
                 model=request.model,
                 system_prompt=request.systemPrompt,
@@ -674,10 +677,9 @@ async def test_run_prompt(
             api_call_time = time.time() - api_call_start
             total_time = time.time() - start_time
             logger.info(f'OpenAI API call took {api_call_time:.3f}s, total request: {total_time:.3f}s')
-            return res
 
         elif 'anthropic' in provider_lower or 'claude' in provider_lower:
-            return await call_claude_api(
+            result = await call_claude_api(
                 api_key=api_key,
                 model=request.model,
                 system_prompt=request.systemPrompt,
@@ -688,7 +690,7 @@ async def test_run_prompt(
             )
 
         elif 'google' in provider_lower or 'gemini' in provider_lower:
-            return await call_gemini_api(
+            result = await call_gemini_api(
                 api_key=api_key,
                 model=request.model,
                 system_prompt=request.systemPrompt,
@@ -704,9 +706,63 @@ async def test_run_prompt(
                 detail=f"Unsupported provider: {request.provider}"
             )
 
-    except HTTPException:
+        # Log successful test run
+        total_time_ms = int((time.time() - start_time) * 1000)
+        prompt_length = len(request.systemPrompt or "") + len(request.userPrompt or "")
+        response_length = len(result.text) if result and result.text else 0
+        cost_usd = result.costUsd if result else None
+
+        await EventLogger.log_test_with_ai(
+            db=session,
+            user_id=current_user.id,
+            workspace_id=None,
+            provider=request.provider,
+            model=request.model,
+            prompt_length=prompt_length,
+            response_length=response_length,
+            latency_ms=total_time_ms,
+            cost_usd=cost_usd,
+            status="success",
+        )
+        await session.commit()
+
+        return result
+
+    except HTTPException as e:
+        # Log failed test run
+        total_time_ms = int((time.time() - start_time) * 1000)
+        prompt_length = len(request.systemPrompt or "") + len(request.userPrompt or "")
+        await EventLogger.log_test_with_ai(
+            db=session,
+            user_id=current_user.id,
+            workspace_id=None,
+            provider=request.provider,
+            model=request.model,
+            prompt_length=prompt_length,
+            response_length=0,
+            latency_ms=total_time_ms,
+            status="failure",
+            error_message=str(e.detail),
+        )
+        await session.commit()
         raise
     except Exception as e:
+        # Log failed test run
+        total_time_ms = int((time.time() - start_time) * 1000)
+        prompt_length = len(request.systemPrompt or "") + len(request.userPrompt or "")
+        await EventLogger.log_test_with_ai(
+            db=session,
+            user_id=current_user.id,
+            workspace_id=None,
+            provider=request.provider,
+            model=request.model,
+            prompt_length=prompt_length,
+            response_length=0,
+            latency_ms=total_time_ms,
+            status="failure",
+            error_message=str(e),
+        )
+        await session.commit()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error calling LLM API: {str(e)}"

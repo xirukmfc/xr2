@@ -101,7 +101,6 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
         setProvidersLoading(true)
         setProvidersError(null)
         const providersData = await apiClient.request('/llm/providers')
-        console.log('[TestModal] Received providers from API:', providersData)
         
         let providersArray: APIProvider[] = []
         if (Array.isArray(providersData)) {
@@ -212,13 +211,9 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
 
   const started = performance.now()
 
-  console.log('[TestModal] Starting test request...') // Add logs
-
   try {
     // Get user auth token for API key retrieval
-    const tokenStart = performance.now()
     const token = apiClient.getToken()
-    console.log(`[TestModal] Token retrieval took: ${(performance.now() - tokenStart).toFixed(2)}ms`)
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -261,16 +256,11 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
       tools: toolsArray,
     }
 
-    console.log('[TestModal] Request body:', requestBody)
-    const fetchStart = performance.now()
-
     const res = await fetch("/api/test-run", {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
     })
-
-    console.log(`[TestModal] API request took: ${(performance.now() - fetchStart).toFixed(2)}ms`)
 
     if (!res.ok) {
       // Read response body once as text
@@ -332,9 +322,6 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
       }
       costUsd?: number | null
     } = await res.json()
-
-    console.log(`[TestModal] JSON parsing took: ${(performance.now() - parseStart).toFixed(2)}ms`)
-    console.log('[TestModal] Response data:', data)
 
     const elapsed = (performance.now() - started) / 1000
     setResponse(data.text || "")

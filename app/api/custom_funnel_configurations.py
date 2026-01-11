@@ -12,6 +12,7 @@ from app.models.analytics import CustomFunnelConfiguration
 from app.models.user import User
 from app.core.database import get_session as get_db
 from app.core.auth import get_current_user, get_current_user_optional
+from app.services.event_logger import EventLogger
 
 router = APIRouter(prefix="/custom-funnel-configurations", tags=["custom-funnel-configurations"])
 
@@ -115,29 +116,6 @@ async def get_test_custom_funnel_configurations(
         return [{"error": str(e)}]
 
 
-@router.post("/test/debug")
-async def debug_funnel_request(request: Request):
-    """Debug endpoint to see raw request body"""
-    try:
-        body = await request.body()
-        body_str = body.decode('utf-8')
-        body_json = json.loads(body_str)
-        print(f"[DEBUG] Raw body: {body_str}")
-        print(f"[DEBUG] Parsed JSON: {body_json}")
-
-        # Try to validate with Pydantic
-        try:
-            validated = CustomFunnelConfigurationCreate(**body_json)
-            print(f"[DEBUG] Pydantic validation SUCCESS: {validated}")
-            return {"status": "valid", "data": validated.dict()}
-        except ValidationError as e:
-            print(f"[DEBUG] Pydantic validation FAILED: {e}")
-            return {"status": "invalid", "errors": e.errors()}
-    except Exception as e:
-        print(f"[DEBUG] Exception: {e}")
-        return {"status": "error", "message": str(e)}
-
-
 @router.post("/test", response_model=CustomFunnelConfigurationResponse)
 async def create_test_custom_funnel_configuration(
     config_data: CustomFunnelConfigurationCreate,
@@ -145,15 +123,11 @@ async def create_test_custom_funnel_configuration(
     db: AsyncSession = Depends(get_db)
 ):
     """Create a new custom funnel configuration for testing (uses auth if available)"""
-    print(f"[FUNNEL CREATE] Received data: name={config_data.name}, description={config_data.description}, event_steps={config_data.event_steps}")
-
     # Validate event_steps
     if not config_data.event_steps or len(config_data.event_steps) < 2:
-        print(f"[FUNNEL CREATE ERROR] Not enough event steps: {len(config_data.event_steps) if config_data.event_steps else 0}")
         raise HTTPException(422, "At least 2 event steps are required")
 
     if any(not step or not step.strip() for step in config_data.event_steps):
-        print(f"[FUNNEL CREATE ERROR] Empty event steps found")
         raise HTTPException(422, "All event steps must be non-empty")
 
     try:
@@ -345,6 +319,17 @@ async def create_custom_funnel_configuration(
     db.add(config)
     await db.commit()
     await db.refresh(config)
+
+    # Log funnel creation event
+    await EventLogger.log_funnel_created(
+        db=db,
+        funnel_id=config.id,
+        user_id=current_user.id,
+        workspace_id=workspace_id,
+        funnel_name=config_data.name,
+        funnel_type="custom",
+    )
+    await db.commit()
 
     return CustomFunnelConfigurationResponse(
         id=config.id,

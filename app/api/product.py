@@ -83,12 +83,8 @@ async def get_ab_test_version(session: AsyncSession, prompt_id: UUID, workspace_
         # Get only the first (most recent) running test
         ab_test = result.scalars().first()
 
-        # Debug logging to understand what's happening
         if not ab_test:
-            print(f"[A/B TEST DEBUG] No active tests found for prompt {prompt_id}, using production version")
             return None
-
-        print(f"[A/B TEST DEBUG] Found running test: {ab_test.name} (ID: {ab_test.id}, Status: {ab_test.status}, Created: {ab_test.created_at})")
 
         # Check if we've reached the total request limit
         total_served = ab_test.version_a_requests + ab_test.version_b_requests
@@ -123,8 +119,7 @@ async def get_ab_test_version(session: AsyncSession, prompt_id: UUID, workspace_
             "ab_test_variant": variant
         }
 
-    except Exception as e:
-        print(f"Error in A/B testing: {e}")
+    except Exception:
         return None  # Fall back to production version
 
 

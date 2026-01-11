@@ -20,6 +20,7 @@ from app.models.llm import UserAPIKey
 from app.models.product_api_key import ProductAPIKey
 from app.core.auth import get_current_user as get_authenticated_user
 from app.core.config import settings
+from app.services.event_logger import EventLogger
 import httpx
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -145,6 +146,17 @@ async def register_user(
         encrypted_key=encrypted_key
     )
     session.add(default_api_key)
+    await session.commit()
+
+    # Log user registration event
+    await EventLogger.log_user_registered(
+        db=session,
+        user_id=new_user.id,
+        workspace_id=default_workspace.id,
+        email=str(user_data.email),
+        username=user_data.username,
+        method="email",
+    )
     await session.commit()
 
     return UserResponse(**new_user.to_dict())
@@ -424,7 +436,18 @@ async def google_login(
             session.add(default_api_key)
             await session.commit()
             await session.refresh(user)
-            
+
+            # Log user registration event (Google OAuth)
+            await EventLogger.log_user_registered(
+                db=session,
+                user_id=user.id,
+                workspace_id=default_workspace.id,
+                email=email,
+                username=user.username,
+                method="google",
+            )
+            await session.commit()
+
             # Store API key to return in response
             api_key_value = full_key
         else:

@@ -94,37 +94,23 @@ export function Sidebar() {
   useEffect(() => {
     const fetchLimits = async () => {
       if (!isAuthenticated) {
-        console.log('[Sidebar] User not authenticated, skipping limits fetch')
         return
       }
       
       try {
-        console.log('[Sidebar] Fetching user limits...')
         setLimitsLoading(true)
         const data = await getUserLimits()
-        console.log('[Sidebar] Limits data received:', data)
         setLimits(data)
       } catch (err) {
         console.error('[Sidebar] Error fetching limits:', err)
       } finally {
         setLimitsLoading(false)
-        console.log('[Sidebar] Limits loading finished')
       }
     }
 
     fetchLimits()
   }, [isAuthenticated])
 
-  // Debug tooltip visibility conditions
-  useEffect(() => {
-    console.log('[Sidebar] Tooltip conditions debug:', {
-      limits: limits,
-      limitsLoading: limitsLoading,
-      isUserSuperuser: limits?.is_superuser,
-      isLimitsSuperuser: limits?.limits?.is_superuser,
-      shouldShowTooltip: limits && !limits.is_superuser && !limits.limits.is_superuser && !limitsLoading
-    })
-  }, [limits, limitsLoading])
 
   // Don't show sidebar on login page or if not authenticated
   if (pathname.startsWith("/editor/") || pathname === "/login" || !isAuthenticated) {

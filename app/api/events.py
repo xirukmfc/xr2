@@ -10,8 +10,9 @@ from app.models.analytics import PromptEvent, EventDefinition
 from app.services.analytics import process_event
 from app.services.redis import redis_client
 from app.core.database import get_session as get_db
-from app.core.product_auth import get_product_api_key
+from app.core.product_auth import get_product_api_key, get_user_from_api_key
 from app.models.product_api_key import ProductAPIKey
+from app.services.event_logger import EventLogger
 
 
 router = APIRouter()
@@ -237,6 +238,19 @@ async def track_event(
 
         # Process event asynchronously (aggregations, alerts, etc.)
         background_tasks.add_task(process_event, str(prompt_event.id), workspace_id)
+
+        # Log API request event with source_name for monitoring
+        user = await get_user_from_api_key(api_key, db)
+        await EventLogger.log_api_request(
+            db=db,
+            endpoint="/api/v1/events",
+            user_id=user.id,
+            workspace_id=workspace_id,
+            source_name=event.source_name,
+            prompt_id=prompt_id,
+            status="success",
+        )
+        await db.commit()
 
         return {
             "status": "success",

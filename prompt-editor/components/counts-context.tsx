@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { getCounts, invalidateCache } from '@/lib/api'
 import { useWorkspaceContext } from './workspace-context'
 import { useAuth } from '@/contexts/auth-context'
+import { logger } from '@/lib/logger'
 
 interface CountsContextType {
   promptsCount: number
@@ -35,7 +36,7 @@ export function CountsProvider({ children }: { children: ReactNode }) {
   const fetchCounts = useCallback(async () => {
     // Circuit breaker: stop making requests if too many failures
     if (isCircuitBreakerOpen) {
-      console.debug('[CountsContext] Circuit breaker open, skipping request')
+      logger.debug('[CountsContext] Circuit breaker open, skipping request')
       return
     }
 
@@ -57,7 +58,7 @@ export function CountsProvider({ children }: { children: ReactNode }) {
       // Reset on successful request
       setRetryAttempts(0)
       setIsCircuitBreakerOpen(false)
-      console.log('[CountsContext] Counts updated:', counts)
+      logger.log('[CountsContext] Counts updated:', counts)
     } catch (err) {
       console.error('[CountsContext] Error fetching counts:', err)
 
@@ -73,7 +74,7 @@ export function CountsProvider({ children }: { children: ReactNode }) {
 
       // Handle authentication errors
       if (err instanceof Error && (err.message.includes('403') || err.message.includes('401'))) {
-        console.debug('[CountsContext] Authentication error, user needs to login')
+        logger.debug('[CountsContext] Authentication error, user needs to login')
         setError('Authentication required')
         // Open circuit breaker immediately for auth errors
         setIsCircuitBreakerOpen(true)
@@ -131,7 +132,7 @@ export function CountsProvider({ children }: { children: ReactNode }) {
 
     // Exponential backoff: 30s, 60s, 120s
     const backoffDelay = RETRY_INTERVAL * Math.pow(EXPONENTIAL_BACKOFF_BASE, retryAttempts)
-    console.debug(`[CountsContext] Retrying in ${backoffDelay}ms (attempt ${retryAttempts + 1}/${MAX_RETRY_ATTEMPTS})`)
+    logger.debug(`[CountsContext] Retrying in ${backoffDelay}ms (attempt ${retryAttempts + 1}/${MAX_RETRY_ATTEMPTS})`)
 
     const retryTimeout = setTimeout(() => {
       fetchCounts()

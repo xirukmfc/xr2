@@ -11,6 +11,7 @@ from app.models.analytics import EventDefinition
 from app.models.user import User
 from app.core.database import get_session as get_db
 from app.core.auth import get_current_user, get_current_user_optional
+from app.services.event_logger import EventLogger
 
 class EventDefinitionRequest(BaseModel):
     event_name: str
@@ -96,8 +97,6 @@ async def create_event_definition(
     try:
         # Get user's workspace
         workspace_id = await get_user_workspace(db, current_user)
-        print(f"[EVENT_DEF] Creating event definition for workspace: {workspace_id}")
-        print(f"[EVENT_DEF] Request data: {request.dict()}")
 
         # Check if already exists
         existing_query = select(EventDefinition).where(
@@ -110,7 +109,6 @@ async def create_event_definition(
         existing = result.scalar_one_or_none()
 
         if existing:
-            print(f"[EVENT_DEF] Already exists: {existing.id}")
             return {
                 "id": str(existing.id),
                 "status": "already_exists",
@@ -133,6 +131,16 @@ async def create_event_definition(
         db.add(definition)
         await db.commit()
         await db.refresh(definition)
+
+        # Log event definition creation
+        await EventLogger.log_event_definition_created(
+            db=db,
+            event_def_id=definition.id,
+            user_id=current_user.id,
+            workspace_id=workspace_id,
+            event_name=request.event_name,
+        )
+        await db.commit()
 
         print(f"[EVENT_DEF] Created successfully: {definition.id}")
 

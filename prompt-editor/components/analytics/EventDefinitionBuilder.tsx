@@ -109,11 +109,8 @@ export default function EventDefinitionBuilder({
     setError(null); // Reset error state
     try {
       const data = await apiClient.request('/event-definitions');
-      console.log('Loaded events from server:', data);
 
       if (Array.isArray(data)) {
-        console.log('Events:', data.map((e: any) => ({ id: e.id, name: e.event_name })));
-
         // Preserve collapsed state
         const currentCollapsedState = eventsList.reduce((acc, event) => {
           acc[event.id!] = event.collapsed ?? true;
@@ -124,7 +121,6 @@ export default function EventDefinitionBuilder({
           ...event,
           collapsed: currentCollapsedState[event.id] !== undefined ? currentCollapsedState[event.id] : true
         }));
-        console.log('Setting new events list:', newEventsList);
         setEventsList(newEventsList);
         setRefreshKey(prev => prev + 1); // Force re-render
       } else {
@@ -200,8 +196,6 @@ export default function EventDefinitionBuilder({
         alert_thresholds: editingEvent.alert_thresholds
       };
 
-      console.log('Sending request data:', requestData);
-
       if (isUpdate) {
         // Update existing event
         await apiClient.request(`/event-definitions/${editingEvent.id}`, {
@@ -216,11 +210,9 @@ export default function EventDefinitionBuilder({
         });
       }
 
-      console.log('Event save successful, reloading events...');
       setSaveMessage(t('analytics.notifications.eventCreatedSuccess'));
       setEditingEvent(null);
       await loadEvents(); // Reload events from server
-      console.log('Events reloaded after save');
 
       if (onSave) {
         onSave(editingEvent);

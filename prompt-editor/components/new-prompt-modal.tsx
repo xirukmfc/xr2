@@ -71,8 +71,6 @@ export function NewPromptModal({ isOpen, onClose, onPromptCreated }: NewPromptMo
         workspace_id: currentWorkspaceId,      // correct workspace
       }
 
-      // log just in case
-      // console.log("createPrompt payload", payload)
 
       const newPrompt = await apiClient.createPrompt(payload)
 

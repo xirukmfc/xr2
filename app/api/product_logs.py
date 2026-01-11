@@ -75,16 +75,20 @@ async def get_product_api_logs(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Get product API logs for the current user
-    
+    Get product API logs. Superusers can see all logs across all users.
+
     This endpoint allows you to view all API requests made with your product API keys
     with various filtering options for monitoring and analytics.
     """
     try:
-        # Base query - only show logs for user's API keys
-        stmt = select(ProductAPILog).join(ProductAPIKey).where(
-            ProductAPIKey.user_id == current_user.id
-        )
+        # Superusers can see all logs
+        if current_user.is_superuser:
+            stmt = select(ProductAPILog).join(ProductAPIKey)
+        else:
+            # Base query - only show logs for user's API keys
+            stmt = select(ProductAPILog).join(ProductAPIKey).where(
+                ProductAPIKey.user_id == current_user.id
+            )
         
         # Apply filters
         if api_key_id:
@@ -185,21 +189,27 @@ async def get_product_api_stats(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Get statistics about product API usage
-    
+    Get statistics about product API usage. Superusers can see all stats.
+
     Returns aggregated statistics for monitoring and analytics purposes.
     """
     try:
         # Calculate date range
         date_from = datetime.now(timezone.utc) - timedelta(days=days)
-        
-        # Base query - only user's API keys
-        base_stmt = select(ProductAPILog).join(ProductAPIKey).where(
-            and_(
-                ProductAPIKey.user_id == current_user.id,
+
+        # Superusers can see all stats
+        if current_user.is_superuser:
+            base_stmt = select(ProductAPILog).join(ProductAPIKey).where(
                 ProductAPILog.created_at >= date_from
             )
-        )
+        else:
+            # Base query - only user's API keys
+            base_stmt = select(ProductAPILog).join(ProductAPIKey).where(
+                and_(
+                    ProductAPIKey.user_id == current_user.id,
+                    ProductAPILog.created_at >= date_from
+                )
+            )
         
         # Apply API key filter if provided
         if api_key_id:

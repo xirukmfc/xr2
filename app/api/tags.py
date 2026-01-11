@@ -60,10 +60,16 @@ async def get_user_tags(
         session: AsyncSession = Depends(get_session),
         current_user: User = Depends(get_current_user)
 ):
-    """Get all tags for the current user"""
-    result = await session.execute(
-        select(Tag).where(Tag.created_by == current_user.id).order_by(Tag.name)
-    )
+    """Get all tags. Superusers can see all tags across all users."""
+    # Superusers can see all tags
+    if current_user.is_superuser:
+        result = await session.execute(
+            select(Tag).order_by(Tag.name)
+        )
+    else:
+        result = await session.execute(
+            select(Tag).where(Tag.created_by == current_user.id).order_by(Tag.name)
+        )
     tags = result.scalars().all()
 
     response_data = [
@@ -147,13 +153,19 @@ async def get_tag(
         session: AsyncSession = Depends(get_session),
         current_user: User = Depends(get_current_user)
 ):
-    """Get a specific tag by ID (only if user owns it)"""
-    result = await session.execute(
-        select(Tag).where(
-            Tag.id == tag_id,
-            Tag.created_by == current_user.id
+    """Get a specific tag by ID. Superusers can access any tag."""
+    # Superusers can access any tag
+    if current_user.is_superuser:
+        result = await session.execute(
+            select(Tag).where(Tag.id == tag_id)
         )
-    )
+    else:
+        result = await session.execute(
+            select(Tag).where(
+                Tag.id == tag_id,
+                Tag.created_by == current_user.id
+            )
+        )
     tag = result.scalar_one_or_none()
 
     if not tag:

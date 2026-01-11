@@ -235,23 +235,17 @@ class ApiClient {
 
     async request<T>(endpoint: string, options: RequestInit & { body?: any } = {}): Promise<T> {
         const url = `${this.baseUrl}${endpoint}`;
-        console.log('[API Client] Making request to:', url, 'with method:', options.method || 'GET');
-        console.log('[API Client] Token available:', !!this.token);
         const defaultHeaders: Record<string, string> = {'Content-Type': 'application/json'};
 
         // Add Authorization header if token exists
         if (this.token) {
             defaultHeaders['Authorization'] = `Bearer ${this.token}`;
-            console.log('[API Client] Added Authorization header');
-        } else {
-            console.warn('[API Client] No token available for authenticated request');
         }
 
         // Stringify body if it's an object
         const processedOptions = { ...options };
         if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
             processedOptions.body = JSON.stringify(options.body);
-            console.log('[API Client] Stringified body:', processedOptions.body);
         }
 
         const config: RequestInit = {
@@ -260,27 +254,21 @@ class ApiClient {
         };
 
         try {
-            console.log('[API Client] Fetching with config:', JSON.stringify(config, null, 2));
             const response = await fetch(url, config);
-            console.log('[API Client] Response status:', response.status, response.statusText);
             if (!response.ok) {
                 const errorText = await response.text();
 
                 // If it's a 401 error and we have a token, the session may have expired
                 if (response.status === 401 && this.token && endpoint !== '/auth/login' && endpoint !== '/auth/refresh') {
-                    console.log('[API Client] Got 401 - access token expired, attempting refresh...');
-
                     // Check if we have a refresh token
                     const hasRefreshToken = typeof window !== 'undefined' && localStorage.getItem('refresh_token');
 
                     if (hasRefreshToken) {
                         try {
                             // Try to refresh the access token
-                            console.log('[API Client] Attempting to refresh access token...');
                             await this.refreshToken();
 
                             // Retry the original request with new access token
-                            console.log('[API Client] Access token refreshed, retrying original request...');
                             return this.request<T>(endpoint, options);
                         } catch (refreshError) {
                             console.error('[API Client] Refresh token failed:', refreshError);
@@ -299,7 +287,6 @@ class ApiClient {
                         }
                     } else {
                         // No refresh token available, just redirect to login
-                        console.log('[API Client] No refresh token available, clearing token and redirecting to login');
                         this.clearToken();
 
                         if (typeof window !== 'undefined') {
@@ -503,10 +490,7 @@ class ApiClient {
 
         // Store API key if provided (for new users)
         if (response.api_key && typeof window !== 'undefined') {
-            console.log('[API Client] Saving API key to localStorage:', response.api_key.substring(0, 20) + '...');
             localStorage.setItem('api_key', response.api_key);
-        } else {
-            console.log('[API Client] No API key in response');
         }
 
         // Store token automatically

@@ -46,13 +46,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Initialize auth state from stored token
   useEffect(() => {
     const initializeAuth = async () => {
-      console.log('[AuthContext] Initializing auth, token exists:', apiClient.isAuthenticated());
-      
       if (apiClient.isAuthenticated()) {
         try {
-          console.log('[AuthContext] Fetching user data...');
           const userData = await apiClient.getCurrentUser()
-          console.log('[AuthContext] Got user data:', userData);
           setUser(userData)
           
           // Sync localStorage with server onboarding_completed value
@@ -65,9 +61,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         } catch (error: any) {
           // Only log error if it's not a common authentication failure
-          if (error.message?.includes('401') || error.message?.includes('User not found')) {
-            console.log('[AuthContext] Token expired or user deleted, clearing auth state');
-          } else {
+          if (!error.message?.includes('401') && !error.message?.includes('User not found')) {
             console.error('Failed to load user data:', error)
           }
           // Clear invalid token
@@ -76,7 +70,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
       setIsLoading(false)
-      console.log('[AuthContext] Auth initialization complete');
     }
 
     initializeAuth()
@@ -85,14 +78,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (username: string, password: string, rememberMe: boolean = false) => {
     setIsLoading(true)
     try {
-      console.log('[AuthContext] Logging in with remember_me:', rememberMe);
       const response = await apiClient.login(username, password, rememberMe)
-      console.log('[AuthContext] Login successful, setting user:', response.user);
       setUser(response.user)
 
       // Store refresh token if remember_me is true
       if (rememberMe && response.refresh_token && typeof window !== 'undefined') {
-        console.log('[AuthContext] Storing refresh token');
         localStorage.setItem('refresh_token', response.refresh_token);
       }
 
@@ -115,14 +105,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const googleLogin = async (credential: string, rememberMe: boolean = false) => {
     setIsLoading(true)
     try {
-      console.log('[AuthContext] Google logging in with remember_me:', rememberMe);
       const response = await apiClient.googleLogin(credential, rememberMe)
-      console.log('[AuthContext] Google login successful, setting user:', response.user);
       setUser(response.user)
 
       // Store refresh token if remember_me is true
       if (rememberMe && response.refresh_token && typeof window !== 'undefined') {
-        console.log('[AuthContext] Storing refresh token');
         localStorage.setItem('refresh_token', response.refresh_token);
       }
 

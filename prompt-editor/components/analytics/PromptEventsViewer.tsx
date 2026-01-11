@@ -132,12 +132,6 @@ export default function PromptEventsViewer() {
           break;
       }
 
-      console.log('Loading events with date range:', {
-        period,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString()
-      });
-
       // If "All Versions" is selected, fetch events for last 3 versions only
       if (selectedVersionId === 'all') {
         // Sort versions by version number descending and take last 3
@@ -166,15 +160,6 @@ export default function PromptEventsViewer() {
 
         const eventsData = await apiClient.request<PromptEvent[]>(`/analytics/events?${params.toString()}`);
 
-        console.log('Events loaded (All Versions):', {
-          totalEvents: eventsData.length,
-          versions: lastThreeVersions.map(v => `v${v.version_number}`),
-          dateRange: eventsData.length > 0 ? {
-            earliest: new Date(Math.min(...eventsData.map(e => new Date(e.created_at).getTime()))).toISOString(),
-            latest: new Date(Math.max(...eventsData.map(e => new Date(e.created_at).getTime()))).toISOString()
-          } : null
-        });
-
         setEvents(eventsData);
         processChartData(eventsData, startDate, endDate);
       } else {
@@ -187,15 +172,6 @@ export default function PromptEventsViewer() {
         });
 
         const eventsData = await apiClient.request<PromptEvent[]>(`/analytics/events?${params.toString()}`);
-
-        console.log('Events loaded (Single Version):', {
-          totalEvents: eventsData.length,
-          version: selectedVersionId,
-          dateRange: eventsData.length > 0 ? {
-            earliest: new Date(Math.min(...eventsData.map(e => new Date(e.created_at).getTime()))).toISOString(),
-            latest: new Date(Math.max(...eventsData.map(e => new Date(e.created_at).getTime()))).toISOString()
-          } : null
-        });
 
         setEvents(eventsData);
         processChartData(eventsData, startDate, endDate);
@@ -218,16 +194,6 @@ export default function PromptEventsViewer() {
   };
 
   const processChartData = (eventsData: PromptEvent[], startDate: Date, endDate: Date) => {
-    console.log('Processing chart data:', {
-      totalEvents: eventsData.length,
-      dateRange: { start: startDate.toISOString(), end: endDate.toISOString() },
-      sampleEvents: eventsData.slice(0, 3).map(e => ({
-        created_at: e.created_at,
-        event_type: e.event_type,
-        event_name: e.event_metadata?.event_name
-      }))
-    });
-
     // Group events by date and event type
     const eventsByDate: { [key: string]: { [key: string]: number } } = {};
     const eventTypes = new Set<string>();
@@ -245,8 +211,6 @@ export default function PromptEventsViewer() {
       }
       eventsByDate[date][eventType] = (eventsByDate[date][eventType] || 0) + 1;
     });
-
-    console.log('Events grouped by date:', eventsByDate);
 
     // Generate all dates in range, not just dates with events
     const allDates: string[] = [];
@@ -288,16 +252,6 @@ export default function PromptEventsViewer() {
       data: dates.map(date => eventsByDate[date]?.[eventType] || 0),
       color: `hsl(${(index * 137.5) % 360}, 70%, 50%)`
     }));
-
-    console.log('Chart data prepared:', {
-      dates,
-      seriesCount: series.length,
-      series: series.map(s => ({
-        name: s.name,
-        totalCount: s.data.reduce((sum, v) => sum + v, 0),
-        data: s.data
-      }))
-    });
 
     setChartData({ dates, series });
   };

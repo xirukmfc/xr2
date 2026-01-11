@@ -46,7 +46,6 @@ export default function LoginPage() {
   // Redirect authenticated users to prompts page
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      console.log('[LoginPage] User already authenticated, redirecting to /prompts')
       router.push('/prompts')
     }
   }, [isAuthenticated, authLoading, router])
@@ -56,12 +55,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!hasGoogleClientId) {
-      console.log('Google Client ID not configured, skipping Google script load');
       return;
     }
 
-    console.log('Loading Google Identity Services script...');
-    
     // Load Google Identity Services script
     const script = document.createElement('script')
     script.src = 'https://accounts.google.com/gsi/client'
@@ -70,7 +66,6 @@ export default function LoginPage() {
     document.body.appendChild(script)
 
     script.onload = () => {
-      console.log('Google script loaded successfully');
       if (window.google) {
         try {
           window.google.accounts.id.initialize({
@@ -81,7 +76,6 @@ export default function LoginPage() {
             auto_select: false,
             cancel_on_tap_outside: true,
           })
-          console.log('Google OAuth initialized successfully');
         } catch (error) {
           console.error('Error initializing Google OAuth:', error);
           setError(t('auth.login.errors.googleInitFailed'));
@@ -106,7 +100,6 @@ export default function LoginPage() {
 
   const handleGoogleResponse = async (response: any) => {
     try {
-      console.log('Google OAuth response received:', response);
       setIsLoading(true);
       await googleLogin(response.credential, rememberMe)
       router.push('/prompts')
@@ -120,7 +113,6 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = () => {
     if (window.google && window.google.accounts) {
-      console.log('Triggering Google sign-in with popup OAuth flow');
       // Use popup OAuth flow directly to avoid FedCM 403 errors
       handlePopupFallback();
     } else {
@@ -132,14 +124,11 @@ export default function LoginPage() {
   const handlePopupFallback = () => {
     try {
       if (window.google && window.google.accounts && window.google.accounts.oauth2) {
-        console.log('Attempting popup-based Google OAuth...');
-        
         const client = window.google.accounts.oauth2.initTokenClient({
           client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
           scope: 'openid email profile',
           callback: async (response: any) => {
             if (response.access_token) {
-              console.log('Access token received from popup, getting user info...');
               try {
                 // Get user info using access token
                 const userInfoResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${response.access_token}`);
