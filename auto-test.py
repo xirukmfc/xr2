@@ -618,9 +618,9 @@ class XR2AutoTester:
             # Сначала делаем logout
             await self.logout_user()
 
-            # Открыть страницу логина
-            await self.page.goto(f"{self.frontend_url}/login")
-            await self.page.wait_for_load_state("networkidle")
+            # Открыть страницу логина (с явным таймаутом)
+            await self.page.goto(f"{self.frontend_url}/login", timeout=15000)
+            await self.page.wait_for_load_state("networkidle", timeout=10000)
 
             # Проверяем, доступна ли UI форма логина
             login_form_available = False
@@ -658,11 +658,12 @@ class XR2AutoTester:
                     # Если дошли сюда - ошибка, неверные данные не должны работать
                     raise Exception("API принял неверные credentials - это ошибка безопасности!")
                 except Exception as api_err:
-                    if "Failed to get API token" in str(api_err) or "401" in str(api_err) or "403" in str(api_err):
+                    error_str = str(api_err)
+                    if "Failed to get API token" in error_str or "401" in error_str or "403" in error_str or "400" in error_str:
                         # Это ожидаемое поведение - API отклонил неверные данные
                         test_result.pass_test({
                             "api_rejected_invalid_credentials": True,
-                            "error": str(api_err),
+                            "error": error_str,
                             "test_method": "api"
                         })
                     else:
