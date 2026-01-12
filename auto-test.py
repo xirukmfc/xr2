@@ -1779,8 +1779,8 @@ class XR2AutoTester:
             await self.page.goto(f"{self.frontend_url}/prompts")
             await self.page.wait_for_load_state("networkidle")
 
-            # Найти поле поиска из DataFilters компонента
-            search_input = await self.page.query_selector('input[placeholder*="Search prompts"]')
+            # Найти поле поиска из DataFilters компонента (селектор по классам, не по placeholder)
+            search_input = await self.page.query_selector('input[type="text"].pl-10.rounded-lg')
             if search_input:
                 # Искать созданный промпт
                 search_term = "Auto Test"  # Часть имени нашего тестового промпта
@@ -1841,7 +1841,7 @@ class XR2AutoTester:
 
             # Тест 1: Проверить работу фильтров
             logger.info("Тестируем фильтры...")
-            filter_buttons = await self.page.query_selector_all('.bg-slate-100 button')
+            filter_buttons = await self.page.query_selector_all('.bg-slate-100.rounded-lg button')
             if len(filter_buttons) > 1:
                 # Кликнуть на фильтр "Draft" (второй в списке)
                 await filter_buttons[1].click()
@@ -1864,7 +1864,7 @@ class XR2AutoTester:
 
             # Тест 2: Поиск по имени промпта
             logger.info("Тестируем поиск по имени промпта...")
-            search_input = await self.page.query_selector('input[placeholder="Search prompts..."]')
+            search_input = await self.page.query_selector('input[type="text"].pl-10.rounded-lg')
             if search_input:
                 # Используем имя тестового промпта, который должен был быть создан ранее
                 prompt_name = self.test_data["prompt_name"]
