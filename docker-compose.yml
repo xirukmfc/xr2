@@ -163,6 +163,8 @@ services:
     environment:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
+      # Backend URL for server-side API routes (внутри Docker network)
+      BACKEND_URL: http://app:8000
     ports:
       - "3000:3000"
     depends_on:
