@@ -2213,20 +2213,8 @@ class XR2AutoTester:
                 await self.page.wait_for_load_state("networkidle")
 
             async def login_as(username: str, password: str):
-                # Сначала делаем logout
-                await self.logout_user()
-                await self.page.goto(f"{self.frontend_url}/login")
-                await self.page.wait_for_load_state("networkidle")
-                try:
-                    await self.page.evaluate(
-                        "() => { try{localStorage?.clear?.(); sessionStorage?.clear?.();}catch(e){} }")
-                except Exception:
-                    pass
-                await self.page.wait_for_selector('#username', timeout=30000)
-                await self.page.fill('#username', username)
-                await self.page.fill('#password', password)
-                await self.page.click('button:has-text("Sign in")')
-                await self.page.wait_for_timeout(2000)
+                # Используем универсальный метод авторизации (работает и через API если UI форма скрыта)
+                await self.login_as_user(username, password)
 
             async def try_create_prompt_expect_block() -> bool:
                 """Повторяет твою T2.2 логику, но ожидает НЕуспех из-за лимита"""
@@ -2456,34 +2444,8 @@ class XR2AutoTester:
 
             for user_info in test_users:
                 try:
-                    # Logout current user
-                    await self.logout_user()
-                    await self.page.goto(f"{self.frontend_url}/login")
-                    await self.page.wait_for_load_state("networkidle")
-
-                    # Clear storage
-                    try:
-                        await self.page.evaluate("""
-                            () => {
-                                try {
-                                    if (typeof Storage !== 'undefined') {
-                                        if (localStorage) localStorage.clear();
-                                        if (sessionStorage) sessionStorage.clear();
-                                    }
-                                } catch (e) {
-                                    console.warn('Storage clearing error:', e);
-                                }
-                            }
-                        """)
-                    except:
-                        pass
-
-                    # Дождаться появления формы логина и заполнить
-                    await self.page.wait_for_selector('#username', timeout=30000)
-                    await self.page.fill('#username', user_info["username"])
-                    await self.page.fill('#password', user_info["password"])
-                    await self.page.click('button:has-text("Sign in")')
-                    await self.page.wait_for_timeout(3000)
+                    # Авторизация через универсальный метод (работает и через API если UI форма скрыта)
+                    await self.login_as_user(user_info["username"], user_info["password"])
 
                     # Navigate to different pages and look for limits
                     test_pages = [
@@ -2637,16 +2599,9 @@ class XR2AutoTester:
 
             # 2) Если перекинуло на логин — логинимся и снова идём на /logs
             if "/login" in self.page.url or await self.page.query_selector(
-                    'button:has-text("Sign in"), input#username'):
-                await self.logout_user()
-                await self.page.goto(f"{self.frontend_url}/login")
-                await self.page.wait_for_load_state("networkidle")
-                await self.page.wait_for_selector('#username', timeout=30000)
-                await self.page.fill('#username', self.test_user["username"])
-                await self.page.fill('#password', self.test_user["password"])
-                await self.page.click('button:has-text("Sign in")')
-                # Не ждём redirect на /prompts — идём сразу на /logs
-                await self.page.wait_for_load_state("networkidle")
+                    'button:has-text("Sign in"), button:has-text("Google")'):
+                # Авторизация через универсальный метод (работает и через API если UI форма скрыта)
+                await self.login_as_user(self.test_user["username"], self.test_user["password"])
                 await self.page.goto(logs_url)
                 await self.page.wait_for_load_state("domcontentloaded")
 
@@ -2899,23 +2854,8 @@ class XR2AutoTester:
                 test_result.skip_test("Нет созданного промпта для тестирования")
                 return test_result
 
-            # Авторизация если нужно
-            if "/login" not in self.page.url:
-                await self.logout_user()
-                await self.page.goto(f"{self.frontend_url}/login")
-                await self.page.wait_for_load_state("networkidle")
-                try:
-                    await self.page.evaluate("() => { try{localStorage?.clear?.(); sessionStorage?.clear?.();}catch(e){} }")
-                except Exception:
-                    pass
-                try:
-                    await self.page.wait_for_selector('#username', timeout=30000)
-                    await self.page.fill('#username', 'www')
-                    await self.page.fill('#password', self.test_user["password"])
-                    await self.page.click('button:has-text("Sign in")')
-                    await self.page.wait_for_timeout(2000)
-                except Exception:
-                    pass
+            # Авторизация через универсальный метод (работает и через API если UI форма скрыта)
+            await self.login_as_user(self.test_user["username"], self.test_user["password"])
 
             # Переход на страницу редактора промпта
             editor_url = f"{self.frontend_url}/editor/{self.created_prompt_id}"
@@ -4271,20 +4211,8 @@ class XR2AutoTester:
                 raise Exception("Нет промпта для тестирования редактора")
 
             async def login_as(username: str, password: str):
-                # Сначала делаем logout
-                await self.logout_user()
-                await self.page.goto(f"{self.frontend_url}/login")
-                await self.page.wait_for_load_state("networkidle")
-                try:
-                    await self.page.evaluate(
-                        "() => { try{localStorage?.clear?.(); sessionStorage?.clear?.();}catch(e){} }")
-                except Exception:
-                    pass
-                await self.page.wait_for_selector('#username', timeout=30000)
-                await self.page.fill('#username', username)
-                await self.page.fill('#password', password)
-                await self.page.click('button:has-text("Sign in")')
-                await self.page.wait_for_timeout(2000)
+                # Используем универсальный метод авторизации (работает и через API если UI форма скрыта)
+                await self.login_as_user(username, password)
 
             await login_as(self.test_user["username"], self.test_user["password"])
 
@@ -4403,23 +4331,8 @@ class XR2AutoTester:
 
             print(self.created_prompt_id)
 
-            # Авторизация если нужно
-            if "/login" not in self.page.url:
-                await self.logout_user()
-                await self.page.goto(f"{self.frontend_url}/login")
-                await self.page.wait_for_load_state("networkidle")
-                try:
-                    await self.page.evaluate("() => { try{localStorage?.clear?.(); sessionStorage?.clear?.();}catch(e){} }")
-                except Exception:
-                    pass
-                try:
-                    await self.page.wait_for_selector('#username', timeout=30000)
-                    await self.page.fill('#username', 'www')
-                    await self.page.fill('#password', self.test_user["password"])
-                    await self.page.click('button:has-text("Sign in")')
-                    await self.page.wait_for_timeout(2000)
-                except Exception:
-                    pass
+            # Авторизация через универсальный метод (работает и через API если UI форма скрыта)
+            await self.login_as_user(self.test_user["username"], self.test_user["password"])
 
             # Перейти в редактор
             await self.page.goto(f"{self.frontend_url}/editor/{self.created_prompt_id}")
@@ -4699,23 +4612,8 @@ class XR2AutoTester:
         test_result.start()
 
         try:
-            # Авторизация если нужно
-            if "/login" not in self.page.url:
-                await self.logout_user()
-                await self.page.goto(f"{self.frontend_url}/login")
-                await self.page.wait_for_load_state("networkidle")
-                try:
-                    await self.page.evaluate("() => { try{localStorage?.clear?.(); sessionStorage?.clear?.();}catch(e){} }")
-                except Exception:
-                    pass
-                try:
-                    await self.page.wait_for_selector('#username', timeout=30000)
-                    await self.page.fill('#username', 'www')
-                    await self.page.fill('#password', self.test_user["password"])
-                    await self.page.click('button:has-text("Sign in")')
-                    await self.page.wait_for_timeout(2000)
-                except Exception:
-                    pass
+            # Авторизация через универсальный метод (работает и через API если UI форма скрыта)
+            await self.login_as_user(self.test_user["username"], self.test_user["password"])
 
             # Перейти на страницу настроек
             await self.page.goto(f"{self.frontend_url}/settings")
@@ -5801,21 +5699,8 @@ class XR2AutoTester:
         test_result.start()
 
         try:
-            # Сначала делаем logout
-            await self.logout_user()
-
-            # Авторизация
-            await self.page.goto(f"{self.frontend_url}/login")
-            await self.page.wait_for_load_state("networkidle")
-            try:
-                await self.page.evaluate("() => { try{localStorage?.clear?.(); sessionStorage?.clear?.();}catch(e){} }")
-            except Exception:
-                pass
-            await self.page.wait_for_selector('#username', timeout=30000)
-            await self.page.fill('#username', 'www')
-            await self.page.fill('#password', self.test_user["password"])
-            await self.page.click('button:has-text("Sign in")')
-            await self.page.wait_for_timeout(2000)
+            # Авторизация через универсальный метод (работает и через API если UI форма скрыта)
+            await self.login_as_user(self.test_user["username"], self.test_user["password"])
 
             # Перейти на любую защищенную страницу
             await self.page.goto(f"{self.frontend_url}/prompts")
@@ -6038,23 +5923,8 @@ class XR2AutoTester:
                 test_result.skip_test("Нет созданного промпта для тестирования сохранения")
                 return test_result
 
-            # Авторизация если нужно
-            if "/login" not in self.page.url:
-                await self.logout_user()
-                await self.page.goto(f"{self.frontend_url}/login")
-                await self.page.wait_for_load_state("networkidle")
-                try:
-                    await self.page.evaluate("() => { try{localStorage?.clear?.(); sessionStorage?.clear?.();}catch(e){} }")
-                except Exception:
-                    pass
-                try:
-                    await self.page.wait_for_selector('#username', timeout=30000)
-                    await self.page.fill('#username', 'www')
-                    await self.page.fill('#password', self.test_user["password"])
-                    await self.page.click('button:has-text("Sign in")')
-                    await self.page.wait_for_timeout(2000)
-                except Exception:
-                    pass
+            # Авторизация через универсальный метод (работает и через API если UI форма скрыта)
+            await self.login_as_user(self.test_user["username"], self.test_user["password"])
 
             # Переходим в редактор промпта
             await self.page.goto(f"{self.frontend_url}/editor/{self.created_prompt_id}")
@@ -7132,11 +7002,8 @@ class XR2AutoTester:
             if "/login" in self.page.url:
                 logger.info("   ⚠️  Обнаружен редирект на страницу логина, выполняем авторизацию...")
                 try:
-                    await self.page.wait_for_selector('#username', timeout=5000)
-                    await self.page.fill('#username', 'www')
-                    await self.page.fill('#password', self.test_user["password"])
-                    await self.page.click('button:has-text("Sign in")')
-                    await self.page.wait_for_timeout(2000)
+                    # Авторизация через универсальный метод (работает и через API если UI форма скрыта)
+                    await self.login_as_user(self.test_user["username"], self.test_user["password"])
 
                     # Снова переходим на страницу редактора
                     await self.page.goto(f'{self.frontend_url}/editor/{self.created_prompt_id}')
@@ -7444,66 +7311,13 @@ class XR2AutoTester:
         test_result = TestResult("T11.1", "Тестирование API статистики")
         logger.info("📊 T11.1: Тестируем эндпоинты статистики...")
 
-        async def login_as(username: str, password: str):
-            # Сначала делаем logout
-            await self.logout_user()
-            await self.page.goto(f"{self.frontend_url}/login")
-            await self.page.wait_for_load_state("networkidle")
-            try:
-                await self.page.evaluate(
-                    "() => { try{localStorage?.clear?.(); sessionStorage?.clear?.();}catch(e){} }")
-            except Exception:
-                pass
-            await self.page.wait_for_selector('#username', timeout=30000)
-            await self.page.fill('#username', username)
-            await self.page.fill('#password', password)
-            await self.page.click('button:has-text("Sign in")')
-            await self.page.wait_for_timeout(2000)
-
         try:
-            # Проверка и получение токена если его нет
-            await self.logout_user()
-            await login_as(self.test_user["username"], self.test_user["password"])
+            # Авторизация через универсальный метод (работает и через API если UI форма скрыта)
+            await self.login_as_user(self.test_user["username"], self.test_user["password"])
 
             if not hasattr(self, 'auth_token') or not self.auth_token:
-                logger.info("Auth token отсутствует, выполняем повторный логин...")
-                await self.logout_user()
-                await self.page.goto(f"{self.frontend_url}/login")
-                await self.page.wait_for_load_state("networkidle")
-                try:
-                    await self.page.evaluate("() => { try{localStorage?.clear?.(); sessionStorage?.clear?.();}catch(e){} }")
-                except Exception:
-                    pass
-                await self.page.wait_for_selector('#username', timeout=30000)
-                await self.page.fill('#username', 'www')
-                await self.page.fill('#password', self.test_user["password"])
-                await self.page.click('button:has-text("Sign in")')
-                await self.page.wait_for_timeout(2000)
-
-                # Получить токен
-                try:
-                    auth_token = await self.page.evaluate("""
-                        () => {
-                            try {
-                                if (typeof Storage !== 'undefined' && localStorage) {
-                                    return localStorage.getItem('auth_token') ||
-                                           localStorage.getItem('token') ||
-                                           localStorage.getItem('access_token');
-                                }
-                                return null;
-                            } catch (e) {
-                                return null;
-                            }
-                        }
-                    """)
-                    if auth_token:
-                        self.auth_token = auth_token
-                    else:
-                        test_result.skip_test("Не удалось получить auth token после логина")
-                        return test_result
-                except Exception as e:
-                    test_result.skip_test(f"Ошибка при получении токена: {e}")
-                    return test_result
+                logger.info("Auth token отсутствует, получаем через API...")
+                self.auth_token = await self.get_api_token(self.test_user["username"], self.test_user["password"])
 
             statistics_checks = {
                 "overall_stats": False,
@@ -7587,31 +7401,14 @@ class XR2AutoTester:
         test_result = TestResult("T11.2", "Проверка сбора данных аналитики")
         logger.info("📈 T11.2: Проверяем сбор аналитических данных...")
 
-        async def login_as(username: str, password: str):
-            # Сначала делаем logout
-            await self.logout_user()
-            await self.page.goto(f"{self.frontend_url}/login")
-            await self.page.wait_for_load_state("networkidle")
-            try:
-                await self.page.evaluate(
-                    "() => { try{localStorage?.clear?.(); sessionStorage?.clear?.();}catch(e){} }")
-            except Exception:
-                pass
-            await self.page.wait_for_selector('#username', timeout=30000)
-            await self.page.fill('#username', username)
-            await self.page.fill('#password', password)
-            await self.page.click('button:has-text("Sign in")')
-            await self.page.wait_for_timeout(2000)
-
         try:
-            await self.logout_user()
-            await login_as(self.test_user["username"], self.test_user["password"])
+            # Авторизация через универсальный метод (работает и через API если UI форма скрыта)
+            await self.login_as_user(self.test_user["username"], self.test_user["password"])
 
             # Проверка и получение токена если его нет
             if not hasattr(self, 'auth_token') or not self.auth_token:
-                logger.info("Auth token отсутствует, пропускаем тест (должен быть получен в T11.1)")
-                test_result.skip_test("Требуется авторизация (auth_token не найден)")
-                return test_result
+                logger.info("Auth token отсутствует, получаем через API...")
+                self.auth_token = await self.get_api_token(self.test_user["username"], self.test_user["password"])
 
             collection_checks = {
                 "api_logs_recorded": False,
@@ -7709,42 +7506,9 @@ class XR2AutoTester:
         test_result = TestResult("T11.3", "Проверка отображения статистики в UI")
         logger.info("📊 T11.3: Проверяем интеграцию статистики в интерфейс...")
 
-        async def login_as(username: str, password: str):
-            # Сначала делаем logout
-            await self.logout_user()
-            await self.page.goto(f"{self.frontend_url}/login")
-            await self.page.wait_for_load_state("networkidle")
-            try:
-                await self.page.evaluate(
-                    "() => { try{localStorage?.clear?.(); sessionStorage?.clear?.();}catch(e){} }")
-            except Exception:
-                pass
-            await self.page.wait_for_selector('#username', timeout=30000)
-            await self.page.fill('#username', username)
-            await self.page.fill('#password', password)
-            await self.page.click('button:has-text("Sign in")')
-            await self.page.wait_for_timeout(2000)
-
         try:
-            await self.logout_user()
-            await login_as(self.test_user["username"], self.test_user["password"])
-
-            # Авторизация перед проверкой UI если нужно
-            if "/login" not in self.page.url:
-                await self.page.goto(f"{self.frontend_url}/login")
-                await self.page.wait_for_load_state("networkidle")
-                try:
-                    await self.page.evaluate("() => { try{localStorage?.clear?.(); sessionStorage?.clear?.();}catch(e){} }")
-                except Exception:
-                    pass
-                try:
-                    await self.page.wait_for_selector('#username', timeout=30000)
-                    await self.page.fill('#username', 'www')
-                    await self.page.fill('#password', self.test_user["password"])
-                    await self.page.click('button:has-text("Sign in")')
-                    await self.page.wait_for_timeout(2000)
-                except Exception:
-                    pass
+            # Авторизация через универсальный метод (работает и через API если UI форма скрыта)
+            await self.login_as_user(self.test_user["username"], self.test_user["password"])
 
             ui_checks = {
                 "logs_page_accessible": False,
