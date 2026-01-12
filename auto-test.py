@@ -514,69 +514,74 @@ class XR2AutoTester:
             await self.page.goto(f"{self.frontend_url}/login")
             await self.page.wait_for_load_state("networkidle")
 
-            # Дождаться появления формы логина
-            await self.page.wait_for_selector('#username', timeout=30000)
+            # Проверяем, доступна ли UI форма логина (может быть скрыта на проде)
+            login_form_available = False
+            try:
+                await self.page.wait_for_selector('#username', timeout=5000)
+                login_form_available = True
+            except:
+                logger.info("UI форма логина не найдена, используем API авторизацию")
 
-            # Заполнить форму - используем id из исходного кода
-            await self.page.fill('#username', self.test_user["username"])
-            await self.page.fill('#password', self.test_user["password"])
+            if login_form_available:
+                # Заполнить форму - используем id из исходного кода
+                await self.page.fill('#username', self.test_user["username"])
+                await self.page.fill('#password', self.test_user["password"])
 
-            # Нажать кнопку Sign in
-            await self.page.click('button:has-text("Sign in")')
+                # Нажать кнопку Sign in
+                await self.page.click('button:has-text("Sign in")')
 
-            # Ожидание редиректа на /prompts
-            await self.page.wait_for_url(f"{self.frontend_url}/prompts", timeout=10000)
+                # Ожидание редиректа на /prompts
+                await self.page.wait_for_url(f"{self.frontend_url}/prompts", timeout=10000)
+            else:
+                # Авторизация через API (для продакшена где UI форма скрыта)
+                access_token = await self.get_api_token(
+                    self.test_user["username"],
+                    self.test_user["password"]
+                )
+                self.auth_token = access_token
+
+                # Устанавливаем токен в localStorage и переходим на /prompts
+                await self.page.evaluate(f"""
+                    localStorage.setItem('auth_token', '{access_token}');
+                    window.location.href = '/prompts';
+                """)
+
+                # Ждем перехода на страницу prompts
+                await self.page.wait_for_url(f"**/prompts**", timeout=10000)
+
+            await self.page.wait_for_load_state("networkidle")
 
             # Проверить наличие sidebar (индикатор успешного входа)
             sidebar_exists = await self.wait_for_element('[data-testid="sidebar"], .sidebar, nav')
 
             if sidebar_exists:
                 # Сохранить токен из localStorage для API запросов
-                auth_token = None
-                try:
-                    # Безопасный способ получения токена с проверкой доступности localStorage
-                    auth_token = await self.page.evaluate("""
-                        () => {
-                            try {
-                                if (typeof Storage !== 'undefined' && localStorage) {
-                                    return localStorage.getItem('auth_token');
-                                }
-                                return null;
-                            } catch (e) {
-                                console.warn('localStorage access error:', e);
-                                return null;
-                            }
-                        }
-                    """)
-                    if auth_token:
-                        self.auth_token = auth_token
-                except Exception as e:
-                    logger.warning(f"Не удалось получить токен из localStorage: {e}")
-                    # Попробуем другие возможные ключи с безопасной проверкой
+                auth_token = self.auth_token
+                if not auth_token:
                     try:
+                        # Безопасный способ получения токена с проверкой доступности localStorage
                         auth_token = await self.page.evaluate("""
                             () => {
                                 try {
                                     if (typeof Storage !== 'undefined' && localStorage) {
-                                        return localStorage.getItem('token') ||
-                                               localStorage.getItem('access_token') ||
-                                               localStorage.getItem('jwt_token');
+                                        return localStorage.getItem('auth_token');
                                     }
                                     return null;
                                 } catch (e) {
-                                    console.warn('Alternative token retrieval failed:', e);
+                                    console.warn('localStorage access error:', e);
                                     return null;
                                 }
                             }
                         """)
                         if auth_token:
                             self.auth_token = auth_token
-                    except Exception as fallback_error:
-                        logger.warning(f"Fallback token retrieval failed: {fallback_error}")
+                    except Exception as e:
+                        logger.warning(f"Не удалось получить токен из localStorage: {e}")
 
                 test_result.pass_test({
                     "url": self.page.url,
-                    "auth_token_exists": bool(auth_token)
+                    "auth_token_exists": bool(auth_token),
+                    "login_method": "ui_form" if login_form_available else "api"
                 })
             else:
                 raise Exception("Sidebar не найден после логина")
@@ -609,12 +614,6 @@ class XR2AutoTester:
                 """)
             except Exception as e:
                 logger.warning(f"Не удалось очистить localStorage: {e}")
-                # Попробуем перезагрузить страницу
-                try:
-                    await self.page.goto("about:blank")
-                    await self.page.wait_for_timeout(1000)
-                except Exception as nav_error:
-                    logger.warning(f"Navigation to blank page failed: {nav_error}")
 
             # Сначала делаем logout
             await self.logout_user()
@@ -623,29 +622,51 @@ class XR2AutoTester:
             await self.page.goto(f"{self.frontend_url}/login")
             await self.page.wait_for_load_state("networkidle")
 
-            # Дождаться появления формы логина
-            await self.page.wait_for_selector('#username', timeout=30000)
+            # Проверяем, доступна ли UI форма логина
+            login_form_available = False
+            try:
+                await self.page.wait_for_selector('#username', timeout=5000)
+                login_form_available = True
+            except:
+                logger.info("UI форма логина не найдена, тестируем через API")
 
-            # Заполнить неверные данные
-            await self.page.fill('#username', "wrong_user")
-            await self.page.fill('#password', "wrong_password")
+            if login_form_available:
+                # Заполнить неверные данные через UI
+                await self.page.fill('#username', "wrong_user")
+                await self.page.fill('#password', "wrong_password")
 
-            # Нажать кнопку Sign in
-            await self.page.click('button:has-text("Sign in")')
+                # Нажать кнопку Sign in
+                await self.page.click('button:has-text("Sign in")')
 
-            # Ожидание ошибки (должны остаться на /login)
-            await self.page.wait_for_timeout(3000)
+                # Ожидание ошибки (должны остаться на /login)
+                await self.page.wait_for_timeout(3000)
 
-            # Проверить, что остались на странице логина
-            if "/login" in self.page.url:
-                # Проверить наличие сообщения об ошибке
-                error_message = await self.page.query_selector('.error, [class*="error"], [role="alert"]')
-                test_result.pass_test({
-                    "stayed_on_login": True,
-                    "error_message_shown": bool(error_message)
-                })
+                # Проверить, что остались на странице логина
+                if "/login" in self.page.url:
+                    error_message = await self.page.query_selector('.error, [class*="error"], [role="alert"]')
+                    test_result.pass_test({
+                        "stayed_on_login": True,
+                        "error_message_shown": bool(error_message),
+                        "test_method": "ui_form"
+                    })
+                else:
+                    raise Exception("Неожиданный редирект при неверных данных")
             else:
-                raise Exception("Неожиданный редирект при неверных данных")
+                # Тестируем через API (для продакшена где UI форма скрыта)
+                try:
+                    await self.get_api_token("wrong_user", "wrong_password")
+                    # Если дошли сюда - ошибка, неверные данные не должны работать
+                    raise Exception("API принял неверные credentials - это ошибка безопасности!")
+                except Exception as api_err:
+                    if "Failed to get API token" in str(api_err) or "401" in str(api_err) or "403" in str(api_err):
+                        # Это ожидаемое поведение - API отклонил неверные данные
+                        test_result.pass_test({
+                            "api_rejected_invalid_credentials": True,
+                            "error": str(api_err),
+                            "test_method": "api"
+                        })
+                    else:
+                        raise
 
         except Exception as e:
             screenshot = await self.take_screenshot("invalid_login")
