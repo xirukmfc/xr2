@@ -8,7 +8,7 @@ datasources:
     url: postgres:5432
     user: xr2_user
     secureJsonData:
-      password: ***REMOVED_PG_PWD***
+      password: CHANGE_ME_ON_SERVER
     jsonData:
       database: xr2_db
       sslmode: disable
@@ -22,7 +22,7 @@ datasources:
   - name: Prometheus
     type: prometheus
     uid: Prometheus
-    url: http://prometheus:9090
+    url: http://prometheus:9090/prometheus
     access: proxy
     isDefault: false
     editable: true
