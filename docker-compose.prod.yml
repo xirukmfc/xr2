@@ -278,6 +278,7 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./nginx/.htpasswd:/etc/nginx/.htpasswd:ro
+      - ./nginx/.htpasswd_grafana:/etc/nginx/.htpasswd_grafana:ro
       - nginx_logs_prod:/var/log/nginx
     depends_on:
       - app
