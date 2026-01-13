@@ -24,12 +24,6 @@ scrape_configs:
       - targets: ['cadvisor:8080']
     scrape_interval: 15s
 
-  # TODO: Добавить exporters для полного мониторинга:
-  # - postgres_exporter (порт 9187) - метрики PostgreSQL
-  # - redis_exporter (порт 9121) - метрики Redis
-  # - nginx-prometheus-exporter (порт 9113) - метрики Nginx
-  # - prometheus middleware в FastAPI - метрики приложения
-
 
 
 
