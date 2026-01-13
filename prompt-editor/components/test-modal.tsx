@@ -256,43 +256,33 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
       tools: toolsArray,
     }
 
-    const res = await fetch("/api/test-run", {
-      method: "POST",
-      headers,
-      body: JSON.stringify(requestBody),
-    })
-
-    if (!res.ok) {
-      // Read response body once as text
-      const errorText = await res.text()
-      
-      // Try to parse as JSON and extract readable error message
+    // Use apiClient for consistent API calls
+    let data: {
+      text: string
+      usage?: {
+        total?: number
+        prompt_tokens?: number
+        completion_tokens?: number
+      }
+      costUsd?: number | null
+    }
+    
+    try {
+      data = await apiClient.request('/llm/test-run', {
+        method: "POST",
+        body: requestBody,
+      })
+    } catch (error: any) {
+      // Extract error message from apiClient error
       let errorMessage = "Request failed"
-      let rawError = errorText
-      try {
-        const errorData = JSON.parse(errorText)
-        // Handle nested error structures from LLM APIs
-        if (errorData.detail) {
-          // FastAPI HTTPException format
-          errorMessage = errorData.detail
-        } else if (errorData.error) {
-          // Handle nested error object (Anthropic, OpenAI format)
-          if (typeof errorData.error === 'object' && errorData.error.message) {
-            errorMessage = errorData.error.message
-          } else if (typeof errorData.error === 'string') {
-            errorMessage = errorData.error
-          }
-        } else if (errorData.message) {
-          errorMessage = errorData.message
-        }
-        rawError = JSON.stringify(errorData, null, 2)
-      } catch {
-        // If not JSON, use raw text
-        errorMessage = errorText || "Request failed"
+      if (error?.message) {
+        errorMessage = error.message
+        // Remove "API request failed: XXX" prefix if present
+        errorMessage = errorMessage.replace(/^API request failed: \d+ /, '')
       }
 
       // Check if it's an API key error (401 or specific message)
-      if (res.status === 401 || errorMessage.toLowerCase().includes("api key")) {
+      if (errorMessage.toLowerCase().includes("api key") || errorMessage.toLowerCase().includes("unauthorized")) {
         setNeedsApiKey(true)
         showNotification(errorMessage, "error", { duration: 8000 })
         return
@@ -309,19 +299,10 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
 
       // For other errors, show in response area for better visibility
       setResponse(`❌ **API Error**\n\n${errorMessage}`)
-      throw new Error(errorMessage)
+      throw error
     }
 
     const parseStart = performance.now()
-    const data: {
-      text: string
-      usage?: {
-        total?: number
-        prompt_tokens?: number
-        completion_tokens?: number
-      }
-      costUsd?: number | null
-    } = await res.json()
 
     const elapsed = (performance.now() - started) / 1000
     setResponse(data.text || "")

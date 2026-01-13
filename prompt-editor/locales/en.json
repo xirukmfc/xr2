@@ -161,6 +161,7 @@
       "buttonLoading": "Signing in...",
       "divider": "Or continue with",
       "googleButton": "Sign in with Google",
+      "googleNotConfigured": "Google OAuth is not configured",
       "demo": {
         "title": "Demo credentials:",
         "username": "Username",

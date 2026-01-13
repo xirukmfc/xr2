@@ -233,7 +233,7 @@ class ApiClient {
         return !!this.token;
     }
 
-    async request<T>(endpoint: string, options: RequestInit & { body?: any } = {}): Promise<T> {
+    async request<T>(endpoint: string, options: Omit<RequestInit, 'body'> & { body?: any } = {}): Promise<T> {
         const url = `${this.baseUrl}${endpoint}`;
         const defaultHeaders: Record<string, string> = {'Content-Type': 'application/json'};
 

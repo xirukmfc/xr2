@@ -409,17 +409,28 @@ async def call_openai_api(
         "messages": messages,
     }
 
-    # GPT-5 and o1 models have different parameter requirements
-    if model.startswith("gpt-5") or model.startswith("o1"):
-        request_data["max_completion_tokens"] = max_output_tokens  # Remove str()
-        # GPT-5 and o1 models only support temperature = 1 (default)
-        if temperature != 1.0:
-            request_data["temperature"] = 1.0  # Remove str(), set to 1.0
+    # Models that require max_completion_tokens instead of max_tokens
+    # GPT-5, o1, o3, o4 series models have different parameter requirements
+    models_requiring_max_completion_tokens = [
+        "gpt-5", "o1", "o3", "o4"
+    ]
+    requires_max_completion_tokens = any(model.startswith(prefix) for prefix in models_requiring_max_completion_tokens)
+    
+    # Models that only support temperature = 1.0 (default)
+    models_fixed_temperature = ["o1", "o3", "o4"]
+    requires_fixed_temperature = any(model.startswith(prefix) for prefix in models_fixed_temperature)
+    
+    if requires_max_completion_tokens:
+        request_data["max_completion_tokens"] = max_output_tokens
+        # o1, o3, and o4 models only support temperature = 1 (default)
+        if requires_fixed_temperature:
+            request_data["temperature"] = 1.0
         else:
-            request_data["temperature"] = temperature  # Remove str()
+            # GPT-5 models support custom temperature
+            request_data["temperature"] = temperature
     else:
-        request_data["max_tokens"] = max_output_tokens  # Remove str()
-        request_data["temperature"] = temperature  # Remove str()
+        request_data["max_tokens"] = max_output_tokens
+        request_data["temperature"] = temperature
 
     if tools:
         request_data["tools"] = tools

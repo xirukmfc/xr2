@@ -1,7 +1,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
-const FASTAPI_BASE_URL = process.env.FASTAPI_URL || 'http://localhost:8000';
+// In Docker, use app service name. In development, use localhost
+const FASTAPI_BASE_URL = process.env.FASTAPI_URL || process.env.BACKEND_URL || (process.env.NODE_ENV === 'production' ? 'http://app:8000' : 'http://localhost:8000');
 
 interface TokenizeRequest {
   systemText: string;

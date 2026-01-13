@@ -161,6 +161,7 @@
       "buttonLoading": "Входим...",
       "divider": "Или продолжите через",
       "googleButton": "Войти через Google",
+      "googleNotConfigured": "Google OAuth не настроен",
       "demo": {
         "title": "Демо-доступ:",
         "username": "Имя пользователя",

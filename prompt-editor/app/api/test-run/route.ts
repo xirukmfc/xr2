@@ -36,7 +36,8 @@ export async function POST(req: Request) {
     }
 
     // Forward the request to the backend API
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
+    // In Docker, use app service name. In development, use localhost
+    const backendUrl = process.env.BACKEND_URL || (process.env.NODE_ENV === 'production' ? 'http://app:8000' : 'http://localhost:8000');
     const backendResponse = await fetch(`${backendUrl}/internal/llm/test-run`, {
       method: 'POST',
       headers: {

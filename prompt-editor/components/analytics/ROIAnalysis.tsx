@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, Target } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { apiClient } from '@/lib/api';
 
 interface ROIData {
   period_days: number;
@@ -36,14 +37,10 @@ export default function ROIAnalysis({ promptId }: ROIAnalysisProps) {
     setLoading(true);
     try {
       const endpoint = promptId
-        ? `/internal/analytics/roi/${promptId}?period_days=${period}`
-        : `/internal/analytics/roi/workspace?period_days=${period}`;
+        ? `/analytics/roi/${promptId}?period_days=${period}`
+        : `/analytics/roi/workspace?period_days=${period}`;
 
-      const response = await fetch(endpoint, {
-        credentials: 'include'
-      });
-
-      const data = await response.json();
+      const data = await apiClient.request(endpoint);
       setRoiData(data);
     } catch (error) {
       console.error('Failed to fetch ROI data:', error);

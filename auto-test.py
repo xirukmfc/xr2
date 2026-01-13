@@ -801,23 +801,98 @@ class XR2AutoTester:
             await self.page.goto(f"{self.frontend_url}/editor/{self.created_prompt_id}")
             await self.page.wait_for_load_state("networkidle")
 
-            # Открыть секцию Settings в левой панели
-            settings_button = await self.page.query_selector('button:has-text("Settings")')
-            if settings_button:
-                await settings_button.click()
-                await self.page.wait_for_timeout(1500)  # Увеличиваем время ожидания
-                # Ждем появления секции Settings
+            # Открыть секцию Settings в левой панели (поддерживаем обе локализации)
+            settings_button = None
+            # Пробуем найти кнопку Settings/Настройки
+            settings_selectors = [
+                'button:has-text("Settings")',
+                'button:has-text("Настройки")',
+                'button:has([class*="Settings"])',
+                'button[aria-label*="Settings"]',
+                'button[aria-label*="Настройки"]',
+            ]
+            
+            for selector in settings_selectors:
                 try:
-                    await self.page.wait_for_selector('div:has-text("Prompt Name"), div:has-text("Slug")', timeout=5000, state="visible")
-                    logger.info("✅ Секция Settings открыта")
+                    settings_button = await self.page.query_selector(selector)
+                    if settings_button:
+                        is_visible = await settings_button.is_visible()
+                        if is_visible:
+                            logger.info(f"✅ Кнопка Settings найдена через селектор: {selector}")
+                            break
+                        else:
+                            settings_button = None
                 except:
-                    logger.warning("⚠️ Не удалось подтвердить открытие секции Settings, продолжаем...")
+                    continue
+            
+            # Если не нашли через селекторы, ищем через JavaScript
+            if not settings_button:
+                logger.info("🔍 Пробуем найти кнопку Settings через JavaScript...")
+                try:
+                    js_handle = await self.page.evaluate_handle('''() => {
+                        const buttons = document.querySelectorAll('button');
+                        for (let btn of buttons) {
+                            const text = btn.textContent || '';
+                            if (text.includes('Settings') || text.includes('Настройки')) {
+                                // Проверяем что это кнопка в левой панели (рядом с иконкой Settings)
+                                const hasSettingsIcon = btn.querySelector('svg') || btn.closest('div')?.querySelector('svg');
+                                if (hasSettingsIcon) {
+                                    return btn;
+                                }
+                            }
+                        }
+                        return null;
+                    }''')
+                    if js_handle:
+                        element_handle = js_handle.as_element()
+                        if element_handle:
+                            settings_button = element_handle
+                            logger.info("✅ Кнопка Settings найдена через JavaScript")
+                except Exception as js_err:
+                    logger.warning(f"⚠️ Ошибка при поиске кнопки через JavaScript: {js_err}")
+            
+            if settings_button:
+                # Проверяем, не открыта ли уже секция
+                is_expanded = await self.page.evaluate('''() => {
+                    const textareas = document.querySelectorAll('textarea[maxlength="250"]');
+                    for (let textarea of textareas) {
+                        const rect = textarea.getBoundingClientRect();
+                        if (rect.height > 0 && rect.width > 0) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }''')
+                
+                if not is_expanded:
+                    await settings_button.click()
+                    logger.info("✅ Клик по кнопке Settings выполнен")
+                    # Ждем появления секции Settings с увеличенным таймаутом
+                    await self.page.wait_for_timeout(2000)
+                    # Ждем появления полей в секции Settings (поддерживаем обе локализации)
+                    try:
+                        await self.page.wait_for_selector(
+                            'div:has-text("Prompt Name"), div:has-text("Slug"), div:has-text("Name"), textarea[maxlength="250"]',
+                            timeout=10000,
+                            state="visible"
+                        )
+                        logger.info("✅ Секция Settings открыта и поля видны")
+                    except Exception as wait_err:
+                        logger.warning(f"⚠️ Не удалось подтвердить открытие секции Settings: {wait_err}, продолжаем...")
+                else:
+                    logger.info("✅ Секция Settings уже открыта")
+            else:
+                logger.warning("⚠️ Кнопка Settings не найдена, пробуем найти поле описания напрямую...")
+                # Делаем скриншот для отладки
+                try:
+                    await self.page.screenshot(path=f"test_screenshots/settings_button_not_found_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+                except:
+                    pass
 
             # Найти поле описания в раскрывшейся секции Settings
             # Попробуем несколько вариантов селекторов (включая локализованные варианты)
             description_selectors = [
                 'textarea[maxlength="250"]',  # Самый надежный селектор
-                'textarea[placeholder="Description"]',
                 'textarea[placeholder*="Description"]',
                 'textarea[placeholder*="description"]',
                 'textarea[placeholder*="Описание"]',  # Русская локализация
@@ -851,18 +926,39 @@ class XR2AutoTester:
                         // Ищем textarea с maxlength="250" в секции Settings
                         const textareas = document.querySelectorAll('textarea[maxlength="250"]');
                         for (let textarea of textareas) {
+                            // Проверяем что textarea видимо
+                            const rect = textarea.getBoundingClientRect();
+                            if (rect.height === 0 || rect.width === 0) continue;
+                            
                             // Проверяем что textarea находится в секции Settings (рядом с полями Name и Slug)
                             const parent = textarea.closest('div');
                             if (parent) {
                                 const parentText = parent.textContent || '';
+                                // Поддерживаем обе локализации
                                 if (parentText.includes('Prompt Name') || parentText.includes('Slug') || 
-                                    parentText.includes('Name') || parentText.includes('Slug')) {
+                                    parentText.includes('Name') || parentText.includes('Slug') ||
+                                    parentText.includes('Описание') || parentText.includes('Description')) {
+                                    return textarea;
+                                }
+                            }
+                            
+                            // Также проверяем по label
+                            const label = textarea.closest('div')?.querySelector('label');
+                            if (label) {
+                                const labelText = label.textContent || '';
+                                if (labelText.includes('Description') || labelText.includes('Описание')) {
                                     return textarea;
                                 }
                             }
                         }
-                        // Если не нашли по контексту, возвращаем первый textarea с maxlength="250"
-                        return textareas.length > 0 ? textareas[0] : null;
+                        // Если не нашли по контексту, возвращаем первый видимый textarea с maxlength="250"
+                        for (let textarea of textareas) {
+                            const rect = textarea.getBoundingClientRect();
+                            if (rect.height > 0 && rect.width > 0) {
+                                return textarea;
+                            }
+                        }
+                        return null;
                     }''')
                     if js_handle:
                         # Конвертируем JSHandle в ElementHandle
@@ -879,6 +975,17 @@ class XR2AutoTester:
                     description_field = None
 
             if description_field:
+                # Дополнительная проверка видимости перед использованием
+                is_visible = await description_field.is_visible()
+                if not is_visible:
+                    # Пробуем прокрутить к элементу
+                    await description_field.scroll_into_view_if_needed()
+                    await self.page.wait_for_timeout(500)
+                    is_visible = await description_field.is_visible()
+                
+                if not is_visible:
+                    raise Exception("Поле описания найдено, но не видимо")
+                
                 new_description = f"Updated description - {datetime.now().strftime('%H:%M:%S')}"
                 # Очистить поле и ввести новый текст
                 await self.page.evaluate('(element) => element.value = ""', description_field)

@@ -194,6 +194,78 @@ services:
       retries: 3
       start_period: 60s
 
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: xr2_prometheus_prod
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data_prod:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--web.external-url=/prometheus'
+      - '--web.route-prefix=/prometheus'
+    networks:
+      - xr2_network
+    restart: unless-stopped
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: xr2_grafana_prod
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://xr2.uk/grafana
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data_prod:/var/lib/grafana
+    depends_on:
+      - postgres
+      - prometheus
+    networks:
+      - xr2_network
+    restart: unless-stopped
+
+  # Node Exporter for system metrics (CPU, RAM, Disk, Network)
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: xr2_node_exporter_prod
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - xr2_network
+    restart: unless-stopped
+
+  # cAdvisor for Docker container metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: xr2_cadvisor_prod
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg
+    networks:
+      - xr2_network
+    restart: unless-stopped
+
   # Nginx
   nginx:
     image: nginx:alpine
@@ -211,6 +283,10 @@ services:
       - app
       - frontend
       - tgsight
+      - grafana
+      - prometheus
+      - node-exporter
+      - cadvisor
     networks:
       - xr2_network
     restart: unless-stopped
@@ -224,6 +300,8 @@ volumes:
   postgres_data_prod:
   redis_data_prod:
   nginx_logs_prod:
+  prometheus_data_prod:
+  grafana_data_prod:
 
 networks:
   xr2_network:

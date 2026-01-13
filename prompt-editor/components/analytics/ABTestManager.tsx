@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
+import { apiClient } from '@/lib/api';
 
 interface ABTest {
   id: string;
@@ -65,15 +66,7 @@ export default function ABTestManager({ promptId }: { promptId: string }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/internal/ab-tests?prompt_id=${promptId}`, {
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch: ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      const data = await apiClient.request<ABTest[]>(`/ab-tests-simple/test?prompt_id=${promptId}`);
       setTests(data);
     } catch (error) {
       console.error('Failed to fetch tests:', error);
@@ -86,17 +79,10 @@ export default function ABTestManager({ promptId }: { promptId: string }) {
 
   const startTest = async (testId: string) => {
     try {
-      const response = await fetch(`/internal/ab-tests/${testId}/start`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+      await apiClient.request(`/ab-tests-simple/test/${testId}/start`, {
+        method: 'POST'
       });
-
-      if (response.ok) {
-        await fetchTests();
-      }
+      await fetchTests();
     } catch (error) {
       console.error('Failed to start test:', error);
     }
@@ -104,14 +90,10 @@ export default function ABTestManager({ promptId }: { promptId: string }) {
 
   const stopTest = async (testId: string) => {
     try {
-      const response = await fetch(`/internal/ab-tests/${testId}/stop`, {
-        method: 'POST',
-        credentials: 'include'
+      await apiClient.request(`/ab-tests-simple/test/${testId}/stop`, {
+        method: 'POST'
       });
-
-      if (response.ok) {
-        await fetchTests();
-      }
+      await fetchTests();
     } catch (error) {
       console.error('Failed to stop test:', error);
     }
