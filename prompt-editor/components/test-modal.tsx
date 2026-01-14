@@ -205,124 +205,158 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
   }
 
   const runTest = async () => {
-  setIsRunning(true)
-  setResponse("")
-  setMetrics({ responseTime: "—" })
+    setIsRunning(true)
+    setResponse("")
+    setMetrics({ responseTime: "—" })
 
-  const started = performance.now()
+    const started = performance.now()
 
-  try {
-    // Get user auth token for API key retrieval
-    const token = apiClient.getToken()
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    }
-
-    // Add Authorization header if user is authenticated
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`
-    }
-
-    // Get provider name instead of ID for API call
-    const currentProvider = apiProviders.find(p => p.id === provider)
-    const providerName = currentProvider?.name || provider
-
-    const toolsArray = Object.entries(tools)
-      .filter(([key, value]) => value)
-      .map(([key]) => key)
-
-    // Substitute variables in prompts before sending
-    const substituteVariables = (text: string, vars: Record<string, string>) => {
-      let result = text
-      Object.entries(vars).forEach(([key, value]) => {
-        const placeholder = `{{${key}}}`
-        result = result.replace(new RegExp(placeholder.replace(/[{}]/g, '\\$&'), 'g'), value)
-      })
-      return result
-    }
-
-    const systemPromptWithVars = substituteVariables(safePrompt.systemPrompt, testVars)
-    const userPromptWithVars = substituteVariables(safePrompt.userPrompt, testVars)
-
-    const requestBody = {
-      provider: providerName,
-      model,
-      temperature,
-      max_output_tokens: maxTokens,
-      systemPrompt: systemPromptWithVars,
-      userPrompt: userPromptWithVars,
-      variables: testVars, // Keep variables for reference/logging
-      tools: toolsArray,
-    }
-
-    // Use apiClient for consistent API calls
-    let data: {
-      text: string
-      usage?: {
-        total?: number
-        prompt_tokens?: number
-        completion_tokens?: number
-      }
-      costUsd?: number | null
-    }
-    
     try {
-      data = await apiClient.request('/llm/test-run', {
+      // Get user auth token for API key retrieval
+      const token = apiClient.getToken()
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      }
+
+      // Add Authorization header if user is authenticated
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`
+      }
+
+      // Get provider name instead of ID for API call
+      const currentProvider = apiProviders.find(p => p.id === provider)
+      const providerName = currentProvider?.name || provider
+
+      const toolsArray = Object.entries(tools)
+        .filter(([key, value]) => value)
+        .map(([key]) => key)
+
+      // Substitute variables in prompts before sending
+      const substituteVariables = (text: string, vars: Record<string, string>) => {
+        let result = text
+        Object.entries(vars).forEach(([key, value]) => {
+          const placeholder = `{{${key}}}`
+          result = result.replace(new RegExp(placeholder.replace(/[{}]/g, '\\$&'), 'g'), value)
+        })
+        return result
+      }
+
+      const systemPromptWithVars = substituteVariables(safePrompt.systemPrompt, testVars)
+      const userPromptWithVars = substituteVariables(safePrompt.userPrompt, testVars)
+
+      const requestBody = {
+        provider: providerName,
+        model,
+        temperature,
+        max_output_tokens: maxTokens,
+        systemPrompt: systemPromptWithVars,
+        userPrompt: userPromptWithVars,
+        variables: testVars,
+        tools: toolsArray,
+      }
+
+      // Use streaming endpoint
+      const baseUrl = apiClient.getBaseUrl()
+      const response = await fetch(`${baseUrl}/llm/test-run-stream`, {
         method: "POST",
-        body: requestBody,
+        headers,
+        body: JSON.stringify(requestBody),
       })
-    } catch (error: any) {
-      // Extract error message from apiClient error
-      let errorMessage = "Request failed"
-      if (error?.message) {
-        errorMessage = error.message
-        // Remove "API request failed: XXX" prefix if present
-        errorMessage = errorMessage.replace(/^API request failed: \d+ /, '')
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage = "Request failed"
+        try {
+          const errorJson = JSON.parse(errorText)
+          errorMessage = errorJson.detail || errorJson.message || errorText
+        } catch {
+          errorMessage = errorText
+        }
+
+        // Check if it's an API key error
+        if (response.status === 401 || errorMessage.toLowerCase().includes("api key")) {
+          setNeedsApiKey(true)
+          showNotification(errorMessage, "error", { duration: 8000 })
+          return
+        }
+
+        setResponse(`❌ **API Error**\n\n${errorMessage}`)
+        throw new Error(errorMessage)
       }
 
-      // Check if it's an API key error (401 or specific message)
-      if (errorMessage.toLowerCase().includes("api key") || errorMessage.toLowerCase().includes("unauthorized")) {
-        setNeedsApiKey(true)
-        showNotification(errorMessage, "error", { duration: 8000 })
-        return
+      // Read streaming response
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error("No response body")
       }
 
-      // Check for billing/credit errors
-      if (errorMessage.toLowerCase().includes("credit") || 
-          errorMessage.toLowerCase().includes("billing") ||
-          errorMessage.toLowerCase().includes("balance")) {
-        setResponse(`❌ **Billing Error**\n\n${errorMessage}\n\n---\n\nPlease check your account balance with the LLM provider.`)
-        showNotification(errorMessage, "error", { duration: 8000 })
-        return
+      const decoder = new TextDecoder()
+      let fullText = ""
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            try {
+              const parsed = JSON.parse(data)
+
+              if (parsed.error) {
+                // Handle error from stream
+                const errorMessage = parsed.error
+                if (errorMessage.toLowerCase().includes("api key") || errorMessage.toLowerCase().includes("unauthorized")) {
+                  setNeedsApiKey(true)
+                  showNotification(errorMessage, "error", { duration: 8000 })
+                  return
+                }
+                setResponse(`❌ **API Error**\n\n${errorMessage}`)
+                return
+              }
+
+              if (parsed.text) {
+                fullText += parsed.text
+                setResponse(fullText)
+              }
+
+              if (parsed.done) {
+                // Stream complete
+                const elapsed = (performance.now() - started) / 1000
+                setMetrics({
+                  responseTime: `${elapsed.toFixed(2)}s`,
+                  tokens: undefined, // Streaming doesn't provide token counts
+                  inputTokens: undefined,
+                  outputTokens: undefined,
+                  cost: "—",
+                })
+              }
+            } catch (e) {
+              // Ignore parse errors for incomplete chunks
+            }
+          }
+        }
       }
 
-      // For other errors, show in response area for better visibility
-      setResponse(`❌ **API Error**\n\n${errorMessage}`)
-      throw error
+      // Final metrics update
+      const elapsed = (performance.now() - started) / 1000
+      setMetrics(prev => ({
+        ...prev,
+        responseTime: `${elapsed.toFixed(2)}s`,
+      }))
+
+    } catch (e: any) {
+      console.error('[TestModal] Error during test run:', e)
+      const errorMsg = e?.message || "Request error"
+      showNotification(errorMsg, "error", { duration: 8000 })
+    } finally {
+      setIsRunning(false)
     }
-
-    const parseStart = performance.now()
-
-    const elapsed = (performance.now() - started) / 1000
-    setResponse(data.text || "")
-    setMetrics({
-      responseTime: `${elapsed.toFixed(2)}s`,
-      tokens: data.usage?.total,
-      inputTokens: data.usage?.prompt_tokens || 0,
-      outputTokens: data.usage?.completion_tokens || 0,
-      cost: data.costUsd !== undefined && data.costUsd !== null
-        ? `$${data.costUsd.toFixed(6)}`
-        : "—",
-    })
-  } catch (e: any) {
-    console.error('[TestModal] Error during test run:', e)
-    const errorMsg = e?.message || "Request error"
-    showNotification(errorMsg, "error", { duration: 8000 })
-  } finally {
-    setIsRunning(false)
   }
-}
 
 
   return (

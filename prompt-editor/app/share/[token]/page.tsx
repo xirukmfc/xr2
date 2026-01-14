@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Copy, Check, User, Calendar, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,7 @@ import type { PublicPromptData } from '@/lib/api'
 
 export default function SharedPromptPage() {
   const params = useParams()
-  const token = params.token as string
+  const token = params?.token as string
 
   const [promptData, setPromptData] = useState<PublicPromptData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -146,7 +146,7 @@ export default function SharedPromptPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-4">
+      <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
 
         {/* Header */}
         <div className="text-center space-y-2 pb-4 border-b">
@@ -188,136 +188,112 @@ export default function SharedPromptPage() {
           </div>
         </div>
 
-        {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-          {/* Left Column - System Prompt & Variables */}
-          <div className="space-y-4">
-
-            {/* System Prompt */}
-            {promptData.system_prompt && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-normal text-muted-foreground">System Prompt</CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => copyToClipboard(promptData.system_prompt!, 'system')}
-                    >
-                      {copiedField === 'system' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      <span className="ml-1">Copy</span>
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="bg-muted/30 rounded p-3 border">
-                    <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
-                      {promptData.system_prompt}
-                    </pre>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Variables */}
-            {promptData.variables && promptData.variables.length > 0 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-normal text-muted-foreground">Variables ({promptData.variables.length})</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-2">
-                    {promptData.variables.map((variable, index) => {
-                      const defaultValue = getDefaultValue(variable)
-                      return (
-                        <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded border">
-                          <div className="flex items-center space-x-2 min-w-0">
-                            <code className="bg-background px-1.5 py-0.5 rounded text-xs font-mono">
-                              {`{{${variable.name}}}`}
-                            </code>
-                            <Badge variant="outline" className="text-xs">
-                              {variable.type || 'string'}
-                            </Badge>
-                            {defaultValue ? (
-                              <span className="text-xs text-muted-foreground truncate">
-                                <code className="bg-background px-1 rounded">{defaultValue}</code>
-                              </span>
-                            ) : (
-                              <span className="text-xs text-muted-foreground italic">no default</span>
-                            )}
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(`{{${variable.name}}}`, `var-${index}`)}
-                            className="h-6 w-6 p-0 ml-2 flex-shrink-0"
-                          >
-                            {copiedField === `var-${index}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                          </Button>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+        {/* Variables */}
+        {promptData.variables && promptData.variables.length > 0 && (
+          <div className="space-y-2 py-3">
+            <h3 className="text-sm font-medium text-muted-foreground">Variables ({promptData.variables.length})</h3>
+            <div className="flex flex-wrap gap-2">
+              {promptData.variables.map((variable, index) => {
+                const defaultValue = getDefaultValue(variable)
+                const varType = variable.type || 'string'
+                return (
+                  <button
+                    key={index}
+                    onClick={() => copyToClipboard(`{{${variable.name}}}`, `var-${index}`)}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted/40 hover:bg-muted border rounded-lg text-xs transition-colors group"
+                    title="Click to copy"
+                  >
+                    <code className="font-mono font-medium">{`{{${variable.name}}}`}</code>
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">{varType}</Badge>
+                    {defaultValue && (
+                      <span className="text-muted-foreground border-l pl-2 ml-0.5">
+                        <span className="opacity-60">default:</span> {defaultValue}
+                      </span>
+                    )}
+                    {copiedField === `var-${index}` ? (
+                      <Check className="w-3 h-3 text-green-500" />
+                    ) : (
+                      <Copy className="w-3 h-3 opacity-0 group-hover:opacity-50" />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
           </div>
+        )}
 
-          {/* Right Column - User Prompt & Assistant Prompt */}
-          <div className="space-y-4">
-            {/* User Prompt */}
-            {promptData.user_prompt && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-normal text-muted-foreground">User Prompt</CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => copyToClipboard(promptData.user_prompt!, 'user')}
-                    >
-                      {copiedField === 'user' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      <span className="ml-1">Copy</span>
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="bg-muted/30 rounded p-3 border">
-                    <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
-                      {promptData.user_prompt}
-                    </pre>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+        {/* Prompts - Vertical Stack */}
+        <div className="space-y-4">
 
-            {/* Assistant Prompt */}
-            {promptData.assistant_prompt && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-normal text-muted-foreground">Assistant Prompt</CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => copyToClipboard(promptData.assistant_prompt!, 'assistant')}
-                    >
-                      {copiedField === 'assistant' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      <span className="ml-1">Copy</span>
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="bg-muted/30 rounded p-3 border">
-                    <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
-                      {promptData.assistant_prompt}
-                    </pre>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          {/* System Prompt */}
+          {promptData.system_prompt && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-muted-foreground">System Prompt</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(promptData.system_prompt!, 'system')}
+                  className="h-7 px-2 text-xs"
+                >
+                  {copiedField === 'system' ? <Check className="w-3.5 h-3.5 mr-1" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
+                  Copy
+                </Button>
+              </div>
+              <div className="bg-muted/30 rounded-lg p-4 border">
+                <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
+                  {promptData.system_prompt}
+                </pre>
+              </div>
+            </div>
+          )}
+
+          {/* User Prompt */}
+          {promptData.user_prompt && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-muted-foreground">User Prompt</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(promptData.user_prompt!, 'user')}
+                  className="h-7 px-2 text-xs"
+                >
+                  {copiedField === 'user' ? <Check className="w-3.5 h-3.5 mr-1" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
+                  Copy
+                </Button>
+              </div>
+              <div className="bg-muted/30 rounded-lg p-4 border">
+                <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
+                  {promptData.user_prompt}
+                </pre>
+              </div>
+            </div>
+          )}
+
+          {/* Assistant Prompt */}
+          {promptData.assistant_prompt && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-muted-foreground">Assistant Prompt</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(promptData.assistant_prompt!, 'assistant')}
+                  className="h-7 px-2 text-xs"
+                >
+                  {copiedField === 'assistant' ? <Check className="w-3.5 h-3.5 mr-1" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
+                  Copy
+                </Button>
+              </div>
+              <div className="bg-muted/30 rounded-lg p-4 border">
+                <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
+                  {promptData.assistant_prompt}
+                </pre>
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Footer */}

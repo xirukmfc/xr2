@@ -229,6 +229,10 @@ class ApiClient {
         return this.token;
     }
 
+    getBaseUrl(): string {
+        return this.baseUrl;
+    }
+
     isAuthenticated(): boolean {
         return !!this.token;
     }

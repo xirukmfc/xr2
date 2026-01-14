@@ -5,9 +5,9 @@ const BACKEND_URL = process.env.BACKEND_URL || (process.env.NODE_ENV === 'produc
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
-  const token = params.token
+  const { token } = await params
 
   try {
     // Forward request to FastAPI backend

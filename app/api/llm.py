@@ -1,6 +1,8 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
+import json
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List, Optional, Dict, Any
@@ -18,7 +20,7 @@ from app.services.event_logger import EventLogger
 # Optimized HTTP client with connection pooling for external API calls
 # This will reuse connections instead of creating new ones for each request
 http_client = httpx.AsyncClient(
-    timeout=httpx.Timeout(30.0, connect=10.0),  # 30s total, 10s connect timeout
+    timeout=httpx.Timeout(180.0, connect=10.0),  # 180s total for long LLM responses, 10s connect
     limits=httpx.Limits(max_keepalive_connections=20, max_connections=100),
     # Connection pooling settings for better performance with external APIs
     http2=True,  # Use HTTP/2 when available for better multiplexing
@@ -778,3 +780,290 @@ async def test_run_prompt(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error calling LLM API: {str(e)}"
         )
+
+
+# ==================== STREAMING ENDPOINTS ====================
+
+async def stream_openai_api(
+        api_key: str,
+        model: str,
+        system_prompt: str,
+        user_prompt: str,
+        temperature: float,
+        max_output_tokens: int,
+):
+    """Stream from OpenAI API using Server-Sent Events format"""
+    messages = []
+    if system_prompt.strip():
+        messages.append({"role": "system", "content": system_prompt})
+    messages.append({"role": "user", "content": user_prompt})
+
+    request_data = {
+        "model": model,
+        "messages": messages,
+        "stream": True,
+    }
+
+    # Handle model-specific parameters
+    models_requiring_max_completion_tokens = ["gpt-5", "o1", "o3", "o4"]
+    requires_max_completion_tokens = any(model.startswith(prefix) for prefix in models_requiring_max_completion_tokens)
+    models_fixed_temperature = ["o1", "o3", "o4"]
+    requires_fixed_temperature = any(model.startswith(prefix) for prefix in models_fixed_temperature)
+
+    if requires_max_completion_tokens:
+        request_data["max_completion_tokens"] = max_output_tokens
+        request_data["temperature"] = 1.0 if requires_fixed_temperature else temperature
+    else:
+        request_data["max_tokens"] = max_output_tokens
+        request_data["temperature"] = temperature
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    async with httpx.AsyncClient(timeout=httpx.Timeout(180.0, connect=10.0)) as client:
+        async with client.stream(
+            "POST",
+            "https://api.openai.com/v1/chat/completions",
+            headers=headers,
+            json=request_data
+        ) as response:
+            if response.status_code != 200:
+                error_text = await response.aread()
+                yield f"data: {json.dumps({'error': error_text.decode()})}\n\n"
+                return
+
+            async for line in response.aiter_lines():
+                if line.startswith("data: "):
+                    data = line[6:]
+                    if data == "[DONE]":
+                        yield f"data: {json.dumps({'done': True})}\n\n"
+                        break
+                    try:
+                        chunk = json.loads(data)
+                        delta = chunk.get("choices", [{}])[0].get("delta", {})
+                        content = delta.get("content", "")
+                        if content:
+                            yield f"data: {json.dumps({'text': content})}\n\n"
+                    except json.JSONDecodeError:
+                        continue
+
+
+async def stream_claude_api(
+        api_key: str,
+        model: str,
+        system_prompt: str,
+        user_prompt: str,
+        temperature: float,
+        max_tokens: int,
+):
+    """Stream from Claude API using Server-Sent Events format"""
+    model_mapping = {
+        'claude-4.1-opus': 'claude-3-5-sonnet-20241022',
+        'claude-4-sonnet': 'claude-3-5-sonnet-20241022',
+        'claude-3.5-sonnet': 'claude-3-5-sonnet-20241022',
+        'claude-3.5-haiku': 'claude-3-5-haiku-20241022',
+        'claude-3-opus': 'claude-3-opus-20240229',
+        'claude-3-sonnet': 'claude-3-sonnet-20240229',
+        'claude-3-haiku': 'claude-3-haiku-20240307',
+    }
+    api_model = model_mapping.get(model, model)
+
+    request_data = {
+        "model": api_model,
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+        "stream": True,
+        "messages": [{"role": "user", "content": user_prompt}]
+    }
+
+    if system_prompt.strip():
+        request_data["system"] = system_prompt
+
+    headers = {
+        "Content-Type": "application/json",
+        "x-api-key": api_key,
+        "anthropic-version": "2023-06-01"
+    }
+
+    async with httpx.AsyncClient(timeout=httpx.Timeout(180.0, connect=10.0)) as client:
+        async with client.stream(
+            "POST",
+            "https://api.anthropic.com/v1/messages",
+            headers=headers,
+            json=request_data
+        ) as response:
+            if response.status_code != 200:
+                error_text = await response.aread()
+                yield f"data: {json.dumps({'error': error_text.decode()})}\n\n"
+                return
+
+            async for line in response.aiter_lines():
+                if line.startswith("data: "):
+                    data = line[6:]
+                    try:
+                        chunk = json.loads(data)
+                        event_type = chunk.get("type", "")
+
+                        if event_type == "content_block_delta":
+                            delta = chunk.get("delta", {})
+                            text = delta.get("text", "")
+                            if text:
+                                yield f"data: {json.dumps({'text': text})}\n\n"
+                        elif event_type == "message_stop":
+                            yield f"data: {json.dumps({'done': True})}\n\n"
+                            break
+                    except json.JSONDecodeError:
+                        continue
+
+
+async def stream_gemini_api(
+        api_key: str,
+        model: str,
+        system_prompt: str,
+        user_prompt: str,
+        temperature: float,
+        max_output_tokens: int,
+):
+    """Stream from Gemini API"""
+    parts = []
+    if system_prompt.strip():
+        parts.append({"text": f"System: {system_prompt}\n\nUser: {user_prompt}"})
+    else:
+        parts.append({"text": user_prompt})
+
+    request_data = {
+        "contents": [{"parts": parts}],
+        "generationConfig": {
+            "temperature": temperature,
+            "maxOutputTokens": max_output_tokens,
+        }
+    }
+
+    headers = {"Content-Type": "application/json"}
+
+    async with httpx.AsyncClient(timeout=httpx.Timeout(180.0, connect=10.0)) as client:
+        async with client.stream(
+            "POST",
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?key={api_key}",
+            headers=headers,
+            json=request_data
+        ) as response:
+            if response.status_code != 200:
+                error_text = await response.aread()
+                yield f"data: {json.dumps({'error': error_text.decode()})}\n\n"
+                return
+
+            buffer = ""
+            async for chunk in response.aiter_text():
+                buffer += chunk
+                # Gemini returns JSON array chunks, try to parse complete objects
+                try:
+                    # Remove array brackets if present
+                    clean = buffer.strip()
+                    if clean.startswith("["):
+                        clean = clean[1:]
+                    if clean.endswith("]"):
+                        clean = clean[:-1]
+
+                    # Try to find complete JSON objects
+                    while clean:
+                        clean = clean.strip().lstrip(",").strip()
+                        if not clean:
+                            break
+                        try:
+                            obj, end_idx = json.JSONDecoder().raw_decode(clean)
+                            if "candidates" in obj:
+                                for candidate in obj["candidates"]:
+                                    content = candidate.get("content", {})
+                                    for part in content.get("parts", []):
+                                        text = part.get("text", "")
+                                        if text:
+                                            yield f"data: {json.dumps({'text': text})}\n\n"
+                            clean = clean[end_idx:].strip().lstrip(",").strip()
+                            buffer = clean
+                        except json.JSONDecodeError:
+                            break
+                except Exception:
+                    continue
+
+            yield f"data: {json.dumps({'done': True})}\n\n"
+
+
+@router.post("/test-run-stream")
+async def test_run_prompt_stream(
+        request: TestRunRequest,
+        session: AsyncSession = Depends(get_session),
+        current_user: User = Depends(get_current_user)
+):
+    """Test a prompt with LLM using streaming response"""
+    import time
+    start_time = time.time()
+
+    # Get user's API key for the specified provider
+    api_key = await get_user_api_key_by_provider(
+        request.provider,
+        current_user.id,
+        session
+    )
+
+    if not api_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"No API key found for provider '{request.provider}'. Please add an API key first."
+        )
+
+    provider_lower = request.provider.lower()
+
+    async def generate():
+        try:
+            if 'openai' in provider_lower or 'gpt' in provider_lower:
+                async for chunk in stream_openai_api(
+                    api_key=api_key,
+                    model=request.model,
+                    system_prompt=request.systemPrompt,
+                    user_prompt=request.userPrompt,
+                    temperature=request.temperature,
+                    max_output_tokens=request.max_output_tokens,
+                ):
+                    yield chunk
+
+            elif 'anthropic' in provider_lower or 'claude' in provider_lower:
+                async for chunk in stream_claude_api(
+                    api_key=api_key,
+                    model=request.model,
+                    system_prompt=request.systemPrompt,
+                    user_prompt=request.userPrompt,
+                    temperature=request.temperature,
+                    max_tokens=request.max_output_tokens,
+                ):
+                    yield chunk
+
+            elif 'google' in provider_lower or 'gemini' in provider_lower:
+                async for chunk in stream_gemini_api(
+                    api_key=api_key,
+                    model=request.model,
+                    system_prompt=request.systemPrompt,
+                    user_prompt=request.userPrompt,
+                    temperature=request.temperature,
+                    max_output_tokens=request.max_output_tokens,
+                ):
+                    yield chunk
+
+            else:
+                yield f"data: {json.dumps({'error': f'Unsupported provider: {request.provider}'})}\n\n"
+
+        except Exception as e:
+            logger.error(f"Streaming error: {e}")
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",  # Disable nginx buffering
+        }
+    )
