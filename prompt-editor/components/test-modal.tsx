@@ -15,6 +15,7 @@ export interface Variable {
   name: string
   isDefined: boolean
   description?: string
+  defaultValue?: string
 }
 export interface PromptDataLike {
   systemPrompt: string
@@ -133,6 +134,22 @@ export function TestModal({ open, onOpenChange, prompt }: TestModal) {
     
     fetchProviders()
   }, [open])
+
+  // Initialize testVars with default values when modal opens
+  useEffect(() => {
+    if (!open || !safePrompt.variables.length) return
+
+    const defaultVars: Record<string, string> = {}
+    safePrompt.variables.forEach(v => {
+      if (v.defaultValue) {
+        defaultVars[v.name] = v.defaultValue
+      }
+    })
+
+    if (Object.keys(defaultVars).length > 0) {
+      setTestVars(prev => ({ ...defaultVars, ...prev }))
+    }
+  }, [open, safePrompt.variables])
 
   // when changing provider — reset model to first
   useEffect(() => {
