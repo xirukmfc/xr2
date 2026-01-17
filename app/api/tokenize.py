@@ -161,7 +161,7 @@ async def count_openai_tokens(system_text: str, user_text: str, assistant_text: 
         has_assistant = bool(assistant_text.strip()) if assistant_text else False
         has_user = bool(user_text.strip()) if user_text else False
 
-        # Mode 1: plain text (only user, no system/assistant)
+        # Mode 1: plain text (only user, no system_docs/assistant)
         if has_user and not has_system and not has_assistant:
             text_tokens = encoding.encode(user_text, disallowed_special=())
             return len(text_tokens)
@@ -172,7 +172,7 @@ async def count_openai_tokens(system_text: str, user_text: str, assistant_text: 
             if '5' in model.lower():
                 messages.append({"role": "developer", "content": system_text.strip()})
             else:
-                messages.append({"role": "system", "content": system_text.strip()})
+                messages.append({"role": "system_docs", "content": system_text.strip()})
         if has_user:
             messages.append({"role": "user", "content": user_text.strip()})
         if has_assistant:
@@ -240,9 +240,9 @@ async def count_claude_tokens(system_text: str, user_text: str, assistant_text: 
             'messages': messages
         }
 
-        # Add system message if provided
+        # Add system_docs message if provided
         if system_text:
-            request_params['system'] = system_text
+            request_params['system_docs'] = system_text
 
         response = client.messages.count_tokens(**request_params)
 
@@ -267,7 +267,7 @@ async def count_gemini_tokens(system_text: str, user_text: str, assistant_text: 
         # Build contents for Gemini API
         contents = []
 
-        # Gemini doesn't have separate system role, so we combine system + user
+        # Gemini doesn't have separate system_docs role, so we combine system_docs + user
         user_message = ""
         if system_text:
             user_message += f"System: {system_text}\n\n"
@@ -325,7 +325,7 @@ async def count_deepseek_tokens(system_text: str, user_text: str, assistant_text
         # Collect messages in ChatML format (similar to OpenAI)
         messages = []
         if system_text:
-            messages.append({"role": "system", "content": system_text})
+            messages.append({"role": "system_docs", "content": system_text})
         if user_text:
             messages.append({"role": "user", "content": user_text})
         if assistant_text:
@@ -399,7 +399,7 @@ async def tokenize_text(
 ):
     """
     Tokenize text for multiple models
-    Returns token counts for system, user, and assistant text combined
+    Returns token counts for system_docs, user, and assistant text combined
     """
     try:
         results = {}

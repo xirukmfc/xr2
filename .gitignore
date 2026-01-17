@@ -20,8 +20,8 @@ nginx/.htpasswd
 # Production server credentials
 PRODUCTION_SERVER.md
 
-# Credentials docs (contains passwords)
-docs/PROD_TEST_CREDENTIALS.md
+# Credentials public_docs (contains passwords)
+system_docs/PROD_TEST_CREDENTIALS.md
 
 # TGSight deployment guide (temporary, not needed in repo)
 TGSIGHT_DEPLOY_GUIDE.md

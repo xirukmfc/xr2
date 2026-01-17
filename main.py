@@ -71,7 +71,7 @@ async def lifespan(app: FastAPI):
     print("🚀 xR2 Platform is ready!")
     print("📊 Admin interface: http://localhost:8000/admin")
     print("🔐 Admin Swagger (protected): http://localhost:8000/admin-docs")
-    print("📚 Public API docs: http://localhost:8000/docs")
+    print("📚 Public API public_docs: http://localhost:8000/docs")
 
     yield  # Application is running
 
@@ -81,12 +81,12 @@ async def lifespan(app: FastAPI):
     print("🛑 Shutting down xR2 Platform")
 
 
-# Create main FastAPI application with public docs
+# Create main FastAPI application with public public_docs
 app = FastAPI(
     title="xR2 Public API",
     description="Public API with limited access - only get-prompt and events",
     version="1.0.0",
-    docs_url="/docs",
+    docs_url="/public_docs",
     redoc_url="/redoc",
     lifespan=lifespan,
     servers=[
@@ -107,8 +107,8 @@ app.add_middleware(
     allowed_hosts=["xr2.uk", "www.xr2.uk", "localhost", "127.0.0.1", "app"]
 )
 
-# Add Swagger authentication middleware (protects admin docs)
-app.add_middleware(SwaggerAuthMiddleware, admin_path="/admin-docs")
+# Add Swagger authentication middleware (protects admin public_docs)
+app.add_middleware(SwaggerAuthMiddleware, admin_path="/admin-public_docs")
 
 # Add product API logging middleware
 app.add_middleware(ProductAPILoggingMiddleware)
@@ -160,9 +160,9 @@ app.include_router(public_share_router, include_in_schema=False)
 admin = create_admin(app)
 
 # Add admin documentation routes directly to main app
-# This avoids the /admin-docs prefix issue in Swagger URLs
+# This avoids the /admin-public_docs prefix issue in Swagger URLs
 
-# Add login endpoint for admin docs
+# Add login endpoint for admin public_docs
 @app.post("/admin-docs/login", include_in_schema=False)
 async def admin_login(username: str = Form(...), password: str = Form(...)):
     """Admin login endpoint for Swagger access"""
@@ -181,7 +181,7 @@ async def admin_login(username: str = Form(...), password: str = Form(...)):
         
         if user and verify_password(password, user.hashed_password):
             # Создаем простую сессию (в реальном проекте используйте JWT или сессии)
-            response = RedirectResponse(url="/admin-docs/", status_code=302)
+            response = RedirectResponse(url="/admin-public_docs/", status_code=302)
             response.set_cookie(
                 "swagger_session", 
                 "admin_authenticated", 
@@ -206,7 +206,7 @@ from fastapi.openapi.utils import get_openapi
 async def admin_docs():
     """Admin documentation with all API endpoints"""
     return get_swagger_ui_html(
-        openapi_url="/admin-docs/openapi.json",
+        openapi_url="/admin-public_docs/openapi.json",
         title="xR2 Admin API Documentation",
         swagger_ui_parameters={"defaultModelsExpandDepth": -1}
     )

@@ -2370,10 +2370,10 @@ class XR2AutoTester:
                     cls = await system_prompt_field.get_attribute('class') or ""
                     if "monaco" in cls:
                         await self.page.click('.monaco-editor')
-                        await self.page.keyboard.type(self.test_data.get("system_prompt", "system text"))
+                        await self.page.keyboard.type(self.test_data.get("system_prompt", "system_docs text"))
                     else:
                         await self.page.fill('textarea[name="system_prompt"]',
-                                             self.test_data.get("system_prompt", "system text"))
+                                             self.test_data.get("system_prompt", "system_docs text"))
 
                 # Submit
                 await self.page.click('button:has-text("Create Prompt"), button[type="submit"]')
@@ -4389,8 +4389,8 @@ class XR2AutoTester:
                 ('.monaco-editor', 'monaco'),
                 ('.editor-container', 'container'),
                 ('[data-testid="monaco-editor"]', 'monaco-testid'),
-                ('textarea[data-testid="system-prompt-textarea"]', 'textarea'),
-                ('textarea[placeholder*="system prompt"]', 'textarea-placeholder'),
+                ('textarea[data-testid="system_docs-prompt-textarea"]', 'textarea'),
+                ('textarea[placeholder*="system_docs prompt"]', 'textarea-placeholder'),
                 ('.CodeMirror', 'codemirror')
             ]
 
@@ -4410,7 +4410,7 @@ class XR2AutoTester:
                 input_selectors = [
                     '.monaco-editor .view-lines',
                     '.monaco-editor textarea',
-                    'textarea[data-testid="system-prompt-textarea"]',
+                    'textarea[data-testid="system_docs-prompt-textarea"]',
                     '.editor-container textarea',
                     '.CodeMirror textarea',
                     'textarea'
@@ -4621,7 +4621,7 @@ class XR2AutoTester:
                             if monaco_editor:
                                 await monaco_editor.click()
                                 await self.page.keyboard.type(
-                                    "// Full screen editor test content\nSystem: Test system prompt")
+                                    "// Full screen editor test content\nSystem: Test system_docs prompt")
                                 fullscreen_component_features.append("✅ Monaco editor functional in fullscreen")
                         except Exception as editor_error:
                             fullscreen_component_features.append(f"❌ Monaco editor test failed: {editor_error}")

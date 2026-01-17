@@ -109,7 +109,7 @@ async def get_overall_statistics(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    """Get overall system statistics, optionally filtered by user"""
+    """Get overall system_docs statistics, optionally filtered by user"""
     try:
         user_uuid = None
         if user_id:

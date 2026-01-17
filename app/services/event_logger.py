@@ -1,5 +1,5 @@
 """
-Event Logger Service for tracking system events for monitoring dashboard.
+Event Logger Service for tracking system_docs events for monitoring dashboard.
 """
 from datetime import datetime
 from typing import Optional, Dict, Any
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class EventLogger:
-    """Service for logging system events to the database."""
+    """Service for logging system_docs events to the database."""
 
     @staticmethod
     async def log_event(
@@ -30,7 +30,7 @@ class EventLogger:
         error_message: Optional[str] = None,
     ) -> SystemEvent:
         """
-        Log a system event.
+        Log a system_docs event.
 
         Args:
             db: Database session

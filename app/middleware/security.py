@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 SAFE_PATHS = {
     "/", "/health",
     "/static", "/admin/static",
-    "/docs", "/docs/", "/redoc", "/openapi.json",
-    "/api/docs", "/api/docs/", "/api/openapi.json",
-    "/admin-docs", "/admin-docs/", "/admin-docs/openapi.json",
+    "/public_docs", "/public_docs/", "/redoc", "/openapi.json",
+    "/api/public_docs", "/api/public_docs/", "/api/openapi.json",
+    "/admin-public_docs", "/admin-public_docs/", "/admin-public_docs/openapi.json",
 }
 
 class SecurityMiddleware(BaseHTTPMiddleware):

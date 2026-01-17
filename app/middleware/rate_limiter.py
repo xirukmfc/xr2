@@ -110,7 +110,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # Skip rate limiting for certain paths, internal IPs, or in development mode
         if (path.startswith('/internal/admin/') or
             path.startswith('/health') or
-            path.startswith('/docs') or
+            path.startswith('/public_docs') or
             path.startswith('/redoc') or
             self.is_internal_ip(client_ip)):  # Skip for internal networks (Docker, localhost, etc.)
             return await call_next(request)

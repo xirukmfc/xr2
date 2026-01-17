@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 class SystemEvent(Base):
-    """Model for tracking system-wide events for monitoring dashboard."""
+    """Model for tracking system_docs-wide events for monitoring dashboard."""
     __tablename__ = "system_events"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

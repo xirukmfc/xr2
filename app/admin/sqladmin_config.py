@@ -201,7 +201,7 @@ class UserAdmin(ModelView, model=User):
                     )
                     owned_workspaces = workspaces_result.scalars().all()
 
-                # Check if this would leave the system without any admin users
+                # Check if this would leave the system_docs without any admin users
                 admin_count_result = session.execute(
                     select(User).where(
                         User.is_superuser == True,

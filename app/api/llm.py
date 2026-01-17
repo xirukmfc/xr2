@@ -402,7 +402,7 @@ async def call_openai_api(
     messages = []
 
     if system_prompt.strip():
-        messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "system_docs", "content": system_prompt})
 
     messages.append({"role": "user", "content": user_prompt})
 
@@ -510,7 +510,7 @@ async def call_claude_api(
     }
 
     if system_prompt.strip():
-        request_data["system"] = system_prompt
+        request_data["system_docs"] = system_prompt
 
     if tools:
         request_data["tools"] = tools
@@ -795,7 +795,7 @@ async def stream_openai_api(
     """Stream from OpenAI API using Server-Sent Events format"""
     messages = []
     if system_prompt.strip():
-        messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "system_docs", "content": system_prompt})
     messages.append({"role": "user", "content": user_prompt})
 
     request_data = {
@@ -879,7 +879,7 @@ async def stream_claude_api(
     }
 
     if system_prompt.strip():
-        request_data["system"] = system_prompt
+        request_data["system_docs"] = system_prompt
 
     headers = {
         "Content-Type": "application/json",

@@ -25,7 +25,7 @@ from app.services.analytics import (
     get_available_conversion_events
 )
 
-# These imports will need to be created or imported from your auth system
+# These imports will need to be created or imported from your auth system_docs
 from app.models.user import User
 from app.core.database import get_session as get_db
 from app.core.auth import get_current_user, get_current_user_optional

@@ -321,7 +321,7 @@ class StatisticsService:
             hours: int = 24,
             user_id: Optional[UUID] = None
     ) -> Dict[str, Any]:
-        """Get overall system statistics"""
+        """Get overall system_docs statistics"""
 
         cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours)
 

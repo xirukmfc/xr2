@@ -47,8 +47,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup --system_docs --gid 1001 nodejs
+RUN adduser --system_docs --uid 1001 nextjs
 
 # Copy necessary files
 COPY --from=builder /app/public ./public

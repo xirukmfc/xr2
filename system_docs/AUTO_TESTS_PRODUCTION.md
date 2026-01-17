@@ -203,7 +203,7 @@ fi
    # Проверить использование памяти
    free -h
    # Очистить кэш Docker если нужно
-   docker system prune -a
+   docker system_docs prune -a
    ```
 
 4. **Проблемы с сетью**

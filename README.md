@@ -2,6 +2,9 @@
 
 AI Prompt Management & Analytics platform with A/B testing, conversion funnels, and multi-LLM support.
 
+**xR2** is a platform for managing, testing, and analyzing AI prompts in production. It helps teams ship prompt changes safely with experiments, track performance and user journeys, and integrate via API/SDKs.
+
+**Website:** https://xr2.uk
 **Production:** https://xr2.uk
 **Documentation:** https://xr2.gitbook.io/docs
 

@@ -119,7 +119,7 @@ services:
       # CORS
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
 
-      # API Server URL for Swagger docs
+      # API Server URL for Swagger public_docs
       API_SERVER_URL: ${API_SERVER_URL:-http://localhost:8000}
 
       # Database connection for scripts
@@ -241,7 +241,7 @@ services:
       - xr2_network
     restart: unless-stopped
 
-  # Node Exporter for system metrics (CPU, RAM, Disk, Network)
+  # Node Exporter for system_docs metrics (CPU, RAM, Disk, Network)
   node-exporter:
     image: prom/node-exporter:latest
     container_name: xr2_node_exporter

@@ -98,7 +98,7 @@ services:
       DEBUG: ${DEBUG:-false}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
 
-      # API Server URL for Swagger docs (production)
+      # API Server URL for Swagger public_docs (production)
       API_SERVER_URL: https://xr2.uk
 
       FORWARDED_ALLOW_IPS: "*"
@@ -232,7 +232,7 @@ services:
       - xr2_network
     restart: unless-stopped
 
-  # Node Exporter for system metrics (CPU, RAM, Disk, Network)
+  # Node Exporter for system_docs metrics (CPU, RAM, Disk, Network)
   node-exporter:
     image: prom/node-exporter:latest
     container_name: xr2_node_exporter_prod

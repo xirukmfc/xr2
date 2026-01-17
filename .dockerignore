@@ -61,11 +61,6 @@ Dockerfile
 docker-compose.yml
 .dockerignore
 
-# Documentation
-README.md
-*.md
-docs/
-
 # Monitoring
 monitoring/
 

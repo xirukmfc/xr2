@@ -242,7 +242,7 @@ class PromptVersion(Base):
 
         result = {}
         if self.system_prompt:
-            result['system'] = replace_variables(self.system_prompt, variables)
+            result['system_docs'] = replace_variables(self.system_prompt, variables)
         if self.user_prompt:
             result['user'] = replace_variables(self.user_prompt, variables)
         if self.assistant_prompt:

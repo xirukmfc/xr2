@@ -1,5 +1,5 @@
 /**
- * Design Tokens - Unified styling system for xR2
+ * Design Tokens - Unified styling system_docs for xR2
  * Use these constants instead of hardcoded values for consistency
  */
 

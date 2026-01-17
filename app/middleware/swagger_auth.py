@@ -14,7 +14,7 @@ from app.core.config import settings
 class SwaggerAuthMiddleware(BaseHTTPMiddleware):
     """Middleware для защиты админского Swagger интерфейса"""
     
-    def __init__(self, app, admin_path: str = "/admin-docs"):
+    def __init__(self, app, admin_path: str = "/admin-public_docs"):
         super().__init__(app)
         self.admin_path = admin_path
         # Простая сессия для хранения авторизованных пользователей
@@ -71,7 +71,7 @@ class SwaggerAuthMiddleware(BaseHTTPMiddleware):
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <style>
                 body {
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    font-family: -apple-system_docs, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     margin: 0;
                     padding: 0;
@@ -151,7 +151,7 @@ class SwaggerAuthMiddleware(BaseHTTPMiddleware):
                 <div class="login-header">
                     <h1>🔐 xR2 Admin Swagger</h1>
                 </div>
-                <form method="post" action="/admin-docs/login">
+                <form method="post" action="/admin-public_docs/login">
                     <div class="form-group">
                         <label for="username">Username:</label>
                         <input type="text" id="username" name="username" required>

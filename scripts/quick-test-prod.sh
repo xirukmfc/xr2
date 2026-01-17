@@ -42,7 +42,7 @@ test_endpoint "Frontend главная" "$BASE_URL" 200 && ((PASSED++)) || ((FAI
 test_endpoint "Backend health" "$BASE_URL/health" 200 && ((PASSED++)) || ((FAILED++))
 ((TOTAL++))
 
-# Тест 3: API docs
+# Тест 3: API public_docs
 test_endpoint "API документация" "$BASE_URL/docs" 200 && ((PASSED++)) || ((FAILED++))
 ((TOTAL++))
 
