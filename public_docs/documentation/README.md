@@ -4,32 +4,46 @@ icon: hand-wave
 
 # Welcome to xR2
 
-**xR2** is a platform for managing, testing, and analyzing AI prompts in production. Ship prompt changes safely with experiments, track performance and user journeys, and integrate via API/SDKs.
+**xR2** is an AI prompt management platform that lets you update prompts without code deployments, run A/B tests, and measure business impact with built-in analytics.
 
 Website: [https://xr2.uk](https://xr2.uk)
 
-## What is xR2?
+## Why xR2?
 
-xR2 helps you manage, version, and optimize prompts for your AI-powered applications:
+Traditional prompt management is painful:
+- Every prompt change requires a code deployment
+- No way to test different prompt versions
+- Impossible to measure which prompts drive conversions
 
-* **Prompt Management** — Store and organize all your prompts in one place
-* **Version Control** — Track changes, test different versions, and roll back when needed
-* **A/B Testing** — Run experiments to find the best performing prompts
-* **Analytics** — Track events and measure the impact of your prompts on user behavior
+**xR2 solves this:**
 
-## Jump right in
+* **Zero-code updates** — Change prompts instantly without touching your codebase
+* **Version control** — Git-like workflow with drafts, testing, and production statuses
+* **A/B testing** — Compare prompt versions and pick the winner based on data
+* **Analytics** — Track events, build funnels, measure ROI of your AI features
 
-<table data-view="cards"><thead><tr><th></th><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Quickstart</strong></td><td>Get started in 5 minutes</td><td><a href="getting-started/quickstart.md">quickstart.md</a></td></tr><tr><td><strong>Authentication</strong></td><td>Set up your API key</td><td><a href="getting-started/authentication.md">authentication.md</a></td></tr><tr><td><strong>API Reference</strong></td><td>Explore the API endpoints</td><td><a href="getting-started/api-reference.md">api-reference.md</a></td></tr></tbody></table>
+## Who is xR2 for?
 
-## Available SDKs
+| Role | Use Case |
+|------|----------|
+| **Product Managers** | Update AI behavior without waiting for developers |
+| **Product Teams** | Centralized prompt control across multiple products |
+| **No-code users** | Connect via Make, n8n, or Zapier |
+| **Enterprises** | Multi-workspace isolation with team collaboration |
 
-| SDK                         | Installation            | Description              |
-| --------------------------- | ----------------------- | ------------------------ |
-| [Python](sdks/python.md)    | `pip install xr2-sdk`   | Sync and async clients   |
-| [Node.js](sdks/nodejs.md)   | `npm install xr2-sdk`   | TypeScript support       |
-| [n8n](sdks/n8n.md)          | Community node          | Visual workflow builder  |
-| [Make.com](sdks/make.md)    | Custom app              | Visual automation        |
-| [Zapier](sdks/zapier.md)    | Zapier app              | No-code automation       |
+## Platform Overview
+
+<table data-view="cards"><thead><tr><th></th><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Quickstart</strong></td><td>Create your first prompt in 5 minutes</td><td><a href="getting-started/quickstart.md">quickstart.md</a></td></tr><tr><td><strong>Prompt Editor</strong></td><td>Learn the visual editor</td><td><a href="prompts/overview.md">overview.md</a></td></tr><tr><td><strong>Analytics</strong></td><td>Track events and build funnels</td><td><a href="analytics/overview.md">overview.md</a></td></tr><tr><td><strong>A/B Testing</strong></td><td>Compare prompt versions</td><td><a href="ab-testing/overview.md">overview.md</a></td></tr></tbody></table>
+
+## How It Works
+
+```
+1. Create prompt in xR2 dashboard
+2. Call API to get prompt content
+3. Use prompt with your LLM (OpenAI, Claude, etc.)
+4. Track conversion events back to xR2
+5. Analyze results and optimize
+```
 
 ## Support
 

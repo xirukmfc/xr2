@@ -6,12 +6,33 @@
 
 * [Quickstart](getting-started/quickstart.md)
 * [Authentication](getting-started/authentication.md)
+
+## Prompt Editor
+
+* [Overview](prompts/overview.md)
+* [Creating Prompts](prompts/creating-prompts.md)
+* [Variables](prompts/variables.md)
+* [Versions & Deployment](prompts/versions.md)
+* [Testing Prompts](prompts/testing.md)
+
+## Analytics
+
+* [Overview](analytics/overview.md)
+* [Event Tracking](analytics/events.md)
+* [Conversion Funnels](analytics/funnels.md)
+
+## A/B Testing
+
+* [Overview](ab-testing/overview.md)
+* [Creating Tests](ab-testing/creating-tests.md)
+* [Measuring Results](ab-testing/results.md)
+* [Statistical Significance](ab-testing/statistics.md)
+
+## API & SDKs
+
 * [API Reference](getting-started/api-reference.md)
-
-## SDKs
-
-* [Python](sdks/python.md)
-* [Node.js](sdks/nodejs.md)
+* [Python SDK](sdks/python.md)
+* [Node.js SDK](sdks/nodejs.md)
 * [n8n](sdks/n8n.md)
 * [Make.com](sdks/make.md)
 * [Zapier](sdks/zapier.md)
