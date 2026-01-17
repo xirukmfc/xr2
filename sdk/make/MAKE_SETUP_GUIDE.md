@@ -133,7 +133,7 @@
 {
     "name": "getPrompt",
     "label": "Get Prompt",
-    "description": "Retrieve prompt content by slug. Returns system, user, and assistant prompts, variables, and trace_id for event tracking.",
+    "description": "Retrieve prompt content by slug. Returns system_docs, user, and assistant prompts, variables, and trace_id for event tracking.",
     "connection": "xr2_api_key",
     "parameters": [
         {

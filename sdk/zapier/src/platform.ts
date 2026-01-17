@@ -52,7 +52,7 @@ const getPrompt = {
     noun: 'Prompt',
     display: {
         label: 'Get Prompt',
-        description: 'Fetch a prompt by slug. Returns system, user, and assistant prompts, variables, and trace_id for event tracking.',
+        description: 'Fetch a prompt by slug. Returns system_docs, user, and assistant prompts, variables, and trace_id for event tracking.',
     },
     operation: {
         inputFields: [
