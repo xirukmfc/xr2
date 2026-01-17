@@ -28,8 +28,22 @@ Each step shows:
 2. Click **+ New Funnel**
 3. Configure:
    - **Name**: Descriptive name (e.g., "Onboarding Funnel")
+   - **Source**: Choose the starting point
    - **Steps**: Add events in order
 4. Click **Save**
+
+### Funnel Source Types
+
+The funnel source defines what counts as "entering" the funnel:
+
+| Source Type | Description |
+|-------------|-------------|
+| **Prompt Requests** | Users who received a specific prompt via API (`get-prompt` calls) |
+| **Event** | Users who triggered a specific event |
+
+{% hint style="info" %}
+**Tip:** Use "Prompt Requests" as the source to measure how many users who received your prompt went on to convert. This is the most common setup for measuring prompt effectiveness.
+{% endhint %}
 
 ### Adding Steps
 

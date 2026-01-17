@@ -44,6 +44,17 @@ Each prompt can have three components:
 ### Visual Variable Detection
 The editor automatically detects variables in `{{variable_name}}` format and displays them in the left panel for configuration.
 
+### Fullscreen Mode
+Click the fullscreen icon to expand the editor to full screen. Features:
+- Distraction-free editing environment
+- Collapsible variable panel on the left
+- Font size controls (10px-32px)
+- Line numbers toggle
+- Markdown syntax highlighting
+- Preview mode for rendered content
+- Copy all functionality
+- Keyboard shortcuts: `⌘S` to save, `Escape` to exit
+
 ### Real-time Testing
 Test your prompts directly in the editor with any LLM provider (OpenAI, Anthropic, Google, etc.) and see streaming responses.
 
@@ -53,8 +64,19 @@ Git-like workflow with statuses: Draft → Testing → Production → Deprecated
 ### Deployment Pipeline
 Deploy versions to production instantly. Track who deployed what and when.
 
+### Share Versions
+Share specific prompt versions with team members or external stakeholders:
+1. Open the version you want to share
+2. Click **Share** button
+3. A unique public link is generated
+4. Recipients can view (read-only):
+   - Prompt content (system, user, assistant)
+   - Variable definitions
+   - Metadata (created by, dates)
+5. Links can be deactivated or set to expire
+
 ### Collaboration
-Share prompts via public links. Work in isolated workspaces with team members.
+Work in isolated workspaces with team members. Each workspace has its own prompts, API keys, and settings.
 
 ## Keyboard Shortcuts
 

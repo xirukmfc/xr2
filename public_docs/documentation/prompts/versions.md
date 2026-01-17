@@ -111,14 +111,14 @@ Each version tracks:
 
 ## Changelog
 
-xR2 automatically generates changelogs when you create versions:
+xR2 tracks changes when you update versions. The changelog field stores what changed:
 
-```
-Version 3 - Created by john@company.com
-- Updated system prompt: Added return policy instructions
-- Modified variable: customer_tier (added default value)
-- Removed variable: deprecated_field
-```
+- Status transitions (draft → testing → production)
+- Variable configuration updates
+- Model configuration changes
+- Prompt content modifications (system, user, assistant)
+
+You can view the changelog in the Version History panel.
 
 ## Performance Metrics per Version
 

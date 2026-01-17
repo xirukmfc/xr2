@@ -6,11 +6,18 @@ icon: bolt-lightning
 
 Official Zapier integration for xR2.
 
+## Installation
+
+Install the xR2 Zapier integration using this invite link:
+
+**[Install xR2 for Zapier](https://zapier.com/developer/public-invite/234012/76d33482ff8db5ed0f78871a90dfed37/)**
+
 ## Setup
 
-1. Get your API Key at [xr2.uk/api-keys](https://xr2.uk/api-keys)
-2. Click **Create Keys** and copy your Product API Key (starts with `xr2_prod_`)
-3. In Zapier, connect xR2 using your API key
+1. Click the install link above and accept the invitation
+2. Get your API Key at [xr2.uk/api-keys](https://xr2.uk/api-keys)
+3. Click **Create Keys** and copy your Product API Key (starts with `xr2_prod_`)
+4. In Zapier, connect xR2 using your API key
 
 ## Available Actions
 

@@ -88,8 +88,6 @@ Optional Fields:
 
 ## Sending Events
 
-### Single Event
-
 ```bash
 curl -X POST https://xr2.uk/api/v1/events \
   -H "Authorization: Bearer xr2_prod_xxx" \
@@ -104,30 +102,6 @@ curl -X POST https://xr2.uk/api/v1/events \
     "metadata": {
       "order_id": "order_789"
     }
-  }'
-```
-
-### Batch Events
-
-Send up to 100 events at once:
-
-```bash
-curl -X POST https://xr2.uk/api/v1/events/batch \
-  -H "Authorization: Bearer xr2_prod_xxx" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "events": [
-      {
-        "trace_id": "evt_abc123",
-        "event_name": "page_viewed",
-        "source_name": "web_app"
-      },
-      {
-        "trace_id": "evt_def456",
-        "event_name": "button_clicked",
-        "source_name": "web_app"
-      }
-    ]
   }'
 ```
 

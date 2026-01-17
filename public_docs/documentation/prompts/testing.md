@@ -19,14 +19,13 @@ The test modal has several sections:
 
 ### Provider & Model Selection
 
-Choose your LLM provider and model:
+Choose your LLM provider and model from the dropdown. Available providers and models are configured dynamically and may include:
 
-| Provider | Models |
-|----------|--------|
-| **OpenAI** | GPT-4o, GPT-4 Turbo, GPT-3.5 Turbo |
-| **Anthropic** | Claude 3.5 Sonnet, Claude 3 Opus |
-| **Google** | Gemini Pro, Gemini Ultra |
-| **DeepSeek** | DeepSeek Chat, DeepSeek Coder |
+- **OpenAI** — GPT-4o, GPT-4, GPT-3.5 Turbo, and newer models
+- **Anthropic** — Claude models
+- **Google** — Gemini models
+- **DeepSeek** — DeepSeek models
+- Other providers as configured by your workspace
 
 ### API Key Management
 
