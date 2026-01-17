@@ -1,30 +1,37 @@
 ---
 icon: hand-wave
-layout:
-  width: default
-  title:
-    visible: true
-  description:
-    visible: false
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
-  metadata:
-    visible: true
-metaLinks:
-  alternates:
-    - https://app.gitbook.com/s/yE16Xb3IemPxJWydtPOj/
 ---
 
-# Welcome
+# Welcome to xR2
 
-Welcome to the GitBook starter template! Here you'll get an overview of all the amazing features GitBook offers to help you build beautiful, interactive documentation.
+**xR2** is a platform for managing, testing, and analyzing AI prompts in production. Ship prompt changes safely with experiments, track performance and user journeys, and integrate via API/SDKs.
 
-You'll see some of the best parts of GitBook in action — and find help on how you can turn this template into your own.
+Website: [https://xr2.uk](https://xr2.uk)
 
-### Jump right in
+## What is xR2?
 
-<table data-view="cards"><thead><tr><th></th><th></th><th></th><th data-hidden data-card-cover data-type="files"></th><th data-hidden></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><h4><i class="fa-bolt">:bolt:</i></h4></td><td><strong>Quickstart</strong></td><td>Create your first site</td><td></td><td></td><td><a href="getting-started/quickstart.md">quickstart.md</a></td></tr><tr><td><h4><i class="fa-leaf">:leaf:</i></h4></td><td><strong>Editor basics</strong></td><td>Learn the basics of GitBook</td><td></td><td></td><td><a href="https://github.com/GitbookIO/gitbook-templates/blob/main/product-docs/broken-reference/README.md">https://github.com/GitbookIO/gitbook-templates/blob/main/product-docs/broken-reference/README.md</a></td></tr><tr><td><h4><i class="fa-globe-pointer">:globe-pointer:</i></h4></td><td><strong>Publish your docs</strong></td><td>Share your docs online</td><td></td><td></td><td><a href="getting-started/publish-your-docs.md">publish-your-docs.md</a></td></tr></tbody></table>
+xR2 helps you manage, version, and optimize prompts for your AI-powered applications:
+
+* **Prompt Management** — Store and organize all your prompts in one place
+* **Version Control** — Track changes, test different versions, and roll back when needed
+* **A/B Testing** — Run experiments to find the best performing prompts
+* **Analytics** — Track events and measure the impact of your prompts on user behavior
+
+## Jump right in
+
+<table data-view="cards"><thead><tr><th></th><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Quickstart</strong></td><td>Get started in 5 minutes</td><td><a href="getting-started/quickstart.md">quickstart.md</a></td></tr><tr><td><strong>Authentication</strong></td><td>Set up your API key</td><td><a href="getting-started/authentication.md">authentication.md</a></td></tr><tr><td><strong>API Reference</strong></td><td>Explore the API endpoints</td><td><a href="getting-started/api-reference.md">api-reference.md</a></td></tr></tbody></table>
+
+## Available SDKs
+
+| SDK                         | Installation            | Description              |
+| --------------------------- | ----------------------- | ------------------------ |
+| [Python](sdks/python.md)    | `pip install xr2-sdk`   | Sync and async clients   |
+| [Node.js](sdks/nodejs.md)   | `npm install xr2-sdk`   | TypeScript support       |
+| [n8n](sdks/n8n.md)          | Community node          | Visual workflow builder  |
+| [Make.com](sdks/make.md)    | Custom app              | Visual automation        |
+| [Zapier](sdks/zapier.md)    | Zapier app              | No-code automation       |
+
+## Support
+
+* **Email**: hello@xr2.uk
+* **Website**: [https://xr2.uk](https://xr2.uk)

@@ -5,12 +5,13 @@
 ## Getting Started
 
 * [Quickstart](getting-started/quickstart.md)
-* [Publish your docs](getting-started/publish-your-docs.md)
+* [Authentication](getting-started/authentication.md)
+* [API Reference](getting-started/api-reference.md)
 
-## Basics
+## SDKs
 
-* [Editor](basics/editor.md)
-* [Markdown](basics/markdown.md)
-* [Images & media](basics/images-and-media.md)
-* [Interactive blocks](basics/interactive-blocks.md)
-* [Integrations](basics/integrations.md)
+* [Python](sdks/python.md)
+* [Node.js](sdks/nodejs.md)
+* [n8n](sdks/n8n.md)
+* [Make.com](sdks/make.md)
+* [Zapier](sdks/zapier.md)
