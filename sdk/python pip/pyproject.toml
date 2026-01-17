@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xr2-sdk"
-version = "0.2.0"
-description = "Official Python SDK for xR2 product API"
+version = "0.2.6"
+description = "Official Python SDK for xR2 — prompt management platform for AI applications"
 readme = "README.md"
 requires-python = ">=3.9"
-authors = [{ name = "xR2", email = "support@channeler.ai" }]
+authors = [{ name = "xR2", email = "hello@xr2.uk" }]
 license = { text = "MIT" }
-keywords = ["channeler", "xr2", "sdk", "prompts", "analytics"]
+keywords = ["xr2", "prompts management", "sdk"]
 dependencies = [
   "requests>=2.31.0",
   "httpx>=0.27.0",
@@ -18,13 +18,7 @@ dependencies = [
   "typing-extensions>=4.8.0",
 ]
 
-[project.urls]
-Homepage = "https://github.com/channeler-ai/xr2"
-Repository = "https://github.com/channeler-ai/xr2"
-Issues = "https://github.com/channeler-ai/xr2/issues"
-
 [tool.setuptools]
 packages = ["xr2_sdk"]
 package-dir = {"" = "."}
-
 

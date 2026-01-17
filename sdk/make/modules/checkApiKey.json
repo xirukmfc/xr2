@@ -1,0 +1,20 @@
+{
+    "name": "checkApiKey",
+    "label": "Check API Key",
+    "description": "Validate your API key and get the username associated with it. Use this to verify credentials are working.",
+    "connection": "xr2_api_key",
+    "parameters": [],
+    "expect": [],
+    "interface": [
+        {"name": "ok", "type": "boolean", "label": "Is Valid"},
+        {"name": "user", "type": "text", "label": "Username"}
+    ],
+    "communication": {
+        "url": "/check-api-key",
+        "method": "GET",
+        "response": {
+            "output": "{{body}}"
+        }
+    },
+    "samples": {}
+}

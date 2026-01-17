@@ -1,0 +1,31 @@
+{
+  "name": "xr2-sdk",
+  "version": "0.1.0",
+  "description": "Official Node.js SDK for xR2 - prompt management platform for AI applications",
+  "license": "MIT",
+  "author": "xR2 <hello@xr2.uk>",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "xr2",
+    "sdk",
+    "prompts",
+    "ai"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "typescript": "^5.5.4"
+  }
+}

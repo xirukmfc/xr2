@@ -1,31 +1,46 @@
 {
   "name": "n8n-nodes-xr2",
-  "version": "0.2.0",
+  "version": "0.2.15",
   "description": "n8n community nodes for xR2 API (Check API Key, Get Prompt, Track Events)",
   "license": "MIT",
-  "author": "xR2",
+  "author": "xirukmfc <pavel.kuzko@gmail.com>",
   "keywords": [
+    "n8n-community-node-package",
     "n8n-community-node",
     "n8n-nodes",
     "xr2",
     "prompts",
     "analytics"
   ],
-  "homepage": "https://github.com/channeler-ai/xr2",
+  "homepage": "https://github.com/xirukmfc/n8n-nodes-xr2#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/channeler-ai/xr2.git"
+    "url": "git+https://github.com/xirukmfc/n8n-nodes-xr2.git"
+  },
+  "bugs": {
+    "email": "hello@xr2.uk"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "n8n": {
+    "nodes": [
+      "dist/nodes/XR2/XR2.node.js"
+    ],
+    "credentials": [
+      "dist/credentials/XR2Api.credentials.js"
+    ]
+  },
   "files": [
     "dist",
-    "src/nodes/**/xr2.svg"
+    "nodes/**/xr2.svg",
+    "README.md"
   ],
   "scripts": {
     "build": "tsc -p . && npm run copy-assets",
-    "copy-assets": "mkdir -p dist/nodes/XR2 && cp src/nodes/XR2/*.svg src/nodes/XR2/*.png dist/nodes/XR2/ 2>/dev/null || true",
+    "copy-assets": "mkdir -p dist/nodes/XR2 && cp nodes/XR2/*.svg nodes/XR2/*.png dist/nodes/XR2/ 2>/dev/null || true",
     "clean": "rimraf dist",
+    "lint": "tsc -p . --noEmit",
+    "dev": "tsc -p . --watch",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "devDependencies": {
@@ -40,4 +55,3 @@
     "form-data": "^4.0.4"
   }
 }
-

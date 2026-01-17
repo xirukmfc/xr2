@@ -15,7 +15,7 @@ A community node for [n8n](https://n8n.io) that integrates with the [xR2 API](ht
 
 - **Track Event**: Send analytics events with trace_id for monitoring and debugging
   - Track prompt usage across workflows
-  - Custom event categories and fields
+  - Custom event metadata payloads
   - Full integration with xR2 analytics dashboard
 
 ## Installation
@@ -67,6 +67,8 @@ Fetches a prompt from xR2 by slug.
   - **Deprecated**: Only deprecated versions
 
   ⚠️ **Note**: If you select a specific status and no version with that status exists, you'll get a 404 error. Leave as "Any" unless you specifically need a version with a particular status.
+  
+  **Source Name**: Auto-filled as `n8n_sdk` (not editable).
 
 **Output:**
 ```json
@@ -102,7 +104,7 @@ Sends an analytics event to xR2.
 
 **Parameters:**
 - **Trace ID** (required): UUID from Get Prompt response or custom identifier
-- **Event Name** (required): Name of the event (e.g., "prompt_used", "api_called")
+- **Event Name** (required): Name of the event (e.g., "sign_up", "purchase_completed")
 - **Source Name**: Auto-filled as `n8n_sdk` (no need to set manually)
 - **User ID** (optional)
 - **Session ID** (optional)
@@ -119,57 +121,38 @@ Sends an analytics event to xR2.
 
 ## Example Workflows
 
-### Basic: Get and Use a Prompt
+### Basic: Check API Key, Get Prompt, Track Event
 
 ```
-[Manual Trigger] → [xR2: Get Prompt] → [Code Node]
+[Manual Trigger] → [xR2: Check API Key] → [xR2: Get Prompt] → [xR2: Track Event]
+```
+
+1. **xR2 Node** (Check API Key):
+   - Resource: `API Key`
+   - Operation: `Check`
+2. **xR2 Node** (Get Prompt):
+   - Slug: `welcome`
+3. **xR2 Node** (Track Event):
+   - Trace ID: `{{ $('xR2').item.json.trace_id }}`
+   - Event Name: `sign_up`
+   - User ID: `user_123`
+   - Metadata: `{}`
+
+### Revenue Tracking: Purchase Event
+
+```
+[Manual Trigger] → [xR2: Get Prompt] → [xR2: Track Event]
 ```
 
 1. **xR2 Node** (Get Prompt):
-   - Slug: `my-prompt`
-2. **Code Node**: Access prompt data
-   ```javascript
-   const prompt = $input.item.json;
-   return [{
-     json: {
-       system_prompt: prompt.system_prompt,
-       user_prompt: prompt.user_prompt,
-       trace_id: prompt.trace_id,
-       variables: prompt.variables
-     }
-   }];
-   ```
-
-### Advanced: LLM Integration with Analytics
-
-```
-[Manual Trigger] → [xR2: Get Prompt] → [HTTP: OpenAI] → [xR2: Track Event]
-```
-
-1. **xR2 Node** (Get Prompt): Fetch prompt
-2. **HTTP Request Node**: Call OpenAI
-   - URL: `https://api.openai.com/v1/chat/completions`
-   - Body:
-   ```json
-   {
-     "model": "gpt-4",
-     "messages": [
-       {
-         "role": "system",
-         "content": "{{ $('xR2').item.json.system_prompt }}"
-       },
-       {
-         "role": "user",
-         "content": "{{ $('xR2').item.json.user_prompt }}"
-       }
-     ]
-   }
-   ```
-3. **xR2 Node** (Track Event): Log the interaction
+   - Slug: `welcome`
+2. **xR2 Node** (Track Event):
    - Trace ID: `{{ $('xR2').item.json.trace_id }}`
-   - Event Name: `llm_completion`
-   - Category: `llm`
-   - Fields: `{"model": "gpt-4", "success": true}`
+   - Event Name: `purchase_completed`
+   - User ID: `user_123`
+   - Value: `99.99`
+   - Currency: `USD`
+   - Metadata: `{"order_id": "order_67890", "product_id": "prod_456"}`
 
 ### With Error Handling
 
@@ -255,10 +238,6 @@ npm run build
 npm run clean
 ```
 
-## Contributing
-
-Issues and pull requests are welcome at [github.com/channeler-ai/xr2](https://github.com/channeler-ai/xr2).
-
 ## License
 
 MIT
@@ -266,6 +245,6 @@ MIT
 ## Support
 
 For issues with:
-- **This node**: Open an issue on GitHub
-- **xR2 API**: Contact xR2 support
+- **This node**: hello@xr2.uk
+- **xR2 API**: hello@xr2.uk
 - **n8n**: Visit n8n community forum

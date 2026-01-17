@@ -3,7 +3,7 @@ import { NodeApiError, IDataObject, JsonObject } from 'n8n-workflow';
 export const BASE_URL = 'https://xr2.uk';
 
 export interface RequestOptions {
-    uri: string;
+    url: string;
     body?: IDataObject;
     method?: string;
     json?: boolean;
@@ -119,7 +119,7 @@ export async function xr2GetRequest(this: any, options: RequestOptions) {
     };
 
     try {
-        const response = await this.helpers.requestWithAuthentication.call(
+        const response = await this.helpers.httpRequestWithAuthentication.call(
             this,
             'xr2Api',
             requestOptions,
@@ -138,7 +138,7 @@ export async function xr2Request(this: any, options: RequestOptions) {
     };
 
     try {
-        const response = await this.helpers.requestWithAuthentication.call(
+        const response = await this.helpers.httpRequestWithAuthentication.call(
             this,
             'xr2Api',
             requestOptions,

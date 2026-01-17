@@ -24,7 +24,7 @@ Create credentials of type "xR2 API" and paste your Product API Key.
 
 ## Configuration
 
-Base URL is fixed inside the node at build time. Update `src/helpers/http.ts` `BASE_URL` before building to point to your production API.
+Base URL is set in credentials per workflow. Default is `https://xr2.uk` and you can change it there for local development.
 
 ## Publish / Update
 

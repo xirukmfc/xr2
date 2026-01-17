@@ -1,18 +1,65 @@
-# xR2 Zapier App (Users)
+# xR2 Zapier Integration
 
-Use this app to fetch prompts from xR2 in your Zaps.
+Official Zapier integration for xR2 - AI Prompt Management Platform.
 
-## What it does
-- Get Prompt (Create action): Calls POST /api/v1/get-prompt; returns prompt content + trace_id.
+## Features
+
+- **Check API Key** - Validate your API key and get the username
+- **Get Prompt** - Retrieve prompt content by slug with version control and A/B testing support
+- **Track Event** - Send usage events for analytics and conversion tracking
 
 ## Setup
-1. Install/connect the private Zapier app provided by the publisher.
-2. Add an account using your xR2 Product API Key.
-3. In your Zap, add the "Get Prompt" action and provide:
-   - slug
-   - (optional) version_number, status (draft, testing, production, inactive, deprecated)
 
-Note: The base URL is fixed by the publisher and not user-editable.
+1. Get your API Key at https://xr2.uk/api-keys
+2. Click "Create Keys" and copy your Product API Key (starts with `xr2_prod_`)
+3. In Zapier, connect xR2 using your API key
 
-## Output
-- Full prompt content including variables, model_config, and trace_id for analytics/events.
+## Available Actions
+
+### Check API Key
+Validates your API key and returns the username.
+
+**Output:** `{ ok: true, user: "your_username" }`
+
+### Get Prompt
+Fetches a prompt from xR2 by slug.
+
+**Parameters:**
+- **Slug** (required) - Unique prompt identifier
+- **Version Number** (optional) - Specific version to fetch
+- **Status** (optional) - Filter by status (production, testing, draft, etc.)
+
+**Output:** System prompt, user prompt, assistant prompt, variables, trace_id, model config, A/B test info
+
+### Track Event
+Sends analytics events linked to a prompt request.
+
+**Parameters:**
+- **Trace ID** (required) - From Get Prompt response
+- **Event Name** (required) - Event name defined in xR2 Analytics (e.g., sign_up, purchase_completed)
+- **User ID** (optional) - User identifier
+- **Session ID** (optional) - Session identifier
+- **Value** (optional) - Numeric value for revenue tracking
+- **Currency** (optional) - Currency code (USD, EUR, etc.)
+- **Metadata** (optional) - JSON object with custom fields
+
+## Example Zap
+
+```
+[Trigger] -> [xR2: Get Prompt] -> [OpenAI] -> [xR2: Track Event]
+```
+
+1. Trigger (e.g., new form submission)
+2. Get Prompt: slug = `customer-support`
+3. OpenAI: Use prompt content from xR2
+4. Track Event: trace_id from step 2, event_name = `sign_up`
+
+## Support
+
+- Dashboard: https://xr2.uk
+- Documentation: https://xr2.gitbook.io/docs
+- Email: hello@xr2.uk
+
+## License
+
+MIT

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import time
+import asyncio
 from typing import Optional
 
 import httpx
@@ -113,7 +113,7 @@ class xR2Client:
         *,
         trace_id: str,
         event_name: str,
-        source_name: str,
+        source_name: str = "python_sdk",
         user_id: Optional[str] = None,
         session_id: Optional[str] = None,
         value: Optional[float] = None,
@@ -171,12 +171,11 @@ class AsyncxR2Client:
         while True:
             try:
                 return await self._client.post(url, json=json, headers=self._headers)
-            except (httpx.ConnectError, httpx.ReadError, httpx.RemoteProtocolError, httpx.HTTPStatusError) as exc:
+            except (httpx.ConnectError, httpx.ReadError, httpx.RemoteProtocolError, httpx.HTTPStatusError):
                 if attempt >= self._total_retries:
                     raise
                 sleep_s = self._backoff_factor * (2 ** attempt)
-                await httpx.AsyncClient().aclose()  # no-op to satisfy lint; not used
-                time.sleep(sleep_s)
+                await asyncio.sleep(sleep_s)
                 attempt += 1
 
     async def _get_with_retry(self, url: str) -> httpx.Response:
@@ -184,11 +183,11 @@ class AsyncxR2Client:
         while True:
             try:
                 return await self._client.get(url, headers=self._headers)
-            except (httpx.ConnectError, httpx.ReadError, httpx.RemoteProtocolError, httpx.HTTPStatusError) as exc:
+            except (httpx.ConnectError, httpx.ReadError, httpx.RemoteProtocolError, httpx.HTTPStatusError):
                 if attempt >= self._total_retries:
                     raise
                 sleep_s = self._backoff_factor * (2 ** attempt)
-                time.sleep(sleep_s)
+                await asyncio.sleep(sleep_s)
                 attempt += 1
 
     async def check_api_key(self) -> Response[CheckAPIKeyResponse]:
@@ -234,7 +233,7 @@ class AsyncxR2Client:
         *,
         trace_id: str,
         event_name: str,
-        source_name: str,
+        source_name: str = "python_sdk",
         user_id: Optional[str] = None,
         session_id: Optional[str] = None,
         value: Optional[float] = None,

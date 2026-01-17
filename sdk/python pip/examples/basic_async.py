@@ -2,63 +2,48 @@ import asyncio
 from xr2_sdk.client import AsyncxR2Client
 
 
-async def main() -> None:
+async def main():
     client = AsyncxR2Client(api_key="YOUR_API_KEY")
     try:
-        # 1. Check API key validity
+        # Check API key validity
         key_response = await client.check_api_key()
         if key_response.ok:
-            print("API key valid for user:", key_response.data.user)
-        else:
-            print("Invalid API key:", key_response.error)
-            return
+            print(f"API key valid for user: {key_response.data.user}")
 
-        # 2. Get a prompt
-        prompt = await client.get_prompt(slug="welcome")
-        if not prompt.ok:
-            print("Error getting prompt:", prompt.error)
-            return
-        print("Prompt version:", prompt.data.version_number)
-        
-        # Get a specific version
-        prompt_v2 = await client.get_prompt(slug="welcome", version_number=2)
+        # Get prompt
+        prompt_response = await client.get_prompt(slug="welcome")
 
-        # Get a prompt by status
-        prompt_prod = await client.get_prompt(slug="welcome", status="production")
+        if prompt_response.ok:
+            prompt = prompt_response.data
+            print(f"slug: {prompt.slug}")
+            print(f"version_number: {prompt.version_number}")
+            print(f"system_prompt: {prompt.system_prompt}")
+            print(f"user_prompt: {prompt.user_prompt}")
+            print(f"variables: {prompt.variables}")
+            print(f"trace_id: {prompt.trace_id}")
 
-        # 3. Track an event with the trace_id from the prompt
-        event_response = await client.track_event(
-            trace_id=prompt.data.trace_id,
-            event_name="cta_clicked",
-            source_name="python_async_example",
-            user_id="user_001",
-            session_id="session_xyz",
-            metadata={"button_text": "Get Started", "page": "homepage"},
-        )
+            # Track an event
+            event_response = await client.track_event(
+                trace_id=prompt.trace_id,
+                event_name="sign_up",
+                user_id="user_123",
+                metadata={},
+            )
 
-        if event_response.ok:
-            print("Event recorded:", event_response.data.event_id)
-        else:
-            print("Error tracking event:", event_response.error)
+            if event_response.ok:
+                print(f"Event tracked: {event_response.data.event_id}")
 
-        # Track a conversion event with value
-        conversion_response = await client.track_event(
-            trace_id=prompt.data.trace_id,
-            event_name="subscription_started",
-            source_name="python_async_example",
-            user_id="user_001",
-            value=29.99,
-            currency="USD",
-            metadata={"subscription_tier": "pro", "billing_period": "monthly"},
-        )
-
-        if conversion_response.ok:
-            print("Conversion event recorded:", conversion_response.data.event_id)
+            # Track a purchase event with value
+            purchase_response = await client.track_event(
+                trace_id=prompt.trace_id,
+                event_name="purchase_completed",
+                user_id="user_123",
+                value=99.99,
+                currency="USD",
+                metadata={"order_id": "order_67890", "product_id": "prod_456"},
+            )
     finally:
         await client.aclose()
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
-
-
+asyncio.run(main())

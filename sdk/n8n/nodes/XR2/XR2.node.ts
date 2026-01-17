@@ -232,7 +232,7 @@ export class XR2 implements INodeType {
                 name: 'metadata',
                 type: 'json',
                 default: '{}',
-                description: 'Custom event fields as JSON object (e.g., {"plan": "premium", "order_id": "123"})',
+                description: 'Custom event metadata as JSON object (e.g., {"plan": "premium", "order_id": "123"})',
                 displayOptions: {
                     show: {
                         resource: ['event'],
@@ -258,8 +258,8 @@ export class XR2 implements INodeType {
             // Check API Key
             if (resource === 'apiKey' && operation === 'check') {
                 const response = await xr2GetRequest.call(this, {
-                    uri: `${baseUrl}/api/v1/check-api-key`,
-                } as any);
+                    url: `${baseUrl}/api/v1/check-api-key`,
+                });
 
                 returnData.push({ json: response as IDataObject });
             }
@@ -278,9 +278,9 @@ export class XR2 implements INodeType {
                 if (status) body.status = status;
 
                 const response = await xr2Request.call(this, {
-                    uri: `${baseUrl}/api/v1/get-prompt`,
+                    url: `${baseUrl}/api/v1/get-prompt`,
                     body,
-                } as any);
+                });
 
                 returnData.push({ json: response as IDataObject });
             }
@@ -318,9 +318,9 @@ export class XR2 implements INodeType {
                 }
 
                 const response = await xr2Request.call(this, {
-                    uri: `${baseUrl}/api/v1/events`,
+                    url: `${baseUrl}/api/v1/events`,
                     body,
-                } as any);
+                });
 
                 returnData.push({ json: response as IDataObject });
             }
@@ -329,4 +329,3 @@ export class XR2 implements INodeType {
         return [returnData];
     }
 }
-

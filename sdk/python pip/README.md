@@ -1,6 +1,17 @@
 # xR2 SDK (Python)
 
-Official Python client for xR2 APIs.
+Official Python SDK for [xR2](https://xr2.uk/) — a platform for managing, testing, and analyzing AI prompts in production. Use it to ship prompt changes safely with experiments, track performance and user journeys, and integrate via API/SDKs.
+
+Website: https://xr2.uk/
+
+## What is xR2?
+
+xR2 helps you manage, version, and optimize prompts for your AI-powered applications:
+
+- **Prompt Management** — Store and organize all your prompts in one place
+- **Version Control** — Track changes, test different versions, and roll back when needed
+- **A/B Testing** — Run experiments to find the best performing prompts
+- **Analytics** — Track events and measure the impact of your prompts on user behavior
 
 ## Installation
 
@@ -25,15 +36,19 @@ prompt_response = client.get_prompt(slug="welcome")
 
 if prompt_response.ok:
     prompt = prompt_response.data
-    print(f"Prompt: {prompt.user_prompt}")
+    print(f"slug: {prompt.slug}")
+    print(f"version_number: {prompt.version_number}")
+    print(f"system_prompt: {prompt.system_prompt}")
+    print(f"user_prompt: {prompt.user_prompt}")
+    print(f"variables: {prompt.variables}")
+    print(f"trace_id: {prompt.trace_id}")
 
     # Track an event
     event_response = client.track_event(
         trace_id=prompt.trace_id,
-        event_name="signup_success",
-        source_name="web_app",
+        event_name="sign_up",
         user_id="user_123",
-        metadata={"plan": "premium", "referral_code": "ABC123"},
+        metadata={},
     )
 
     if event_response.ok:
@@ -43,7 +58,6 @@ if prompt_response.ok:
     purchase_response = client.track_event(
         trace_id=prompt.trace_id,
         event_name="purchase_completed",
-        source_name="web_app",
         user_id="user_123",
         value=99.99,
         currency="USD",
@@ -58,7 +72,7 @@ import asyncio
 from xr2_sdk.client import AsyncxR2Client
 
 async def main():
-    client = AsyncxR2Client(api_key="YOUR_KEY")
+    client = AsyncxR2Client(api_key="YOUR_PRODUCT_API_KEY")
     try:
         # Check API key validity
         key_response = await client.check_api_key()
@@ -70,19 +84,33 @@ async def main():
 
         if prompt_response.ok:
             prompt = prompt_response.data
+            print(f"slug: {prompt.slug}")
+            print(f"version_number: {prompt.version_number}")
+            print(f"system_prompt: {prompt.system_prompt}")
+            print(f"user_prompt: {prompt.user_prompt}")
+            print(f"variables: {prompt.variables}")
+            print(f"trace_id: {prompt.trace_id}")
 
-            # Track event
+            # Track an event
             event_response = await client.track_event(
                 trace_id=prompt.trace_id,
-                event_name="cta_clicked",
-                source_name="mobile_app",
-                user_id="user_001",
-                session_id="session_xyz",
-                metadata={"button_text": "Get Started", "page": "homepage"},
+                event_name="sign_up",
+                user_id="user_123",
+                metadata={},
             )
 
             if event_response.ok:
                 print(f"Event tracked: {event_response.data.event_id}")
+
+            # Track a purchase event with value
+            purchase_response = await client.track_event(
+                trace_id=prompt.trace_id,
+                event_name="purchase_completed",
+                user_id="user_123",
+                value=99.99,
+                currency="USD",
+                metadata={"order_id": "order_67890", "product_id": "prod_456"},
+            )
     finally:
         await client.aclose()
 
@@ -128,8 +156,7 @@ Validate your API key and get the associated username.
 
 **Required Parameters:**
 - `trace_id`: Trace ID from `get_prompt()` response
-- `event_name`: Event name as defined in dashboard (e.g., "signup_success", "purchase_completed")
-- `source_name`: Source identifier (e.g., "web_app", "mobile_app", "john_doe")
+- `event_name`: Event name as defined in dashboard (e.g., "sign_up", "purchase_completed")
 
 **Optional Parameters:**
 - `user_id`: User identifier for tracking
@@ -148,4 +175,7 @@ Validate your API key and get the associated username.
 - Field validation happens automatically based on your event definitions
 - Events are deduplicated by `trace_id` + `event_name`
 
+## Links
 
+- Website: https://xr2.uk/
+- Documentation: https://xr2.uk/docs

@@ -12,7 +12,7 @@
       "parameters": {
         "resource": "prompt",
         "operation": "get",
-        "slug": "welcome-message",
+        "slug": "welcome",
         "versionNumber": 0
       },
       "name": "Get Prompt",
@@ -31,9 +31,9 @@
         "resource": "event",
         "operation": "track",
         "traceId": "={{ $json.trace_id }}",
-        "eventName": "prompt_fetched",
-        "category": "workflow",
-        "fields": "{ \"workflow_name\": \"Example\", \"environment\": \"test\" }"
+        "eventName": "sign_up",
+        "userId": "user_123",
+        "metadata": "{}"
       },
       "name": "Track Event",
       "type": "n8n-nodes-xr2.xr2",

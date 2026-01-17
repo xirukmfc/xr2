@@ -79,7 +79,7 @@ Output:
    - **Credentials**: Select your xR2 API credential
    - **Resource**: Prompt
    - **Operation**: Get
-   - **Slug**: `your-prompt-slug` (replace with your actual prompt)
+   - **Slug**: `welcome`
 
 Output:
 ```json
@@ -92,66 +92,29 @@ Output:
 }
 ```
 
-### Step 4: Track an Event
+### Step 4: Track an Event (sign_up)
 
 1. Add another **xR2** node
 2. Configure:
    - **Resource**: Event
    - **Operation**: Track
    - **Trace ID**: `{{ $('xR2').item.json.trace_id }}`
-   - **Event Name**: `workflow_completed`
-   - **User ID**: (optional) `user_123`
-   - **Value**: (optional) `99.99` for revenue tracking
-   - **Currency**: (optional) `USD`
-   - **Metadata**: `{"step": "completed", "workflow_id": "123"}`
+   - **Event Name**: `sign_up`
+   - **User ID**: `user_123`
+   - **Metadata**: `{}`
 
-## Example: Use with OpenAI
-
-### Step 1: Get Prompt from xR2
-
-Configure xR2 node as above.
-
-### Step 2: Add HTTP Request Node
-
-1. Add **HTTP Request** node
-2. Configure:
-   - **Method**: POST
-   - **URL**: `https://api.openai.com/v1/chat/completions`
-   - **Authentication**: Header Auth
-     - Name: `Authorization`
-     - Value: `Bearer YOUR_OPENAI_KEY`
-   - **Body Parameters**:
-     ```json
-     {
-       "model": "{{ $('xR2').item.json.model_config.model_name }}",
-       "messages": [
-         {
-           "role": "system",
-           "content": "{{ $('xR2').item.json.system_prompt }}"
-         },
-         {
-           "role": "user",
-           "content": "Hello!"
-         }
-       ]
-     }
-     ```
-
-### Step 3: Track Event
+### Step 5: Track a Purchase Event
 
 1. Add another **xR2** node
 2. Configure:
    - **Resource**: Event
    - **Operation**: Track
    - **Trace ID**: `{{ $('xR2').item.json.trace_id }}`
-   - **Event Name**: `openai_completion`
-   - **Metadata**:
-     ```json
-     {
-       "model": "{{ $('xR2').item.json.model_config.model_name }}",
-       "success": true
-     }
-     ```
+   - **Event Name**: `purchase_completed`
+   - **User ID**: `user_123`
+   - **Value**: `99.99`
+   - **Currency**: `USD`
+   - **Metadata**: `{"order_id": "order_67890", "product_id": "prod_456"}`
 
 ## Event Tracking Parameters
 
@@ -164,34 +127,7 @@ Configure xR2 node as above.
 | Session ID | No | Session identifier for analytics |
 | Value | No | Numeric value for revenue tracking |
 | Currency | No | Currency code (USD, EUR, etc.) |
-| Metadata | No | Custom JSON fields |
-
-## Common Use Cases
-
-### 1. Scheduled Prompt Updates
-
-```
-[Schedule Trigger: Every 6 hours]
-  → [xR2: Get Prompt]
-  → [Database: Update Config]
-```
-
-### 2. Dynamic Content Generation
-
-```
-[Webhook Trigger]
-  → [xR2: Get Prompt]
-  → [HTTP: Call LLM]
-  → [xR2: Track Event]
-  → [Webhook Response]
-```
-
-### 3. Revenue Tracking
-
-```
-[Webhook: Order Completed]
-  → [xR2: Track Event with value=order_total, currency=USD]
-```
+| Metadata | No | Custom JSON metadata |
 
 ## Tips
 

@@ -70,7 +70,7 @@ dist/
 ### 2. Track Event
 - Sends analytics events to xR2
 - Uses trace_id for correlation
-- Supports custom event fields
+- Supports custom event metadata
 - Categories for organization
 
 ## Testing Instructions
@@ -114,7 +114,7 @@ curl -X POST https://xr2.uk/api/v1/get-prompt \
 curl -X POST https://xr2.uk/api/v1/events \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"trace_id": "uuid", "event_name": "test", "category": "test", "fields": {}}'
+  -d '{"trace_id": "uuid", "event_name": "test", "metadata": {}}'
 ```
 
 ## Publishing Process

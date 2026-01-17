@@ -72,7 +72,7 @@ Create a workflow with the following nodes:
 2. **xR2 Node**:
    - Resource: `Prompt`
    - Operation: `Get`
-   - Slug: `welcome-message` (replace with your actual prompt slug)
+   - Slug: `welcome`
    - Version Number: `0` (latest)
    - Status: leave empty (or select `production`)
 
@@ -96,58 +96,33 @@ Create a workflow:
 2. **xR2 Node** (Get Prompt):
    - Resource: `Prompt`
    - Operation: `Get`
-   - Slug: `welcome-message`
+   - Slug: `welcome`
 3. **xR2 Node** (Track Event):
    - Resource: `Event`
    - Operation: `Track`
    - Trace ID: `{{ $json.trace_id }}` (from previous node)
-   - Event Name: `prompt_used`
-   - Category: `workflow`
-   - Fields:
-     ```json
-     {
-       "workflow_name": "Test Workflow",
-       "environment": "local"
-     }
-     ```
+   - Event Name: `sign_up`
+   - User ID: `user_123`
+   - Metadata: `{}`
 
-### Example 3: Integration with HTTP Request
+### Example 3: Purchase Event
 
-Create a workflow that uses the prompt with an LLM:
+Create a workflow:
 
 1. **Manual Trigger**
-2. **xR2 Node** (Get Prompt) → get prompt content
-3. **HTTP Request Node**:
-   - Method: POST
-   - URL: `https://api.openai.com/v1/chat/completions`
-   - Authentication: Bearer token (your OpenAI key)
-   - Body:
-     ```json
-     {
-       "model": "{{ $('xR2').item.json.model_config.model_name }}",
-       "messages": [
-         {
-           "role": "system",
-           "content": "{{ $('xR2').item.json.content }}"
-         },
-         {
-           "role": "user",
-           "content": "Hello"
-         }
-       ]
-     }
-     ```
-4. **xR2 Node** (Track Event):
-   - Trace ID: `{{ $('xR2').item.json.trace_id }}`
-   - Event Name: `llm_response_received`
-   - Category: `llm`
-   - Fields:
-     ```json
-     {
-       "model": "{{ $('xR2').item.json.model_config.model_name }}",
-       "response_length": "{{ $('HTTP Request').item.json.choices[0].message.content.length }}"
-     }
-     ```
+2. **xR2 Node** (Get Prompt):
+   - Resource: `Prompt`
+   - Operation: `Get`
+   - Slug: `welcome`
+3. **xR2 Node** (Track Event):
+   - Resource: `Event`
+   - Operation: `Track`
+   - Trace ID: `{{ $json.trace_id }}`
+   - Event Name: `purchase_completed`
+   - User ID: `user_123`
+   - Value: `99.99`
+   - Currency: `USD`
+   - Metadata: `{"order_id": "order_67890", "product_id": "prod_456"}`
 
 ## Testing Checklist
 
@@ -159,7 +134,7 @@ Create a workflow that uses the prompt with an LLM:
 - [ ] Get Prompt with status parameter works
 - [ ] Get Prompt returns error for non-existent slug
 - [ ] Track Event successfully sends data
-- [ ] Track Event with JSON fields works
+- [ ] Track Event with JSON metadata works
 - [ ] trace_id can be passed between Get Prompt and Track Event nodes
 - [ ] Node works in both manual and automated workflows
 
@@ -202,7 +177,7 @@ curl -X POST https://xr2.uk/api/v1/get-prompt \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "slug": "welcome-message",
+    "slug": "welcome",
     "source_name": "n8n_sdk"
   }'
 ```
@@ -214,11 +189,9 @@ curl -X POST https://xr2.uk/api/v1/events \
   -H "Content-Type: application/json" \
   -d '{
     "trace_id": "your-trace-id-from-get-prompt",
-    "event_name": "test_event",
-    "category": "testing",
-    "fields": {
-      "test": true
-    }
+    "event_name": "sign_up",
+    "user_id": "user_123",
+    "metadata": {}
   }'
 ```
 
