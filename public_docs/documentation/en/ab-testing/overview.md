@@ -1,5 +1,3 @@
----
----
 
 # A/B Testing Overview
 
@@ -31,7 +29,27 @@ When a test is running, the API automatically returns:
 - Version A for ~50% of requests
 - Version B for ~50% of requests
 
-The split is random but consistent per request.
+The split is **truly random** — each request independently receives version A or B with 50% probability.
+
+!!! info "Why Random Instead of Alternating?"
+    xR2 uses random distribution instead of deterministic round-robin (A-B-A-B) for an important reason: **statistical correctness**.
+
+    With alternating distribution, traffic patterns can create bias — for example, morning users (more active) might systematically get one version while evening users (less active) get another. This creates **selection bias** and skews test results.
+
+    Random distribution ensures each request is independent, which is a key requirement for correctly applying statistical methods (z-test, chi-square, etc.).
+
+### Expected Distribution
+
+With random distribution, the final ratio will be **approximately** 50/50:
+
+| Requests | 95% Interval |
+|----------|--------------|
+| 100      | 40% – 60%    |
+| 1,000    | 47% – 53%    |
+| 3,000    | 48% – 52%    |
+| 10,000   | 49% – 51%    |
+
+A small imbalance doesn't affect results — statistical formulas account for different sample sizes.
 
 ### Response with A/B Test Info
 

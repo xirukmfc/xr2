@@ -1,5 +1,3 @@
----
----
 
 # Measuring Results
 

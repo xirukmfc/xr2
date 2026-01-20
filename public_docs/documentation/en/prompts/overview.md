@@ -1,5 +1,3 @@
----
----
 
 # Prompt Editor Overview
 

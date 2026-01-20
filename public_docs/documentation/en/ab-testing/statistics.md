@@ -1,5 +1,3 @@
----
----
 
 # Statistical Significance
 

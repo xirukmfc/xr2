@@ -1,5 +1,3 @@
----
----
 
 # Conversion Funnels
 
