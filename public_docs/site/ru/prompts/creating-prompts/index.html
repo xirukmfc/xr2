@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/ru/prompts/creating-prompts/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Creating Prompts - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Creating Prompts";
+        var mkdocs_page_input_path = "ru/prompts/creating-prompts.md";
+        var mkdocs_page_url = "/ru/prompts/creating-prompts/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../" class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" title="Введите поисковый запрос" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Навигационное меню">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Creating Prompts</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">Создание нового промпта</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_3">Написание эффективных промптов</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#system-prompt">System Prompt</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#user-prompt">User Prompt</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#assistant-prompt">Assistant Prompt (опционально)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_4">Организация с помощью тегов</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_5">Лучшие практики структурирования промптов</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-system-prompts">1. Делайте System Prompts сфокусированными</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2">2. Используйте переменные стратегически</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3">3. Тестируйте граничные случаи</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_6">Шаблоны</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_7">Следующие шаги</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Мобильная версия навигации">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../" class="icon icon-home" aria-label="Документация"></a></li>
+          <li class="breadcrumb-item">Prompt Editor</li>
+      <li class="breadcrumb-item active">Creating Prompts</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">Создание промптов</h1>
+<p>Узнайте, как создавать и структурировать промпты в xR2.</p>
+<h2 id="_2">Создание нового промпта</h2>
+<ol>
+<li>Перейдите на страницу <strong>Prompts</strong></li>
+<li>Нажмите кнопку <strong>+ New Prompt</strong></li>
+<li>Заполните обязательные поля:<ul>
+<li><strong>Name</strong> — Понятное название (например, "Customer Support Bot")</li>
+<li><strong>Slug</strong> — Уникальный API-идентификатор (например, <code>customer-support</code>)</li>
+</ul>
+</li>
+<li>Нажмите <strong>Create</strong></li>
+</ol>
+<blockquote>
+<p>ℹ️ <strong>Информация:</strong> Slug нельзя изменить после создания. Выбирайте его внимательно — это то, что вы будете использовать в API-вызовах.</p>
+</blockquote>
+<h2 id="_3">Написание эффективных промптов</h2>
+<h3 id="system-prompt">System Prompt</h3>
+<p>System prompt определяет поведение, личность и ограничения AI. Лучшие практики:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>You are a customer support assistant for TechStore.
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Your responsibilities:
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>- Answer product questions accurately
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>- Help with order status and returns
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>- Escalate complex issues to human agents
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>Guidelines:
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>- Be friendly but professional
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>- Keep responses under 150 words
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>- Never discuss competitor products
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>- If unsure, say &quot;Let me connect you with a specialist&quot;
+</code></pre></div>
+<p><strong>Советы:</strong></p>
+<ul>
+<li>Конкретно указывайте роль AI</li>
+<li>Перечисляйте четкие правила, что делать и чего избегать</li>
+<li>Определяйте формат и длину ответа</li>
+<li>Указывайте поведение в граничных случаях</li>
+</ul>
+<h3 id="user-prompt">User Prompt</h3>
+<p>User prompt — это шаблон, который заполняется динамическими данными. Используйте переменные для персонализации:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Customer: {{customer_name}}
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Membership: {{membership_tier}}
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Previous purchases: {{purchase_count}}
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>Question: {{question}}
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>Please provide a helpful response appropriate for their membership level.
+</code></pre></div>
+<p><strong>Советы:</strong></p>
+<ul>
+<li>Используйте описательные имена переменных</li>
+<li>Предоставляйте контекст, необходимый AI</li>
+<li>Структурируйте входные данные четко</li>
+</ul>
+<h3 id="assistant-prompt">Assistant Prompt (опционально)</h3>
+<p>Предварительно заполните начало ответа AI для направления формата:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Based on your {{membership_tier}} membership, here&#39;s my response:
+</code></pre></div>
+<p>Это обеспечивает единообразное начало ответов.</p>
+<h2 id="_4">Организация с помощью тегов</h2>
+<p>Теги помогают категоризировать и фильтровать промпты:</p>
+<ol>
+<li>Нажмите <strong>Add Tag</strong> в левой панели</li>
+<li>Введите название тега (например, "onboarding", "support", "sales")</li>
+<li>Выберите цвет</li>
+<li>Нажмите <strong>Save</strong></li>
+</ol>
+<p><strong>Распространенные стратегии тегирования:</strong></p>
+<ul>
+<li>По области продукта: <code>checkout</code>, <code>profile</code>, <code>search</code></li>
+<li>По команде: <code>marketing</code>, <code>support</code>, <code>product</code></li>
+<li>По стадии: <code>experimental</code>, <code>production</code>, <code>deprecated</code></li>
+</ul>
+<h2 id="_5">Лучшие практики структурирования промптов</h2>
+<h3 id="1-system-prompts">1. Делайте System Prompts сфокусированными</h3>
+<p>Одна ответственность на промпт. Вместо мега-промпта, который делает все, создавайте специализированные промпты:</p>
+<ul>
+<li><code>support-general</code> — Общие вопросы</li>
+<li><code>support-returns</code> — Запросы на возврат</li>
+<li><code>support-technical</code> — Технические проблемы</li>
+</ul>
+<h3 id="2">2. Используйте переменные стратегически</h3>
+<p>Включайте только те переменные, которые действительно влияют на поведение AI:</p>
+<p><strong>Хорошо:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Customer tier: {{tier}} — affects discount eligibility
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Order history: {{recent_orders}} — for context
+</code></pre></div></p>
+<p><strong>Избегайте:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Current timestamp: {{timestamp}} — rarely useful
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Request ID: {{request_id}} — AI doesn&#39;t need this
+</code></pre></div></p>
+<h3 id="3">3. Тестируйте граничные случаи</h3>
+<p>Перед развертыванием тестируйте с:</p>
+<ul>
+<li>Пустыми значениями переменных</li>
+<li>Очень длинными входными данными</li>
+<li>Неожиданными типами данных</li>
+<li>Граничными сценариями</li>
+</ul>
+<h2 id="_6">Шаблоны</h2>
+<p>xR2 предоставляет стартовые шаблоны для распространенных случаев использования:</p>
+<table>
+<thead>
+<tr>
+<th>Шаблон</th>
+<th>Случай использования</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Customer Support</strong></td>
+<td>Ответы службы поддержки и FAQ</td>
+</tr>
+<tr>
+<td><strong>Content Generator</strong></td>
+<td>Посты в блог, социальные сети, email</td>
+</tr>
+<tr>
+<td><strong>Data Extractor</strong></td>
+<td>Парсинг и структурирование неструктурированного текста</td>
+</tr>
+<tr>
+<td><strong>Classifier</strong></td>
+<td>Категоризация входных данных по предопределенным классам</td>
+</tr>
+<tr>
+<td><strong>Summarizer</strong></td>
+<td>Сжатие длинного текста до ключевых моментов</td>
+</tr>
+</tbody>
+</table>
+<p>Получите доступ к шаблонам при создании нового промпта или в разделе <strong>Templates</strong>.</p>
+<h2 id="_7">Следующие шаги</h2>
+<ul>
+<li><a href="../variables/">Переменные</a> — Настройка динамического контента</li>
+<li><a href="../testing/">Тестирование промптов</a> — Валидация перед развертыванием</li>
+<li><a href="../versions/">Версии и развертывание</a> — Выпуск в продакшен</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Навигация по странице">
+        <a href="../overview/" class="btn btn-neutral float-left" title="Overview"><span class="icon icon-circle-arrow-left"></span> Назад</a>
+        <a href="../variables/" class="btn btn-neutral float-right" title="Variables">Вперед <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Собрано в <a href="https://www.mkdocs.org/">MkDocs</a> с использованием <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы</a> от <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Версии">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../overview/" style="color: #fcfcfc">&laquo; Назад</a></span>
+    
+    
+      <span><a href="../variables/" style="color: #fcfcfc">Вперед &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../js/lang-switcher.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

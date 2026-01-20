@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/ab-testing/creating-tests/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Creating Tests - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Creating Tests";
+        var mkdocs_page_input_path = "en/ab-testing/creating-tests.md";
+        var mkdocs_page_url = "/ab-testing/creating-tests/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Creating Tests</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">A/B Testing</li>
+      <li class="breadcrumb-item active">Creating Tests</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="-">---</h2>
+<h1 id="creating-ab-tests">Creating A/B Tests</h1>
+<p>Learn how to set up and run A/B tests in xR2.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before creating a test, you need:</p>
+<ol>
+<li><strong>A prompt</strong> with at least two versions</li>
+<li><strong>Event tracking</strong> set up for your success metric</li>
+<li><strong>Traffic</strong> — enough users to reach statistical significance</li>
+</ol>
+<h2 id="step-by-step-guide">Step-by-Step Guide</h2>
+<h3 id="step-1-prepare-your-versions">Step 1: Prepare Your Versions</h3>
+<p>Create two versions of your prompt:</p>
+<p><strong>Version A (Control)</strong>
+- Usually your current production version
+- The baseline you're comparing against</p>
+<p><strong>Version B (Treatment)</strong>
+- The new version you want to test
+- Contains your hypothesis change</p>
+<p _="%" endhint="endhint">{% hint style="info" %}
+Create versions before starting the test. You can't modify versions while a test is running.</p>
+<h3 id="step-2-create-the-test">Step 2: Create the Test</h3>
+<ol>
+<li>Go to <strong>Analytics</strong> → <strong>A/B Tests</strong></li>
+<li>Click <strong>+ New A/B Test</strong></li>
+<li>Fill in the configuration:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Test Name</strong></td>
+<td>Descriptive name (e.g., "Tone Experiment Q1")</td>
+</tr>
+<tr>
+<td><strong>Prompt</strong></td>
+<td>Select the prompt to test</td>
+</tr>
+<tr>
+<td><strong>Version A</strong></td>
+<td>Select the control version</td>
+</tr>
+<tr>
+<td><strong>Version B</strong></td>
+<td>Select the treatment version</td>
+</tr>
+<tr>
+<td><strong>Request Limit</strong></td>
+<td>Total requests before test completes</td>
+</tr>
+<tr>
+<td><strong>Success Event</strong></td>
+<td>The conversion event to measure</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>Click <strong>Create Test</strong></li>
+</ol>
+<h3 id="step-3-review-and-start">Step 3: Review and Start</h3>
+<p>Before starting, review:
+- Correct versions selected?
+- Success event is tracking correctly?
+- Request limit is sufficient for significance?</p>
+<p>Click <strong>Start Test</strong> to begin traffic splitting.</p>
+<h2 id="configuration-options">Configuration Options</h2>
+<h3 id="request-limit">Request Limit</h3>
+<p>How many total requests before the test auto-completes:</p>
+<table>
+<thead>
+<tr>
+<th>Request Limit</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1,000</td>
+<td>Quick directional test</td>
+</tr>
+<tr>
+<td>5,000</td>
+<td>Standard test</td>
+</tr>
+<tr>
+<td>10,000+</td>
+<td>High-confidence result</td>
+</tr>
+</tbody>
+</table>
+<p _="%" endhint="endhint">{% hint style="warning" %}
+Lower limits mean faster results but less confidence. See <a href="../statistics/">Statistical Significance</a> for guidance.</p>
+<h3 id="success-event">Success Event</h3>
+<p>Choose the event that defines "success":</p>
+<p><strong>Common choices:</strong>
+- <code>signup_completed</code> — For acquisition
+- <code>purchase_completed</code> — For revenue
+- <code>positive_feedback</code> — For satisfaction
+- <code>task_completed</code> — For engagement</p>
+<h3 id="traffic-split">Traffic Split</h3>
+<p>Currently, xR2 uses a fixed 50/50 split:
+- 50% of requests get Version A
+- 50% of requests get Version B</p>
+<p>The split is randomized per request.</p>
+<h2 id="managing-running-tests">Managing Running Tests</h2>
+<h3 id="view-status">View Status</h3>
+<p>Go to <strong>A/B Tests</strong> to see:
+- Current request count
+- Conversion rates per variant
+- Time running
+- Projected completion</p>
+<h3 id="pauseresume">Pause/Resume</h3>
+<p>Currently not supported. Tests run until completion or cancellation.</p>
+<h3 id="cancel-test">Cancel Test</h3>
+<p>If you need to stop early:
+1. Find the test in the list
+2. Click <strong>Cancel</strong>
+3. Confirm cancellation</p>
+<p _="%" endhint="endhint">{% hint style="warning" %}
+Cancelled tests have incomplete data. Results may not be statistically significant.</p>
+<h2 id="test-completion">Test Completion</h2>
+<p>A test completes automatically when:
+- Request limit is reached
+- You manually end it</p>
+<p>After completion:
+- Traffic returns to production version only
+- Results are available for analysis
+- Winner can be deployed</p>
+<h2 id="example-creating-a-tone-test">Example: Creating a Tone Test</h2>
+<p><strong>Hypothesis</strong>: A friendlier tone will increase signups.</p>
+<h3 id="1-create-versions">1. Create Versions</h3>
+<p><strong>Version 3 (Control)</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>System: You are a professional customer service agent.
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>Respond formally and efficiently.
+</code></pre></div></p>
+<p><strong>Version 4 (Treatment)</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>System: You are a friendly helper who loves assisting customers!
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Be warm, use casual language, and add encouraging words.
+</code></pre></div></p>
+<h3 id="2-create-test">2. Create Test</h3>
+<ul>
+<li><strong>Test Name</strong>: "Friendly Tone Test"</li>
+<li><strong>Prompt</strong>: <code>onboarding-assistant</code></li>
+<li><strong>Version A</strong>: Version 3</li>
+<li><strong>Version B</strong>: Version 4</li>
+<li><strong>Request Limit</strong>: 5,000</li>
+<li><strong>Success Event</strong>: <code>signup_completed</code></li>
+</ul>
+<h3 id="3-monitor">3. Monitor</h3>
+<p>Check the A/B Tests dashboard daily:
+- Day 1: A=2.1%, B=2.8% (too early)
+- Day 3: A=2.3%, B=3.1% (promising)
+- Day 7: A=2.4%, B=3.2% (significant!)</p>
+<h3 id="4-conclude">4. Conclude</h3>
+<p>Version B wins with 33% improvement in signup rate. Deploy Version 4 to production.</p>
+<h2 id="multiple-tests">Multiple Tests</h2>
+<h3 id="sequential-tests">Sequential Tests</h3>
+<p>Run one test at a time per prompt:
+1. Test A vs B → B wins
+2. Test B vs C → C wins
+3. Deploy C</p>
+<h3 id="parallel-tests-different-prompts">Parallel Tests (Different Prompts)</h3>
+<p>You can run tests on different prompts simultaneously:
+- <code>onboarding</code> — Testing tone
+- <code>checkout</code> — Testing length</p>
+<h3 id="avoiding-conflicts">Avoiding Conflicts</h3>
+<p>Don't run multiple tests on the same prompt. Results will be contaminated.</p>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="1-document-everything">1. Document Everything</h3>
+<p>Create a test log:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Test: Friendly Tone Test
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Date: 2025-01-15
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Hypothesis: Friendly tone increases signups
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>Versions: v3 (control) vs v4 (treatment)
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>Metric: signup_completed
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>Result: TBD
+</code></pre></div></p>
+<h3 id="2-notify-your-team">2. Notify Your Team</h3>
+<p>Before starting:
+- Tell developers (code may behave differently)
+- Tell support (user experience may vary)
+- Tell stakeholders (metrics may fluctuate)</p>
+<h3 id="3-avoid-peeking">3. Avoid Peeking</h3>
+<p>Don't make decisions based on early results:
+- Day 1 results are unreliable
+- Wait for statistical significance
+- Trust the process</p>
+<h3 id="4-plan-the-next-test">4. Plan the Next Test</h3>
+<p>While one test runs, prepare the next:
+- Analyze current learnings
+- Form new hypotheses
+- Create new versions</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="test-not-getting-traffic">Test Not Getting Traffic</h3>
+<ul>
+<li>Is the prompt being called via API?</li>
+<li>Check the slug matches</li>
+<li>Verify test status is "Running"</li>
+</ul>
+<h3 id="events-not-linking">Events Not Linking</h3>
+<ul>
+<li>Ensure <code>trace_id</code> is passed to event tracking</li>
+<li>Verify event name matches success event</li>
+<li>Check events in Recent Events tab</li>
+</ul>
+<h3 id="one-variant-has-no-data">One Variant Has No Data</h3>
+<ul>
+<li>Test might be too new</li>
+<li>Check if API is returning both variants</li>
+<li>Verify traffic is actually reaching the prompt</li>
+</ul>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><a href="../results/">Measuring Results</a> — Analyze your test outcomes</li>
+<li><a href="../statistics/">Statistical Significance</a> — Understand when results are reliable</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../overview/" class="btn btn-neutral float-left" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../results/" class="btn btn-neutral float-right" title="Measuring Results">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../overview/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../results/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/lang-switcher.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

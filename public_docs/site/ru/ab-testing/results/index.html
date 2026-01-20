@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/ru/ab-testing/results/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Measuring Results - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Measuring Results";
+        var mkdocs_page_input_path = "ru/ab-testing/results.md";
+        var mkdocs_page_url = "/ru/ab-testing/results/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../" class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" title="Введите поисковый запрос" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Навигационное меню">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Measuring Results</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Мобильная версия навигации">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../" class="icon icon-home" aria-label="Документация"></a></li>
+          <li class="breadcrumb-item">A/B Testing</li>
+      <li class="breadcrumb-item active">Measuring Results</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="-">---</h2>
+<h1 id="_1">Измерение результатов</h1>
+<p>Узнайте, как анализировать результаты A/B-тестов и принимать решения на основе данных.</p>
+<h2 id="_2">Панель результатов</h2>
+<p>Перейдите в <strong>Аналитика</strong> → <strong>A/B-тесты</strong> → Выберите тест.</p>
+<h3 id="_3">Раздел обзора</h3>
+<table>
+<thead>
+<tr>
+<th>Метрика</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Статус</strong></td>
+<td>Running, Completed, Cancelled</td>
+</tr>
+<tr>
+<td><strong>Длительность</strong></td>
+<td>Как долго тест работает</td>
+</tr>
+<tr>
+<td><strong>Всего запросов</strong></td>
+<td>Суммарные запросы для обоих вариантов</td>
+</tr>
+<tr>
+<td><strong>Запросов по варианту</strong></td>
+<td>Распределение между A и B</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_4">Сравнение производительности</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│              Version A    Version B    Diff     │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├─────────────────────────────────────────────────┤
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│ Requests         2,450        2,550             │
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│ Conversions        294          357             │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│ Conv. Rate       12.0%        14.0%   +16.7%   │
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│ Confidence                              94%     │
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>└─────────────────────────────────────────────────┘
+</code></pre></div>
+<h2 id="_5">Ключевые метрики</h2>
+<h3 id="_6">Показатель конверсии</h3>
+<p>Процент пользователей, которые выполнили событие успеха:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Conversion Rate = Conversions / Requests × 100%
+</code></pre></div>
+<p><strong>Пример:</strong>
+- Версия A: 294 конверсии / 2 450 запросов = 12,0%
+- Версия B: 357 конверсий / 2 550 запросов = 14,0%</p>
+<h3 id="_7">Относительное улучшение</h3>
+<p>Насколько тестовый вариант лучше контрольного:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Improvement = (B - A) / A × 100%
+</code></pre></div>
+<p><strong>Пример:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>(14.0% - 12.0%) / 12.0% = +16.7% improvement
+</code></pre></div></p>
+<h3 id="_8">Уровень достоверности</h3>
+<p>Насколько мы уверены, что разница реальна (не случайность):</p>
+<table>
+<thead>
+<tr>
+<th>Достоверность</th>
+<th>Интерпретация</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt; 80%</td>
+<td>Незначимо, нужно больше данных</td>
+</tr>
+<tr>
+<td>80-90%</td>
+<td>Слабые доказательства</td>
+</tr>
+<tr>
+<td>90-95%</td>
+<td>Умеренные доказательства</td>
+</tr>
+<tr>
+<td>95-99%</td>
+<td>Сильные доказательства</td>
+</tr>
+<tr>
+<td>&gt; 99%</td>
+<td>Очень сильные доказательства</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Отраслевой стандарт</strong>: 95% достоверность перед объявлением победителя.</p>
+<h2 id="_9">Чтение результатов</h2>
+<h3 id="_10">Явный победитель</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Version A: 10.2%
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Version B: 14.8%
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Confidence: 98%
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>→ Version B wins decisively
+</code></pre></div>
+<p><strong>Действие</strong>: Разверните версию B</p>
+<h3 id="_11">Нет разницы</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Version A: 12.1%
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>Version B: 12.3%
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>Confidence: 52%
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>→ No meaningful difference
+</code></pre></div>
+<p><strong>Действие</strong>: Оставьте текущую версию (A), тестируйте что-то другое</p>
+<h3 id="_12">Неоднозначно</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Version A: 11.5%
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Version B: 13.2%
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>Confidence: 78%
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>→ B looks better but not confident
+</code></pre></div>
+<p><strong>Действие</strong>: Продолжайте тест или увеличьте размер выборки</p>
+<h2 id="_13">Анализ за пределами конверсии</h2>
+<h3 id="_14">Сегментный анализ</h3>
+<p>Смотрите на результаты по сегментам пользователей:</p>
+<table>
+<thead>
+<tr>
+<th>Сегмент</th>
+<th>Версия A</th>
+<th>Версия B</th>
+<th>Победитель</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Новые пользователи</td>
+<td>8%</td>
+<td>12%</td>
+<td>B (+50%)</td>
+</tr>
+<tr>
+<td>Возвращающиеся</td>
+<td>15%</td>
+<td>14%</td>
+<td>A (+7%)</td>
+</tr>
+<tr>
+<td>Мобильные</td>
+<td>10%</td>
+<td>13%</td>
+<td>B (+30%)</td>
+</tr>
+<tr>
+<td>Десктоп</td>
+<td>12%</td>
+<td>11%</td>
+<td>A (+9%)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Вывод</strong>: B работает лучше для новых и мобильных пользователей. Рассмотрите разные промпты для разных сегментов.</p>
+<h3 id="_15">Анализ по времени</h3>
+<p>Проверьте, изменяются ли результаты со временем:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Week 1: A=11%, B=14%
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Week 2: A=12%, B=13%
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>Week 3: A=12%, B=12%
+</code></pre></div>
+<p><strong>Вывод</strong>: Преимущество B уменьшилось со временем (эффект новизны).</p>
+<h3 id="_16">Влияние на выручку</h3>
+<p>Если отслеживаете денежную ценность:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Version A: $45.20 avg order value
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>Version B: $52.80 avg order value
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>Improvement: +16.8% revenue per user
+</code></pre></div>
+<h2 id="_17">Принятие решений</h2>
+<h3 id="_18">Когда объявлять победителя</h3>
+<p>Объявляйте победителя, когда:
+- Достоверность &gt;= 95%
+- Размер выборки соответствует минимальным требованиям
+- Результаты стабильны во времени
+- Бизнес-влияние значимо</p>
+<p>Не объявляйте победителя, когда:
+- Достоверность &lt; 90%
+- Размер выборки слишком мал
+- Результаты колеблются
+- Разница незначительна (&lt; 1%)</p>
+<h3 id="_19">Развёртывание победителя</h3>
+<ol>
+<li>Перейдите к результатам теста</li>
+<li>Нажмите <strong>Развернуть победителя</strong></li>
+<li>Подтвердите развёртывание</li>
+<li>Тест завершается автоматически</li>
+<li>Победитель становится продакшен-версией</li>
+</ol>
+<h3 id="_20">Документирование выводов</h3>
+<p>После каждого теста записывайте:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="gu">## Test: Friendly Tone Test</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="gs">**Date**</span>: Jan 15 - Jan 22, 2025
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="gs">**Hypothesis**</span>: Friendlier tone increases signups
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="gs">**Result**</span>: Confirmed
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="gu">### Data</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="k">-</span><span class="w"> </span>Version A (formal): 12.0% conversion
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="k">-</span><span class="w"> </span>Version B (friendly): 14.0% conversion
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="k">-</span><span class="w"> </span>Improvement: +16.7%
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="k">-</span><span class="w"> </span>Confidence: 94%
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="k">-</span><span class="w"> </span>Sample size: 5,000
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="gu">### Learnings</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="k">-</span><span class="w"> </span>Users respond better to casual language
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="k">-</span><span class="w"> </span>Effect stronger for new users
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="k">-</span><span class="w"> </span>No negative impact on support tickets
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="gu">### Next Steps</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="k">-</span><span class="w"> </span>Test even more casual tone
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="k">-</span><span class="w"> </span>Apply friendly tone to checkout prompt
+</code></pre></div>
+<h2 id="_21">Частые паттерны</h2>
+<h3 id="_22">Победитель по всем метрикам</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Conv. Rate: B wins
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>Revenue: B wins
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>Engagement: B wins
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>→ Easy decision, deploy B
+</code></pre></div>
+<h3 id="_23">Компромиссы</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Conv. Rate: B wins (+20%)
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>Revenue: A wins (+5%)
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Support tickets: B worse (+15%)
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>→ Consider business priorities
+</code></pre></div>
+<p>Вопросы для обдумывания:
+- Какая метрика важнее всего?
+- Можно ли исправить недостатки B?
+- Каков чистый бизнес-эффект?</p>
+<h3 id="_24">Победители по сегментам</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Overall: No difference
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>New users: B wins
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>Power users: A wins
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>→ Consider personalization
+</code></pre></div>
+<p>Варианты:
+- Развернуть B (приоритет привлечения)
+- Развернуть A (приоритет удержания)
+- Использовать разные промпты для разных сегментов</p>
+<h2 id="_25">После теста</h2>
+<h3 id="b">Если B побеждает</h3>
+<ol>
+<li>Разверните версию B</li>
+<li>Задокументируйте выводы</li>
+<li>Запланируйте следующий тест (можно ли B сделать ещё лучше?)</li>
+</ol>
+<h3 id="a">Если A побеждает</h3>
+<ol>
+<li>Оставьте версию A</li>
+<li>Проанализируйте, почему B не сработал</li>
+<li>Сформируйте новую гипотезу</li>
+<li>Протестируйте другой подход</li>
+</ol>
+<h3 id="_26">Если ничья</h3>
+<ol>
+<li>Оставьте текущую версию</li>
+<li>Тестируйте что-то более отличающееся</li>
+<li>Подумайте, стоит ли изменение усилий</li>
+</ol>
+<h2 id="_27">Экспорт и отчётность</h2>
+<h3 id="_28">Экспорт результатов</h3>
+<ol>
+<li>Нажмите <strong>Экспорт</strong> в результатах теста</li>
+<li>Выберите формат:</li>
+<li>CSV (сырые данные)</li>
+<li>PDF (отчёт)</li>
+<li>Скачайте</li>
+</ol>
+<h3 id="_29">Поделитесь с заинтересованными сторонами</h3>
+<p>Результаты включают:
+- Сводную статистику
+- Доверительные интервалы
+- Визуальные графики
+- Разбивку по сегментам</p>
+<h2 id="_30">Устранение неполадок</h2>
+<h3 id="_31">Результаты не соответствуют ожиданиям</h3>
+<ul>
+<li>Проверьте, работает ли отслеживание событий</li>
+<li>Убедитесь, что trace_id связаны</li>
+<li>Поищите ошибки в любой из версий</li>
+<li>Проверьте внешние факторы (сезонность, сбои)</li>
+</ul>
+<h3 id="_32">Показатель конверсии равен нулю</h3>
+<ul>
+<li>События не отслеживаются</li>
+<li>Выбрано неверное событие успеха</li>
+<li>Проблемы с API-ключом</li>
+<li>Проверьте вкладку «Недавние события»</li>
+</ul>
+<h3 id="_33">Результаты кажутся неправильными</h3>
+<ul>
+<li>Размер выборки слишком мал</li>
+<li>Длительность теста слишком короткая</li>
+<li>Внешние факторы влияют на результаты</li>
+<li>Проверьте качество данных</li>
+</ul>
+<h2 id="_34">Следующие шаги</h2>
+<ul>
+<li><a href="../statistics/">Статистическая значимость</a> — Глубже в математику</li>
+<li><a href="../creating-tests/">Создание тестов</a> — Проведите следующий эксперимент</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Навигация по странице">
+        <a href="../creating-tests/" class="btn btn-neutral float-left" title="Creating Tests"><span class="icon icon-circle-arrow-left"></span> Назад</a>
+        <a href="../statistics/" class="btn btn-neutral float-right" title="Statistical Significance">Вперед <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Собрано в <a href="https://www.mkdocs.org/">MkDocs</a> с использованием <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы</a> от <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Версии">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../creating-tests/" style="color: #fcfcfc">&laquo; Назад</a></span>
+    
+    
+      <span><a href="../statistics/" style="color: #fcfcfc">Вперед &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../js/lang-switcher.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

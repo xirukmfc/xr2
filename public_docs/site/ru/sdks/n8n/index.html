@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/ru/sdks/n8n/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>n8n - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "n8n";
+        var mkdocs_page_input_path = "ru/sdks/n8n.md";
+        var mkdocs_page_url = "/ru/sdks/n8n/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../" class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" title="Введите поисковый запрос" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Навигационное меню">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">n8n</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Мобильная версия навигации">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../" class="icon icon-home" aria-label="Документация"></a></li>
+          <li class="breadcrumb-item">API & SDKs</li>
+      <li class="breadcrumb-item active">n8n</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="-">---</h2>
+<h1 id="n8n">Интеграция с n8n</h1>
+<p>Пользовательская нода для n8n, интегрирующаяся с API xR2.</p>
+<p><a href="https://www.npmjs.com/package/n8n-nodes-xr2"><img alt="npm" src="https://img.shields.io/npm/v/n8n-nodes-xr2" /></a></p>
+<h2 id="_1">Установка</h2>
+<h3 id="n8n_1">Через интерфейс n8n (рекомендуется)</h3>
+<ol>
+<li>Перейдите в <strong>Settings</strong> → <strong>Community Nodes</strong></li>
+<li>Нажмите <strong>Install</strong></li>
+<li>Введите <code>n8n-nodes-xr2</code></li>
+<li>Нажмите <strong>Install</strong></li>
+<li>Перезапустите n8n</li>
+</ol>
+<h3 id="_2">Ручная установка</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>~/.n8n/custom
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>npm<span class="w"> </span>install<span class="w"> </span>n8n-nodes-xr2
+</code></pre></div>
+<h2 id="_3">Настройка учетных данных</h2>
+<ol>
+<li>В n8n перейдите в <strong>Settings</strong> → <strong>Credentials</strong></li>
+<li>Нажмите <strong>New</strong> → найдите "xR2 API"</li>
+<li>Вставьте ваш API-ключ (из <a href="https://xr2.uk/api-keys">xr2.uk/api-keys</a>)</li>
+<li>Нажмите <strong>Save</strong></li>
+</ol>
+<h2 id="_4">Доступные операции</h2>
+<table>
+<thead>
+<tr>
+<th>Ресурс</th>
+<th>Операция</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Key</td>
+<td>Check</td>
+<td>Проверка API-ключа</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Get</td>
+<td>Получение промпта по slug</td>
+</tr>
+<tr>
+<td>Event</td>
+<td>Track</td>
+<td>Отправка аналитического события</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">Получение промпта</h2>
+<p>Получает промпт из xR2.</p>
+<p><strong>Параметры:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Обязательный</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Slug</td>
+<td>Да</td>
+<td>Идентификатор промпта</td>
+</tr>
+<tr>
+<td>Version Number</td>
+<td>Нет</td>
+<td>Конкретная версия (0 = последняя)</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Нет</td>
+<td><code>production</code>, <code>testing</code>, <code>draft</code> и т.д.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Вывод:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;slug&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;welcome&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;system_prompt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;You are a helpful assistant&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">&quot;user_prompt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hello {{name}}&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">&quot;variables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">],</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">&quot;trace_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;evt_xxx&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="nt">&quot;version_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="_6">Отслеживание событий</h2>
+<p>Отправляет аналитическое событие в xR2.</p>
+<p><strong>Параметры:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Обязательный</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trace ID</td>
+<td>Да</td>
+<td>Из ответа Get Prompt</td>
+</tr>
+<tr>
+<td>Event Name</td>
+<td>Да</td>
+<td>Название события из дашборда</td>
+</tr>
+<tr>
+<td>User ID</td>
+<td>Нет</td>
+<td>Идентификатор пользователя</td>
+</tr>
+<tr>
+<td>Session ID</td>
+<td>Нет</td>
+<td>Идентификатор сессии</td>
+</tr>
+<tr>
+<td>Value</td>
+<td>Нет</td>
+<td>Числовое значение</td>
+</tr>
+<tr>
+<td>Currency</td>
+<td>Нет</td>
+<td>Код валюты</td>
+</tr>
+<tr>
+<td>Metadata</td>
+<td>Нет</td>
+<td>JSON-объект</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_7">Примеры сценариев</h2>
+<h3 id="_8">Базовый сценарий</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>[Manual Trigger] → [xR2: Get Prompt] → [xR2: Track Event]
+</code></pre></div>
+<ol>
+<li><strong>Нода xR2</strong> (Get Prompt):</li>
+<li>
+<p>Slug: <code>welcome</code></p>
+</li>
+<li>
+<p><strong>Нода xR2</strong> (Track Event):</p>
+</li>
+<li>Trace ID: <code>{{ $('xR2').item.json.trace_id }}</code></li>
+<li>Event Name: <code>sign_up</code></li>
+<li>User ID: <code>user_123</code></li>
+</ol>
+<h3 id="openai">С OpenAI</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>[Webhook] → [xR2: Get Prompt] → [OpenAI] → [xR2: Track Event]
+</code></pre></div>
+<ol>
+<li>Получите промпт из xR2</li>
+<li>Используйте <code>system_prompt</code> и <code>user_prompt</code> в ноде OpenAI</li>
+<li>Отследите событие конверсии</li>
+</ol>
+<h2 id="_9">Доступ к данным в выражениях</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// Get prompt content</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="p">{{</span><span class="w"> </span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;xR2&#39;</span><span class="p">).</span><span class="nx">item</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">user_prompt</span><span class="w"> </span><span class="p">}}</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1">// Get trace_id</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">{{</span><span class="w"> </span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;xR2&#39;</span><span class="p">).</span><span class="nx">item</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">trace_id</span><span class="w"> </span><span class="p">}}</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1">// Get model config</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">{{</span><span class="w"> </span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;xR2&#39;</span><span class="p">).</span><span class="nx">item</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">model_config</span><span class="p">.</span><span class="nx">model_name</span><span class="w"> </span><span class="p">}}</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="c1">// Get variables</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="p">{{</span><span class="w"> </span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;xR2&#39;</span><span class="p">).</span><span class="nx">item</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">variables</span><span class="w"> </span><span class="p">}}</span>
+</code></pre></div>
+<h2 id="_10">Устранение неполадок</h2>
+<h3 id="_11">Нода не отображается</h3>
+<ul>
+<li>Перезапустите n8n после установки</li>
+<li>Проверьте наличие пакета в <code>~/.n8n/custom/node_modules/</code></li>
+<li>Запустите <code>n8n start --verbose</code> для просмотра ошибок</li>
+</ul>
+<h3 id="_12">Ошибка аутентификации</h3>
+<ul>
+<li>Убедитесь, что API-ключ корректен</li>
+<li>Убедитесь, что ключ начинается с <code>xr2_prod_</code></li>
+<li>Проверьте, что ключ активен в дашборде</li>
+</ul>
+<h3 id="_13">Промпт не найден</h3>
+<ul>
+<li>Убедитесь, что slug существует на <a href="https://xr2.uk/prompts">xr2.uk/prompts</a></li>
+<li>Убедитесь, что у промпта есть развернутая версия</li>
+<li>Проверьте правильность написания</li>
+</ul>
+<h2 id="_14">Ссылки</h2>
+<ul>
+<li>npm: <a href="https://www.npmjs.com/package/n8n-nodes-xr2">https://www.npmjs.com/package/n8n-nodes-xr2</a></li>
+<li>Сообщество n8n: <a href="https://community.n8n.io">https://community.n8n.io</a></li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Навигация по странице">
+        <a href="../nodejs/" class="btn btn-neutral float-left" title="Node.js SDK"><span class="icon icon-circle-arrow-left"></span> Назад</a>
+        <a href="../make/" class="btn btn-neutral float-right" title="Make.com">Вперед <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Собрано в <a href="https://www.mkdocs.org/">MkDocs</a> с использованием <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы</a> от <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Версии">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../nodejs/" style="color: #fcfcfc">&laquo; Назад</a></span>
+    
+    
+      <span><a href="../make/" style="color: #fcfcfc">Вперед &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../js/lang-switcher.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

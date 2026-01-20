@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/ru/prompts/variables/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Variables - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Variables";
+        var mkdocs_page_input_path = "ru/prompts/variables.md";
+        var mkdocs_page_url = "/ru/prompts/variables/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../" class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" title="Введите поисковый запрос" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Навигационное меню">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Variables</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">Синтаксис переменных</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_3">Автоматическое обнаружение</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_4">Определение переменных</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">Имя</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_6">Тип</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_7">Значение по умолчанию</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_8">Обязательность</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_9">Состояния переменных</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_10">Использование переменных в промптах</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_11">Базовое использование</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_12">Списки и массивы</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_13">Лучшие практики</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1">1. Соглашения об именовании</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2">2. Минимизируйте количество переменных</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3">3. Предоставляйте контекст</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#4">4. Обрабатывайте отсутствующие значения</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#api-">Переменные в API-ответе</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_14">Синхронизация переменных</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_15">Следующие шаги</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Мобильная версия навигации">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../" class="icon icon-home" aria-label="Документация"></a></li>
+          <li class="breadcrumb-item">Prompt Editor</li>
+      <li class="breadcrumb-item active">Variables</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">Переменные</h1>
+<p>Переменные позволяют внедрять динамический контент в промпты во время выполнения. Это ключ к созданию переиспользуемых промптов для различных контекстов.</p>
+<h2 id="_2">Синтаксис переменных</h2>
+<p>Используйте двойные фигурные скобки для определения переменных:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Hello {{customer_name}}, welcome to {{company_name}}!
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Your order #{{order_id}} will arrive on {{delivery_date}}.
+</code></pre></div>
+<h2 id="_3">Автоматическое обнаружение</h2>
+<p>Редактор автоматически обнаруживает переменные по мере ввода:</p>
+<ol>
+<li>Введите <code>{{variable_name}}</code> в любом поле промпта</li>
+<li>Переменная появится в левой панели под <strong>Variables</strong></li>
+<li>Желтый индикатор показывает, что она <strong>не определена</strong></li>
+<li>Нажмите, чтобы определить ее свойства</li>
+</ol>
+<h2 id="_4">Определение переменных</h2>
+<p>Нажмите на любую переменную для настройки:</p>
+<h3 id="_5">Имя</h3>
+<p>Идентификатор переменной. Используйте <code>snake_case</code>:</p>
+<ul>
+<li><code>customer_name</code></li>
+<li><code>order_total</code></li>
+<li><code>is_premium_user</code></li>
+</ul>
+<h3 id="_6">Тип</h3>
+<p>Выберите тип данных:</p>
+<table>
+<thead>
+<tr>
+<th>Тип</th>
+<th>Случай использования</th>
+<th>Пример</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>String</strong></td>
+<td>Текстовые значения</td>
+<td>Имена, описания, сообщения</td>
+</tr>
+<tr>
+<td><strong>Number</strong></td>
+<td>Числовые значения</td>
+<td>Цены, количества, ID</td>
+</tr>
+<tr>
+<td><strong>Boolean</strong></td>
+<td>Флаги true/false</td>
+<td><code>is_subscribed</code>, <code>has_discount</code></td>
+</tr>
+<tr>
+<td><strong>Array</strong></td>
+<td>Списки элементов</td>
+<td>Списки продуктов, теги</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">Значение по умолчанию</h3>
+<p>Что использовать, если значение не предоставлено:</p>
+<ul>
+<li>String: <code>"Guest"</code></li>
+<li>Number: <code>0</code></li>
+<li>Boolean: <code>false</code></li>
+<li>Array: <code>[]</code></li>
+</ul>
+<h3 id="_8">Обязательность</h3>
+<p>Отметьте как обязательную, чтобы гарантировать, что API-вызов включает эту переменную.</p>
+<h2 id="_9">Состояния переменных</h2>
+<p>Переменные имеют три состояния:</p>
+<table>
+<thead>
+<tr>
+<th>Состояние</th>
+<th>Индикатор</th>
+<th>Значение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Определена</strong></td>
+<td>Зеленый</td>
+<td>Полностью настроена с типом и значением по умолчанию</td>
+</tr>
+<tr>
+<td><strong>Не определена</strong></td>
+<td>Желтый</td>
+<td>Обнаружена в тексте, но не настроена</td>
+</tr>
+<tr>
+<td><strong>Не используется</strong></td>
+<td>Серый</td>
+<td>Определена, но не используется ни в одном промпте</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Предупреждение:</strong> Неопределенные переменные будут работать, но могут вызвать неожиданное поведение. Всегда определяйте переменные перед развертыванием.</p>
+</blockquote>
+<h2 id="_10">Использование переменных в промптах</h2>
+<h3 id="_11">Базовое использование</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>System: You are assisting {{customer_name}}.
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>User: The customer asks: {{question}}
+</code></pre></div>
+<h3 id="_12">Списки и массивы</h3>
+<p>Для переменных-массивов:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Recent orders: {{recent_orders}}
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Interests: {{user_interests}}
+</code></pre></div>
+<p>Передавайте массивы как JSON в API-вызове:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;recent_orders&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Order #123&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Order #456&quot;</span><span class="p">],</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">&quot;user_interests&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;electronics&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;gaming&quot;</span><span class="p">]</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="_13">Лучшие практики</h2>
+<h3 id="1">1. Соглашения об именовании</h3>
+<p><strong>Правильно:</strong></p>
+<ul>
+<li><code>customer_name</code> — понятно, описательно</li>
+<li><code>order_total_usd</code> — включает единицу измерения</li>
+<li><code>is_returning_customer</code> — префикс для boolean</li>
+</ul>
+<p><strong>Неправильно:</strong></p>
+<ul>
+<li><code>n</code> — слишком коротко</li>
+<li><code>customerNameValue</code> — camelCase</li>
+<li><code>x1</code> — бессмысленно</li>
+</ul>
+<h3 id="2">2. Минимизируйте количество переменных</h3>
+<p>Включайте только переменные, которые действительно влияют на ответ AI:</p>
+<p><strong>Необходимо:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>{{customer_tier}} — affects recommendations
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>{{language}} — affects response language
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>{{product_category}} — affects expertise needed
+</code></pre></div></p>
+<p><strong>Не нужно:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>{{request_id}} — AI doesn&#39;t use this
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>{{timestamp}} — rarely relevant
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>{{internal_user_id}} — no impact on response
+</code></pre></div></p>
+<h3 id="3">3. Предоставляйте контекст</h3>
+<p>Добавляйте описания в определениях переменных, чтобы члены команды понимали их назначение:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Variable: order_status
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Type: String
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>Default: &quot;pending&quot;
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>Description: Current order status (pending, shipped, delivered, cancelled)
+</code></pre></div>
+<h3 id="4">4. Обрабатывайте отсутствующие значения</h3>
+<p>Всегда устанавливайте разумные значения по умолчанию:</p>
+<table>
+<thead>
+<tr>
+<th>Переменная</th>
+<th>Плохое значение</th>
+<th>Хорошее значение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>customer_name</code></td>
+<td><code>""</code></td>
+<td><code>"valued customer"</code></td>
+</tr>
+<tr>
+<td><code>discount_percent</code></td>
+<td><code>null</code></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>undefined</td>
+<td><code>"en"</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="api-">Переменные в API-ответе</h2>
+<p>При получении промпта через API ответ включает определения переменных:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;slug&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;welcome-message&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">&quot;user_prompt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hello {{customer_name}}!&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">&quot;variables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;customer_name&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">      </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;valued customer&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">      </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="p">}</span>
+</code></pre></div>
+<p>Используйте это для валидации входных данных в вашем приложении перед вызовом LLM.</p>
+<h2 id="_14">Синхронизация переменных</h2>
+<p>Если вы добавляете или удаляете переменные в тексте промпта:</p>
+<ol>
+<li>Новые переменные автоматически появляются в панели</li>
+<li>Удаленные переменные становятся <strong>Не используется</strong></li>
+<li>Нажмите <strong>Sync</strong>, чтобы очистить неиспользуемые переменные</li>
+</ol>
+<h2 id="_15">Следующие шаги</h2>
+<ul>
+<li><a href="../testing/">Тестирование промптов</a> — Тестируйте переменные с реальными значениями</li>
+<li><a href="../versions/">Версии и развертывание</a> — Зафиксируйте определения переменных</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Навигация по странице">
+        <a href="../creating-prompts/" class="btn btn-neutral float-left" title="Creating Prompts"><span class="icon icon-circle-arrow-left"></span> Назад</a>
+        <a href="../versions/" class="btn btn-neutral float-right" title="Versions & Deployment">Вперед <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Собрано в <a href="https://www.mkdocs.org/">MkDocs</a> с использованием <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы</a> от <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Версии">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../creating-prompts/" style="color: #fcfcfc">&laquo; Назад</a></span>
+    
+    
+      <span><a href="../versions/" style="color: #fcfcfc">Вперед &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../js/lang-switcher.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

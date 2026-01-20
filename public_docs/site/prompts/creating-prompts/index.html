@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/prompts/creating-prompts/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Creating Prompts - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Creating Prompts";
+        var mkdocs_page_input_path = "en/prompts/creating-prompts.md";
+        var mkdocs_page_url = "/prompts/creating-prompts/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Creating Prompts</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#creating-a-new-prompt">Creating a New Prompt</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#writing-effective-prompts">Writing Effective Prompts</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#system-prompt">System Prompt</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#user-prompt">User Prompt</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#assistant-prompt-optional">Assistant Prompt (Optional)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#organizing-with-tags">Organizing with Tags</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#prompt-structure-best-practices">Prompt Structure Best Practices</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-keep-system-prompts-focused">1. Keep System Prompts Focused</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-use-variables-strategically">2. Use Variables Strategically</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3-test-edge-cases">3. Test Edge Cases</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#templates">Templates</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Prompt Editor</li>
+      <li class="breadcrumb-item active">Creating Prompts</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="creating-prompts">Creating Prompts</h1>
+<p>Learn how to create and structure prompts in xR2.</p>
+<h2 id="creating-a-new-prompt">Creating a New Prompt</h2>
+<ol>
+<li>Go to the <strong>Prompts</strong> page</li>
+<li>Click <strong>+ New Prompt</strong> button</li>
+<li>Fill in the required fields:<ul>
+<li><strong>Name</strong> — Human-readable title (e.g., "Customer Support Bot")</li>
+<li><strong>Slug</strong> — Unique API identifier (e.g., <code>customer-support</code>)</li>
+</ul>
+</li>
+<li>Click <strong>Create</strong></li>
+</ol>
+<blockquote>
+<p>ℹ️ <strong>Info:</strong> The slug cannot be changed after creation. Choose it carefully — it's what you'll use in API calls.</p>
+</blockquote>
+<h2 id="writing-effective-prompts">Writing Effective Prompts</h2>
+<h3 id="system-prompt">System Prompt</h3>
+<p>The system prompt defines the AI's behavior, personality, and constraints. Best practices:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>You are a customer support assistant for TechStore.
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Your responsibilities:
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>- Answer product questions accurately
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>- Help with order status and returns
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>- Escalate complex issues to human agents
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>Guidelines:
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>- Be friendly but professional
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>- Keep responses under 150 words
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>- Never discuss competitor products
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>- If unsure, say &quot;Let me connect you with a specialist&quot;
+</code></pre></div>
+<p><strong>Tips:</strong></p>
+<ul>
+<li>Be specific about the AI's role</li>
+<li>List clear dos and don'ts</li>
+<li>Define response format and length</li>
+<li>Specify edge case behavior</li>
+</ul>
+<h3 id="user-prompt">User Prompt</h3>
+<p>The user prompt is a template that gets filled with dynamic data. Use variables for personalization:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Customer: {{customer_name}}
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Membership: {{membership_tier}}
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Previous purchases: {{purchase_count}}
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>Question: {{question}}
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>Please provide a helpful response appropriate for their membership level.
+</code></pre></div>
+<p><strong>Tips:</strong></p>
+<ul>
+<li>Use descriptive variable names</li>
+<li>Provide context the AI needs</li>
+<li>Structure input clearly</li>
+</ul>
+<h3 id="assistant-prompt-optional">Assistant Prompt (Optional)</h3>
+<p>Pre-fill the start of the AI's response to guide format:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Based on your {{membership_tier}} membership, here&#39;s my response:
+</code></pre></div>
+<p>This ensures responses start consistently.</p>
+<h2 id="organizing-with-tags">Organizing with Tags</h2>
+<p>Tags help you categorize and filter prompts:</p>
+<ol>
+<li>Click <strong>Add Tag</strong> in the left panel</li>
+<li>Enter tag name (e.g., "onboarding", "support", "sales")</li>
+<li>Choose a color</li>
+<li>Click <strong>Save</strong></li>
+</ol>
+<p><strong>Common tag strategies:</strong></p>
+<ul>
+<li>By product area: <code>checkout</code>, <code>profile</code>, <code>search</code></li>
+<li>By team: <code>marketing</code>, <code>support</code>, <code>product</code></li>
+<li>By stage: <code>experimental</code>, <code>production</code>, <code>deprecated</code></li>
+</ul>
+<h2 id="prompt-structure-best-practices">Prompt Structure Best Practices</h2>
+<h3 id="1-keep-system-prompts-focused">1. Keep System Prompts Focused</h3>
+<p>One responsibility per prompt. Instead of a mega-prompt that does everything, create specialized prompts:</p>
+<ul>
+<li><code>support-general</code> — General inquiries</li>
+<li><code>support-returns</code> — Return requests</li>
+<li><code>support-technical</code> — Technical issues</li>
+</ul>
+<h3 id="2-use-variables-strategically">2. Use Variables Strategically</h3>
+<p>Only include variables that change the AI's behavior:</p>
+<p><strong>Good:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Customer tier: {{tier}} — affects discount eligibility
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Order history: {{recent_orders}} — for context
+</code></pre></div></p>
+<p><strong>Avoid:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Current timestamp: {{timestamp}} — rarely useful
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Request ID: {{request_id}} — AI doesn&#39;t need this
+</code></pre></div></p>
+<h3 id="3-test-edge-cases">3. Test Edge Cases</h3>
+<p>Before deploying, test with:</p>
+<ul>
+<li>Empty variable values</li>
+<li>Very long inputs</li>
+<li>Unexpected input types</li>
+<li>Edge case scenarios</li>
+</ul>
+<h2 id="templates">Templates</h2>
+<p>xR2 provides starter templates for common use cases:</p>
+<table>
+<thead>
+<tr>
+<th>Template</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Customer Support</strong></td>
+<td>Help desk and FAQ responses</td>
+</tr>
+<tr>
+<td><strong>Content Generator</strong></td>
+<td>Blog posts, social media, emails</td>
+</tr>
+<tr>
+<td><strong>Data Extractor</strong></td>
+<td>Parse and structure unstructured text</td>
+</tr>
+<tr>
+<td><strong>Classifier</strong></td>
+<td>Categorize inputs into predefined classes</td>
+</tr>
+<tr>
+<td><strong>Summarizer</strong></td>
+<td>Condense long text into key points</td>
+</tr>
+</tbody>
+</table>
+<p>Access templates when creating a new prompt or from the <strong>Templates</strong> section.</p>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><a href="../variables/">Variables</a> — Configure dynamic content</li>
+<li><a href="../testing/">Testing Prompts</a> — Validate before deployment</li>
+<li><a href="../versions/">Versions &amp; Deployment</a> — Ship to production</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../overview/" class="btn btn-neutral float-left" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../variables/" class="btn btn-neutral float-right" title="Variables">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../overview/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../variables/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/lang-switcher.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

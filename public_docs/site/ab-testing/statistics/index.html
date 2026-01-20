@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/ab-testing/statistics/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Statistical Significance - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Statistical Significance";
+        var mkdocs_page_input_path = "en/ab-testing/statistics.md";
+        var mkdocs_page_url = "/ab-testing/statistics/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Statistical Significance</a>
+    <ul class="current">
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">A/B Testing</li>
+      <li class="breadcrumb-item active">Statistical Significance</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="-">---</h2>
+<h1 id="statistical-significance">Statistical Significance</h1>
+<p>Understanding statistical significance helps you make confident decisions about A/B test results.</p>
+<h2 id="what-is-statistical-significance">What is Statistical Significance?</h2>
+<p>When you run an A/B test, you see a difference between versions:
+- Version A: 12% conversion
+- Version B: 14% conversion</p>
+<p>But is this difference <strong>real</strong> or just <strong>random chance</strong>?</p>
+<p>Statistical significance answers: "How confident are we that B is actually better than A?"</p>
+<h2 id="the-problem-of-randomness">The Problem of Randomness</h2>
+<p>Imagine flipping a coin 10 times:
+- You might get 6 heads, 4 tails
+- Does that mean the coin is biased?
+- No — with only 10 flips, this is normal variation</p>
+<p>The same applies to A/B tests:
+- Small sample → results can be misleading
+- Large sample → results are reliable</p>
+<h2 id="confidence-level-explained">Confidence Level Explained</h2>
+<p>The confidence level (e.g., 95%) means:</p>
+<blockquote>
+<p>"If we ran this test 100 times with no real difference, we'd see a difference this large only 5 times."</p>
+</blockquote>
+<p>In other words:
+- <strong>95% confidence</strong> = 5% chance the result is random
+- <strong>99% confidence</strong> = 1% chance the result is random</p>
+<h3 id="industry-standards">Industry Standards</h3>
+<table>
+<thead>
+<tr>
+<th>Confidence</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>80%</td>
+<td>Early exploration, quick decisions</td>
+</tr>
+<tr>
+<td>90%</td>
+<td>Standard product decisions</td>
+</tr>
+<tr>
+<td><strong>95%</strong></td>
+<td><strong>Industry standard</strong></td>
+</tr>
+<tr>
+<td>99%</td>
+<td>High-stakes decisions</td>
+</tr>
+<tr>
+<td>99.9%</td>
+<td>Critical changes (payments, security)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="how-xr2-calculates-significance">How xR2 Calculates Significance</h2>
+<p>xR2 uses a <strong>two-proportion z-test</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>For each variant:
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>- p₁ = conversions_A / requests_A
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>- p₂ = conversions_B / requests_B
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>Calculate:
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>- Pooled proportion
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>- Standard error
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>- Z-score
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>- P-value
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>- Confidence level = 1 - p-value
+</code></pre></div>
+<p>You don't need to do this math — xR2 shows the confidence level automatically.</p>
+<h2 id="sample-size-requirements">Sample Size Requirements</h2>
+<h3 id="minimum-sample-size">Minimum Sample Size</h3>
+<p>The required sample size depends on:</p>
+<ol>
+<li><strong>Baseline conversion rate</strong> — Your current conversion rate</li>
+<li><strong>Minimum detectable effect</strong> — Smallest improvement worth detecting</li>
+<li><strong>Confidence level</strong> — How sure you want to be</li>
+<li><strong>Statistical power</strong> — Ability to detect real differences (usually 80%)</li>
+</ol>
+<h3 id="sample-size-calculator">Sample Size Calculator</h3>
+<table>
+<thead>
+<tr>
+<th>Baseline Rate</th>
+<th>5% Improvement</th>
+<th>10% Improvement</th>
+<th>20% Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5%</td>
+<td>31,000</td>
+<td>8,000</td>
+<td>2,000</td>
+</tr>
+<tr>
+<td>10%</td>
+<td>15,000</td>
+<td>4,000</td>
+<td>1,000</td>
+</tr>
+<tr>
+<td>20%</td>
+<td>6,000</td>
+<td>1,600</td>
+<td>400</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example</strong>: If your current conversion is 10% and you want to detect a 10% improvement (10% → 11%), you need ~4,000 samples per variant.</p>
+<h3 id="quick-rules-of-thumb">Quick Rules of Thumb</h3>
+<ul>
+<li><strong>Minimum</strong>: 1,000 samples per variant</li>
+<li><strong>Standard</strong>: 2,500-5,000 per variant</li>
+<li><strong>High confidence</strong>: 10,000+ per variant</li>
+</ul>
+<h2 id="interpreting-results">Interpreting Results</h2>
+<h3 id="strong-evidence-95">Strong Evidence (≥95%)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Confidence: 97%
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Version A: 12.1%
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Version B: 14.8%
+</code></pre></div>
+<p>✅ <strong>Safe to conclude</strong>: B is better than A</p>
+<h3 id="weak-evidence-80-95">Weak Evidence (80-95%)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Confidence: 88%
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Version A: 12.1%
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Version B: 13.5%
+</code></pre></div>
+<p>⚠️ <strong>Proceed with caution</strong>:
+- B might be better
+- Could be random variation
+- Consider running longer</p>
+<h3 id="no-evidence-80">No Evidence (&lt;80%)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Confidence: 65%
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Version A: 12.1%
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Version B: 12.8%
+</code></pre></div>
+<p>❌ <strong>Cannot conclude anything</strong>:
+- Difference is likely random
+- Need more samples
+- Or the versions are truly equal</p>
+<h2 id="common-mistakes">Common Mistakes</h2>
+<h3 id="1-stopping-too-early">1. Stopping Too Early</h3>
+<p><strong>Wrong:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Day 1: B is winning 60% vs 40%! Ship it!
+</code></pre></div></p>
+<p>Early results are unreliable. A test that shows B winning by 20% on day 1 might end with A winning by 5%.</p>
+<p><strong>Right:</strong> Wait for planned sample size or confidence level.</p>
+<h3 id="2-peeking-and-deciding">2. Peeking and Deciding</h3>
+<p><strong>Wrong:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Check results daily.
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>When B looks good, stop the test.
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>When A looks good, keep running.
+</code></pre></div></p>
+<p>This inflates false positive rates dramatically.</p>
+<p><strong>Right:</strong> Set sample size upfront, don't peek, analyze at the end.</p>
+<h3 id="3-ignoring-practical-significance">3. Ignoring Practical Significance</h3>
+<p><strong>Wrong:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>A: 10.00%
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>B: 10.05%
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>Confidence: 99%
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>Ship B because it&#39;s statistically significant!
+</code></pre></div></p>
+<p>A 0.05% improvement might not be worth the complexity.</p>
+<p><strong>Right:</strong> Consider if the difference is <strong>practically</strong> meaningful.</p>
+<h3 id="4-multiple-comparisons">4. Multiple Comparisons</h3>
+<p><strong>Wrong:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Test 20 variations.
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>One shows 95% confidence.
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>Ship it!
+</code></pre></div></p>
+<p>With 20 variations at 95% confidence, you expect 1 false positive.</p>
+<p><strong>Right:</strong> Adjust for multiple comparisons or test fewer variations.</p>
+<h2 id="understanding-p-values">Understanding P-Values</h2>
+<p>The <strong>p-value</strong> is the probability of seeing results this extreme if there's no real difference.</p>
+<table>
+<thead>
+<tr>
+<th>P-Value</th>
+<th>Confidence</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.20</td>
+<td>80%</td>
+<td>Weak evidence</td>
+</tr>
+<tr>
+<td>0.10</td>
+<td>90%</td>
+<td>Moderate evidence</td>
+</tr>
+<tr>
+<td><strong>0.05</strong></td>
+<td><strong>95%</strong></td>
+<td><strong>Standard threshold</strong></td>
+</tr>
+<tr>
+<td>0.01</td>
+<td>99%</td>
+<td>Strong evidence</td>
+</tr>
+<tr>
+<td>0.001</td>
+<td>99.9%</td>
+<td>Very strong evidence</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Lower p-value = more confident the difference is real</strong></p>
+<h2 id="confidence-intervals">Confidence Intervals</h2>
+<p>Instead of just a point estimate, confidence intervals show the range of likely values:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Version B improvement: 16.7%
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>95% Confidence Interval: [8.2%, 25.1%]
+</code></pre></div>
+<p>This means:
+- Best estimate: B is 16.7% better
+- We're 95% sure the true improvement is between 8.2% and 25.1%
+- At minimum, B is probably 8.2% better</p>
+<h3 id="interpreting-confidence-intervals">Interpreting Confidence Intervals</h3>
+<p><strong>Wide interval</strong> (e.g., [-5%, +40%]):
+- High uncertainty
+- Need more samples</p>
+<p><strong>Narrow interval</strong> (e.g., [14%, 19%]):
+- High certainty
+- Reliable result</p>
+<p><strong>Interval crosses zero</strong> (e.g., [-2%, +8%]):
+- Cannot conclude B is better
+- Might be worse, equal, or better</p>
+<h2 id="power-analysis">Power Analysis</h2>
+<p><strong>Statistical power</strong> = probability of detecting a real effect.</p>
+<ul>
+<li>Low power (50%) → Might miss real improvements</li>
+<li>Standard power (80%) → Good balance</li>
+<li>High power (90%+) → Rarely miss improvements</li>
+</ul>
+<h3 id="underpowered-tests">Underpowered Tests</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Actual improvement: 10%
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>Sample size: 500
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>Power: 40%
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>Result: &quot;No significant difference&quot;
+</code></pre></div>
+<p>The test was too small to detect the real 10% improvement.</p>
+<h3 id="properly-powered-tests">Properly Powered Tests</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Actual improvement: 10%
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>Sample size: 5,000
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>Power: 90%
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>Result: &quot;B is significantly better (12% improvement, 96% confidence)&quot;
+</code></pre></div>
+<h2 id="making-decisions">Making Decisions</h2>
+<h3 id="decision-framework">Decision Framework</h3>
+<table>
+<thead>
+<tr>
+<th>Confidence</th>
+<th>Effect Size</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>≥95%</td>
+<td>Large</td>
+<td>Deploy B</td>
+</tr>
+<tr>
+<td>≥95%</td>
+<td>Small</td>
+<td>Consider if worth it</td>
+</tr>
+<tr>
+<td>80-95%</td>
+<td>Large</td>
+<td>Run longer or deploy B</td>
+</tr>
+<tr>
+<td>80-95%</td>
+<td>Small</td>
+<td>Run longer</td>
+</tr>
+<tr>
+<td>&lt;80%</td>
+<td>Any</td>
+<td>Run longer or abandon</td>
+</tr>
+</tbody>
+</table>
+<h3 id="when-results-are-inconclusive">When Results Are Inconclusive</h3>
+<p>Options:
+1. <strong>Run longer</strong> — More samples = more confidence
+2. <strong>Accept uncertainty</strong> — Deploy if risk is low
+3. <strong>Abandon test</strong> — If no difference is likely
+4. <strong>Test bigger changes</strong> — Subtle changes are hard to detect</p>
+<h2 id="practical-tips">Practical Tips</h2>
+<h3 id="1-calculate-sample-size-before-starting">1. Calculate Sample Size Before Starting</h3>
+<p>Use the table above or online calculators to determine required samples.</p>
+<h3 id="2-set-a-stopping-rule">2. Set a Stopping Rule</h3>
+<p>Before starting:
+- "We'll run until 5,000 samples OR 95% confidence"
+- Stick to it</p>
+<h3 id="3-dont-cherry-pick">3. Don't Cherry-Pick</h3>
+<p>If you run many tests, some will show false positives. Don't just report the "wins."</p>
+<h3 id="4-consider-business-impact">4. Consider Business Impact</h3>
+<p>A 1% improvement with 99% confidence might matter less than a 20% improvement with 90% confidence.</p>
+<h3 id="5-document-and-learn">5. Document and Learn</h3>
+<p>Even "failed" tests teach you something. Document all results.</p>
+<h2 id="summary">Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Key Point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Statistical Significance</strong></td>
+<td>How confident the difference is real</td>
+</tr>
+<tr>
+<td><strong>Confidence Level</strong></td>
+<td>Industry standard is 95%</td>
+</tr>
+<tr>
+<td><strong>Sample Size</strong></td>
+<td>More samples = more reliable results</td>
+</tr>
+<tr>
+<td><strong>P-Value</strong></td>
+<td>Lower = more confident</td>
+</tr>
+<tr>
+<td><strong>Confidence Interval</strong></td>
+<td>Range of likely true values</td>
+</tr>
+<tr>
+<td><strong>Power</strong></td>
+<td>Ability to detect real effects</td>
+</tr>
+</tbody>
+</table>
+<p>When in doubt: <strong>more samples, higher confidence, bigger effects</strong>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../results/" class="btn btn-neutral float-left" title="Measuring Results"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../getting-started/api-reference/" class="btn btn-neutral float-right" title="API Reference">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../results/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../getting-started/api-reference/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/lang-switcher.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

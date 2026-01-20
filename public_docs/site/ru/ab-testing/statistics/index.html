@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/ru/ab-testing/statistics/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Statistical Significance - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Statistical Significance";
+        var mkdocs_page_input_path = "ru/ab-testing/statistics.md";
+        var mkdocs_page_url = "/ru/ab-testing/statistics/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../" class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" title="Введите поисковый запрос" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Навигационное меню">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Statistical Significance</a>
+    <ul class="current">
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Мобильная версия навигации">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../" class="icon icon-home" aria-label="Документация"></a></li>
+          <li class="breadcrumb-item">A/B Testing</li>
+      <li class="breadcrumb-item active">Statistical Significance</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="-">---</h2>
+<h1 id="_1">Статистическая значимость</h1>
+<p>Понимание статистической значимости помогает принимать уверенные решения по результатам A/B-тестов.</p>
+<h2 id="_2">Что такое статистическая значимость?</h2>
+<p>Когда вы проводите A/B-тест, вы видите разницу между версиями:
+- Версия A: 12% конверсия
+- Версия B: 14% конверсия</p>
+<p>Но эта разница <strong>реальна</strong> или просто <strong>случайность</strong>?</p>
+<p>Статистическая значимость отвечает: «Насколько мы уверены, что B действительно лучше A?»</p>
+<h2 id="_3">Проблема случайности</h2>
+<p>Представьте, что вы подбрасываете монету 10 раз:
+- Вы можете получить 6 орлов, 4 решки
+- Значит ли это, что монета смещена?
+- Нет — при всего 10 подбрасываниях это нормальная вариация</p>
+<p>То же самое применимо к A/B-тестам:
+- Маленькая выборка → результаты могут вводить в заблуждение
+- Большая выборка → результаты надёжны</p>
+<h2 id="_4">Объяснение уровня достоверности</h2>
+<p>Уровень достоверности (например, 95%) означает:</p>
+<blockquote>
+<p>«Если бы мы провели этот тест 100 раз без реальной разницы, мы бы увидели такую большую разницу только 5 раз.»</p>
+</blockquote>
+<p>Другими словами:
+- <strong>95% достоверность</strong> = 5% вероятность, что результат случаен
+- <strong>99% достоверность</strong> = 1% вероятность, что результат случаен</p>
+<h3 id="_5">Отраслевые стандарты</h3>
+<table>
+<thead>
+<tr>
+<th>Достоверность</th>
+<th>Сценарий использования</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>80%</td>
+<td>Раннее исследование, быстрые решения</td>
+</tr>
+<tr>
+<td>90%</td>
+<td>Стандартные продуктовые решения</td>
+</tr>
+<tr>
+<td><strong>95%</strong></td>
+<td><strong>Отраслевой стандарт</strong></td>
+</tr>
+<tr>
+<td>99%</td>
+<td>Решения с высокими ставками</td>
+</tr>
+<tr>
+<td>99.9%</td>
+<td>Критические изменения (платежи, безопасность)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="xr2">Как xR2 вычисляет значимость</h2>
+<p>xR2 использует <strong>двухвыборочный z-тест для долей</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>For each variant:
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>- p₁ = conversions_A / requests_A
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>- p₂ = conversions_B / requests_B
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>Calculate:
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>- Pooled proportion
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>- Standard error
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>- Z-score
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>- P-value
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>- Confidence level = 1 - p-value
+</code></pre></div>
+<p>Вам не нужно делать эти расчёты — xR2 показывает уровень достоверности автоматически.</p>
+<h2 id="_6">Требования к размеру выборки</h2>
+<h3 id="_7">Минимальный размер выборки</h3>
+<p>Требуемый размер выборки зависит от:</p>
+<ol>
+<li><strong>Базовый показатель конверсии</strong> — ваш текущий показатель конверсии</li>
+<li><strong>Минимальный обнаруживаемый эффект</strong> — наименьшее улучшение, которое стоит обнаружить</li>
+<li><strong>Уровень достоверности</strong> — насколько вы хотите быть уверены</li>
+<li><strong>Статистическая мощность</strong> — способность обнаружить реальные различия (обычно 80%)</li>
+</ol>
+<h3 id="_8">Калькулятор размера выборки</h3>
+<table>
+<thead>
+<tr>
+<th>Базовый показатель</th>
+<th>Улучшение 5%</th>
+<th>Улучшение 10%</th>
+<th>Улучшение 20%</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5%</td>
+<td>31 000</td>
+<td>8 000</td>
+<td>2 000</td>
+</tr>
+<tr>
+<td>10%</td>
+<td>15 000</td>
+<td>4 000</td>
+<td>1 000</td>
+</tr>
+<tr>
+<td>20%</td>
+<td>6 000</td>
+<td>1 600</td>
+<td>400</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Пример</strong>: Если ваша текущая конверсия 10% и вы хотите обнаружить 10% улучшение (10% → 11%), вам нужно ~4 000 образцов на вариант.</p>
+<h3 id="_9">Быстрые эмпирические правила</h3>
+<ul>
+<li><strong>Минимум</strong>: 1 000 образцов на вариант</li>
+<li><strong>Стандарт</strong>: 2 500-5 000 на вариант</li>
+<li><strong>Высокая достоверность</strong>: 10 000+ на вариант</li>
+</ul>
+<h2 id="_10">Интерпретация результатов</h2>
+<h3 id="95">Сильные доказательства (&gt;= 95%)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Confidence: 97%
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Version A: 12.1%
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Version B: 14.8%
+</code></pre></div>
+<p>Безопасно заключить: B лучше A</p>
+<h3 id="80-95">Слабые доказательства (80-95%)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Confidence: 88%
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Version A: 12.1%
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Version B: 13.5%
+</code></pre></div>
+<p>Действуйте с осторожностью:
+- B может быть лучше
+- Может быть случайная вариация
+- Рассмотрите продление теста</p>
+<h3 id="80">Нет доказательств (&lt;80%)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Confidence: 65%
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Version A: 12.1%
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Version B: 12.8%
+</code></pre></div>
+<p>Нельзя сделать никаких выводов:
+- Разница, вероятно, случайна
+- Нужно больше образцов
+- Или версии действительно равны</p>
+<h2 id="_11">Частые ошибки</h2>
+<h3 id="1">1. Слишком ранняя остановка</h3>
+<p><strong>Неправильно:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Day 1: B is winning 60% vs 40%! Ship it!
+</code></pre></div></p>
+<p>Ранние результаты ненадёжны. Тест, показывающий победу B на 20% в первый день, может закончиться победой A на 5%.</p>
+<p><strong>Правильно:</strong> Дождитесь запланированного размера выборки или уровня достоверности.</p>
+<h3 id="2">2. Подглядывание и принятие решений</h3>
+<p><strong>Неправильно:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Check results daily.
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>When B looks good, stop the test.
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>When A looks good, keep running.
+</code></pre></div></p>
+<p>Это резко увеличивает количество ложноположительных результатов.</p>
+<p><strong>Правильно:</strong> Установите размер выборки заранее, не подглядывайте, анализируйте в конце.</p>
+<h3 id="3">3. Игнорирование практической значимости</h3>
+<p><strong>Неправильно:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>A: 10.00%
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>B: 10.05%
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>Confidence: 99%
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>Ship B because it&#39;s statistically significant!
+</code></pre></div></p>
+<p>Улучшение на 0,05% может не стоить сложности.</p>
+<p><strong>Правильно:</strong> Подумайте, является ли разница <strong>практически</strong> значимой.</p>
+<h3 id="4">4. Множественные сравнения</h3>
+<p><strong>Неправильно:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Test 20 variations.
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>One shows 95% confidence.
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>Ship it!
+</code></pre></div></p>
+<p>При 20 вариациях с 95% достоверностью ожидается 1 ложноположительный результат.</p>
+<p><strong>Правильно:</strong> Делайте поправку на множественные сравнения или тестируйте меньше вариаций.</p>
+<h2 id="p-">Понимание P-значений</h2>
+<p><strong>P-значение</strong> — это вероятность увидеть результаты такого масштаба, если реальной разницы нет.</p>
+<table>
+<thead>
+<tr>
+<th>P-значение</th>
+<th>Достоверность</th>
+<th>Интерпретация</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.20</td>
+<td>80%</td>
+<td>Слабые доказательства</td>
+</tr>
+<tr>
+<td>0.10</td>
+<td>90%</td>
+<td>Умеренные доказательства</td>
+</tr>
+<tr>
+<td><strong>0.05</strong></td>
+<td><strong>95%</strong></td>
+<td><strong>Стандартный порог</strong></td>
+</tr>
+<tr>
+<td>0.01</td>
+<td>99%</td>
+<td>Сильные доказательства</td>
+</tr>
+<tr>
+<td>0.001</td>
+<td>99.9%</td>
+<td>Очень сильные доказательства</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Меньшее p-значение = больше уверенности, что разница реальна</strong></p>
+<h2 id="_12">Доверительные интервалы</h2>
+<p>Вместо только точечной оценки доверительные интервалы показывают диапазон вероятных значений:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Version B improvement: 16.7%
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>95% Confidence Interval: [8.2%, 25.1%]
+</code></pre></div>
+<p>Это означает:
+- Лучшая оценка: B лучше на 16,7%
+- Мы на 95% уверены, что истинное улучшение между 8,2% и 25,1%
+- Как минимум, B, вероятно, лучше на 8,2%</p>
+<h3 id="_13">Интерпретация доверительных интервалов</h3>
+<p><strong>Широкий интервал</strong> (например, [-5%, +40%]):
+- Высокая неопределённость
+- Нужно больше образцов</p>
+<p><strong>Узкий интервал</strong> (например, [14%, 19%]):
+- Высокая определённость
+- Надёжный результат</p>
+<p><strong>Интервал пересекает ноль</strong> (например, [-2%, +8%]):
+- Нельзя заключить, что B лучше
+- Может быть хуже, равен или лучше</p>
+<h2 id="_14">Анализ мощности</h2>
+<p><strong>Статистическая мощность</strong> = вероятность обнаружения реального эффекта.</p>
+<ul>
+<li>Низкая мощность (50%) → Можете пропустить реальные улучшения</li>
+<li>Стандартная мощность (80%) → Хороший баланс</li>
+<li>Высокая мощность (90%+) → Редко пропускаете улучшения</li>
+</ul>
+<h3 id="_15">Недостаточно мощные тесты</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Actual improvement: 10%
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>Sample size: 500
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>Power: 40%
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>Result: &quot;No significant difference&quot;
+</code></pre></div>
+<p>Тест был слишком мал, чтобы обнаружить реальное 10% улучшение.</p>
+<h3 id="_16">Правильно мощные тесты</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Actual improvement: 10%
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>Sample size: 5,000
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>Power: 90%
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>Result: &quot;B is significantly better (12% improvement, 96% confidence)&quot;
+</code></pre></div>
+<h2 id="_17">Принятие решений</h2>
+<h3 id="_18">Фреймворк принятия решений</h3>
+<table>
+<thead>
+<tr>
+<th>Достоверность</th>
+<th>Размер эффекта</th>
+<th>Решение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&gt;= 95%</td>
+<td>Большой</td>
+<td>Разверните B</td>
+</tr>
+<tr>
+<td>&gt;= 95%</td>
+<td>Маленький</td>
+<td>Подумайте, стоит ли оно того</td>
+</tr>
+<tr>
+<td>80-95%</td>
+<td>Большой</td>
+<td>Продлите тест или разверните B</td>
+</tr>
+<tr>
+<td>80-95%</td>
+<td>Маленький</td>
+<td>Продлите тест</td>
+</tr>
+<tr>
+<td>&lt; 80%</td>
+<td>Любой</td>
+<td>Продлите тест или откажитесь</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_19">Когда результаты неоднозначны</h3>
+<p>Варианты:
+1. <strong>Продлите тест</strong> — Больше образцов = больше достоверности
+2. <strong>Примите неопределённость</strong> — Разверните, если риск низкий
+3. <strong>Откажитесь от теста</strong> — Если разницы, вероятно, нет
+4. <strong>Тестируйте более значительные изменения</strong> — Тонкие изменения трудно обнаружить</p>
+<h2 id="_20">Практические советы</h2>
+<h3 id="1_1">1. Рассчитайте размер выборки до начала</h3>
+<p>Используйте таблицу выше или онлайн-калькуляторы для определения необходимых образцов.</p>
+<h3 id="2_1">2. Установите правило остановки</h3>
+<p>Перед началом:
+- «Мы будем тестировать до 5 000 образцов ИЛИ 95% достоверности»
+- Придерживайтесь этого</p>
+<h3 id="3_1">3. Не выбирайте выборочно</h3>
+<p>Если вы проводите много тестов, некоторые покажут ложноположительные результаты. Не отчитывайтесь только о «победах».</p>
+<h3 id="4-">4. Учитывайте бизнес-влияние</h3>
+<p>1% улучшение с 99% достоверностью может значить меньше, чем 20% улучшение с 90% достоверностью.</p>
+<h3 id="5">5. Документируйте и учитесь</h3>
+<p>Даже «неудачные» тесты чему-то учат. Документируйте все результаты.</p>
+<h2 id="_21">Резюме</h2>
+<table>
+<thead>
+<tr>
+<th>Концепция</th>
+<th>Ключевой момент</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Статистическая значимость</strong></td>
+<td>Насколько достоверна разница</td>
+</tr>
+<tr>
+<td><strong>Уровень достоверности</strong></td>
+<td>Отраслевой стандарт — 95%</td>
+</tr>
+<tr>
+<td><strong>Размер выборки</strong></td>
+<td>Больше образцов = надёжнее результаты</td>
+</tr>
+<tr>
+<td><strong>P-значение</strong></td>
+<td>Меньше = больше достоверности</td>
+</tr>
+<tr>
+<td><strong>Доверительный интервал</strong></td>
+<td>Диапазон вероятных истинных значений</td>
+</tr>
+<tr>
+<td><strong>Мощность</strong></td>
+<td>Способность обнаружить реальные эффекты</td>
+</tr>
+</tbody>
+</table>
+<p>В случае сомнений: <strong>больше образцов, выше достоверность, больший эффект</strong>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Навигация по странице">
+        <a href="../results/" class="btn btn-neutral float-left" title="Measuring Results"><span class="icon icon-circle-arrow-left"></span> Назад</a>
+        <a href="../../getting-started/api-reference/" class="btn btn-neutral float-right" title="API Reference">Вперед <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Собрано в <a href="https://www.mkdocs.org/">MkDocs</a> с использованием <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы</a> от <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Версии">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../results/" style="color: #fcfcfc">&laquo; Назад</a></span>
+    
+    
+      <span><a href="../../getting-started/api-reference/" style="color: #fcfcfc">Вперед &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../js/lang-switcher.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

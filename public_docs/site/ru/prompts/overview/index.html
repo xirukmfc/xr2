@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/ru/prompts/overview/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Overview - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Overview";
+        var mkdocs_page_input_path = "ru/prompts/overview.md";
+        var mkdocs_page_url = "/ru/prompts/overview/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../" class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" title="Введите поисковый запрос" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Навигационное меню">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">Структура редактора</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_3">Левая панель — Метаданные и история</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_4">Центральная панель — Редактор контента</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">Правая панель — Контекст и действия</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_6">Типы промптов</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_7">Ключевые возможности</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_8">Визуальное обнаружение переменных</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_9">Полноэкранный режим</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_10">Тестирование в реальном времени</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_11">Контроль версий</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_12">Конвейер развертывания</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_13">Публикация версий</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_14">Совместная работа</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_15">Горячие клавиши</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_16">Следующие шаги</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Мобильная версия навигации">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../" class="icon icon-home" aria-label="Документация"></a></li>
+          <li class="breadcrumb-item">Prompt Editor</li>
+      <li class="breadcrumb-item active">Overview</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">Обзор редактора промптов</h1>
+<p>Редактор промптов xR2 — это мощный визуальный инструмент для создания, редактирования и управления AI-промптами. Он предоставляет все необходимое для итеративной работы с промптами без изменения кодовой базы.</p>
+<h2 id="_2">Структура редактора</h2>
+<p>Редактор разделен на три основные области:</p>
+<h3 id="_3">Левая панель — Метаданные и история</h3>
+<ul>
+<li><strong>Переменные</strong> — Определение и управление динамическими переменными</li>
+<li><strong>Теги</strong> — Организация промптов с помощью цветных меток</li>
+<li><strong>История версий</strong> — Просмотр и восстановление предыдущих версий</li>
+<li><strong>Статистика производительности</strong> — Просмотр метрик использования</li>
+</ul>
+<h3 id="_4">Центральная панель — Редактор контента</h3>
+<p>Редактор кода на базе Monaco (такой же, как в VS Code) с:</p>
+<ul>
+<li>Подсветкой синтаксиса</li>
+<li>Тремя вкладками: System, User, Assistant промпты</li>
+<li>Полноэкранным режимом</li>
+<li>Настройкой размера шрифта</li>
+<li>Функцией копирования</li>
+</ul>
+<h3 id="_5">Правая панель — Контекст и действия</h3>
+<ul>
+<li>Статус развертывания</li>
+<li>Предпросмотр аналитики</li>
+<li>Быстрые действия</li>
+</ul>
+<h2 id="_6">Типы промптов</h2>
+<p>Каждый промпт может содержать три компонента:</p>
+<table>
+<thead>
+<tr>
+<th>Тип</th>
+<th>Назначение</th>
+<th>Пример</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>System Prompt</strong></td>
+<td>Определяет поведение и личность AI</td>
+<td>"You are a helpful assistant that speaks formally."</td>
+</tr>
+<tr>
+<td><strong>User Prompt</strong></td>
+<td>Шаблон для пользовательского ввода с переменными</td>
+<td>"Help {{user_name}} with: {{question}}"</td>
+</tr>
+<tr>
+<td><strong>Assistant Prompt</strong></td>
+<td>Опциональный префикс для ответа AI</td>
+<td>"Based on my analysis..."</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_7">Ключевые возможности</h2>
+<h3 id="_8">Визуальное обнаружение переменных</h3>
+<p>Редактор автоматически обнаруживает переменные в формате <code>{{variable_name}}</code> и отображает их в левой панели для настройки.</p>
+<h3 id="_9">Полноэкранный режим</h3>
+<p>Нажмите на иконку полноэкранного режима, чтобы развернуть редактор на весь экран. Возможности:</p>
+<ul>
+<li>Среда редактирования без отвлекающих факторов</li>
+<li>Сворачиваемая панель переменных слева</li>
+<li>Управление размером шрифта (10px-32px)</li>
+<li>Переключатель номеров строк</li>
+<li>Подсветка синтаксиса Markdown</li>
+<li>Режим предпросмотра отрендеренного контента</li>
+<li>Копирование всего содержимого</li>
+<li>Горячие клавиши: <code>⌘S</code> для сохранения, <code>Escape</code> для выхода</li>
+</ul>
+<h3 id="_10">Тестирование в реальном времени</h3>
+<p>Тестируйте промпты прямо в редакторе с любым LLM-провайдером (OpenAI, Anthropic, Google и др.) и наблюдайте потоковые ответы.</p>
+<h3 id="_11">Контроль версий</h3>
+<p>Git-подобный рабочий процесс со статусами: Draft → Testing → Production → Deprecated. Откат к любой предыдущей версии одним кликом.</p>
+<h3 id="_12">Конвейер развертывания</h3>
+<p>Мгновенное развертывание версий в продакшен. Отслеживание кто, что и когда развернул.</p>
+<h3 id="_13">Публикация версий</h3>
+<p>Делитесь конкретными версиями промптов с членами команды или внешними заинтересованными сторонами:</p>
+<ol>
+<li>Откройте версию, которой хотите поделиться</li>
+<li>Нажмите кнопку <strong>Share</strong></li>
+<li>Генерируется уникальная публичная ссылка</li>
+<li>Получатели могут просматривать (только для чтения):<ul>
+<li>Содержимое промпта (system, user, assistant)</li>
+<li>Определения переменных</li>
+<li>Метаданные (кто создал, даты)</li>
+</ul>
+</li>
+<li>Ссылки можно деактивировать или установить срок действия</li>
+</ol>
+<h3 id="_14">Совместная работа</h3>
+<p>Работайте в изолированных рабочих пространствах с членами команды. Каждое рабочее пространство имеет собственные промпты, API-ключи и настройки.</p>
+<h2 id="_15">Горячие клавиши</h2>
+<table>
+<thead>
+<tr>
+<th>Сочетание</th>
+<th>Действие</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>⌘S</code> / <code>Ctrl+S</code></td>
+<td>Сохранить изменения</td>
+</tr>
+<tr>
+<td><code>⌘T</code> / <code>Ctrl+T</code></td>
+<td>Открыть модальное окно тестирования</td>
+</tr>
+<tr>
+<td><code>⌘Enter</code></td>
+<td>Запустить тест</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_16">Следующие шаги</h2>
+<ul>
+<li><a href="../creating-prompts/">Создание промптов</a> — Узнайте, как создавать новые промпты</li>
+<li><a href="../variables/">Переменные</a> — Освойте работу с динамическим контентом</li>
+<li><a href="../versions/">Версии</a> — Управление версиями и развертывание</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Навигация по странице">
+        <a href="../../getting-started/authentication/" class="btn btn-neutral float-left" title="Authentication"><span class="icon icon-circle-arrow-left"></span> Назад</a>
+        <a href="../creating-prompts/" class="btn btn-neutral float-right" title="Creating Prompts">Вперед <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Собрано в <a href="https://www.mkdocs.org/">MkDocs</a> с использованием <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы</a> от <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Версии">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../getting-started/authentication/" style="color: #fcfcfc">&laquo; Назад</a></span>
+    
+    
+      <span><a href="../creating-prompts/" style="color: #fcfcfc">Вперед &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../js/lang-switcher.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

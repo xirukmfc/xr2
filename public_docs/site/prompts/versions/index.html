@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/prompts/versions/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Versions & Deployment - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Versions \u0026 Deployment";
+        var mkdocs_page_input_path = "en/prompts/versions.md";
+        var mkdocs_page_url = "/prompts/versions/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Versions & Deployment</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#version-lifecycle">Version Lifecycle</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#creating-versions">Creating Versions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#from-current-draft">From Current Draft</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#from-existing-version">From Existing Version</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#blank-version">Blank Version</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#version-numbers">Version Numbers</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#deploying-to-production">Deploying to Production</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#deploy-a-version">Deploy a Version</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#one-click-deploy">One-Click Deploy</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rollback">Rollback</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#comparing-versions">Comparing Versions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#version-details">Version Details</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#changelog">Changelog</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#performance-metrics-per-version">Performance Metrics per Version</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-version-before-big-changes">1. Version Before Big Changes</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-use-testing-status">2. Use Testing Status</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3-document-changes">3. Document Changes</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#4-keep-production-stable">4. Keep Production Stable</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#5-monitor-after-deploy">5. Monitor After Deploy</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#api-version-selection">API Version Selection</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Prompt Editor</li>
+      <li class="breadcrumb-item active">Versions & Deployment</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="versions-deployment">Versions &amp; Deployment</h1>
+<p>xR2 uses a Git-like versioning system that lets you iterate on prompts safely while maintaining a stable production version.</p>
+<h2 id="version-lifecycle">Version Lifecycle</h2>
+<p>Each version goes through these statuses:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Draft → Testing → Production → Deprecated
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+<th>API Access</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Draft</strong></td>
+<td>Work in progress</td>
+<td>Not accessible</td>
+</tr>
+<tr>
+<td><strong>Testing</strong></td>
+<td>Ready for QA</td>
+<td>Via <code>status: "testing"</code> param</td>
+</tr>
+<tr>
+<td><strong>Production</strong></td>
+<td>Live and active</td>
+<td>Default response</td>
+</tr>
+<tr>
+<td><strong>Inactive</strong></td>
+<td>Paused</td>
+<td>Via <code>status: "inactive"</code> param</td>
+</tr>
+<tr>
+<td><strong>Deprecated</strong></td>
+<td>Old version, replaced</td>
+<td>Via <code>version_number</code> param</td>
+</tr>
+</tbody>
+</table>
+<h2 id="creating-versions">Creating Versions</h2>
+<h3 id="from-current-draft">From Current Draft</h3>
+<ol>
+<li>Make your changes in the editor</li>
+<li>Click <strong>Create Version</strong></li>
+<li>Add a version note (optional)</li>
+<li>The version is saved with status <strong>Draft</strong></li>
+</ol>
+<h3 id="from-existing-version">From Existing Version</h3>
+<ol>
+<li>Go to <strong>Version History</strong> in the left panel</li>
+<li>Find the version you want to copy</li>
+<li>Click <strong>Create from this version</strong></li>
+<li>A new draft is created with the same content</li>
+</ol>
+<h3 id="blank-version">Blank Version</h3>
+<ol>
+<li>Click <strong>Create Version</strong> → <strong>Blank</strong></li>
+<li>Start with empty prompts</li>
+<li>Useful for major rewrites</li>
+</ol>
+<h2 id="version-numbers">Version Numbers</h2>
+<p>Versions are numbered sequentially:</p>
+<ul>
+<li>v1, v2, v3...</li>
+</ul>
+<p>The number is auto-assigned and cannot be changed.</p>
+<h2 id="deploying-to-production">Deploying to Production</h2>
+<h3 id="deploy-a-version">Deploy a Version</h3>
+<ol>
+<li>Select the version in Version History</li>
+<li>Click <strong>Deploy to Production</strong></li>
+<li>Confirm the deployment</li>
+</ol>
+<p><strong>What happens:</strong></p>
+<ul>
+<li>Selected version status → <strong>Production</strong></li>
+<li>Previous production version → <strong>Deprecated</strong></li>
+<li>API now returns the new version by default</li>
+</ul>
+<h3 id="one-click-deploy">One-Click Deploy</h3>
+<p>From the editor toolbar, click <strong>Deploy</strong> to deploy the currently viewed version instantly.</p>
+<blockquote>
+<p>⚠️ <strong>Warning:</strong> Deployment is immediate. There's no staging environment — the version goes live as soon as you click Deploy.</p>
+</blockquote>
+<h2 id="rollback">Rollback</h2>
+<p>Made a mistake? Roll back in seconds:</p>
+<ol>
+<li>Go to <strong>Version History</strong></li>
+<li>Find the previous working version</li>
+<li>Click <strong>Deploy to Production</strong></li>
+</ol>
+<p>The old version is now live again.</p>
+<h2 id="comparing-versions">Comparing Versions</h2>
+<p>Compare any two versions side-by-side:</p>
+<ol>
+<li>In Version History, select a version</li>
+<li>Click <strong>Compare</strong></li>
+<li>Select the version to compare against</li>
+<li>View the diff showing:<ul>
+<li>Added content (green)</li>
+<li>Removed content (red)</li>
+<li>Changed variables</li>
+<li>Model config differences</li>
+</ul>
+</li>
+</ol>
+<h2 id="version-details">Version Details</h2>
+<p>Each version tracks:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Version Number</strong></td>
+<td>Sequential identifier (v1, v2...)</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>Current lifecycle stage</td>
+</tr>
+<tr>
+<td><strong>Created At</strong></td>
+<td>When the version was created</td>
+</tr>
+<tr>
+<td><strong>Created By</strong></td>
+<td>Who created it</td>
+</tr>
+<tr>
+<td><strong>Deployed At</strong></td>
+<td>When it was deployed (if applicable)</td>
+</tr>
+<tr>
+<td><strong>Deployed By</strong></td>
+<td>Who deployed it</td>
+</tr>
+<tr>
+<td><strong>Changelog</strong></td>
+<td>Auto-generated change summary</td>
+</tr>
+</tbody>
+</table>
+<h2 id="changelog">Changelog</h2>
+<p>xR2 tracks changes when you update versions. The changelog field stores what changed:</p>
+<ul>
+<li>Status transitions (draft → testing → production)</li>
+<li>Variable configuration updates</li>
+<li>Model configuration changes</li>
+<li>Prompt content modifications (system, user, assistant)</li>
+</ul>
+<p>You can view the changelog in the Version History panel.</p>
+<h2 id="performance-metrics-per-version">Performance Metrics per Version</h2>
+<p>Track how each version performs:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Requests</strong></td>
+<td>Total API calls</td>
+</tr>
+<tr>
+<td><strong>Avg Latency</strong></td>
+<td>Response time in ms</td>
+</tr>
+<tr>
+<td><strong>Avg Tokens</strong></td>
+<td>Tokens per request</td>
+</tr>
+<tr>
+<td><strong>Success Rate</strong></td>
+<td>% of successful calls</td>
+</tr>
+<tr>
+<td><strong>Conversions</strong></td>
+<td>Linked event count</td>
+</tr>
+</tbody>
+</table>
+<p>Use these to compare version effectiveness.</p>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="1-version-before-big-changes">1. Version Before Big Changes</h3>
+<p>Always create a new version before:</p>
+<ul>
+<li>Major prompt rewrites</li>
+<li>Adding/removing variables</li>
+<li>Changing model configuration</li>
+</ul>
+<h3 id="2-use-testing-status">2. Use Testing Status</h3>
+<p>Don't deploy directly to production:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Draft → Testing → Production
+</code></pre></div>
+<p>Test with the <code>status: "testing"</code> parameter in API calls.</p>
+<h3 id="3-document-changes">3. Document Changes</h3>
+<p>Add descriptive notes when creating versions:</p>
+<ul>
+<li>"Added multilingual support"</li>
+<li>"Fixed tone issue with angry customers"</li>
+<li>"Optimized for GPT-4 Turbo"</li>
+</ul>
+<h3 id="4-keep-production-stable">4. Keep Production Stable</h3>
+<p>Avoid deploying during peak hours. Schedule deployments when traffic is low.</p>
+<h3 id="5-monitor-after-deploy">5. Monitor After Deploy</h3>
+<p>Check analytics for 15-30 minutes after deployment:</p>
+<ul>
+<li>Error rate spike?</li>
+<li>Latency increase?</li>
+<li>Conversion drop?</li>
+</ul>
+<p>Roll back if metrics degrade.</p>
+<h2 id="api-version-selection">API Version Selection</h2>
+<p>By default, API returns the <strong>Production</strong> version. Override with parameters:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Get production version (default)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>.../get-prompt<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;slug&quot;: &quot;support&quot;, &quot;source_name&quot;: &quot;app&quot;}&#39;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Get specific version</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>.../get-prompt<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;slug&quot;: &quot;support&quot;, &quot;source_name&quot;: &quot;app&quot;, &quot;version_number&quot;: 2}&#39;</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Get testing version</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>.../get-prompt<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;slug&quot;: &quot;support&quot;, &quot;source_name&quot;: &quot;app&quot;, &quot;status&quot;: &quot;testing&quot;}&#39;</span>
+</code></pre></div>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><a href="../testing/">Testing Prompts</a> — Validate before deployment</li>
+<li><a href="../../ab-testing/overview/">A/B Testing</a> — Compare versions with real users</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../variables/" class="btn btn-neutral float-left" title="Variables"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../testing/" class="btn btn-neutral float-right" title="Testing Prompts">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../variables/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../testing/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/lang-switcher.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

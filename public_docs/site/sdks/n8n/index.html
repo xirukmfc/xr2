@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/sdks/n8n/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>n8n - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "n8n";
+        var mkdocs_page_input_path = "en/sdks/n8n.md";
+        var mkdocs_page_url = "/sdks/n8n/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">n8n</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">API & SDKs</li>
+      <li class="breadcrumb-item active">n8n</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="-">---</h2>
+<h1 id="n8n-integration">n8n Integration</h1>
+<p>Community node for n8n that integrates with the xR2 API.</p>
+<p><a href="https://www.npmjs.com/package/n8n-nodes-xr2"><img alt="npm" src="https://img.shields.io/npm/v/n8n-nodes-xr2" /></a></p>
+<h2 id="installation">Installation</h2>
+<h3 id="via-n8n-gui-recommended">Via n8n GUI (Recommended)</h3>
+<ol>
+<li>Go to <strong>Settings</strong> → <strong>Community Nodes</strong></li>
+<li>Click <strong>Install</strong></li>
+<li>Enter <code>n8n-nodes-xr2</code></li>
+<li>Click <strong>Install</strong></li>
+<li>Restart n8n</li>
+</ol>
+<h3 id="manual-installation">Manual Installation</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>~/.n8n/custom
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>npm<span class="w"> </span>install<span class="w"> </span>n8n-nodes-xr2
+</code></pre></div>
+<h2 id="setup-credentials">Setup Credentials</h2>
+<ol>
+<li>In n8n, go to <strong>Settings</strong> → <strong>Credentials</strong></li>
+<li>Click <strong>New</strong> → search for "xR2 API"</li>
+<li>Paste your API key (from <a href="https://xr2.uk/api-keys">xr2.uk/api-keys</a>)</li>
+<li>Click <strong>Save</strong></li>
+</ol>
+<h2 id="available-operations">Available Operations</h2>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Operation</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Key</td>
+<td>Check</td>
+<td>Validate API key</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Get</td>
+<td>Fetch prompt by slug</td>
+</tr>
+<tr>
+<td>Event</td>
+<td>Track</td>
+<td>Send analytics event</td>
+</tr>
+</tbody>
+</table>
+<h2 id="get-prompt">Get Prompt</h2>
+<p>Fetches a prompt from xR2.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Slug</td>
+<td>Yes</td>
+<td>Prompt identifier</td>
+</tr>
+<tr>
+<td>Version Number</td>
+<td>No</td>
+<td>Specific version (0 = latest)</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>No</td>
+<td><code>production</code>, <code>testing</code>, <code>draft</code>, etc.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Output:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;slug&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;welcome&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;system_prompt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;You are a helpful assistant&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">&quot;user_prompt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hello {{name}}&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">&quot;variables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">],</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">&quot;trace_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;evt_xxx&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="nt">&quot;version_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="track-event">Track Event</h2>
+<p>Sends an analytics event to xR2.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trace ID</td>
+<td>Yes</td>
+<td>From Get Prompt response</td>
+</tr>
+<tr>
+<td>Event Name</td>
+<td>Yes</td>
+<td>Event name from dashboard</td>
+</tr>
+<tr>
+<td>User ID</td>
+<td>No</td>
+<td>User identifier</td>
+</tr>
+<tr>
+<td>Session ID</td>
+<td>No</td>
+<td>Session identifier</td>
+</tr>
+<tr>
+<td>Value</td>
+<td>No</td>
+<td>Numeric value</td>
+</tr>
+<tr>
+<td>Currency</td>
+<td>No</td>
+<td>Currency code</td>
+</tr>
+<tr>
+<td>Metadata</td>
+<td>No</td>
+<td>JSON object</td>
+</tr>
+</tbody>
+</table>
+<h2 id="example-workflow">Example Workflow</h2>
+<h3 id="basic-flow">Basic Flow</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>[Manual Trigger] → [xR2: Get Prompt] → [xR2: Track Event]
+</code></pre></div>
+<ol>
+<li><strong>xR2 Node</strong> (Get Prompt):</li>
+<li>
+<p>Slug: <code>welcome</code></p>
+</li>
+<li>
+<p><strong>xR2 Node</strong> (Track Event):</p>
+</li>
+<li>Trace ID: <code>{{ $('xR2').item.json.trace_id }}</code></li>
+<li>Event Name: <code>sign_up</code></li>
+<li>User ID: <code>user_123</code></li>
+</ol>
+<h3 id="with-openai">With OpenAI</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>[Webhook] → [xR2: Get Prompt] → [OpenAI] → [xR2: Track Event]
+</code></pre></div>
+<ol>
+<li>Get the prompt from xR2</li>
+<li>Use <code>system_prompt</code> and <code>user_prompt</code> in OpenAI node</li>
+<li>Track conversion event</li>
+</ol>
+<h2 id="accessing-data-in-expressions">Accessing Data in Expressions</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// Get prompt content</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="p">{{</span><span class="w"> </span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;xR2&#39;</span><span class="p">).</span><span class="nx">item</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">user_prompt</span><span class="w"> </span><span class="p">}}</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1">// Get trace_id</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">{{</span><span class="w"> </span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;xR2&#39;</span><span class="p">).</span><span class="nx">item</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">trace_id</span><span class="w"> </span><span class="p">}}</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1">// Get model config</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">{{</span><span class="w"> </span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;xR2&#39;</span><span class="p">).</span><span class="nx">item</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">model_config</span><span class="p">.</span><span class="nx">model_name</span><span class="w"> </span><span class="p">}}</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="c1">// Get variables</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="p">{{</span><span class="w"> </span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;xR2&#39;</span><span class="p">).</span><span class="nx">item</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">variables</span><span class="w"> </span><span class="p">}}</span>
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="node-not-appearing">Node not appearing</h3>
+<ul>
+<li>Restart n8n after installation</li>
+<li>Check <code>~/.n8n/custom/node_modules/</code> for the package</li>
+<li>Run <code>n8n start --verbose</code> to see errors</li>
+</ul>
+<h3 id="authentication-error">Authentication error</h3>
+<ul>
+<li>Verify API key is correct</li>
+<li>Ensure key starts with <code>xr2_prod_</code></li>
+<li>Check key is active in dashboard</li>
+</ul>
+<h3 id="prompt-not-found">Prompt not found</h3>
+<ul>
+<li>Verify slug exists at <a href="https://xr2.uk/prompts">xr2.uk/prompts</a></li>
+<li>Ensure prompt has a deployed version</li>
+<li>Check spelling</li>
+</ul>
+<h2 id="links">Links</h2>
+<ul>
+<li>npm: <a href="https://www.npmjs.com/package/n8n-nodes-xr2">https://www.npmjs.com/package/n8n-nodes-xr2</a></li>
+<li>n8n Community: <a href="https://community.n8n.io">https://community.n8n.io</a></li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../nodejs/" class="btn btn-neutral float-left" title="Node.js SDK"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../make/" class="btn btn-neutral float-right" title="Make.com">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../nodejs/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../make/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/lang-switcher.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

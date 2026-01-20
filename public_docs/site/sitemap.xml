@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://docs.xr2.uk/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ab-testing/creating-tests/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/ab-testing/creating-tests/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/ab-testing/creating-tests/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ab-testing/overview/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/ab-testing/overview/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/ab-testing/overview/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ab-testing/results/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/ab-testing/results/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/ab-testing/results/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ab-testing/statistics/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/ab-testing/statistics/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/ab-testing/statistics/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/analytics/events/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/analytics/events/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/analytics/events/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/analytics/funnels/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/analytics/funnels/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/analytics/funnels/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/analytics/overview/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/analytics/overview/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/analytics/overview/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/getting-started/api-reference/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/getting-started/api-reference/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/getting-started/api-reference/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/getting-started/authentication/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/getting-started/authentication/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/getting-started/authentication/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/getting-started/quickstart/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/getting-started/quickstart/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/getting-started/quickstart/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/prompts/creating-prompts/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/prompts/creating-prompts/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/prompts/creating-prompts/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/prompts/overview/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/prompts/overview/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/prompts/overview/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/prompts/testing/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/prompts/testing/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/prompts/testing/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/prompts/variables/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/prompts/variables/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/prompts/variables/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/prompts/versions/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/prompts/versions/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/prompts/versions/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/sdks/make/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/sdks/make/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/sdks/make/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/sdks/n8n/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/sdks/n8n/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/sdks/n8n/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/sdks/nodejs/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/sdks/nodejs/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/sdks/nodejs/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/sdks/python/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/sdks/python/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/sdks/python/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/sdks/zapier/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/sdks/zapier/"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/sdks/zapier/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/ab-testing/creating-tests/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/ab-testing/creating-tests/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/ab-testing/creating-tests/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/ab-testing/overview/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/ab-testing/overview/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/ab-testing/overview/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/ab-testing/results/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/ab-testing/results/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/ab-testing/results/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/ab-testing/statistics/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/ab-testing/statistics/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/ab-testing/statistics/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/analytics/events/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/analytics/events/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/analytics/events/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/analytics/funnels/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/analytics/funnels/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/analytics/funnels/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/analytics/overview/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/analytics/overview/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/analytics/overview/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/getting-started/api-reference/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/getting-started/api-reference/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/getting-started/api-reference/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/getting-started/authentication/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/getting-started/authentication/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/getting-started/authentication/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/getting-started/quickstart/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/getting-started/quickstart/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/getting-started/quickstart/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/prompts/creating-prompts/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/prompts/creating-prompts/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/prompts/creating-prompts/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/prompts/overview/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/prompts/overview/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/prompts/overview/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/prompts/testing/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/prompts/testing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/prompts/testing/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/prompts/variables/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/prompts/variables/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/prompts/variables/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/prompts/versions/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/prompts/versions/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/prompts/versions/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/sdks/make/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/sdks/make/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/sdks/make/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/sdks/n8n/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/sdks/n8n/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/sdks/n8n/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/sdks/nodejs/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/sdks/nodejs/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/sdks/nodejs/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/sdks/python/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/sdks/python/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/sdks/python/"/>
+    </url>
+    <url>
+        <loc>https://docs.xr2.uk/ru/sdks/zapier/</loc>
+        <lastmod>2026-01-17</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://docs.xr2.uk/ru/sdks/zapier/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.xr2.uk/sdks/zapier/"/>
+    </url>
+</urlset>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/prompts/variables/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Variables - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Variables";
+        var mkdocs_page_input_path = "en/prompts/variables.md";
+        var mkdocs_page_url = "/prompts/variables/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Variables</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#variable-syntax">Variable Syntax</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#auto-detection">Auto-Detection</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#defining-variables">Defining Variables</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#name">Name</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#type">Type</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#default-value">Default Value</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#required">Required</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#variable-states">Variable States</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#using-variables-in-prompts">Using Variables in Prompts</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#basic-usage">Basic Usage</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#lists-and-arrays">Lists and Arrays</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-naming-conventions">1. Naming Conventions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-minimize-variables">2. Minimize Variables</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3-provide-context">3. Provide Context</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#4-handle-missing-values">4. Handle Missing Values</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#variables-in-api-response">Variables in API Response</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#syncing-variables">Syncing Variables</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Prompt Editor</li>
+      <li class="breadcrumb-item active">Variables</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="variables">Variables</h1>
+<p>Variables let you inject dynamic content into your prompts at runtime. They're the key to making prompts reusable across different contexts.</p>
+<h2 id="variable-syntax">Variable Syntax</h2>
+<p>Use double curly braces to define variables:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Hello {{customer_name}}, welcome to {{company_name}}!
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Your order #{{order_id}} will arrive on {{delivery_date}}.
+</code></pre></div>
+<h2 id="auto-detection">Auto-Detection</h2>
+<p>The editor automatically detects variables as you type:</p>
+<ol>
+<li>Type <code>{{variable_name}}</code> in any prompt field</li>
+<li>The variable appears in the left panel under <strong>Variables</strong></li>
+<li>A yellow indicator shows it's <strong>undefined</strong></li>
+<li>Click to define its properties</li>
+</ol>
+<h2 id="defining-variables">Defining Variables</h2>
+<p>Click on any variable to configure:</p>
+<h3 id="name">Name</h3>
+<p>The variable identifier. Use <code>snake_case</code>:</p>
+<ul>
+<li><code>customer_name</code></li>
+<li><code>order_total</code></li>
+<li><code>is_premium_user</code></li>
+</ul>
+<h3 id="type">Type</h3>
+<p>Choose the data type:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Use Case</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>String</strong></td>
+<td>Text values</td>
+<td>Names, descriptions, messages</td>
+</tr>
+<tr>
+<td><strong>Number</strong></td>
+<td>Numeric values</td>
+<td>Prices, quantities, IDs</td>
+</tr>
+<tr>
+<td><strong>Boolean</strong></td>
+<td>True/false flags</td>
+<td><code>is_subscribed</code>, <code>has_discount</code></td>
+</tr>
+<tr>
+<td><strong>Array</strong></td>
+<td>Lists of items</td>
+<td>Product lists, tags</td>
+</tr>
+</tbody>
+</table>
+<h3 id="default-value">Default Value</h3>
+<p>What to use if no value is provided:</p>
+<ul>
+<li>String: <code>"Guest"</code></li>
+<li>Number: <code>0</code></li>
+<li>Boolean: <code>false</code></li>
+<li>Array: <code>[]</code></li>
+</ul>
+<h3 id="required">Required</h3>
+<p>Mark as required to ensure the API call includes this variable.</p>
+<h2 id="variable-states">Variable States</h2>
+<p>Variables have three states:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Indicator</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Defined</strong></td>
+<td>Green</td>
+<td>Fully configured with type and default</td>
+</tr>
+<tr>
+<td><strong>Undefined</strong></td>
+<td>Yellow</td>
+<td>Detected in text but not configured</td>
+</tr>
+<tr>
+<td><strong>Unused</strong></td>
+<td>Gray</td>
+<td>Defined but not used in any prompt</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Warning:</strong> Undefined variables will work but may cause unexpected behavior. Always define your variables before deploying.</p>
+</blockquote>
+<h2 id="using-variables-in-prompts">Using Variables in Prompts</h2>
+<h3 id="basic-usage">Basic Usage</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>System: You are assisting {{customer_name}}.
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>User: The customer asks: {{question}}
+</code></pre></div>
+<h3 id="lists-and-arrays">Lists and Arrays</h3>
+<p>For array variables:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Recent orders: {{recent_orders}}
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Interests: {{user_interests}}
+</code></pre></div>
+<p>Pass arrays as JSON in your API call:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;recent_orders&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Order #123&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Order #456&quot;</span><span class="p">],</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">&quot;user_interests&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;electronics&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;gaming&quot;</span><span class="p">]</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="1-naming-conventions">1. Naming Conventions</h3>
+<p><strong>Do:</strong></p>
+<ul>
+<li><code>customer_name</code> — clear, descriptive</li>
+<li><code>order_total_usd</code> — includes unit</li>
+<li><code>is_returning_customer</code> — boolean prefix</li>
+</ul>
+<p><strong>Don't:</strong></p>
+<ul>
+<li><code>n</code> — too short</li>
+<li><code>customerNameValue</code> — camelCase</li>
+<li><code>x1</code> — meaningless</li>
+</ul>
+<h3 id="2-minimize-variables">2. Minimize Variables</h3>
+<p>Only include variables that actually affect the AI's response:</p>
+<p><strong>Necessary:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>{{customer_tier}} — affects recommendations
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>{{language}} — affects response language
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>{{product_category}} — affects expertise needed
+</code></pre></div></p>
+<p><strong>Unnecessary:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>{{request_id}} — AI doesn&#39;t use this
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>{{timestamp}} — rarely relevant
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>{{internal_user_id}} — no impact on response
+</code></pre></div></p>
+<h3 id="3-provide-context">3. Provide Context</h3>
+<p>Add descriptions in variable definitions so team members understand their purpose:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Variable: order_status
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Type: String
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>Default: &quot;pending&quot;
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>Description: Current order status (pending, shipped, delivered, cancelled)
+</code></pre></div>
+<h3 id="4-handle-missing-values">4. Handle Missing Values</h3>
+<p>Always set sensible defaults:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Bad Default</th>
+<th>Good Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>customer_name</code></td>
+<td><code>""</code></td>
+<td><code>"valued customer"</code></td>
+</tr>
+<tr>
+<td><code>discount_percent</code></td>
+<td><code>null</code></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>undefined</td>
+<td><code>"en"</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="variables-in-api-response">Variables in API Response</h2>
+<p>When you fetch a prompt via API, the response includes variable definitions:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;slug&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;welcome-message&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">&quot;user_prompt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hello {{customer_name}}!&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">&quot;variables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;customer_name&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">      </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;valued customer&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">      </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="p">}</span>
+</code></pre></div>
+<p>Use this to validate inputs in your application before calling the LLM.</p>
+<h2 id="syncing-variables">Syncing Variables</h2>
+<p>If you add or remove variables in the prompt text:</p>
+<ol>
+<li>New variables auto-appear in the panel</li>
+<li>Removed variables become <strong>Unused</strong></li>
+<li>Click <strong>Sync</strong> to clean up unused variables</li>
+</ol>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><a href="../testing/">Testing Prompts</a> — Test variables with real values</li>
+<li><a href="../versions/">Versions &amp; Deployment</a> — Lock in your variable definitions</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../creating-prompts/" class="btn btn-neutral float-left" title="Creating Prompts"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../versions/" class="btn btn-neutral float-right" title="Versions & Deployment">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../creating-prompts/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../versions/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/lang-switcher.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

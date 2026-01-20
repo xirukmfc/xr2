@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/prompts/overview/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Overview - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Overview";
+        var mkdocs_page_input_path = "en/prompts/overview.md";
+        var mkdocs_page_url = "/prompts/overview/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#editor-layout">Editor Layout</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#left-panel-metadata-history">Left Panel — Metadata &amp; History</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#center-panel-content-editor">Center Panel — Content Editor</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#right-panel-context-actions">Right Panel — Context &amp; Actions</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#prompt-types">Prompt Types</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#key-features">Key Features</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#visual-variable-detection">Visual Variable Detection</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fullscreen-mode">Fullscreen Mode</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#real-time-testing">Real-time Testing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#version-control">Version Control</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#deployment-pipeline">Deployment Pipeline</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#share-versions">Share Versions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#collaboration">Collaboration</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#keyboard-shortcuts">Keyboard Shortcuts</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Prompt Editor</li>
+      <li class="breadcrumb-item active">Overview</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="prompt-editor-overview">Prompt Editor Overview</h1>
+<p>The xR2 Prompt Editor is a powerful visual tool for creating, editing, and managing AI prompts. It provides everything you need to iterate on prompts without touching your codebase.</p>
+<h2 id="editor-layout">Editor Layout</h2>
+<p>The editor is divided into three main areas:</p>
+<h3 id="left-panel-metadata-history">Left Panel — Metadata &amp; History</h3>
+<ul>
+<li><strong>Variables</strong> — Define and manage dynamic variables</li>
+<li><strong>Tags</strong> — Organize prompts with colored labels</li>
+<li><strong>Version History</strong> — Browse and restore previous versions</li>
+<li><strong>Performance Stats</strong> — View usage metrics</li>
+</ul>
+<h3 id="center-panel-content-editor">Center Panel — Content Editor</h3>
+<p>A Monaco-based code editor (same as VS Code) with:</p>
+<ul>
+<li>Syntax highlighting</li>
+<li>Three tabs: System, User, Assistant prompts</li>
+<li>Full-screen mode</li>
+<li>Font size adjustment</li>
+<li>Copy functionality</li>
+</ul>
+<h3 id="right-panel-context-actions">Right Panel — Context &amp; Actions</h3>
+<ul>
+<li>Deployment status</li>
+<li>Analytics preview</li>
+<li>Quick actions</li>
+</ul>
+<h2 id="prompt-types">Prompt Types</h2>
+<p>Each prompt can have three components:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Purpose</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>System Prompt</strong></td>
+<td>Define AI behavior and personality</td>
+<td>"You are a helpful assistant that speaks formally."</td>
+</tr>
+<tr>
+<td><strong>User Prompt</strong></td>
+<td>Template for user input with variables</td>
+<td>"Help {{user_name}} with: {{question}}"</td>
+</tr>
+<tr>
+<td><strong>Assistant Prompt</strong></td>
+<td>Optional prefix for AI response</td>
+<td>"Based on my analysis..."</td>
+</tr>
+</tbody>
+</table>
+<h2 id="key-features">Key Features</h2>
+<h3 id="visual-variable-detection">Visual Variable Detection</h3>
+<p>The editor automatically detects variables in <code>{{variable_name}}</code> format and displays them in the left panel for configuration.</p>
+<h3 id="fullscreen-mode">Fullscreen Mode</h3>
+<p>Click the fullscreen icon to expand the editor to full screen. Features:</p>
+<ul>
+<li>Distraction-free editing environment</li>
+<li>Collapsible variable panel on the left</li>
+<li>Font size controls (10px-32px)</li>
+<li>Line numbers toggle</li>
+<li>Markdown syntax highlighting</li>
+<li>Preview mode for rendered content</li>
+<li>Copy all functionality</li>
+<li>Keyboard shortcuts: <code>⌘S</code> to save, <code>Escape</code> to exit</li>
+</ul>
+<h3 id="real-time-testing">Real-time Testing</h3>
+<p>Test your prompts directly in the editor with any LLM provider (OpenAI, Anthropic, Google, etc.) and see streaming responses.</p>
+<h3 id="version-control">Version Control</h3>
+<p>Git-like workflow with statuses: Draft → Testing → Production → Deprecated. One-click rollback to any previous version.</p>
+<h3 id="deployment-pipeline">Deployment Pipeline</h3>
+<p>Deploy versions to production instantly. Track who deployed what and when.</p>
+<h3 id="share-versions">Share Versions</h3>
+<p>Share specific prompt versions with team members or external stakeholders:</p>
+<ol>
+<li>Open the version you want to share</li>
+<li>Click <strong>Share</strong> button</li>
+<li>A unique public link is generated</li>
+<li>Recipients can view (read-only):<ul>
+<li>Prompt content (system, user, assistant)</li>
+<li>Variable definitions</li>
+<li>Metadata (created by, dates)</li>
+</ul>
+</li>
+<li>Links can be deactivated or set to expire</li>
+</ol>
+<h3 id="collaboration">Collaboration</h3>
+<p>Work in isolated workspaces with team members. Each workspace has its own prompts, API keys, and settings.</p>
+<h2 id="keyboard-shortcuts">Keyboard Shortcuts</h2>
+<table>
+<thead>
+<tr>
+<th>Shortcut</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>⌘S</code> / <code>Ctrl+S</code></td>
+<td>Save changes</td>
+</tr>
+<tr>
+<td><code>⌘T</code> / <code>Ctrl+T</code></td>
+<td>Open test modal</td>
+</tr>
+<tr>
+<td><code>⌘Enter</code></td>
+<td>Run test</td>
+</tr>
+</tbody>
+</table>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><a href="../creating-prompts/">Creating Prompts</a> — Learn how to create new prompts</li>
+<li><a href="../variables/">Variables</a> — Master dynamic content</li>
+<li><a href="../versions/">Versions</a> — Manage versions and deploy</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../getting-started/authentication/" class="btn btn-neutral float-left" title="Authentication"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../creating-prompts/" class="btn btn-neutral float-right" title="Creating Prompts">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../getting-started/authentication/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../creating-prompts/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/lang-switcher.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

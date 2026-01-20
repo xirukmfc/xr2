@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/sdks/zapier/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Zapier - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Zapier";
+        var mkdocs_page_input_path = "en/sdks/zapier.md";
+        var mkdocs_page_url = "/sdks/zapier/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Zapier</a>
+    <ul class="current">
+    </ul>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">API & SDKs</li>
+      <li class="breadcrumb-item active">Zapier</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="-">---</h2>
+<h1 id="zapier-integration">Zapier Integration</h1>
+<p>Official Zapier integration for xR2.</p>
+<h2 id="installation">Installation</h2>
+<p>Install the xR2 Zapier integration using this invite link:</p>
+<p><strong><a href="https://zapier.com/developer/public-invite/234012/76d33482ff8db5ed0f78871a90dfed37/">Install xR2 for Zapier</a></strong></p>
+<h2 id="setup">Setup</h2>
+<ol>
+<li>Click the install link above and accept the invitation</li>
+<li>Get your API Key at <a href="https://xr2.uk/api-keys">xr2.uk/api-keys</a></li>
+<li>Click <strong>Create Keys</strong> and copy your Product API Key (starts with <code>xr2_prod_</code>)</li>
+<li>In Zapier, connect xR2 using your API key</li>
+</ol>
+<h2 id="available-actions">Available Actions</h2>
+<h3 id="check-api-key">Check API Key</h3>
+<p>Validates your API key and returns the username.</p>
+<p><strong>Output:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;ok&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your_username&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="get-prompt">Get Prompt</h3>
+<p>Fetches a prompt from xR2 by slug.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Slug</td>
+<td>Yes</td>
+<td>Unique prompt identifier</td>
+</tr>
+<tr>
+<td>Version Number</td>
+<td>No</td>
+<td>Specific version to fetch</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>No</td>
+<td>Filter by status</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Output:</strong>
+* System prompt
+* User prompt
+* Assistant prompt
+* Variables
+* trace_id
+* Model config
+* A/B test info</p>
+<h3 id="track-event">Track Event</h3>
+<p>Sends analytics events linked to a prompt request.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trace ID</td>
+<td>Yes</td>
+<td>From Get Prompt response</td>
+</tr>
+<tr>
+<td>Event Name</td>
+<td>Yes</td>
+<td>Event name from dashboard</td>
+</tr>
+<tr>
+<td>User ID</td>
+<td>No</td>
+<td>User identifier</td>
+</tr>
+<tr>
+<td>Session ID</td>
+<td>No</td>
+<td>Session identifier</td>
+</tr>
+<tr>
+<td>Value</td>
+<td>No</td>
+<td>Numeric value for revenue</td>
+</tr>
+<tr>
+<td>Currency</td>
+<td>No</td>
+<td>Currency code (USD, EUR)</td>
+</tr>
+<tr>
+<td>Metadata</td>
+<td>No</td>
+<td>JSON object with custom fields</td>
+</tr>
+</tbody>
+</table>
+<h2 id="example-zap">Example Zap</h2>
+<h3 id="basic-form-ai-response-track">Basic: Form → AI Response → Track</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>[New Form Submission] → [xR2: Get Prompt] → [OpenAI] → [xR2: Track Event]
+</code></pre></div>
+<ol>
+<li><strong>Trigger</strong>: New form submission (Typeform, Google Forms, etc.)</li>
+<li><strong>xR2 Get Prompt</strong>:</li>
+<li>Slug: <code>customer-support</code></li>
+<li><strong>OpenAI</strong>:</li>
+<li>Use system_prompt and user_prompt from xR2</li>
+<li>Fill in variables from form data</li>
+<li><strong>xR2 Track Event</strong>:</li>
+<li>Trace ID: from step 2</li>
+<li>Event Name: <code>ai_response_generated</code></li>
+<li>User ID: from form email</li>
+</ol>
+<h3 id="revenue-tracking">Revenue Tracking</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>[New Order] → [xR2: Get Prompt] → [xR2: Track Event]
+</code></pre></div>
+<p>Track purchases linked to AI interactions:</p>
+<ol>
+<li><strong>Trigger</strong>: New Shopify/Stripe order</li>
+<li><strong>xR2 Get Prompt</strong>: Get the prompt used for this customer</li>
+<li><strong>xR2 Track Event</strong>:</li>
+<li>Trace ID: stored from initial interaction</li>
+<li>Event Name: <code>purchase_completed</code></li>
+<li>Value: order amount</li>
+<li>Currency: <code>USD</code></li>
+<li>User ID: customer email</li>
+</ol>
+<h2 id="mapping-fields">Mapping Fields</h2>
+<p>Use Zapier's field mapper to connect data between steps:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Trace ID: {{steps.xr2_get_prompt.trace_id}}
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>User Prompt: {{steps.xr2_get_prompt.user_prompt}}
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>System Prompt: {{steps.xr2_get_prompt.system_prompt}}
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="authentication-failed">Authentication Failed</h3>
+<ul>
+<li>Verify API key is correct</li>
+<li>Ensure key starts with <code>xr2_prod_</code></li>
+<li>Check key is active at <a href="https://xr2.uk/api-keys">xr2.uk/api-keys</a></li>
+</ul>
+<h3 id="prompt-not-found">Prompt Not Found</h3>
+<ul>
+<li>Check slug exists at <a href="https://xr2.uk/prompts">xr2.uk/prompts</a></li>
+<li>Verify prompt has a deployed version</li>
+<li>Check spelling of the slug</li>
+</ul>
+<h3 id="event-not-tracking">Event Not Tracking</h3>
+<ul>
+<li>Ensure event name is defined in <a href="https://xr2.uk/analytics/events">Analytics settings</a></li>
+<li>Verify trace_id is correctly mapped from Get Prompt step</li>
+<li>Check that required metadata fields are provided</li>
+</ul>
+<h2 id="links">Links</h2>
+<ul>
+<li>Zapier: <a href="https://zapier.com">https://zapier.com</a></li>
+<li>xR2 Dashboard: <a href="https://xr2.uk">https://xr2.uk</a></li>
+<li>Support: hello@xr2.uk</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../make/" class="btn btn-neutral float-left" title="Make.com"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../make/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../js/lang-switcher.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

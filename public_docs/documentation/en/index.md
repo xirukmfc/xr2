@@ -1,6 +1,3 @@
----
----
-
 # Welcome to xR2
 
 **xR2** is an AI prompt management platform that lets you update prompts without code deployments, run A/B tests, and measure business impact with built-in analytics.

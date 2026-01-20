@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/ru/ab-testing/overview/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Overview - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Overview";
+        var mkdocs_page_input_path = "ru/ab-testing/overview.md";
+        var mkdocs_page_url = "/ru/ab-testing/overview/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../" class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" title="Введите поисковый запрос" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Навигационное меню">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Мобильная версия навигации">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../" class="icon icon-home" aria-label="Документация"></a></li>
+          <li class="breadcrumb-item">A/B Testing</li>
+      <li class="breadcrumb-item active">Overview</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="-">---</h2>
+<h1 id="ab-">Обзор A/B-тестирования</h1>
+<p>A/B-тестирование позволяет сравнивать разные версии промптов на реальных пользователях и выбирать победителя на основе данных, а не догадок.</p>
+<h2 id="ab-_1">Зачем проводить A/B-тесты промптов?</h2>
+<p>Разработка промптов часто идёт методом проб и ошибок:
+- «Лучше ли эта формулировка?»
+- «Стоит ли добавить больше контекста?»
+- «Пользователи предпочтут формальный или неформальный тон?»</p>
+<p>A/B-тестирование даёт однозначные ответы на эти вопросы, показывая каждую версию реальным пользователям и измеряя результаты.</p>
+<h2 id="_1">Как это работает</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>1. Создайте две версии промпта (A и B)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>2. Запустите A/B-тест
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>3. xR2 распределяет трафик 50/50
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>4. Отслеживайте события конверсии
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>5. Анализируйте, какая версия побеждает
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>6. Разверните победителя
+</code></pre></div>
+<h3 id="_2">Распределение трафика</h3>
+<p>Когда тест запущен, API автоматически возвращает:
+- Версию A для ~50% запросов
+- Версию B для ~50% запросов</p>
+<p>Распределение случайное, но постоянное для каждого запроса.</p>
+<h3 id="ab-_2">Ответ с информацией об A/B-тесте</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;slug&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;onboarding&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;system_prompt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">&quot;trace_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;evt_xxx&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">&quot;ab_test_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test_123&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">&quot;ab_test_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tone Experiment&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="nt">&quot;ab_test_variant&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">}</span>
+</code></pre></div>
+<p>Ваш код менять не нужно — xR2 сам управляет распределением.</p>
+<h2 id="_3">Ключевые понятия</h2>
+<h3 id="_4">Вариант</h3>
+<p>Конкретная версия промпта в тесте:
+- <strong>Вариант A (Контроль)</strong>: Обычно текущая продакшен-версия
+- <strong>Вариант B (Тестовый)</strong>: Новая версия, которую вы тестируете</p>
+<h3 id="_5">Событие конверсии</h3>
+<p>Действие, которое вы измеряете:
+- <code>signup_completed</code>
+- <code>purchase_completed</code>
+- <code>positive_feedback</code></p>
+<h3 id="_6">Размер выборки</h3>
+<p>Количество пользователей, которые увидели каждый вариант. Больше выборка = надёжнее результаты.</p>
+<h3 id="_7">Статистическая значимость</h3>
+<p>Уверенность в том, что разница не случайна. xR2 рассчитывает это автоматически.</p>
+<h2 id="_8">Что можно тестировать?</h2>
+<h3 id="_9">Содержание промпта</h3>
+<table>
+<thead>
+<tr>
+<th>Тест</th>
+<th>Пример</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Тон</td>
+<td>Формальный vs. Неформальный</td>
+</tr>
+<tr>
+<td>Длина</td>
+<td>Подробный vs. Краткий</td>
+</tr>
+<tr>
+<td>Структура</td>
+<td>Маркированные списки vs. Абзацы</td>
+</tr>
+<tr>
+<td>Инструкции</td>
+<td>Строгие vs. Гибкие</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">Вариации системного промпта</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Version A: &quot;You are a professional assistant.&quot;
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Version B: &quot;You are a friendly helper who uses casual language.&quot;
+</code></pre></div>
+<h3 id="_11">Шаблоны пользовательского промпта</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Version A: &quot;User question: {{question}}&quot;
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Version B: &quot;The user {{user_name}} asks: {{question}}.
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>            Consider their history: {{context}}&quot;
+</code></pre></div>
+<h3 id="_12">Включение переменных</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Version A: Uses 3 variables
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Version B: Uses 5 variables (more context)
+</code></pre></div>
+<h2 id="_13">Жизненный цикл теста</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Draft → Running → Completed/Cancelled
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Статус</th>
+<th>Значение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Draft</strong></td>
+<td>Тест создан, но не запущен</td>
+</tr>
+<tr>
+<td><strong>Running</strong></td>
+<td>Активно распределяет трафик</td>
+</tr>
+<tr>
+<td><strong>Completed</strong></td>
+<td>Достигнут лимит запросов</td>
+</tr>
+<tr>
+<td><strong>Cancelled</strong></td>
+<td>Остановлен вручную досрочно</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_14">Сценарии использования</h2>
+<h3 id="_15">Оптимизация конверсии</h3>
+<p><strong>Цель</strong>: Увеличить процент регистраций</p>
+<p><strong>Тест</strong>: Сравнить два промпта онбординга
+- A: Текущий промпт (12% конверсия)
+- B: Новый промпт с большим энтузиазмом</p>
+<p><strong>Результат</strong>: B побеждает с 18% конверсией (+50% улучшение)</p>
+<h3 id="_16">Качество поддержки</h3>
+<p><strong>Цель</strong>: Уменьшить количество дополнительных вопросов</p>
+<p><strong>Тест</strong>: Сравнить стили ответов
+- A: Подробные объяснения
+- B: Краткие с пунктами действий</p>
+<p><strong>Результат</strong>: A снижает количество дополнительных вопросов на 25%</p>
+<h3 id="_17">Влияние на выручку</h3>
+<p><strong>Цель</strong>: Увеличить сумму покупки</p>
+<p><strong>Тест</strong>: Сравнить подходы к допродажам
+- A: Ненавязчивая рекомендация
+- B: Прямое сравнение с преимуществами</p>
+<p><strong>Результат</strong>: B увеличивает средний чек на $12</p>
+<h2 id="_18">Лучшие практики</h2>
+<h3 id="1">1. Тестируйте одну вещь за раз</h3>
+<p><strong>Хорошо</strong>: Изменить только тон
+<strong>Плохо</strong>: Изменить тон, длину и структуру одновременно</p>
+<p>Если вы меняете несколько вещей, вы не узнаете, что именно вызвало разницу.</p>
+<h3 id="2">2. Определите метрики успеха заранее</h3>
+<p>Перед началом:
+- Какое событие означает успех?
+- Какое улучшение значимо?
+- Сколько выборок вам нужно?</p>
+<h3 id="3">3. Проводите тесты достаточно долго</h3>
+<p>Не останавливайте тест раньше времени, потому что один вариант выглядит лучше. Дождитесь статистической значимости.</p>
+<h3 id="4">4. Документируйте свою гипотезу</h3>
+<p>Запишите, что вы ожидаете:
+- «Я считаю, что версия B будет конвертировать лучше, потому что...»
+- Это предотвращает рационализацию постфактум.</p>
+<h2 id="_19">Следующие шаги</h2>
+<table data-view="cards"><thead><tr><th></th><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Создание тестов</strong></td><td>Настройте ваш первый A/B-тест</td><td><a href="creating-tests.md">creating-tests.md</a></td></tr><tr><td><strong>Измерение результатов</strong></td><td>Анализируйте итоги теста</td><td><a href="results.md">results.md</a></td></tr><tr><td><strong>Статистическая значимость</strong></td><td>Разберитесь в математике</td><td><a href="statistics.md">statistics.md</a></td></tr></tbody></table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Навигация по странице">
+        <a href="../../analytics/funnels/" class="btn btn-neutral float-left" title="Conversion Funnels"><span class="icon icon-circle-arrow-left"></span> Назад</a>
+        <a href="../creating-tests/" class="btn btn-neutral float-right" title="Creating Tests">Вперед <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Собрано в <a href="https://www.mkdocs.org/">MkDocs</a> с использованием <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы</a> от <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Версии">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../analytics/funnels/" style="color: #fcfcfc">&laquo; Назад</a></span>
+    
+    
+      <span><a href="../creating-tests/" style="color: #fcfcfc">Вперед &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../js/lang-switcher.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

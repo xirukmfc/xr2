@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/ru/analytics/overview/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Overview - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Overview";
+        var mkdocs_page_input_path = "ru/analytics/overview.md";
+        var mkdocs_page_url = "/ru/analytics/overview/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../" class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" title="Введите поисковый запрос" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Навигационное меню">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">Почему аналитика важна</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_3">Как это работает</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#trace-id">Trace ID</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_4">Дашборд аналитики</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">Вкладки</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_6">Ключевые метрики</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_7">Производительность промптов</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_8">Метрики событий</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_9">Сценарии использования</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_10">Электронная коммерция</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#saas">Онбординг в SaaS</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_11">Служба поддержки</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_12">Генерация контента</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_13">Начало работы</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_14">Следующие шаги</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Мобильная версия навигации">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../" class="icon icon-home" aria-label="Документация"></a></li>
+          <li class="breadcrumb-item">Analytics</li>
+      <li class="breadcrumb-item active">Overview</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">Обзор аналитики</h1>
+<p>Аналитика xR2 позволяет измерять влияние ваших AI-промптов на бизнес. Отслеживайте действия пользователей, создавайте воронки конверсии и понимайте, какие промпты приносят реальные результаты.</p>
+<h2 id="_2">Почему аналитика важна</h2>
+<p>Без аналитики вы действуете вслепую:</p>
+<ul>
+<li>Увеличил ли новый промпт количество регистраций?</li>
+<li>Какая версия промпта конвертирует лучше?</li>
+<li>На каком этапе AI-взаимодействия пользователи уходят?</li>
+</ul>
+<p>xR2 отвечает на эти вопросы с помощью данных.</p>
+<h2 id="_3">Как это работает</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>1. Пользователь запрашивает промпт через API
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>2. xR2 возвращает промпт + уникальный trace_id
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>3. Ваше приложение использует промпт с LLM
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>4. Когда пользователь совершает конверсию, отправьте событие с trace_id
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>5. xR2 связывает событие с промптом
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>6. Анализируйте в дашборде
+</code></pre></div>
+<h3 id="trace-id">Trace ID</h3>
+<p>Каждый запрос промпта возвращает <code>trace_id</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;slug&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;onboarding-assistant&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;system_prompt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">&quot;trace_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;evt_abc123_1234567890_xyz&quot;</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">}</span>
+</code></pre></div>
+<p>Этот идентификатор — ключ к атрибуции. Сохраните его и включайте при отслеживании событий.</p>
+<h2 id="_4">Дашборд аналитики</h2>
+<p>Доступ к аналитике по адресу <a href="https://xr2.uk/analytics">xr2.uk/analytics</a>.</p>
+<h3 id="_5">Вкладки</h3>
+<table>
+<thead>
+<tr>
+<th>Вкладка</th>
+<th>Назначение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Последние события</strong></td>
+<td>Лента событий в реальном времени</td>
+</tr>
+<tr>
+<td><strong>События промптов</strong></td>
+<td>События, отфильтрованные по промпту</td>
+</tr>
+<tr>
+<td><strong>Воронки</strong></td>
+<td>Анализ воронок конверсии</td>
+</tr>
+<tr>
+<td><strong>A/B-тесты</strong></td>
+<td>Результаты тестов и метрики</td>
+</tr>
+<tr>
+<td><strong>Определения событий</strong></td>
+<td>Настройка схем событий</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_6">Ключевые метрики</h2>
+<h3 id="_7">Производительность промптов</h3>
+<table>
+<thead>
+<tr>
+<th>Метрика</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Запросы</strong></td>
+<td>Общее количество API-вызовов к этому промпту</td>
+</tr>
+<tr>
+<td><strong>Уникальные пользователи</strong></td>
+<td>Количество уникальных user_id</td>
+</tr>
+<tr>
+<td><strong>Коэффициент конверсии</strong></td>
+<td>События / Запросы × 100%</td>
+</tr>
+<tr>
+<td><strong>Выручка</strong></td>
+<td>Сумма значений событий</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">Метрики событий</h3>
+<table>
+<thead>
+<tr>
+<th>Метрика</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Количество событий</strong></td>
+<td>Общее число отслеживаемых событий</td>
+</tr>
+<tr>
+<td><strong>Уникальные Trace ID</strong></td>
+<td>Количество уникальных запросов промптов</td>
+</tr>
+<tr>
+<td><strong>Средняя стоимость</strong></td>
+<td>Среднее денежное значение</td>
+</tr>
+<tr>
+<td><strong>Процент успеха</strong></td>
+<td>Процент успешных результатов</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_9">Сценарии использования</h2>
+<h3 id="_10">Электронная коммерция</h3>
+<p>Отслеживание покупок с помощью AI:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Промпт: product-recommender
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>События: product_viewed → added_to_cart → purchase_completed
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Измерение: Выручка на версию промпта
+</code></pre></div>
+<h3 id="saas">Онбординг в SaaS</h3>
+<p>Отслеживание завершения регистрации:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Промпт: onboarding-assistant
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>События: signup_started → profile_completed → first_action
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Измерение: Коэффициент активации по промпту
+</code></pre></div>
+<h3 id="_11">Служба поддержки</h3>
+<p>Отслеживание качества решений:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Промпт: support-bot
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>События: ticket_opened → ai_response_sent → issue_resolved
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Измерение: Коэффициент решения, оценка CSAT
+</code></pre></div>
+<h3 id="_12">Генерация контента</h3>
+<p>Отслеживание вовлечённости:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Промпт: blog-writer
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>События: content_generated → content_published → content_shared
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>Измерение: Процент распространения по версии промпта
+</code></pre></div>
+<h2 id="_13">Начало работы</h2>
+<ol>
+<li><strong>Определите события</strong> — Какие действия важны для вашего бизнеса?</li>
+<li><strong>Инструментируйте код</strong> — Отправляйте события с trace_id</li>
+<li><strong>Создайте воронки</strong> — Соедините события в пути конверсии</li>
+<li><strong>Анализируйте и улучшайте</strong> — Используйте данные для улучшения промптов</li>
+</ol>
+<h2 id="_14">Следующие шаги</h2>
+<ul>
+<li><a href="../events/">Отслеживание событий</a> — Настройка и отправка событий</li>
+<li><a href="../funnels/">Воронки конверсии</a> — Создание многошаговых воронок</li>
+<li><a href="../../ab-testing/overview/">A/B-тестирование</a> — Сравнение версий промптов</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Навигация по странице">
+        <a href="../../prompts/testing/" class="btn btn-neutral float-left" title="Testing Prompts"><span class="icon icon-circle-arrow-left"></span> Назад</a>
+        <a href="../events/" class="btn btn-neutral float-right" title="Event Tracking">Вперед <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Собрано в <a href="https://www.mkdocs.org/">MkDocs</a> с использованием <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы</a> от <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Версии">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../prompts/testing/" style="color: #fcfcfc">&laquo; Назад</a></span>
+    
+    
+      <span><a href="../events/" style="color: #fcfcfc">Вперед &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../js/lang-switcher.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

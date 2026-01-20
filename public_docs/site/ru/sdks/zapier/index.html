@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/ru/sdks/zapier/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Zapier - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Zapier";
+        var mkdocs_page_input_path = "ru/sdks/zapier.md";
+        var mkdocs_page_url = "/ru/sdks/zapier/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../" class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" title="Введите поисковый запрос" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Навигационное меню">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../analytics/funnels/">Conversion Funnels</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Zapier</a>
+    <ul class="current">
+    </ul>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Мобильная версия навигации">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../" class="icon icon-home" aria-label="Документация"></a></li>
+          <li class="breadcrumb-item">API & SDKs</li>
+      <li class="breadcrumb-item active">Zapier</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="-">---</h2>
+<h1 id="zapier">Интеграция с Zapier</h1>
+<p>Официальная интеграция Zapier для xR2.</p>
+<h2 id="_1">Установка</h2>
+<p>Установите интеграцию xR2 для Zapier по этой пригласительной ссылке:</p>
+<p><strong><a href="https://zapier.com/developer/public-invite/234012/76d33482ff8db5ed0f78871a90dfed37/">Установить xR2 для Zapier</a></strong></p>
+<h2 id="_2">Настройка</h2>
+<ol>
+<li>Перейдите по ссылке выше и примите приглашение</li>
+<li>Получите ваш API-ключ на <a href="https://xr2.uk/api-keys">xr2.uk/api-keys</a></li>
+<li>Нажмите <strong>Create Keys</strong> и скопируйте ваш Product API Key (начинается с <code>xr2_prod_</code>)</li>
+<li>В Zapier подключите xR2, используя ваш API-ключ</li>
+</ol>
+<h2 id="_3">Доступные действия</h2>
+<h3 id="api-">Проверка API-ключа</h3>
+<p>Проверяет валидность вашего API-ключа и возвращает имя пользователя.</p>
+<p><strong>Вывод:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;ok&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your_username&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="_4">Получение промпта</h3>
+<p>Получает промпт из xR2 по slug-идентификатору.</p>
+<p><strong>Параметры:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Обязательный</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Slug</td>
+<td>Да</td>
+<td>Уникальный идентификатор промпта</td>
+</tr>
+<tr>
+<td>Version Number</td>
+<td>Нет</td>
+<td>Конкретная версия для получения</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Нет</td>
+<td>Фильтр по статусу</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Вывод:</strong>
+* System prompt
+* User prompt
+* Assistant prompt
+* Variables
+* trace_id
+* Model config
+* Информация об A/B-тесте</p>
+<h3 id="_5">Отслеживание события</h3>
+<p>Отправляет аналитические события, связанные с запросом промпта.</p>
+<p><strong>Параметры:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Обязательный</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trace ID</td>
+<td>Да</td>
+<td>Из ответа Get Prompt</td>
+</tr>
+<tr>
+<td>Event Name</td>
+<td>Да</td>
+<td>Название события из дашборда</td>
+</tr>
+<tr>
+<td>User ID</td>
+<td>Нет</td>
+<td>Идентификатор пользователя</td>
+</tr>
+<tr>
+<td>Session ID</td>
+<td>Нет</td>
+<td>Идентификатор сессии</td>
+</tr>
+<tr>
+<td>Value</td>
+<td>Нет</td>
+<td>Числовое значение для выручки</td>
+</tr>
+<tr>
+<td>Currency</td>
+<td>Нет</td>
+<td>Код валюты (USD, EUR)</td>
+</tr>
+<tr>
+<td>Metadata</td>
+<td>Нет</td>
+<td>JSON-объект с произвольными полями</td>
+</tr>
+</tbody>
+</table>
+<h2 id="zap">Пример Zap</h2>
+<h3 id="ai-">Базовый: Форма → AI-ответ → Отслеживание</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>[New Form Submission] → [xR2: Get Prompt] → [OpenAI] → [xR2: Track Event]
+</code></pre></div>
+<ol>
+<li><strong>Триггер</strong>: Новая отправка формы (Typeform, Google Forms и т.д.)</li>
+<li><strong>xR2 Get Prompt</strong>:</li>
+<li>Slug: <code>customer-support</code></li>
+<li><strong>OpenAI</strong>:</li>
+<li>Используйте system_prompt и user_prompt из xR2</li>
+<li>Заполните переменные данными из формы</li>
+<li><strong>xR2 Track Event</strong>:</li>
+<li>Trace ID: из шага 2</li>
+<li>Event Name: <code>ai_response_generated</code></li>
+<li>User ID: из email формы</li>
+</ol>
+<h3 id="_6">Отслеживание выручки</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>[New Order] → [xR2: Get Prompt] → [xR2: Track Event]
+</code></pre></div>
+<p>Отслеживайте покупки, связанные с AI-взаимодействиями:</p>
+<ol>
+<li><strong>Триггер</strong>: Новый заказ Shopify/Stripe</li>
+<li><strong>xR2 Get Prompt</strong>: Получите промпт, использованный для этого клиента</li>
+<li><strong>xR2 Track Event</strong>:</li>
+<li>Trace ID: сохраненный из начального взаимодействия</li>
+<li>Event Name: <code>purchase_completed</code></li>
+<li>Value: сумма заказа</li>
+<li>Currency: <code>USD</code></li>
+<li>User ID: email клиента</li>
+</ol>
+<h2 id="_7">Сопоставление полей</h2>
+<p>Используйте маппер полей Zapier для связи данных между шагами:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Trace ID: {{steps.xr2_get_prompt.trace_id}}
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>User Prompt: {{steps.xr2_get_prompt.user_prompt}}
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>System Prompt: {{steps.xr2_get_prompt.system_prompt}}
+</code></pre></div>
+<h2 id="_8">Устранение неполадок</h2>
+<h3 id="_9">Ошибка аутентификации</h3>
+<ul>
+<li>Убедитесь, что API-ключ корректен</li>
+<li>Убедитесь, что ключ начинается с <code>xr2_prod_</code></li>
+<li>Проверьте, что ключ активен на <a href="https://xr2.uk/api-keys">xr2.uk/api-keys</a></li>
+</ul>
+<h3 id="_10">Промпт не найден</h3>
+<ul>
+<li>Проверьте, что slug существует на <a href="https://xr2.uk/prompts">xr2.uk/prompts</a></li>
+<li>Убедитесь, что у промпта есть развернутая версия</li>
+<li>Проверьте правильность написания slug</li>
+</ul>
+<h3 id="_11">Событие не отслеживается</h3>
+<ul>
+<li>Убедитесь, что название события определено в <a href="https://xr2.uk/analytics/events">настройках аналитики</a></li>
+<li>Убедитесь, что trace_id корректно сопоставлен из шага Get Prompt</li>
+<li>Проверьте, что обязательные поля метаданных заполнены</li>
+</ul>
+<h2 id="_12">Ссылки</h2>
+<ul>
+<li>Zapier: <a href="https://zapier.com">https://zapier.com</a></li>
+<li>Дашборд xR2: <a href="https://xr2.uk">https://xr2.uk</a></li>
+<li>Поддержка: hello@xr2.uk</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Навигация по странице">
+        <a href="../make/" class="btn btn-neutral float-left" title="Make.com"><span class="icon icon-circle-arrow-left"></span> Назад</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Собрано в <a href="https://www.mkdocs.org/">MkDocs</a> с использованием <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы</a> от <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Версии">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../make/" style="color: #fcfcfc">&laquo; Назад</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../js/lang-switcher.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

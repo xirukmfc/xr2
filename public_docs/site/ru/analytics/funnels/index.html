@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="xR2 Team" /><link rel="canonical" href="https://docs.xr2.uk/ru/analytics/funnels/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Conversion Funnels - xR2 Documentation</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../css/custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Conversion Funnels";
+        var mkdocs_page_input_path = "ru/analytics/funnels.md";
+        var mkdocs_page_url = "/ru/analytics/funnels/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../" class="icon icon-home"> xR2 Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" title="Введите поисковый запрос" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Навигационное меню">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/quickstart/">Quickstart</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/authentication/">Authentication</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Prompt Editor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/creating-prompts/">Creating Prompts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/variables/">Variables</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/versions/">Versions & Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../prompts/testing/">Testing Prompts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Analytics</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../events/">Event Tracking</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Conversion Funnels</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">Что такое воронка?</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_3">Создание воронки</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_4">Типы источников воронки</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">Добавление шагов</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_6">Пример: Воронка электронной коммерции</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_7">Визуализация воронки</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_8">Метрики воронки</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_9">Фильтрация воронок</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_10">По промпту</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_11">По диапазону дат</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_12">По сегменту пользователей</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_13">Анализ оттока</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-2-60">Шаг 1 → Шаг 2 (60% отток)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_14">Средние шаги (высокий отток)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_15">Сравнение воронок</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_16">По версии промпта</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_17">По периоду времени</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#ab-">По A/B-тесту</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_18">Сценарии использования воронок</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_19">Оптимизация онбординга</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_20">Качество поддержки</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_21">Вовлечённость в контент</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_22">Лучшие практики</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1">1. Начните просто</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2">2. Определите чёткие шаги</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3">3. Порядок имеет значение</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#4">4. Сегментируйте для инсайтов</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_23">Следующие шаги</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">A/B Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/creating-tests/">Creating Tests</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/results/">Measuring Results</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ab-testing/statistics/">Statistical Significance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API & SDKs</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/api-reference/">API Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/python/">Python SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/nodejs/">Node.js SDK</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/n8n/">n8n</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/make/">Make.com</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sdks/zapier/">Zapier</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/">🌐 EN</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/ru/">🌐 RU</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Мобильная версия навигации">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">xR2 Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../" class="icon icon-home" aria-label="Документация"></a></li>
+          <li class="breadcrumb-item">Analytics</li>
+      <li class="breadcrumb-item active">Conversion Funnels</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">Воронки конверсии</h1>
+<p>Воронки помогают понять, как пользователи проходят через последовательность шагов. Смотрите, где они конвертируются и где уходят.</p>
+<h2 id="_2">Что такое воронка?</h2>
+<p>Воронка — это последовательность событий, которые пользователи должны завершить:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Шаг 1: signup_started      → 1 000 пользователей (100%)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>Шаг 2: email_verified      →   800 пользователей (80%)
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Шаг 3: profile_completed   →   500 пользователей (50%)
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>Шаг 4: first_purchase      →   200 пользователей (20%)
+</code></pre></div>
+<p>Каждый шаг показывает:</p>
+<ul>
+<li>Сколько пользователей достигло его</li>
+<li>Коэффициент конверсии с предыдущего шага</li>
+<li>Общую конверсию от начала</li>
+</ul>
+<h2 id="_3">Создание воронки</h2>
+<ol>
+<li>Перейдите в <strong>Аналитика</strong> → <strong>Воронки</strong></li>
+<li>Нажмите <strong>+ Новая воронка</strong></li>
+<li>Настройте:<ul>
+<li><strong>Название</strong>: Описательное название (например, "Воронка онбординга")</li>
+<li><strong>Источник</strong>: Выберите начальную точку</li>
+<li><strong>Шаги</strong>: Добавьте события по порядку</li>
+</ul>
+</li>
+<li>Нажмите <strong>Сохранить</strong></li>
+</ol>
+<h3 id="_4">Типы источников воронки</h3>
+<p>Источник воронки определяет, что считается "входом" в воронку:</p>
+<table>
+<thead>
+<tr>
+<th>Тип источника</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Запросы промптов</strong></td>
+<td>Пользователи, получившие определённый промпт через API (вызовы <code>get-prompt</code>)</td>
+</tr>
+<tr>
+<td><strong>Событие</strong></td>
+<td>Пользователи, вызвавшие определённое событие</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Совет:</strong> Используйте "Запросы промптов" как источник, чтобы измерить, сколько пользователей, получивших ваш промпт, продолжили конвертироваться. Это наиболее распространённая настройка для измерения эффективности промптов.</p>
+</blockquote>
+<h3 id="_5">Добавление шагов</h3>
+<p>Для каждого шага:</p>
+<ol>
+<li>Нажмите <strong>+ Добавить шаг</strong></li>
+<li>Выберите событие из выпадающего списка</li>
+<li>Опционально добавьте фильтры (например, учитывать только события с <code>value &gt; 10</code>)</li>
+<li>Повторите для всех шагов</li>
+</ol>
+<h3 id="_6">Пример: Воронка электронной коммерции</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Воронка: Процесс покупки
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Шаг 1: product_viewed
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>Шаг 2: added_to_cart
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>Шаг 3: checkout_started
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>Шаг 4: purchase_completed
+</code></pre></div>
+<h2 id="_7">Визуализация воронки</h2>
+<p>Воронка отображается в виде визуальной диаграммы:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>┌─────────────────────────────────────────┐
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>│ product_viewed                    1,000 │ 100%
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>├─────────────────────────────────────────┤
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>│ added_to_cart                       400 │ 40%  ↓60% отток
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>├─────────────────────────────────────────┤
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>│ checkout_started                    200 │ 50%  ↓50% отток
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>├─────────────────────────────────────────┤
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>│ purchase_completed                  150 │ 75%  ↓25% отток
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>└─────────────────────────────────────────┘
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>Общая конверсия: 15%
+</code></pre></div>
+<h2 id="_8">Метрики воронки</h2>
+<table>
+<thead>
+<tr>
+<th>Метрика</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Вошли</strong></td>
+<td>Пользователи, завершившие шаг 1</td>
+</tr>
+<tr>
+<td><strong>Сконвертировались</strong></td>
+<td>Пользователи, завершившие все шаги</td>
+</tr>
+<tr>
+<td><strong>Общая конверсия</strong></td>
+<td>Сконвертировавшиеся / Вошедшие × 100%</td>
+</tr>
+<tr>
+<td><strong>Коэффициент оттока</strong></td>
+<td>100% - Конверсия шага</td>
+</tr>
+<tr>
+<td><strong>Время до конверсии</strong></td>
+<td>Среднее время от первого до последнего шага</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_9">Фильтрация воронок</h2>
+<h3 id="_10">По промпту</h3>
+<p>Смотрите эффективность воронки для конкретного промпта:</p>
+<ol>
+<li>Выберите фильтр <strong>Промпт</strong></li>
+<li>Выберите промпт</li>
+<li>Опционально отфильтруйте по версии</li>
+</ol>
+<h3 id="_11">По диапазону дат</h3>
+<p>Анализируйте конкретные периоды времени:</p>
+<ul>
+<li>Последние 7 дней</li>
+<li>Последние 30 дней</li>
+<li>Произвольный диапазон</li>
+</ul>
+<h3 id="_12">По сегменту пользователей</h3>
+<p>Фильтруйте по атрибутам пользователей:</p>
+<ul>
+<li>Паттерн User ID</li>
+<li>Свойства сессии</li>
+<li>Значения метаданных</li>
+</ul>
+<h2 id="_13">Анализ оттока</h2>
+<p>Когда вы видите высокий отток между шагами:</p>
+<h3 id="1-2-60">Шаг 1 → Шаг 2 (60% отток)</h3>
+<p><strong>Вопросы для анализа:</strong></p>
+<ul>
+<li>Не запутывает ли пользователей ответ AI?</li>
+<li>Понятно ли следующее действие?</li>
+<li>Есть ли технические проблемы?</li>
+</ul>
+<p><strong>Действия:</strong></p>
+<ul>
+<li>Проверьте содержание промпта</li>
+<li>Просмотрите логи ошибок</li>
+<li>Протестируйте процесс самостоятельно</li>
+</ul>
+<h3 id="_14">Средние шаги (высокий отток)</h3>
+<p><strong>Вопросы для анализа:</strong></p>
+<ul>
+<li>Не слишком ли сложен шаг?</li>
+<li>Есть ли трение в UX?</li>
+<li>Правильно ли ответ AI направляет пользователей?</li>
+</ul>
+<p><strong>Действия:</strong></p>
+<ul>
+<li>Упростите шаг</li>
+<li>Улучшите инструкции AI</li>
+<li>Проведите A/B-тест разных подходов</li>
+</ul>
+<h2 id="_15">Сравнение воронок</h2>
+<h3 id="_16">По версии промпта</h3>
+<p>Сравнивайте, как работают разные версии промптов:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Воронка: Онбординг
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Промпт v1:
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  signup_started → signup_completed: 45%
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>Промпт v2:
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>  signup_started → signup_completed: 62%
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>Победитель: v2 (+17% улучшение)
+</code></pre></div>
+<h3 id="_17">По периоду времени</h3>
+<p>Сравнивайте эффективность во времени:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Прошлая неделя:  Общая конверсия: 15%
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Эта неделя:      Общая конверсия: 18%
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Изменение:       +3% улучшение
+</code></pre></div>
+<h3 id="ab-">По A/B-тесту</h3>
+<p>Смотрите эффективность воронки по вариантам теста:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Вариант A: 12% общая конверсия
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>Вариант B: 18% общая конверсия
+</code></pre></div>
+<h2 id="_18">Сценарии использования воронок</h2>
+<h3 id="_19">Оптимизация онбординга</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Шаги:
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>1. signup_started
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>2. email_verified
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>3. profile_completed
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>4. first_feature_used
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>5. subscription_started
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>Цель: Максимизировать платные подписки
+</code></pre></div>
+<h3 id="_20">Качество поддержки</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Шаги:
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>1. support_requested
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>2. ai_response_viewed
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>3. follow_up_asked (обратный показатель — чем меньше, тем лучше)
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>4. issue_resolved
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>5. positive_feedback
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>Цель: Решать проблемы за один ответ AI
+</code></pre></div>
+<h3 id="_21">Вовлечённость в контент</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Шаги:
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>1. content_generated
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>2. content_edited
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>3. content_approved
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>4. content_published
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>5. content_shared
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>Цель: Максимизировать контент, которым делятся
+</code></pre></div>
+<h2 id="_22">Лучшие практики</h2>
+<h3 id="1">1. Начните просто</h3>
+<p>Начните с 3-4 ключевых шагов:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>signup → activation → conversion
+</code></pre></div>
+<p>Добавьте детализацию позже при необходимости.</p>
+<h3 id="2">2. Определите чёткие шаги</h3>
+<p>Каждый шаг должен быть:</p>
+<ul>
+<li>Единственным, отдельным действием</li>
+<li>Измеримым через события</li>
+<li>Значимым для бизнеса</li>
+</ul>
+<h3 id="3">3. Порядок имеет значение</h3>
+<p>Шаги должны идти в логическом порядке:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>product_viewed → added_to_cart → purchased
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>purchased → product_viewed → added_to_cart
+</code></pre></div>
+<h3 id="4">4. Сегментируйте для инсайтов</h3>
+<p>Не смотрите только на общие числа. Сегментируйте по:</p>
+<ul>
+<li>Типу пользователя (новые vs вернувшиеся)</li>
+<li>Источнику трафика</li>
+<li>Типу устройства</li>
+<li>Географии</li>
+</ul>
+<h2 id="_23">Следующие шаги</h2>
+<ul>
+<li><a href="../../ab-testing/overview/">A/B-тестирование</a> — Тестируйте, какие промпты улучшают конверсию воронки</li>
+<li><a href="../events/">Отслеживание событий</a> — Убедитесь, что все шаги воронки отслеживаются</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Навигация по странице">
+        <a href="../events/" class="btn btn-neutral float-left" title="Event Tracking"><span class="icon icon-circle-arrow-left"></span> Назад</a>
+        <a href="../../ab-testing/overview/" class="btn btn-neutral float-right" title="Overview">Вперед <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Собрано в <a href="https://www.mkdocs.org/">MkDocs</a> с использованием <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы</a> от <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Версии">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../events/" style="color: #fcfcfc">&laquo; Назад</a></span>
+    
+    
+      <span><a href="../../ab-testing/overview/" style="color: #fcfcfc">Вперед &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../js/lang-switcher.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
