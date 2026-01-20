@@ -1,0 +1,92 @@
+site_name: xR2 Documentation
+site_url: https://docs.xr2.uk
+site_description: Documentation for xR2 - AI Prompt Management Platform
+site_author: xR2 Team
+docs_dir: documentation
+
+theme:
+  name: readthedocs
+
+extra_javascript:
+  - js/lang-switcher.js
+
+extra_css:
+  - css/custom.css
+
+plugins:
+  - search
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: true
+      languages:
+        - locale: en
+          name: English
+          default: true
+          build: true
+        - locale: ru
+          name: Русский
+          build: true
+          nav_translations:
+            Home: Главная
+            Getting Started: Начало работы
+            Quickstart: Быстрый старт
+            Authentication: Аутентификация
+            API Logs: Логи API
+            Prompt Editor: Редактор промптов
+            Overview: Обзор
+            Creating Prompts: Создание промптов
+            Variables: Переменные
+            Versions & Deployment: Версии и деплой
+            Testing Prompts: Тестирование промптов
+            Analytics: Аналитика
+            Event Tracking: Отслеживание событий
+            Conversion Funnels: Воронки конверсии
+            A/B Testing: A/B тестирование
+            Creating Tests: Создание тестов
+            Measuring Results: Измерение результатов
+            Statistical Significance: Статистическая значимость
+            API & SDKs: API и SDK
+            API Reference: Справочник API
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - tables
+  - attr_list
+  - toc:
+      permalink: false
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quickstart: getting-started/quickstart.md
+    - Authentication: getting-started/authentication.md
+    - API Logs: analytics/logs.md
+  - Prompt Editor:
+    - Overview: prompts/overview.md
+    - Creating Prompts: prompts/creating-prompts.md
+    - Variables: prompts/variables.md
+    - Versions & Deployment: prompts/versions.md
+    - Testing Prompts: prompts/testing.md
+  - Analytics:
+    - Overview: analytics/overview.md
+    - Event Tracking: analytics/events.md
+    - Conversion Funnels: analytics/funnels.md
+  - A/B Testing:
+    - Overview: ab-testing/overview.md
+    - Creating Tests: ab-testing/creating-tests.md
+    - Measuring Results: ab-testing/results.md
+    - Statistical Significance: ab-testing/statistics.md
+  - API & SDKs:
+    - API Reference: getting-started/api-reference.md
+    - Python SDK: sdks/python.md
+    - Node.js SDK: sdks/nodejs.md
+    - n8n: sdks/n8n.md
+    - Make.com: sdks/make.md
+    - Zapier: sdks/zapier.md
+  - 🌐 EN: /
+  - 🌐 RU: /ru/

@@ -1,0 +1,4 @@
+/* Hide footer attribution */
+footer {
+    display: none !important;
+}
