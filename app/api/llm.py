@@ -411,22 +411,27 @@ async def call_openai_api(
         "messages": messages,
     }
 
+    # Normalize model name for comparison (case-insensitive)
+    model_lower = model.lower()
+
     # Models that require max_completion_tokens instead of max_tokens
     # GPT-5, o1, o3, o4 series models have different parameter requirements
     models_requiring_max_completion_tokens = [
         "gpt-5", "o1", "o3", "o4"
     ]
-    requires_max_completion_tokens = any(model.startswith(prefix) for prefix in models_requiring_max_completion_tokens)
-    
+    requires_max_completion_tokens = any(model_lower.startswith(prefix) for prefix in models_requiring_max_completion_tokens)
+
     # Models that only support temperature = 1.0 (default)
+    # o1, o3, o4 series including mini/pro variants don't support custom temperature
     models_fixed_temperature = ["o1", "o3", "o4"]
-    requires_fixed_temperature = any(model.startswith(prefix) for prefix in models_fixed_temperature)
-    
+    requires_fixed_temperature = any(model_lower.startswith(prefix) for prefix in models_fixed_temperature)
+
     if requires_max_completion_tokens:
         request_data["max_completion_tokens"] = max_output_tokens
         # o1, o3, and o4 models only support temperature = 1 (default)
         if requires_fixed_temperature:
-            request_data["temperature"] = 1.0
+            # Don't send temperature parameter at all for reasoning models
+            pass
         else:
             # GPT-5 models support custom temperature
             request_data["temperature"] = temperature
@@ -804,15 +809,20 @@ async def stream_openai_api(
         "stream": True,
     }
 
+    # Normalize model name for comparison (case-insensitive)
+    model_lower = model.lower()
+
     # Handle model-specific parameters
     models_requiring_max_completion_tokens = ["gpt-5", "o1", "o3", "o4"]
-    requires_max_completion_tokens = any(model.startswith(prefix) for prefix in models_requiring_max_completion_tokens)
+    requires_max_completion_tokens = any(model_lower.startswith(prefix) for prefix in models_requiring_max_completion_tokens)
     models_fixed_temperature = ["o1", "o3", "o4"]
-    requires_fixed_temperature = any(model.startswith(prefix) for prefix in models_fixed_temperature)
+    requires_fixed_temperature = any(model_lower.startswith(prefix) for prefix in models_fixed_temperature)
 
     if requires_max_completion_tokens:
         request_data["max_completion_tokens"] = max_output_tokens
-        request_data["temperature"] = 1.0 if requires_fixed_temperature else temperature
+        # Don't send temperature parameter at all for reasoning models
+        if not requires_fixed_temperature:
+            request_data["temperature"] = temperature
     else:
         request_data["max_tokens"] = max_output_tokens
         request_data["temperature"] = temperature
