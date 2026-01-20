@@ -9,6 +9,7 @@
       "features": "Фичи",
       "pricing": "Цены",
       "docs": "Доки",
+      "public_docs": "Доки",
       "signIn": "Войти",
       "getStartedFree": "Попробовать"
     },
@@ -122,6 +123,7 @@
     },
     "footer": {
       "docs": "Доки",
+      "public_docs": "Доки",
       "pricing": "Цены",
       "contact": "Контакты",
       "cookies": "Cookies",

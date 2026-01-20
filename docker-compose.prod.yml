@@ -139,6 +139,9 @@ services:
         NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN: ${NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN:-false}
         BUILDKIT_INLINE_CACHE: 1
       shm_size: '2gb'
+      # Use BuildKit cache mounts for faster rebuilds
+      cache_from:
+        - xr2-frontend:latest
     container_name: xr2_frontend_prod
     environment:
       NODE_ENV: production

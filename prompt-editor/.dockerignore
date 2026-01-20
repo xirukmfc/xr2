@@ -7,3 +7,13 @@ README.md
 .idea
 *.log
 .DS_Store
+.env.local
+.env*.local
+coverage
+.nyc_output
+*.tsbuildinfo
+dist
+build
+.cache
+.turbo
+.swc

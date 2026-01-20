@@ -9,6 +9,7 @@
       "features": "Features",
       "pricing": "Pricing",
       "docs": "Docs",
+      "public_docs": "Docs",
       "signIn": "Sign In",
       "getStartedFree": "Get Started Free"
     },
@@ -122,6 +123,7 @@
     },
     "footer": {
       "docs": "Docs",
+      "public_docs": "Docs",
       "pricing": "Pricing",
       "contact": "Contact",
       "cookies": "Cookies",

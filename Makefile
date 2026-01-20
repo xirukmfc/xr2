@@ -124,6 +124,14 @@ rebuild: ## Пересобрать все образы
 	@echo "$(GREEN)✅ Образы пересобраны$(NC)"
 	@echo "$(YELLOW)Для применения изменений выполните:$(NC) make up"
 
+rebuild-frontend-fast: ## ⚡ Быстрая пересборка frontend с BuildKit и кешем
+	@echo "$(GREEN)⚡ Быстрая пересборка frontend с BuildKit$(NC)"
+	@export DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 && \
+	docker compose --env-file .env.prod -f docker-compose.prod.yml stop frontend 2>/dev/null || true && \
+	docker compose --env-file .env.prod -f docker-compose.prod.yml build frontend && \
+	docker compose --env-file .env.prod -f docker-compose.prod.yml up -d frontend
+	@echo "$(GREEN)✅ Frontend пересобран и запущен!$(NC)"
+
 ##@ Безопасность
 
 setup-admin-auth: ## Настроить авторизацию для /admin-docs/

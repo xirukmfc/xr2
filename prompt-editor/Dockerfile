@@ -12,7 +12,9 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies with increased timeout and memory
-RUN pnpm config set network-timeout 600000 && \
+# Use BuildKit cache mount for node_modules to speed up rebuilds
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm config set network-timeout 600000 && \
     pnpm install --frozen-lockfile --prefer-offline
 
 # Rebuild the source code only when needed
