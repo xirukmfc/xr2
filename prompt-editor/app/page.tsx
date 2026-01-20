@@ -82,7 +82,7 @@ export default function LandingPage() {
             <div className="hidden md:flex items-center gap-6">
               <a href="#features" className="text-gray-600 hover:text-gray-900 text-sm font-medium">{t('landing.nav.features')}</a>
               <a href="#pricing" className="text-gray-600 hover:text-gray-900 text-sm font-medium">{t('landing.nav.pricing')}</a>
-              <a href="https://xr2.gitbook.io/docs" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 text-sm font-medium">{t('landing.nav.public_docs')}</a>
+              <a href="https://docs.xr2.uk" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 text-sm font-medium">{t('landing.nav.public_docs')}</a>
               <button
                 onClick={toggleLanguage}
                 className="text-xl px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
@@ -116,7 +116,7 @@ export default function LandingPage() {
             <div className="px-6 py-4 space-y-4">
               <a href="#features" className="block text-gray-600 hover:text-gray-900 py-2 font-medium">{t('landing.nav.features')}</a>
               <a href="#pricing" className="block text-gray-600 hover:text-gray-900 py-2 font-medium">{t('landing.nav.pricing')}</a>
-              <a href="https://xr2.gitbook.io/docs" target="_blank" rel="noopener noreferrer" className="block text-gray-600 hover:text-gray-900 py-2 font-medium">{t('landing.nav.public_docs')}</a>
+              <a href="https://docs.xr2.uk" target="_blank" rel="noopener noreferrer" className="block text-gray-600 hover:text-gray-900 py-2 font-medium">{t('landing.nav.public_docs')}</a>
               <div className="pt-4">
                 <Button onClick={() => router.push("/login")} className="w-full">{t('landing.nav.getStartedFree')}</Button>
               </div>
@@ -682,7 +682,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-6 text-sm">
-              <a href="https://xr2.gitbook.io/docs" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-900">{t('landing.footer.public_docs')}</a>
+              <a href="https://docs.xr2.uk" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-900">{t('landing.footer.public_docs')}</a>
               <a href="#pricing" className="text-gray-500 hover:text-gray-900">{t('landing.footer.pricing')}</a>
               <a href="mailto:hello@xr2.uk" className="text-gray-500 hover:text-gray-900">{t('landing.footer.contact')}</a>
             </div>

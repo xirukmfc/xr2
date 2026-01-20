@@ -281,7 +281,7 @@ export function Sidebar() {
         </button>
         {/* Full Docs Button */}
         <a
-          href="https://xr2.gitbook.io/docs"
+          href="https://docs.xr2.uk"
           target="_blank"
           rel="noopener noreferrer"
           className={`flex items-center p-2 rounded-md transition-colors group text-slate-600 hover:bg-blue-50 hover:text-blue-700 ${

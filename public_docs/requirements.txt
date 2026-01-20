@@ -1,0 +1,4 @@
+mkdocs>=1.5.0
+mkdocs-gitbook
+pymdown-extensions>=10.0
+mkdocs-static-i18n>=1.0.0
