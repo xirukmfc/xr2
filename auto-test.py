@@ -8949,11 +8949,11 @@ class XR2AutoTester:
             else:
                 raise Exception("Нет доступных версий для Version B (нужно минимум 2 версии)")
 
-            # Установка лимита запросов
+            # Установка лимита запросов (20 для теста случайного распределения с 10 запросами + запас)
             total_requests_input = self.page.get_by_test_id("ab-test-total-requests-input")
             await expect(total_requests_input).to_be_visible()
-            await total_requests_input.fill("4")
-            logger.info("✅ Установлен лимит: 4 запроса")
+            await total_requests_input.fill("20")
+            logger.info("✅ Установлен лимит: 20 запросов")
 
             # Нажатие кнопки Create Test
             create_btn = self.page.get_by_test_id("ab-test-create-button")
@@ -9044,7 +9044,7 @@ class XR2AutoTester:
                     logger.warning(f"⚠️ Не удалось получить A/B тесты: {resp_final.status}")
 
                 self.test_data['ab_test_created'] = True
-                test_result.pass_test({"ab_test_name": test_name, "limit": 4})
+                test_result.pass_test({"ab_test_name": test_name, "limit": 20})
                 logger.info("✅ A/B тест успешно создан и запущен")
 
         except Exception as e:
@@ -9054,12 +9054,12 @@ class XR2AutoTester:
         return test_result
 
     async def test_ab_test_version_alternation(self) -> TestResult:
-        """T17.10: Проверка чередования версий в A/B тесте"""
-        test_result = TestResult("T17.10", "Проверка чередования версий A/B теста")
+        """T17.10: Проверка случайного распределения версий в A/B тесте"""
+        test_result = TestResult("T17.10", "Проверка случайного распределения версий A/B теста")
         test_result.start()
 
         try:
-            logger.info("🔍 Начало теста чередования версий A/B теста")
+            logger.info("🔍 Начало теста случайного распределения версий A/B теста")
 
             if not self.created_api_key:
                 logger.error("❌ API ключ не создан!")
@@ -9093,9 +9093,11 @@ class XR2AutoTester:
                                   f"version_a={test.get('version_a_number')}, version_b={test.get('version_b_number')}, "
                                   f"requests_a={test.get('version_a_requests')}, requests_b={test.get('version_b_requests')}")
 
-            # Делаем 4 запроса и проверяем чередование версий
+            # Делаем 10 запросов для проверки случайного распределения
+            # При 10 запросах вероятность получить все на одну версию = 2 * (0.5)^10 ≈ 0.2%
+            num_requests = 10
             async with aiohttp.ClientSession() as session:
-                for i in range(4):
+                for i in range(num_requests):
                     async with session.post(
                         f"{self.backend_url}/api/v1/get-prompt",
                         headers={"Authorization": f"Bearer {api_key}"},
@@ -9127,28 +9129,44 @@ class XR2AutoTester:
                             error_text = await response.text()
                             logger.error(f"   Ошибка: {error_text[:200]}")
 
-                    await asyncio.sleep(0.5)  # Небольшая пауза между запросами
+                    await asyncio.sleep(0.3)  # Небольшая пауза между запросами
 
-            # Проверка чередования
+            # Проверка случайного распределения
             logger.info(f"📊 Всего получено ответов: {len(versions_received)}")
             for v in versions_received:
                 logger.info(f"   Запрос {v['request']}: version={v['version']}, ab_variant={v['ab_variant']}")
 
             unique_versions = set([v['version'] for v in versions_received if v['version']])
-            logger.info(f"📋 Уникальных версий: {len(unique_versions)} - {unique_versions}")
+            unique_variants = set([v['ab_variant'] for v in versions_received if v['ab_variant']])
 
+            # Подсчитаем распределение по вариантам
+            variant_counts = {}
+            for v in versions_received:
+                variant = v['ab_variant']
+                if variant:
+                    variant_counts[variant] = variant_counts.get(variant, 0) + 1
+
+            logger.info(f"📋 Уникальных версий: {len(unique_versions)} - {unique_versions}")
+            logger.info(f"📋 Уникальных вариантов: {len(unique_variants)} - {unique_variants}")
+            logger.info(f"📊 Распределение по вариантам: {variant_counts}")
+
+            # Проверяем что получили обе версии (при случайном распределении)
+            # При 10 запросах вероятность получить только одну версию ≈ 0.2%
             if len(unique_versions) >= 2:
                 test_result.pass_test({
                     "versions_received": versions_received,
                     "unique_versions": list(unique_versions),
-                    "alternation_confirmed": True
+                    "variant_distribution": variant_counts,
+                    "random_distribution_confirmed": True
                 })
-                logger.info(f"✅ Чередование версий подтверждено! Получены версии: {unique_versions}")
+                logger.info(f"✅ Случайное распределение подтверждено! Версии: {unique_versions}, распределение: {variant_counts}")
             else:
-                logger.error(f"❌ Чередование не обнаружено!")
+                # Это может произойти с вероятностью ~0.2%, но всё равно считаем ошибкой теста
+                logger.error(f"❌ Обе версии не получены при {num_requests} запросах!")
                 logger.error(f"   Получены версии: {unique_versions}")
+                logger.error(f"   Распределение: {variant_counts}")
                 logger.error(f"   Все ответы: {versions_received}")
-                test_result.fail_test(f"Чередование не обнаружено. Получены версии: {unique_versions}")
+                test_result.fail_test(f"Обе версии не получены. Версии: {unique_versions}, распределение: {variant_counts}")
 
         except Exception as e:
             logger.error(f"❌ Исключение в тесте: {e}")

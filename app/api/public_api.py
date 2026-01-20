@@ -9,6 +9,7 @@ import json
 from uuid import UUID
 import secrets
 import time
+import random
 from datetime import datetime, timezone
 
 from app.core.database import get_session
@@ -103,9 +104,10 @@ async def get_ab_test_version(session: AsyncSession, prompt_id: UUID, workspace_
                 await session.commit()
             return None  # Use production version when test is exhausted
 
-        # Determine which version to serve for 50/50 split
-        # Use the version that has been served fewer times
-        if ab_test.version_a_requests <= ab_test.version_b_requests:
+        # Determine which version to serve using random 50/50 split
+        # Random selection ensures statistical independence of each request
+        # (round-robin can create selection bias with non-uniform traffic patterns)
+        if random.random() < 0.5:
             # Serve version A
             ab_test.version_a_requests += 1
             version_to_serve = ab_test.version_a_id
