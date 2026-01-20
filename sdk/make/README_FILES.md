@@ -175,7 +175,7 @@
 ### xR2
 - Dashboard: https://xr2.uk
 - API Keys: https://xr2.uk/api-keys
-- API Docs: https://xr2.gitbook.io/docs
+- API Docs: https://docs.xr2.uk/
 
 ---
 

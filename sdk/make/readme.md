@@ -186,7 +186,7 @@ All requests go to: `https://xr2.uk/api/v1`
 
 ## Support
 
-- Documentation: https://xr2.gitbook.io/docs
+- Documentation: https://docs.xr2.uk/
 - Dashboard: https://xr2.uk
 - Email: hello@xr2.uk
 

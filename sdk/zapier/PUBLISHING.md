@@ -92,7 +92,7 @@ You'll need:
 - **Category**: Developer Tools / AI
 - **Homepage**: https://xr2.uk
 - **Support Email**: hello@xr2.uk
-- **Documentation**: https://xr2.gitbook.io/docs
+- **Documentation**: https://docs.xr2.uk/
 - **Privacy Policy**: https://xr2.uk/privacy
 
 ### Step 2: Complete Publishing Checklist

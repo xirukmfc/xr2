@@ -57,7 +57,7 @@ Sends analytics events linked to a prompt request.
 ## Support
 
 - Dashboard: https://xr2.uk
-- Documentation: https://xr2.gitbook.io/docs
+- Documentation: https://docs.xr2.uk/
 - Email: hello@xr2.uk
 
 ## License

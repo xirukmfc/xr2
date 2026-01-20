@@ -462,7 +462,7 @@ POST
 2. В настройках приложения нажмите **"Submit for Review"**
 3. Заполните форму:
    - **Support Email:** ваш email
-   - **Documentation URL:** https://xr2.gitbook.io/docs
+   - **Documentation URL:** https://docs.xr2.uk/
    - **Privacy Policy URL:** ссылка на политику конфиденциальности
 4. Дождитесь одобрения (обычно 3-7 дней)
 
@@ -523,7 +523,7 @@ Authorization: Bearer {{parameters.apiKey}}
 
 - **Make.com Docs:** https://www.make.com/en/help
 - **Custom Apps Guide:** https://www.make.com/en/help/app-development
-- **xR2 API Docs:** https://xr2.gitbook.io/docs
+- **xR2 API Docs:** https://docs.xr2.uk/
 - **xR2 Dashboard:** https://xr2.uk
 - **Get API Key:** https://xr2.uk/api-keys
 

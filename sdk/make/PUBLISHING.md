@@ -100,7 +100,7 @@ If you want to publish to Make.com Marketplace:
 ### 6.1 Prepare Required Information
 
 - **Support Email**: hello@xr2.uk
-- **Documentation URL**: https://xr2.gitbook.io/docs
+- **Documentation URL**: https://docs.xr2.uk/
 - **Privacy Policy URL**: https://xr2.uk/privacy
 - **Terms of Service URL**: https://xr2.uk/terms
 - **App Icon**: 512x512px PNG (use xR2 logo)

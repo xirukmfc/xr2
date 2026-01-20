@@ -6,7 +6,7 @@ AI Prompt Management & Analytics platform with A/B testing, conversion funnels, 
 
 **Website:** https://xr2.uk
 **Production:** https://xr2.uk
-**Documentation:** https://xr2.gitbook.io/docs
+**Documentation:** https://docs.xr2.uk/
 
 ## Quick Start
 

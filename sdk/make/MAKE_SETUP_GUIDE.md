@@ -426,7 +426,7 @@
 2. Нажмите **Submit for Review** в настройках приложения
 3. Заполните форму:
    - Support Email
-   - Documentation URL: https://xr2.gitbook.io/docs
+   - Documentation URL: https://docs.xr2.uk/
    - Privacy Policy URL
 4. Ждите одобрения (3-7 дней)
 
@@ -588,7 +588,7 @@ https://www.make.com/en/integrations/xr2
 - [Data Types](https://developers.make.com/custom-apps-documentation/block-elements/types)
 
 **xR2 Docs:**
-- [API Documentation](https://xr2.gitbook.io/docs)
+- [API Documentation](https://docs.xr2.uk/)
 - [Dashboard](https://xr2.uk)
 - [API Keys](https://xr2.uk/api-keys)
 
