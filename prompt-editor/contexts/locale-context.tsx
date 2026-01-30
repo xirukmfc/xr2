@@ -38,8 +38,12 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     setLocaleState(newLocale)
     if (typeof window !== 'undefined') {
       localStorage.setItem('locale', newLocale)
-      // Also set cookie for middleware to read
-      document.cookie = `locale=${newLocale};path=/;max-age=31536000;SameSite=Lax`
+      // Set cookie for middleware and subdomains (docs.xr2.uk)
+      // Use domain=.xr2.uk to share cookie across subdomains
+      const hostname = window.location.hostname
+      const isXr2Domain = hostname === 'xr2.uk' || hostname.endsWith('.xr2.uk')
+      const domainPart = isXr2Domain ? ';domain=.xr2.uk' : ''
+      document.cookie = `locale=${newLocale};path=/;max-age=31536000;SameSite=Lax${domainPart}`
     }
   }
 

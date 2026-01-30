@@ -23,6 +23,29 @@ import Head from "next/head"
 
 type SupportedLocale = 'en' | 'ru'
 
+interface PricingPlan {
+  plan_name: string
+  price_display: string
+  period_display: string
+  features: string[]
+}
+
+// Default pricing (fallback if API fails)
+const DEFAULT_PRICING: Record<string, Record<SupportedLocale, PricingPlan>> = {
+  free: {
+    en: { plan_name: 'free', price_display: '$0', period_display: '/month', features: ['Up to 10 prompts', '100 API calls/month', 'Basic analytics', '1 workspace'] },
+    ru: { plan_name: 'free', price_display: '0₽', period_display: '/мес', features: ['До 10 промптов', '100 API запросов/мес', 'Базовая аналитика', '1 workspace'] }
+  },
+  pro: {
+    en: { plan_name: 'pro', price_display: '$29', period_display: '/month', features: ['Unlimited prompts', '1,000 API calls/month', 'A/B testing & revenue tracking', 'Unlimited workspaces', 'Team collaboration'] },
+    ru: { plan_name: 'pro', price_display: '2900₽', period_display: '/мес', features: ['Безлимит промптов', '1 000 API запросов/мес', 'A/B тесты и выручка', 'Безлимит workspaces', 'Командная работа'] }
+  },
+  enterprise: {
+    en: { plan_name: 'enterprise', price_display: 'Custom', period_display: '', features: ['SSO & SAML', 'Dedicated support', 'Custom integrations', 'SLA'] },
+    ru: { plan_name: 'enterprise', price_display: 'По запросу', period_display: '', features: ['SSO и SAML', 'Выделенная поддержка', 'Кастомные интеграции', 'SLA'] }
+  }
+}
+
 export default function LandingPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = use(params)
   const router = useRouter()
@@ -30,6 +53,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
   const { t, locale, setLocale } = useLocale()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [pricing, setPricing] = useState<PricingPlan[]>([])
 
   // Sync URL lang with localStorage on mount
   useEffect(() => {
@@ -54,6 +78,32 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Load pricing from API
+  useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        const response = await fetch(`/api/pricing?locale=${locale}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.plans && data.plans.length > 0) {
+            setPricing(data.plans)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch pricing:', error)
+      }
+    }
+    fetchPricing()
+  }, [locale])
+
+  // Get pricing for a plan (from API or fallback to defaults)
+  const getPlan = (planName: string): PricingPlan => {
+    const apiPlan = pricing.find(p => p.plan_name === planName)
+    if (apiPlan) return apiPlan
+    const defaultPlan = DEFAULT_PRICING[planName]
+    return defaultPlan ? defaultPlan[locale] : DEFAULT_PRICING.free[locale]
+  }
 
   const switchLanguage = (newLang: SupportedLocale) => {
     setLocale(newLang)
@@ -622,68 +672,83 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
 
             <div className="grid md:grid-cols-3 gap-5">
               {/* Free */}
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                <div className="text-gray-500 text-sm font-medium mb-1">{t('landing.pricing.free.name')}</div>
-                <div className="flex items-baseline gap-1 mb-4">
-                  <span className="text-3xl font-bold text-gray-900">{t('landing.pricing.free.price')}</span>
-                  <span className="text-gray-400 text-sm">{t('landing.pricing.free.period')}</span>
-                </div>
+              {(() => {
+                const plan = getPlan('free')
+                return (
+                  <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <div className="text-gray-500 text-sm font-medium mb-1">{t('landing.pricing.free.name')}</div>
+                    <div className="flex items-baseline gap-1 mb-4">
+                      <span className="text-3xl font-bold text-gray-900">{plan.price_display}</span>
+                      <span className="text-gray-400 text-sm">{plan.period_display}</span>
+                    </div>
 
-                <ul className="space-y-2.5 mb-6 text-sm">
-                  {(locale === 'ru' ? ['До 10 промптов', '100 API запросов/мес', 'Базовая аналитика', '1 workspace'] : ['Up to 10 prompts', '100 API calls/month', 'Basic analytics', '1 workspace']).map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-gray-600">
-                      <Check className="h-4 w-4 text-gray-400" />{f}
-                    </li>
-                  ))}
-                </ul>
+                    <ul className="space-y-2.5 mb-6 text-sm">
+                      {plan.features.map((f, i) => (
+                        <li key={i} className="flex items-center gap-2 text-gray-600">
+                          <Check className="h-4 w-4 text-gray-400" />{f}
+                        </li>
+                      ))}
+                    </ul>
 
-                <Button onClick={() => router.push("/login")} variant="outline" className="w-full">
-                  {t('landing.pricing.free.cta')}
-                </Button>
-              </div>
+                    <Button onClick={() => router.push("/login")} variant="outline" className="w-full">
+                      {t('landing.pricing.free.cta')}
+                    </Button>
+                  </div>
+                )
+              })()}
 
               {/* Pro */}
-              <div className="relative bg-white rounded-xl p-6 border-2 border-[#E63355] shadow-lg">
-                <div className="absolute -top-3 left-6 px-3 py-1 bg-[#E63355] text-white rounded-full text-xs font-medium">
-                  {t('landing.pricing.pro.popular')}
-                </div>
+              {(() => {
+                const plan = getPlan('pro')
+                return (
+                  <div className="relative bg-white rounded-xl p-6 border-2 border-[#E63355] shadow-lg">
+                    <div className="absolute -top-3 left-6 px-3 py-1 bg-[#E63355] text-white rounded-full text-xs font-medium">
+                      {t('landing.pricing.pro.popular')}
+                    </div>
 
-                <div className="text-gray-500 text-sm font-medium mb-1">{t('landing.pricing.pro.name')}</div>
-                <div className="flex items-baseline gap-1 mb-4">
-                  <span className="text-3xl font-bold text-gray-900">{t('landing.pricing.pro.price')}</span>
-                  <span className="text-gray-400 text-sm">{t('landing.pricing.pro.period')}</span>
-                </div>
+                    <div className="text-gray-500 text-sm font-medium mb-1">{t('landing.pricing.pro.name')}</div>
+                    <div className="flex items-baseline gap-1 mb-4">
+                      <span className="text-3xl font-bold text-gray-900">{plan.price_display}</span>
+                      <span className="text-gray-400 text-sm">{plan.period_display}</span>
+                    </div>
 
-                <ul className="space-y-2.5 mb-6 text-sm">
-                  {(locale === 'ru' ? ['Безлимит промптов', '1 000 API запросов/мес', 'A/B тесты и выручка', 'Безлимит workspaces', 'Командная работа'] : ['Unlimited prompts', '1,000 API calls/month', 'A/B testing & revenue tracking', 'Unlimited workspaces', 'Team collaboration']).map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-gray-600">
-                      <Check className="h-4 w-4 text-[#E63355]" />{f}
-                    </li>
-                  ))}
-                </ul>
+                    <ul className="space-y-2.5 mb-6 text-sm">
+                      {plan.features.map((f, i) => (
+                        <li key={i} className="flex items-center gap-2 text-gray-600">
+                          <Check className="h-4 w-4 text-[#E63355]" />{f}
+                        </li>
+                      ))}
+                    </ul>
 
-                <Button onClick={() => router.push("/login")} className="w-full bg-[#E63355] hover:bg-[#d42d4d]">
-                  {t('landing.pricing.pro.cta')}
-                </Button>
-              </div>
+                    <Button onClick={() => router.push("/login")} className="w-full bg-[#E63355] hover:bg-[#d42d4d]">
+                      {t('landing.pricing.pro.cta')}
+                    </Button>
+                  </div>
+                )
+              })()}
 
               {/* Enterprise */}
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                <div className="text-gray-500 text-sm font-medium mb-1">{t('landing.pricing.enterprise.name')}</div>
-                <div className="text-2xl font-bold text-gray-900 mb-4">{t('landing.pricing.enterprise.price')}</div>
+              {(() => {
+                const plan = getPlan('enterprise')
+                return (
+                  <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <div className="text-gray-500 text-sm font-medium mb-1">{t('landing.pricing.enterprise.name')}</div>
+                    <div className="text-2xl font-bold text-gray-900 mb-4">{plan.price_display}</div>
 
-                <ul className="space-y-2.5 mb-6 text-sm">
-                  {(locale === 'ru' ? ['SSO и SAML', 'Выделенная поддержка', 'Кастомные интеграции', 'SLA'] : ['SSO & SAML', 'Dedicated support', 'Custom integrations', 'SLA']).map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-gray-600">
-                      <Check className="h-4 w-4 text-gray-400" />{f}
-                    </li>
-                  ))}
-                </ul>
+                    <ul className="space-y-2.5 mb-6 text-sm">
+                      {plan.features.map((f, i) => (
+                        <li key={i} className="flex items-center gap-2 text-gray-600">
+                          <Check className="h-4 w-4 text-gray-400" />{f}
+                        </li>
+                      ))}
+                    </ul>
 
-                <Button variant="outline" className="w-full" onClick={() => window.location.href = 'mailto:hello@xr2.uk'}>
-                  {t('landing.pricing.enterprise.cta')}
-                </Button>
-              </div>
+                    <Button variant="outline" className="w-full" onClick={() => window.location.href = 'mailto:hello@xr2.uk'}>
+                      {t('landing.pricing.enterprise.cta')}
+                    </Button>
+                  </div>
+                )
+              })()}
             </div>
           </div>
         </section>

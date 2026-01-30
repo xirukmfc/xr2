@@ -1,6 +1,14 @@
 // Auto-redirect based on user's locale preference from xR2 portal
 (function() {
-    var savedLocale = localStorage.getItem('locale');
+    // Read locale from cookie (shared across subdomains) or fallback to localStorage
+    function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length === 2) return parts.pop().split(";").shift();
+        return null;
+    }
+
+    var savedLocale = getCookie('locale') || localStorage.getItem('locale');
     var isRussian = window.location.pathname.startsWith('/ru');
     var currentPath = window.location.pathname;
 
