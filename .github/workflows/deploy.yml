@@ -1,0 +1,42 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Выберите действие'
+        required: true
+        type: choice
+        options:
+          - pull-only
+          - rebuild-backend
+          - cleanup-docker
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: <PROD_HOST>
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/xr2
+
+            if [ "${{ github.event.inputs.action }}" = "pull-only" ]; then
+              echo "=== Git Pull ==="
+              git pull
+            fi
+
+            if [ "${{ github.event.inputs.action }}" = "rebuild-backend" ]; then
+              echo "=== Git Pull + Rebuild Backend ==="
+              git pull
+              docker compose -f docker-compose.prod.yml up -d --build backend
+            fi
+
+            if [ "${{ github.event.inputs.action }}" = "cleanup-docker" ]; then
+              echo "=== Docker Cleanup ==="
+              docker system prune -af --volumes
+            fi
