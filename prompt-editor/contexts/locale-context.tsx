@@ -38,6 +38,8 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     setLocaleState(newLocale)
     if (typeof window !== 'undefined') {
       localStorage.setItem('locale', newLocale)
+      // Also set cookie for middleware to read
+      document.cookie = `locale=${newLocale};path=/;max-age=31536000;SameSite=Lax`
     }
   }
 

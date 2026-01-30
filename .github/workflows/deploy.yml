@@ -14,6 +14,7 @@ on:
           - rebuild-all
           - rebuild-app
           - rebuild-frontend
+          - rebuild-frontend-nocache
           - rebuild-docs
           - rebuild-tgsight
           - rebuild-nginx
@@ -61,47 +62,55 @@ jobs:
             if [ "$ACTION" = "rebuild-all" ]; then
               git fetch origin
               git reset --hard origin/master
-              docker compose -f docker-compose.prod.yml build --no-cache
-              docker compose -f docker-compose.prod.yml up -d
+              docker compose --env-file .env.prod -f docker-compose.prod.yml build --no-cache
+              docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
             fi
 
             # Rebuild App
             if [ "$ACTION" = "rebuild-app" ]; then
               git fetch origin
               git reset --hard origin/master
-              docker compose -f docker-compose.prod.yml build --no-cache app
-              docker compose -f docker-compose.prod.yml up -d --no-deps app
+              docker compose --env-file .env.prod -f docker-compose.prod.yml build --no-cache app
+              docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --no-deps app
             fi
 
-            # Rebuild Frontend
+            # Rebuild Frontend (with cache - much faster)
             if [ "$ACTION" = "rebuild-frontend" ]; then
               git fetch origin
               git reset --hard origin/master
-              docker compose -f docker-compose.prod.yml build --no-cache frontend
-              docker compose -f docker-compose.prod.yml up -d --no-deps frontend
+              DOCKER_BUILDKIT=1 docker compose --env-file .env.prod -f docker-compose.prod.yml build frontend
+              docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --no-deps frontend
+            fi
+
+            # Rebuild Frontend (no cache - use only when dependencies change)
+            if [ "$ACTION" = "rebuild-frontend-nocache" ]; then
+              git fetch origin
+              git reset --hard origin/master
+              docker compose --env-file .env.prod -f docker-compose.prod.yml build --no-cache frontend
+              docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --no-deps frontend
             fi
 
             # Rebuild Docs
             if [ "$ACTION" = "rebuild-docs" ]; then
               git fetch origin
               git reset --hard origin/master
-              docker compose -f docker-compose.prod.yml build --no-cache docs
-              docker compose -f docker-compose.prod.yml up -d --no-deps docs
+              docker compose --env-file .env.prod -f docker-compose.prod.yml build --no-cache docs
+              docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --no-deps docs
             fi
 
             # Rebuild TGSight
             if [ "$ACTION" = "rebuild-tgsight" ]; then
               git fetch origin
               git reset --hard origin/master
-              docker compose -f docker-compose.prod.yml build --no-cache tgsight
-              docker compose -f docker-compose.prod.yml up -d --no-deps tgsight
+              docker compose --env-file .env.prod -f docker-compose.prod.yml build --no-cache tgsight
+              docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --no-deps tgsight
             fi
 
             # Rebuild Nginx
             if [ "$ACTION" = "rebuild-nginx" ]; then
               git fetch origin
               git reset --hard origin/master
-              docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate nginx
+              docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --no-deps --force-recreate nginx
             fi
 
             echo "=========================================="

@@ -15,7 +15,7 @@ export default function ClientLayout({
   const pathname = usePathname()
   const isEditorPage = pathname.startsWith("/editor/")
   const isLoginPage = pathname === "/login"
-  const isLandingPage = pathname === "/"
+  const isLandingPage = pathname === "/" || pathname === "/en" || pathname === "/ru"
   const isSharePage = pathname.startsWith("/share/")
   const isLegalPage = pathname.startsWith("/legal/")
   const isSidebarCollapsed = useSidebarCollapse()

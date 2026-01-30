@@ -97,15 +97,15 @@
       "free": {
         "name": "Free",
         "price": "$0",
-        "period": "/mo",
+        "period": "/month",
         "features": ["Up to 10 prompts", "100 API calls/month", "Basic analytics", "1 workspace"],
         "cta": "Get Started"
       },
       "pro": {
         "name": "Pro",
         "popular": "Popular",
-        "price": "$19",
-        "period": "/mo",
+        "price": "$29",
+        "period": "/month",
         "features": ["Unlimited prompts", "1,000 API calls/month", "A/B testing & revenue tracking", "Unlimited workspaces", "Team collaboration"],
         "cta": "Get Started"
       },

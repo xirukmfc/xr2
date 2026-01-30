@@ -86,7 +86,7 @@ app = FastAPI(
     title="xR2 Public API",
     description="Public API with limited access - only get-prompt and events",
     version="1.0.0",
-    docs_url="/public_docs",
+    docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
     servers=[
@@ -206,7 +206,7 @@ from fastapi.openapi.utils import get_openapi
 async def admin_docs():
     """Admin documentation with all API endpoints"""
     return get_swagger_ui_html(
-        openapi_url="/admin-public_docs/openapi.json",
+        openapi_url="/admin-docs/openapi.json",
         title="xR2 Admin API Documentation",
         swagger_ui_parameters={"defaultModelsExpandDepth": -1}
     )

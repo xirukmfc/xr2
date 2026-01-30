@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from . import prompts, auth, tags, workspaces, llm, tokenize, stats, product_api_keys, product_logs, public_share, analytics, ab_tests_simple, custom_funnel_configurations, conversion_funnels
+from . import prompts, auth, tags, workspaces, llm, tokenize, stats, product_api_keys, product_logs, public_share, analytics, ab_tests_simple, custom_funnel_configurations, conversion_funnels, pricing
 
 # Main API router
 router = APIRouter()
@@ -23,6 +23,9 @@ router.include_router(ab_tests_simple.router, tags=["ab-tests-simple"])
 router.include_router(custom_funnel_configurations.router, tags=["custom-funnel-configurations"])
 router.include_router(conversion_funnels.router, tags=["conversion-funnels"])
 
+
+# Public pricing endpoint (no auth required)
+router.include_router(pricing.router, tags=["public"])
 
 # Health check endpoint
 @router.get("/health")

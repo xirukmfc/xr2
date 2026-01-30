@@ -8,6 +8,7 @@ from .public_share import PublicShare
 from .analytics import PromptEvent, ConversionFunnel, CustomFunnelConfiguration, ABTest
 from .refresh_token import RefreshToken
 from .system_event import SystemEvent
+from .pricing import PricingConfig
 
 __all__ = [
     "User",
@@ -27,4 +28,5 @@ __all__ = [
     "ABTest",
     "RefreshToken",
     "SystemEvent",
+    "PricingConfig",
 ]

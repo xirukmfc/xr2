@@ -27,6 +27,7 @@ from app.models.user_limits import UserLimits, GlobalLimits, UserAPIUsage
 from app.models.analytics import EventDefinition, ConversionFunnel, CustomFunnelConfiguration
 from app.models.public_share import PublicShare
 from app.models.workspace import workspace_members
+from app.models.pricing import PricingConfig
 
 
 class AdminAuth(AuthenticationBackend):
@@ -1215,6 +1216,49 @@ class UserAPIUsageAdmin(ModelView, model=UserAPIUsage):
         )
 
 
+class PricingConfigAdmin(ModelView, model=PricingConfig):
+    """Admin interface for Pricing Configuration"""
+    column_list = [
+        PricingConfig.plan_name,
+        PricingConfig.price_usd_display,
+        PricingConfig.price_rub_display,
+        PricingConfig.billing_period,
+        PricingConfig.is_active,
+        PricingConfig.sort_order,
+        PricingConfig.updated_at
+    ]
+
+    column_labels = {
+        PricingConfig.plan_name: "Plan Name",
+        PricingConfig.price_usd: "Price (USD cents)",
+        PricingConfig.price_usd_display: "Price USD Display",
+        PricingConfig.price_rub: "Price (RUB kopecks)",
+        PricingConfig.price_rub_display: "Price RUB Display",
+        PricingConfig.billing_period: "Billing Period",
+        PricingConfig.billing_period_en: "Period (EN)",
+        PricingConfig.billing_period_ru: "Period (RU)",
+        PricingConfig.features_en: "Features (EN, JSON)",
+        PricingConfig.features_ru: "Features (RU, JSON)",
+        PricingConfig.is_active: "Active",
+        PricingConfig.sort_order: "Sort Order",
+        PricingConfig.created_at: "Created",
+        PricingConfig.updated_at: "Updated"
+    }
+
+    form_excluded_columns = [
+        PricingConfig.id,
+        PricingConfig.created_at,
+        PricingConfig.updated_at
+    ]
+
+    name = "Pricing"
+    name_plural = "Pricing Plans"
+    icon = "fa-solid fa-tags"
+
+    page_size = 10
+    page_size_options = [10, 25]
+
+
 def create_admin(app: FastAPI) -> Admin:
     """Create and configure admin instance"""
     import os
@@ -1251,5 +1295,8 @@ def create_admin(app: FastAPI) -> Admin:
     admin.add_view(GlobalLimitsAdmin)
     admin.add_view(UserLimitsAdmin)
     admin.add_view(UserAPIUsageAdmin)
+
+    # Pricing Management
+    admin.add_view(PricingConfigAdmin)
 
     return admin
