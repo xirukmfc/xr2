@@ -4,39 +4,103 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'Выберите действие'
+        description: 'Действие'
         required: true
         type: choice
         options:
-          - pull-only
-          - rebuild-backend
+          - git-pull
+          - git-force-pull
           - cleanup-docker
+          - rebuild-all
+          - rebuild-app
+          - rebuild-frontend
+          - rebuild-docs
+          - rebuild-tgsight
+          - rebuild-nginx
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to server
+      - name: Execute on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: <PROD_HOST>
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 30m
           script: |
+            set -e
             cd /opt/xr2
+            ACTION="${{ github.event.inputs.action }}"
 
-            if [ "${{ github.event.inputs.action }}" = "pull-only" ]; then
-              echo "=== Git Pull ==="
+            echo "=========================================="
+            echo "Action: $ACTION"
+            echo "=========================================="
+
+            # Git Pull (с автомержем локальных изменений)
+            if [ "$ACTION" = "git-pull" ]; then
+              git stash
               git pull
+              git stash pop || true
             fi
 
-            if [ "${{ github.event.inputs.action }}" = "rebuild-backend" ]; then
-              echo "=== Git Pull + Rebuild Backend ==="
-              git pull
-              docker compose -f docker-compose.prod.yml up -d --build backend
+            # Git Force Pull (сбросит локальные изменения!)
+            if [ "$ACTION" = "git-force-pull" ]; then
+              git fetch origin
+              git reset --hard origin/master
             fi
 
-            if [ "${{ github.event.inputs.action }}" = "cleanup-docker" ]; then
-              echo "=== Docker Cleanup ==="
-              docker system prune -af --volumes
+            # Очистка Docker
+            if [ "$ACTION" = "cleanup-docker" ]; then
+              docker system prune -af
+              docker volume prune -f
             fi
+
+            # Rebuild ALL (без кэша)
+            if [ "$ACTION" = "rebuild-all" ]; then
+              git fetch origin
+              git reset --hard origin/master
+              docker compose -f docker-compose.prod.yml build --no-cache
+              docker compose -f docker-compose.prod.yml up -d
+            fi
+
+            # Rebuild App
+            if [ "$ACTION" = "rebuild-app" ]; then
+              git fetch origin
+              git reset --hard origin/master
+              docker compose -f docker-compose.prod.yml up -d --build --no-cache app
+            fi
+
+            # Rebuild Frontend
+            if [ "$ACTION" = "rebuild-frontend" ]; then
+              git fetch origin
+              git reset --hard origin/master
+              docker compose -f docker-compose.prod.yml up -d --build --no-cache frontend
+            fi
+
+            # Rebuild Docs
+            if [ "$ACTION" = "rebuild-docs" ]; then
+              git fetch origin
+              git reset --hard origin/master
+              docker compose -f docker-compose.prod.yml up -d --build --no-cache docs
+            fi
+
+            # Rebuild TGSight
+            if [ "$ACTION" = "rebuild-tgsight" ]; then
+              git fetch origin
+              git reset --hard origin/master
+              docker compose -f docker-compose.prod.yml up -d --build --no-cache tgsight
+            fi
+
+            # Rebuild Nginx
+            if [ "$ACTION" = "rebuild-nginx" ]; then
+              git fetch origin
+              git reset --hard origin/master
+              docker compose -f docker-compose.prod.yml up -d --force-recreate nginx
+            fi
+
+            echo "=========================================="
+            echo "Done!"
+            echo "=========================================="
+            docker ps --format "table {{.Names}}\t{{.Status}}"
