@@ -2,14 +2,9 @@
 1. Сделать SDK для n8n. Review https://creators.n8n.io/nodes/n8n-nodes-xr2/integration
 2. Сделать SDK для Make. Review https://eu2.make.com/apps/xr2-9pmj5r/1/review
 
-0. Нет страницы not foundF
-1. Перевод на сайте
-2. Сохраненеи переаод в доках
-3. Миграция кодаА 
-6. очему на проде не работет https://xr2.uk/docs? 
 7. Почему не октрывается админкский сваггер и где для него пароль
 8. Вынести цены в админку и сделать русские цены
-9. https://xr2.uk/admin-docs/
+9. карта сайта
 
 
 --- Подготовка к запуску
