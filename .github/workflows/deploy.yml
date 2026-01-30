@@ -69,35 +69,39 @@ jobs:
             if [ "$ACTION" = "rebuild-app" ]; then
               git fetch origin
               git reset --hard origin/master
-              docker compose -f docker-compose.prod.yml up -d --build --no-cache app
+              docker compose -f docker-compose.prod.yml build --no-cache app
+              docker compose -f docker-compose.prod.yml up -d --no-deps app
             fi
 
             # Rebuild Frontend
             if [ "$ACTION" = "rebuild-frontend" ]; then
               git fetch origin
               git reset --hard origin/master
-              docker compose -f docker-compose.prod.yml up -d --build --no-cache frontend
+              docker compose -f docker-compose.prod.yml build --no-cache frontend
+              docker compose -f docker-compose.prod.yml up -d --no-deps frontend
             fi
 
             # Rebuild Docs
             if [ "$ACTION" = "rebuild-docs" ]; then
               git fetch origin
               git reset --hard origin/master
-              docker compose -f docker-compose.prod.yml up -d --build --no-cache docs
+              docker compose -f docker-compose.prod.yml build --no-cache docs
+              docker compose -f docker-compose.prod.yml up -d --no-deps docs
             fi
 
             # Rebuild TGSight
             if [ "$ACTION" = "rebuild-tgsight" ]; then
               git fetch origin
               git reset --hard origin/master
-              docker compose -f docker-compose.prod.yml up -d --build --no-cache tgsight
+              docker compose -f docker-compose.prod.yml build --no-cache tgsight
+              docker compose -f docker-compose.prod.yml up -d --no-deps tgsight
             fi
 
             # Rebuild Nginx
             if [ "$ACTION" = "rebuild-nginx" ]; then
               git fetch origin
               git reset --hard origin/master
-              docker compose -f docker-compose.prod.yml up -d --force-recreate nginx
+              docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate nginx
             fi
 
             echo "=========================================="
