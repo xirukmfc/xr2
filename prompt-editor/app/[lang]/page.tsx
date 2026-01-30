@@ -83,7 +83,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
   useEffect(() => {
     const fetchPricing = async () => {
       try {
-        const response = await fetch(`/api/pricing?locale=${locale}`)
+        const response = await fetch(`/internal/pricing?locale=${locale}`)
         if (response.ok) {
           const data = await response.json()
           if (data.plans && data.plans.length > 0) {
