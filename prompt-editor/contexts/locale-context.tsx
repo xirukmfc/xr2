@@ -21,29 +21,46 @@ const translations: Record<Locale, Translations> = {
   ru: ruTranslations,
 }
 
+function getLocaleByHostname(hostname: string): Locale | null {
+  if (hostname.includes('xr2.site')) return 'ru'
+  if (hostname.includes('xr2.uk')) return 'en'
+  return null
+}
+
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('en')
 
-  // Load locale from localStorage on mount
+  // Determine locale on mount: domain-fixed or localStorage fallback
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedLocale = localStorage.getItem('locale') as Locale
-      if (savedLocale && (savedLocale === 'en' || savedLocale === 'ru')) {
-        setLocaleState(savedLocale)
+      const domainLocale = getLocaleByHostname(window.location.hostname)
+      if (domainLocale) {
+        setLocaleState(domainLocale)
+        // Set cookie for middleware compatibility
+        const domainPart = domainLocale === 'ru' ? ';domain=.xr2.site' : ';domain=.xr2.uk'
+        document.cookie = `locale=${domainLocale};path=/;max-age=31536000;SameSite=Lax${domainPart}`
+      } else {
+        // Localhost: use localStorage
+        const savedLocale = localStorage.getItem('locale') as Locale
+        if (savedLocale && (savedLocale === 'en' || savedLocale === 'ru')) {
+          setLocaleState(savedLocale)
+        }
       }
     }
   }, [])
 
   const setLocale = (newLocale: Locale) => {
-    setLocaleState(newLocale)
+    // On production domains, locale is fixed by domain — ignore setLocale calls
     if (typeof window !== 'undefined') {
+      const domainLocale = getLocaleByHostname(window.location.hostname)
+      if (domainLocale) {
+        // Domain-fixed: don't allow changing locale
+        return
+      }
+      // Localhost: allow changing
+      setLocaleState(newLocale)
       localStorage.setItem('locale', newLocale)
-      // Set cookie for middleware and subdomains (docs.xr2.uk)
-      // Use domain=.xr2.uk to share cookie across subdomains
-      const hostname = window.location.hostname
-      const isXr2Domain = hostname === 'xr2.uk' || hostname.endsWith('.xr2.uk')
-      const domainPart = isXr2Domain ? ';domain=.xr2.uk' : ''
-      document.cookie = `locale=${newLocale};path=/;max-age=31536000;SameSite=Lax${domainPart}`
+      document.cookie = `locale=${newLocale};path=/;max-age=31536000;SameSite=Lax`
     }
   }
 

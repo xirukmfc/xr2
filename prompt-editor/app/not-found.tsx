@@ -130,7 +130,7 @@ export default function NotFound() {
               <Link href={`/${locale}/legal/terms`} className="hover:text-gray-600 transition-colors">
                 {locale === 'ru' ? 'Условия' : 'Terms'}
               </Link>
-              <a href="https://docs.xr2.uk" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 transition-colors">
+              <a href={typeof window !== 'undefined' && window.location.hostname.includes('xr2.site') ? '/documentation/' : 'https://docs.xr2.uk'} target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 transition-colors">
                 {locale === 'ru' ? 'Документация' : 'Docs'}
               </a>
             </div>

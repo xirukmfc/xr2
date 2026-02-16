@@ -201,7 +201,7 @@ class XR2AutoTester:
         backend_env = os.getenv('BACKEND_URL', '')
         
         # Определяем, запущены ли мы на проде
-        is_production = 'xr2.uk' in frontend_env or 'xr2.uk' in backend_env or os.path.exists('/opt/xr2')
+        is_production = 'xr2.uk' in frontend_env or 'xr2.site' in frontend_env or 'xr2.uk' in backend_env or 'xr2.site' in backend_env or os.path.exists('/opt/xr2')
         
         if is_production and not backend_env:
             # На проде используем https://xr2.uk если BACKEND_URL не установлен

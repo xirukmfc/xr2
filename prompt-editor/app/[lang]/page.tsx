@@ -174,20 +174,27 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
   const { lang } = use(params)
   const router = useRouter()
   const { isAuthenticated, isLoading } = useAuth()
-  const { t, locale, setLocale } = useLocale()
+  const { t, locale } = useLocale()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [pricing, setPricing] = useState<PricingPlan[]>([])
 
 
+  // On localhost, sync locale from URL param
   useEffect(() => {
-    const urlLang = lang as SupportedLocale
-    if (urlLang === 'en' || urlLang === 'ru') {
-      if (locale !== urlLang) {
-        setLocale(urlLang)
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname
+      const isProductionDomain = hostname.includes('xr2.site') || hostname.includes('xr2.uk')
+      if (!isProductionDomain) {
+        const urlLang = lang as SupportedLocale
+        if (urlLang === 'en' || urlLang === 'ru') {
+          if (locale !== urlLang) {
+            localStorage.setItem('locale', urlLang)
+          }
+        }
       }
     }
-  }, [lang, locale, setLocale])
+  }, [lang, locale])
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -227,13 +234,15 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
     return defaultPlan ? defaultPlan[locale] : DEFAULT_PRICING.free[locale]
   }
 
-  const switchLanguage = (newLang: SupportedLocale) => {
-    setLocale(newLang)
-    router.push(`/${newLang}`)
-  }
-
   const currentLang = (lang === 'en' || lang === 'ru') ? lang : 'en'
-  const alternateLang = currentLang === 'en' ? 'ru' : 'en'
+
+  // Domain-aware docs URL
+  const [docsUrl, setDocsUrl] = useState('https://docs.xr2.uk')
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hostname.includes('xr2.site')) {
+      setDocsUrl('/documentation/')
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-white text-gray-900 overflow-x-hidden">
@@ -251,25 +260,13 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-gray-500 hover:text-gray-900 text-sm transition-colors">{t('landing.nav.features')}</a>
               <a href="#pricing" className="text-gray-500 hover:text-gray-900 text-sm transition-colors">{t('landing.nav.pricing')}</a>
-              <a href="https://docs.xr2.uk" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-900 text-sm transition-colors">{t('landing.nav.public_docs')}</a>
-              <button
-                onClick={() => switchLanguage(alternateLang)}
-                className="text-gray-400 hover:text-gray-600 text-sm font-medium transition-colors"
-              >
-                {currentLang === 'en' ? 'RU' : 'EN'}
-              </button>
+              <a href={docsUrl} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-900 text-sm transition-colors">{t('landing.nav.public_docs')}</a>
               <Button onClick={() => router.push("/login")} size="sm" className="text-sm">
                 {t('landing.nav.signIn')}
               </Button>
             </div>
 
             <div className="md:hidden flex items-center gap-3">
-              <button
-                onClick={() => switchLanguage(alternateLang)}
-                className="text-gray-400 text-sm font-medium"
-              >
-                {currentLang === 'en' ? 'RU' : 'EN'}
-              </button>
               <button
                 className="p-2 text-gray-600"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -286,7 +283,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
             <div className="px-6 py-4 space-y-3">
               <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block text-gray-600 py-2 text-sm">{t('landing.nav.features')}</a>
               <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block text-gray-600 py-2 text-sm">{t('landing.nav.pricing')}</a>
-              <a href="https://docs.xr2.uk" target="_blank" rel="noopener noreferrer" className="block text-gray-600 py-2 text-sm">{t('landing.nav.public_docs')}</a>
+              <a href={docsUrl} target="_blank" rel="noopener noreferrer" className="block text-gray-600 py-2 text-sm">{t('landing.nav.public_docs')}</a>
               <Button onClick={() => { setMobileMenuOpen(false); router.push("/login") }} className="w-full mt-2">
                 {t('landing.nav.signIn')}
               </Button>
@@ -693,7 +690,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
                 <div className="space-y-2.5">
                   <a href="#features" className="block text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('landing.nav.features')}</a>
                   <a href="#pricing" className="block text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('landing.nav.pricing')}</a>
-                  <a href="https://docs.xr2.uk" target="_blank" rel="noopener noreferrer" className="block text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('landing.footer.public_docs')}</a>
+                  <a href={docsUrl} target="_blank" rel="noopener noreferrer" className="block text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('landing.footer.public_docs')}</a>
                 </div>
               </div>
               <div>

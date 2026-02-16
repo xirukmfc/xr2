@@ -28,6 +28,12 @@ function isBot(userAgent: string): boolean {
   return BOT_PATTERNS.some(bot => ua.includes(bot))
 }
 
+function getLocaleByDomain(host: string): 'en' | 'ru' | null {
+  if (host.includes('xr2.site')) return 'ru'
+  if (host.includes('xr2.uk')) return 'en'
+  return null // localhost or unknown — use fallback detection
+}
+
 function getPreferredLocale(request: NextRequest): 'en' | 'ru' {
   // 1. Check cookie (user's previous choice)
   const localeCookie = request.cookies.get('locale')?.value
@@ -35,16 +41,7 @@ function getPreferredLocale(request: NextRequest): 'en' | 'ru' {
     return localeCookie
   }
 
-  // 2. Check Cloudflare geo header
-  const country = request.headers.get('cf-ipcountry')
-  if (country) {
-    const russianSpeakingCountries = ['RU', 'BY', 'KZ', 'UA', 'KG', 'TJ', 'UZ', 'TM', 'AZ', 'AM', 'MD', 'GE']
-    if (russianSpeakingCountries.includes(country.toUpperCase())) {
-      return 'ru'
-    }
-  }
-
-  // 3. Check Accept-Language header
+  // 2. Check Accept-Language header
   const acceptLanguage = request.headers.get('accept-language')
   if (acceptLanguage) {
     const languages = acceptLanguage.split(',').map(lang => lang.split(';')[0].trim().toLowerCase())
@@ -64,6 +61,7 @@ function getPreferredLocale(request: NextRequest): 'en' | 'ru' {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const host = request.headers.get('host') || ''
 
   // Public routes that don't require authentication
   const publicRoutes = ['/login']
@@ -73,22 +71,31 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Handle root path - redirect to localized landing
+  // Determine locale: domain-fixed or fallback for localhost
+  const domainLocale = getLocaleByDomain(host)
+
+  // Handle root path - rewrite to localized landing
   if (pathname === '/') {
-    const userAgent = request.headers.get('user-agent') || ''
-
-    // For bots: rewrite to /en without redirect (for SEO)
-    if (isBot(userAgent)) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/en'
-      return NextResponse.rewrite(url)
-    }
-
-    // For users: rewrite to preferred locale (no redirect = faster load)
-    const locale = getPreferredLocale(request)
+    const locale = domainLocale || getPreferredLocale(request)
     const url = request.nextUrl.clone()
     url.pathname = `/${locale}`
+
+    // For bots on localhost: rewrite to /en without redirect (for SEO)
+    if (!domainLocale && isBot(request.headers.get('user-agent') || '')) {
+      url.pathname = '/en'
+    }
+
     return NextResponse.rewrite(url)
+  }
+
+  // If domain has a fixed locale, force rewrite /en and /ru to the domain's locale
+  if (domainLocale && (pathname === '/en' || pathname === '/ru')) {
+    if (pathname !== `/${domainLocale}`) {
+      const url = request.nextUrl.clone()
+      url.pathname = `/${domainLocale}`
+      return NextResponse.rewrite(url)
+    }
+    return NextResponse.next()
   }
 
   // Allow /en and /ru landing pages

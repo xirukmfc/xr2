@@ -56,7 +56,7 @@ export function Sidebar() {
   const [limitsLoading, setLimitsLoading] = useState(true)
   const [subscription, setSubscription] = useState<SubscriptionResponse | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-  const { locale, setLocale, t } = useLocale()
+  const { locale, t } = useLocale()
 
   // Initialize collapse state from localStorage
   useEffect(() => {
@@ -103,9 +103,13 @@ export function Sidebar() {
     notifySidebarCollapse(newCollapsedState)
   }
 
-  const toggleLanguage = () => {
-    setLocale(locale === 'en' ? 'ru' : 'en')
-  }
+  // Domain-aware docs URL
+  const [docsUrl, setDocsUrl] = useState('https://docs.xr2.uk')
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hostname.includes('xr2.site')) {
+      setDocsUrl('/documentation/')
+    }
+  }, [])
 
   const navigationItems = [
     { name: t('sidebar.prompts'), href: "/prompts", icon: MessageSquare, count: promptsCount },
@@ -286,23 +290,9 @@ export function Sidebar() {
 
       {/* Bottom Actions */}
       <div className="absolute bottom-4 left-4 right-4 space-y-2">
-        {/* Language Switcher */}
-        <button
-          onClick={toggleLanguage}
-          className={`flex items-center p-2 rounded-md transition-colors group text-slate-600 hover:bg-slate-50 hover:text-slate-900 ${
-            isCollapsed
-              ? "w-8 h-8 justify-center"
-              : "w-full justify-start space-x-2"
-          }`}
-          title={locale === 'en' ? 'Switch to Russian' : 'Переключить на английский'}
-        >
-          <span className="text-sm">
-            {locale.toUpperCase()}
-          </span>
-        </button>
         {/* Full Docs Button */}
         <a
-          href="https://docs.xr2.uk"
+          href={docsUrl}
           target="_blank"
           rel="noopener noreferrer"
           className={`flex items-center p-2 rounded-md transition-colors group text-slate-600 hover:bg-blue-50 hover:text-blue-700 ${

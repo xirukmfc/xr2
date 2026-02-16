@@ -1,6 +1,11 @@
 import { MetadataRoute } from 'next'
+import { headers } from 'next/headers'
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const headersList = await headers()
+  const host = headersList.get('host') || 'xr2.uk'
+  const baseUrl = host.includes('xr2.site') ? 'https://xr2.site' : 'https://xr2.uk'
+
   return {
     rules: [
       {
@@ -19,6 +24,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://xr2.uk/sitemap.xml',
+    sitemap: `${baseUrl}/sitemap.xml`,
   }
 }

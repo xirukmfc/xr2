@@ -95,6 +95,7 @@ app = FastAPI(
     lifespan=lifespan,
     servers=[
         {"url": "https://xr2.uk", "description": "Production"},
+        {"url": "https://xr2.site", "description": "Production (RU)"},
         {"url": "http://localhost:8000", "description": "Development"}
     ],
     root_path_in_servers=False,
@@ -132,7 +133,7 @@ app.add_middleware(SecurityMiddleware)
 
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["xr2.uk", "www.xr2.uk", "localhost", "127.0.0.1", "app", "*.ngrok-free.app", "*.ngrok.io"]
+    allowed_hosts=["xr2.uk", "www.xr2.uk", "xr2.site", "www.xr2.site", "localhost", "127.0.0.1", "app", "*.ngrok-free.app", "*.ngrok.io"]
 )
 
 # Add Swagger authentication middleware (protects admin public_docs)

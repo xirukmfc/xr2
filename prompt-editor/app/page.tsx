@@ -10,9 +10,18 @@ export default function RootPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Get preferred locale from localStorage or default to 'en'
-    const savedLocale = localStorage.getItem('locale')
-    const locale = (savedLocale === 'en' || savedLocale === 'ru') ? savedLocale : 'en'
+    // Determine locale from domain
+    const hostname = window.location.hostname
+    let locale: string
+    if (hostname.includes('xr2.site')) {
+      locale = 'ru'
+    } else if (hostname.includes('xr2.uk')) {
+      locale = 'en'
+    } else {
+      // Localhost: use localStorage or default to 'en'
+      const savedLocale = localStorage.getItem('locale')
+      locale = (savedLocale === 'en' || savedLocale === 'ru') ? savedLocale : 'en'
+    }
     router.replace(`/${locale}`)
   }, [router])
 

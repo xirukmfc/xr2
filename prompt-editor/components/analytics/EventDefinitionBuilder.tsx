@@ -252,8 +252,9 @@ export default function EventDefinitionBuilder({
 
     const traceId = `evt_${Math.random().toString(36).substring(2, 11)}_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
 
+    const apiOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://xr2.uk'
     return `curl -X 'POST' \\
-  'https://xr2.uk/api/v1/events' \\
+  '${apiOrigin}/api/v1/events' \\
   -H 'accept: application/json' \\
   -H 'Content-Type: application/json' \\
   -d '{

@@ -98,6 +98,10 @@ services:
       DEBUG: ${DEBUG:-false}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
 
+      # Payment return URLs (domain-specific)
+      YOOKASSA_RETURN_URL: ${YOOKASSA_RETURN_URL:-https://xr2.site/settings}
+      LEMONSQUEEZY_RETURN_URL: ${LEMONSQUEEZY_RETURN_URL:-https://xr2.uk/settings}
+
       # API Server URL for Swagger public_docs (production)
       API_SERVER_URL: https://xr2.uk
 
@@ -134,7 +138,7 @@ services:
       context: ./prompt-editor
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: https://xr2.uk/internal
+        NEXT_PUBLIC_API_URL: /internal
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
         NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN: ${NEXT_PUBLIC_ENABLE_PASSWORD_LOGIN:-false}
         BUILDKIT_INLINE_CACHE: 1
@@ -298,6 +302,8 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./nginx/.htpasswd:/etc/nginx/.htpasswd:ro
       - ./nginx/.htpasswd_grafana:/etc/nginx/.htpasswd_grafana:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
       - nginx_logs_prod:/var/log/nginx
     depends_on:
       - app
