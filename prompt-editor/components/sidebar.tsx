@@ -17,42 +17,13 @@ import { useLocale } from "@/contexts/locale-context"
 import { UpgradeModal } from "@/components/upgrade-modal"
 import type { SubscriptionResponse } from "@/types/subscription"
 
-const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed'
+import { getStoredCollapseState, saveCollapseState, notifyCollapseListeners, addCollapseListener } from "@/lib/sidebar-state"
 
-let sidebarCollapseListeners: ((collapsed: boolean) => void)[] = []
-
-function getStoredCollapseState(): boolean {
-  if (typeof window === 'undefined') return false
-  const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY)
-  return stored === 'true'
-}
-
-function saveCollapseState(collapsed: boolean) {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed))
-}
-
-export function useSidebarCollapse() {
-  const [isCollapsed, setIsCollapsed] = useState(false)
-
-  useEffect(() => {
-    // Initialize from localStorage
-    setIsCollapsed(getStoredCollapseState())
-    
-    const listener = (collapsed: boolean) => setIsCollapsed(collapsed)
-    sidebarCollapseListeners.push(listener)
-
-    return () => {
-      sidebarCollapseListeners = sidebarCollapseListeners.filter((l) => l !== listener)
-    }
-  }, [])
-
-  return isCollapsed
-}
+export { useSidebarCollapse } from "@/lib/sidebar-state"
 
 function notifySidebarCollapse(collapsed: boolean) {
   saveCollapseState(collapsed)
-  sidebarCollapseListeners.forEach((listener) => listener(collapsed))
+  notifyCollapseListeners(collapsed)
 }
 
 interface UserLimits {
@@ -92,7 +63,7 @@ export function Sidebar() {
     const stored = getStoredCollapseState()
     setIsCollapsed(stored)
     // Notify listeners so that main content area adjusts
-    sidebarCollapseListeners.forEach((listener) => listener(stored))
+    notifyCollapseListeners(stored)
   }, [])
 
   // Fetch user limits and subscription

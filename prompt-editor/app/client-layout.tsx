@@ -1,11 +1,14 @@
 "use client"
 
 import type React from "react"
+import dynamic from "next/dynamic"
 import { ThemeProvider } from "@/components/theme-provider"
 import { NotificationProvider } from "@/components/notification-provider"
-import { Sidebar, useSidebarCollapse } from "@/components/sidebar"
-import { AuthGuard } from "@/components/auth-guard"
+import { useSidebarCollapse } from "@/lib/sidebar-state"
 import { usePathname } from "next/navigation"
+
+const Sidebar = dynamic(() => import("@/components/sidebar").then(mod => ({ default: mod.Sidebar })), { ssr: false })
+const AuthGuard = dynamic(() => import("@/components/auth-guard").then(mod => ({ default: mod.AuthGuard })), { ssr: false })
 
 // Routes that require authentication and show sidebar
 const PROTECTED_ROUTES = [

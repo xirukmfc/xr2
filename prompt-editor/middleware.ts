@@ -84,11 +84,11 @@ export function middleware(request: NextRequest) {
       return NextResponse.rewrite(url)
     }
 
-    // For users: redirect to preferred locale
+    // For users: rewrite to preferred locale (no redirect = faster load)
     const locale = getPreferredLocale(request)
     const url = request.nextUrl.clone()
     url.pathname = `/${locale}`
-    return NextResponse.redirect(url)
+    return NextResponse.rewrite(url)
   }
 
   // Allow /en and /ru landing pages

@@ -295,6 +295,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
         )}
       </header>
 
+      <main>
       {/* Hero */}
       <section className="min-h-screen pt-32 pb-20 lg:pt-44 lg:pb-28 flex items-center">
         <div className="max-w-6xl mx-auto px-6">
@@ -671,6 +672,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
           </div>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="py-12 border-t border-gray-100">
@@ -687,7 +689,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
             {/* Links */}
             <div className="flex flex-wrap gap-12 md:gap-16 md:ml-auto">
               <div>
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">{t('landing.footer.productTitle')}</h4>
+                <p className="text-sm font-semibold text-gray-900 mb-3">{t('landing.footer.productTitle')}</p>
                 <div className="space-y-2.5">
                   <a href="#features" className="block text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('landing.nav.features')}</a>
                   <a href="#pricing" className="block text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('landing.nav.pricing')}</a>
@@ -695,13 +697,13 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
                 </div>
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">{t('landing.footer.companyTitle')}</h4>
+                <p className="text-sm font-semibold text-gray-900 mb-3">{t('landing.footer.companyTitle')}</p>
                 <div className="space-y-2.5">
                   <a href="mailto:hello@xr2.uk" className="block text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('landing.footer.contact')}</a>
                 </div>
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">{t('landing.footer.legalTitle')}</h4>
+                <p className="text-sm font-semibold text-gray-900 mb-3">{t('landing.footer.legalTitle')}</p>
                 <div className="space-y-2.5">
                   <Link href="/legal/privacy" className="block text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('landing.footer.privacy')}</Link>
                   <Link href="/legal/terms" className="block text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('landing.footer.terms')}</Link>
