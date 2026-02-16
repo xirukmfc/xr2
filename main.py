@@ -107,13 +107,12 @@ from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
 @app.get("/openapi.json", include_in_schema=False)
 async def custom_openapi(request: Request):
     """Return OpenAPI schema with servers reordered based on current host"""
-    schema = app.openapi()
-    host = request.headers.get("host", "")
+    import copy
+    schema = copy.deepcopy(app.openapi())
+    host = request.headers.get("x-forwarded-host", "") or request.headers.get("host", "")
     if "xr2.site" in host:
-        # Put xr2.site first so Swagger UI selects it by default
         servers = schema.get("servers", [])
-        reordered = sorted(servers, key=lambda s: 0 if "xr2.site" in s.get("url", "") else 1)
-        schema = {**schema, "servers": reordered}
+        schema["servers"] = sorted(servers, key=lambda s: 0 if "xr2.site" in s.get("url", "") else 1)
     return schema
 
 @app.get("/docs", include_in_schema=False)
