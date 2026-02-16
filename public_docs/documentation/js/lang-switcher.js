@@ -1,10 +1,10 @@
 // Auto-redirect based on domain or user's locale preference
 (function() {
     var hostname = window.location.hostname;
-    var isXr2Site = hostname.indexOf('xr2.site') !== -1;  // Russian domain
-    var isDocsXr2Uk = hostname.indexOf('docs.xr2.uk') !== -1;  // English domain
+    var isXr2Site = hostname.indexOf('xr2.site') !== -1;
+    var isDocsXr2Uk = hostname.indexOf('docs.xr2.uk') !== -1;
 
-    // On production domains, no auto-redirect needed — domain determines language
+    // On production domains, no auto-redirect needed
     if (isXr2Site || isDocsXr2Uk) return;
 
     // Localhost: read locale from cookie or localStorage and redirect
@@ -34,7 +34,7 @@
     }
 })();
 
-// Hide language switcher on production domains, show on localhost
+// Hide language switcher on production domains
 document.addEventListener('DOMContentLoaded', function() {
     var hostname = window.location.hostname;
     var isXr2Site = hostname.indexOf('xr2.site') !== -1;
@@ -43,33 +43,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var links = document.querySelectorAll('.wy-menu a');
     links.forEach(function(link) {
-        var href = link.getAttribute('href');
-        if (!href) return;
-
-        var isEnLink = href === '/' || href === '/documentation/';
-        var isRuLink = href === '/ru/' || href === '/documentation/ru/';
+        var text = link.textContent || '';
 
         if (isXr2Site || isDocsXr2Uk) {
-            // Production: hide all language switcher links
-            if (isEnLink || isRuLink) {
+            // Production: hide ALL language switcher links (any link with 🌐)
+            if (text.indexOf('🌐') !== -1) {
                 link.parentElement.style.display = 'none';
             }
         } else {
             // Localhost: show only the "switch to other language" link
-            if (isEnLink && isRussian) {
-                link.textContent = '🌐 Switch to English';
-                link.addEventListener('click', function() {
-                    sessionStorage.setItem('docs_lang_selected', 'true');
-                });
-            } else if (isEnLink && !isRussian) {
-                link.parentElement.style.display = 'none';
-            } else if (isRuLink && !isRussian) {
-                link.textContent = '🌐 Переключить на русский';
-                link.addEventListener('click', function() {
-                    sessionStorage.setItem('docs_lang_selected', 'true');
-                });
-            } else if (isRuLink && isRussian) {
-                link.parentElement.style.display = 'none';
+            if (text.indexOf('🌐 EN') !== -1) {
+                if (isRussian) {
+                    link.textContent = '🌐 Switch to English';
+                    link.addEventListener('click', function() {
+                        sessionStorage.setItem('docs_lang_selected', 'true');
+                    });
+                } else {
+                    link.parentElement.style.display = 'none';
+                }
+            } else if (text.indexOf('🌐 RU') !== -1) {
+                if (!isRussian) {
+                    link.textContent = '🌐 Переключить на русский';
+                    link.addEventListener('click', function() {
+                        sessionStorage.setItem('docs_lang_selected', 'true');
+                    });
+                } else {
+                    link.parentElement.style.display = 'none';
+                }
             }
         }
     });
