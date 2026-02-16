@@ -261,7 +261,7 @@ export class XR2 implements INodeType {
                     url: `${baseUrl}/api/v1/check-api-key`,
                 });
 
-                returnData.push({ json: response as IDataObject });
+                returnData.push({ json: response as IDataObject, pairedItem: { item: i } });
             }
 
             // Get Prompt
@@ -282,7 +282,7 @@ export class XR2 implements INodeType {
                     body,
                 });
 
-                returnData.push({ json: response as IDataObject });
+                returnData.push({ json: response as IDataObject, pairedItem: { item: i } });
             }
 
             // Track Event
@@ -322,7 +322,7 @@ export class XR2 implements INodeType {
                     body,
                 });
 
-                returnData.push({ json: response as IDataObject });
+                returnData.push({ json: response as IDataObject, pairedItem: { item: i } });
             }
         }
 

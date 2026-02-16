@@ -34,13 +34,16 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
     return null // Don't show for superusers or when loading/error
   }
 
-  const promptsPercent = limits.limits.prompts.max > 0 
-    ? (limits.limits.prompts.current / limits.limits.prompts.max) * 100
-    : 0
+  const promptsUnlimited = limits.limits.prompts.max === -1
+  const apiUnlimited = limits.limits.api_requests.max === -1
 
-  const apiPercent = limits.limits.api_requests.max > 0
+  const promptsPercent = promptsUnlimited ? 0 : (limits.limits.prompts.max > 0
+    ? (limits.limits.prompts.current / limits.limits.prompts.max) * 100
+    : 0)
+
+  const apiPercent = apiUnlimited ? 0 : (limits.limits.api_requests.max > 0
     ? (limits.limits.api_requests.current / limits.limits.api_requests.max) * 100
-    : 0
+    : 0)
 
   const resetTime = new Date(limits.limits.api_requests.reset_time)
   const resetTimeStr = resetTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -54,12 +57,12 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             <TooltipTrigger asChild>
               <div className="flex items-center justify-center">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  promptsPercent >= 100 ? 'bg-red-50' : promptsPercent >= 70 ? 'bg-amber-50' : 'bg-emerald-50'
+                  promptsUnlimited ? 'bg-green-50' : promptsPercent >= 100 ? 'bg-red-50' : promptsPercent >= 70 ? 'bg-amber-50' : 'bg-emerald-50'
                 }`}>
                   <span className={`text-xs font-bold ${
-                    promptsPercent >= 100 ? 'text-red-400' : promptsPercent >= 70 ? 'text-amber-400' : 'text-emerald-400'
+                    promptsUnlimited ? 'text-green-500' : promptsPercent >= 100 ? 'text-red-400' : promptsPercent >= 70 ? 'text-amber-400' : 'text-emerald-400'
                   }`}>
-                    {limits.limits.prompts.current}
+                    {promptsUnlimited ? '∞' : limits.limits.prompts.current}
                   </span>
                 </div>
               </div>
@@ -67,9 +70,8 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             <TooltipContent side="right">
               <div className="text-sm">
                 <div className="font-medium">{t('sidebar.prompts')}</div>
-                <div>{limits.limits.prompts.current} / {limits.limits.prompts.max}</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {limits.limits.prompts.max - limits.limits.prompts.current} {t('sidebar.remaining')}
+                <div className={promptsUnlimited ? 'text-green-600' : ''}>
+                  {promptsUnlimited ? t('sidebar.unlimited') : `${limits.limits.prompts.current} / ${limits.limits.prompts.max}`}
                 </div>
               </div>
             </TooltipContent>
@@ -79,10 +81,10 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             <TooltipTrigger asChild>
               <div className="flex items-center justify-center">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  apiPercent >= 100 ? 'bg-red-50' : apiPercent >= 70 ? 'bg-amber-50' : 'bg-emerald-50'
+                  apiUnlimited ? 'bg-green-50' : apiPercent >= 100 ? 'bg-red-50' : apiPercent >= 70 ? 'bg-amber-50' : 'bg-emerald-50'
                 }`}>
                   <Zap className={`w-3 h-3 ${
-                    apiPercent >= 100 ? 'text-red-400' : apiPercent >= 70 ? 'text-amber-400' : 'text-emerald-400'
+                    apiUnlimited ? 'text-green-500' : apiPercent >= 100 ? 'text-red-400' : apiPercent >= 70 ? 'text-amber-400' : 'text-emerald-400'
                   }`} />
                 </div>
               </div>
@@ -90,7 +92,9 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
             <TooltipContent side="right">
               <div className="text-sm">
                 <div className="font-medium">{t('sidebar.apiRequestsMonthly')}</div>
-                <div>{limits.limits.api_requests.current} / {limits.limits.api_requests.max}</div>
+                <div className={apiUnlimited ? 'text-green-600' : ''}>
+                  {apiUnlimited ? t('sidebar.unlimited') : `${limits.limits.api_requests.current} / ${limits.limits.api_requests.max}`}
+                </div>
               </div>
             </TooltipContent>
           </Tooltip>
@@ -108,30 +112,34 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
       <div className="space-y-1">
         <div className="flex items-center justify-between text-xs">
           <span className="text-slate-600">{t('sidebar.prompts')}</span>
-          <span className="text-slate-700 font-medium">
-            {limits.limits.prompts.current} / {limits.limits.prompts.max}
+          <span className={`font-medium ${promptsUnlimited ? 'text-green-600' : 'text-slate-700'}`}>
+            {promptsUnlimited ? t('sidebar.unlimited') : `${limits.limits.prompts.current} / ${limits.limits.prompts.max}`}
           </span>
         </div>
-        <Progress
-          value={promptsPercent}
-          className="h-1.5"
-          indicatorClassName={
-            promptsPercent >= 100 ? 'bg-red-300' :
-            promptsPercent >= 90 ? 'bg-amber-300' :
-            promptsPercent >= 70 ? 'bg-amber-300' : 'bg-emerald-300'
-          }
-        />
-        {promptsPercent >= 100 && (
-          <div className="flex items-center gap-1 text-xs text-red-400">
-            <AlertTriangle className="w-3 h-3" />
-            <span>{t('sidebar.limitReached')}</span>
-          </div>
-        )}
-        {promptsPercent >= 90 && promptsPercent < 100 && (
-          <div className="flex items-center gap-1 text-xs text-amber-500">
-            <AlertTriangle className="w-3 h-3" />
-            <span>{t('sidebar.limitAlmostReached')}</span>
-          </div>
+        {!promptsUnlimited && (
+          <>
+            <Progress
+              value={promptsPercent}
+              className="h-1.5"
+              indicatorClassName={
+                promptsPercent >= 100 ? 'bg-red-300' :
+                promptsPercent >= 90 ? 'bg-amber-300' :
+                promptsPercent >= 70 ? 'bg-amber-300' : 'bg-emerald-300'
+              }
+            />
+            {promptsPercent >= 100 && (
+              <div className="flex items-center gap-1 text-xs text-red-400">
+                <AlertTriangle className="w-3 h-3" />
+                <span>{t('sidebar.limitReached')}</span>
+              </div>
+            )}
+            {promptsPercent >= 90 && promptsPercent < 100 && (
+              <div className="flex items-center gap-1 text-xs text-amber-500">
+                <AlertTriangle className="w-3 h-3" />
+                <span>{t('sidebar.limitAlmostReached')}</span>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -139,30 +147,34 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
       <div className="space-y-1">
         <div className="flex items-center justify-between text-xs">
           <span className="text-slate-600">{t('sidebar.apiRequestsMonthly')}</span>
-          <span className="text-slate-700 font-medium">
-            {limits.limits.api_requests.current} / {limits.limits.api_requests.max}
+          <span className={`font-medium ${apiUnlimited ? 'text-green-600' : 'text-slate-700'}`}>
+            {apiUnlimited ? t('sidebar.unlimited') : `${limits.limits.api_requests.current} / ${limits.limits.api_requests.max}`}
           </span>
         </div>
-        <Progress
-          value={apiPercent}
-          className="h-1.5"
-          indicatorClassName={
-            apiPercent >= 100 ? 'bg-red-300' :
-            apiPercent >= 90 ? 'bg-amber-300' :
-            apiPercent >= 70 ? 'bg-amber-300' : 'bg-emerald-300'
-          }
-        />
-        {apiPercent >= 100 && (
-          <div className="flex items-center gap-1 text-xs text-red-400">
-            <AlertTriangle className="w-3 h-3" />
-            <span>{t('sidebar.limitReached')}</span>
-          </div>
-        )}
-        {apiPercent >= 90 && apiPercent < 100 && (
-          <div className="flex items-center gap-1 text-xs text-amber-500">
-            <AlertTriangle className="w-3 h-3" />
-            <span>{t('sidebar.limitAlmostReached')}</span>
-          </div>
+        {!apiUnlimited && (
+          <>
+            <Progress
+              value={apiPercent}
+              className="h-1.5"
+              indicatorClassName={
+                apiPercent >= 100 ? 'bg-red-300' :
+                apiPercent >= 90 ? 'bg-amber-300' :
+                apiPercent >= 70 ? 'bg-amber-300' : 'bg-emerald-300'
+              }
+            />
+            {apiPercent >= 100 && (
+              <div className="flex items-center gap-1 text-xs text-red-400">
+                <AlertTriangle className="w-3 h-3" />
+                <span>{t('sidebar.limitReached')}</span>
+              </div>
+            )}
+            {apiPercent >= 90 && apiPercent < 100 && (
+              <div className="flex items-center gap-1 text-xs text-amber-500">
+                <AlertTriangle className="w-3 h-3" />
+                <span>{t('sidebar.limitAlmostReached')}</span>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

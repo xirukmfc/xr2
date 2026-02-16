@@ -38,6 +38,9 @@ from app.api.statistics import router as statistics_router
 # Conversion Funnels API routes
 from app.api.conversion_funnels import router as conversion_funnels_router
 
+# Webhooks API routes (for payment gateways)
+from app.api.webhooks import router as webhooks_router
+
 # Event Definitions API routes
 from app.api.event_definitions import router as event_definitions_router
 
@@ -104,7 +107,7 @@ app.add_middleware(SecurityMiddleware)
 
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["xr2.uk", "www.xr2.uk", "localhost", "127.0.0.1", "app"]
+    allowed_hosts=["xr2.uk", "www.xr2.uk", "localhost", "127.0.0.1", "app", "*.ngrok-free.app", "*.ngrok.io"]
 )
 
 # Add Swagger authentication middleware (protects admin public_docs)
@@ -149,6 +152,7 @@ app.include_router(public_api_router, prefix="/api/v1")
 app.include_router(api_router, prefix="/internal", include_in_schema=False)
 app.include_router(statistics_router, prefix="/internal", include_in_schema=False)
 app.include_router(event_definitions_router, prefix="/internal", include_in_schema=False)
+app.include_router(webhooks_router, prefix="/internal", include_in_schema=False)
 
 # Product API routes - deprecated, moved to public_api_router
 # app.include_router(product_router, prefix="/api/v1")

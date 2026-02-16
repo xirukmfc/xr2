@@ -5,10 +5,50 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Home, ArrowLeft } from "lucide-react"
 import { useLocale } from "@/contexts/locale-context"
+import { usePathname } from "next/navigation"
+
+// Routes that are part of the app (not landing page)
+const APP_ROUTES = ['/prompts', '/editor', '/analytics', '/api-keys', '/settings', '/logs', '/docs']
 
 export default function NotFound() {
-  const { t, locale } = useLocale()
+  const { locale } = useLocale()
+  const pathname = usePathname()
 
+  // Check if we're in the app context (portal) vs landing page
+  const isAppContext = APP_ROUTES.some(route => pathname?.startsWith(route))
+
+  // App context: simple 404 without landing page elements
+  if (isAppContext) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gray-50 p-8">
+        <div className="text-center max-w-md">
+          <div className="text-6xl font-bold text-gray-200 mb-4">404</div>
+          <h1 className="text-xl font-semibold text-gray-900 mb-2">
+            {locale === 'ru' ? 'Страница не найдена' : 'Page not found'}
+          </h1>
+          <p className="text-gray-500 mb-6">
+            {locale === 'ru'
+              ? 'Запрашиваемая страница не существует.'
+              : 'The requested page does not exist.'}
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => window.history.back()}>
+              <ArrowLeft className="h-4 w-4 mr-1.5" />
+              {locale === 'ru' ? 'Назад' : 'Back'}
+            </Button>
+            <Link href="/prompts">
+              <Button size="sm">
+                <Home className="h-4 w-4 mr-1.5" />
+                {locale === 'ru' ? 'К промптам' : 'Go to Prompts'}
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Landing page context: full 404 page
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}

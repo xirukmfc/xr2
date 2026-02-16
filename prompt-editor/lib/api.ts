@@ -1,4 +1,12 @@
 import { apiCache } from './api-cache'
+import type {
+  SubscriptionResponse,
+  TransactionListResponse,
+  UpgradeResponse,
+  ActionResponse,
+  YooKassaUpgradeResponse,
+  LemonSqueezyUpgradeResponse,
+} from '@/types/subscription'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/internal';
 
@@ -735,6 +743,63 @@ class ApiClient {
         }
     }
 
+    // Subscription API methods
+    async getCurrentSubscription(): Promise<SubscriptionResponse> {
+        return this.request<SubscriptionResponse>('/subscriptions/current');
+    }
+
+    async getSubscriptionTransactions(limit: number = 50, offset: number = 0): Promise<TransactionListResponse> {
+        return this.request<TransactionListResponse>(`/subscriptions/transactions?limit=${limit}&offset=${offset}`);
+    }
+
+    async upgradeToPro(locale: string = 'en'): Promise<UpgradeResponse> {
+        const result = await this.request<UpgradeResponse>('/subscriptions/upgrade', {
+            method: 'POST',
+            body: JSON.stringify({ locale }),
+        });
+        // Invalidate subscription cache after upgrade
+        apiCache.invalidate('subscription');
+        return result;
+    }
+
+    async cancelSubscription(): Promise<ActionResponse> {
+        const result = await this.request<ActionResponse>('/subscriptions/cancel', {
+            method: 'POST',
+        });
+        // Invalidate subscription cache
+        apiCache.invalidate('subscription');
+        return result;
+    }
+
+    async resumeSubscription(): Promise<ActionResponse> {
+        const result = await this.request<ActionResponse>('/subscriptions/resume', {
+            method: 'POST',
+        });
+        // Invalidate subscription cache
+        apiCache.invalidate('subscription');
+        return result;
+    }
+
+    async upgradeToProYookassa(locale: string = 'ru'): Promise<YooKassaUpgradeResponse> {
+        const result = await this.request<YooKassaUpgradeResponse>('/subscriptions/upgrade/yookassa', {
+            method: 'POST',
+            body: JSON.stringify({ locale }),
+        });
+        // Invalidate subscription cache after initiating upgrade
+        apiCache.invalidate('subscription');
+        return result;
+    }
+
+    async upgradeToProLemonSqueezy(locale: string = 'en'): Promise<LemonSqueezyUpgradeResponse> {
+        const result = await this.request<LemonSqueezyUpgradeResponse>('/subscriptions/upgrade/lemonsqueezy', {
+            method: 'POST',
+            body: JSON.stringify({ locale }),
+        });
+        // Invalidate subscription cache after initiating upgrade
+        apiCache.invalidate('subscription');
+        return result;
+    }
+
 }
 
 export const apiClient = new ApiClient();
@@ -771,6 +836,13 @@ export const createPublicShare = apiClient.createPublicShare.bind(apiClient);
 export const getPublicShares = apiClient.getPublicShares.bind(apiClient);
 export const deletePublicShare = apiClient.deletePublicShare.bind(apiClient);
 export const getPublicPrompt = apiClient.getPublicPrompt.bind(apiClient);
+export const getCurrentSubscription = apiClient.getCurrentSubscription.bind(apiClient);
+export const getSubscriptionTransactions = apiClient.getSubscriptionTransactions.bind(apiClient);
+export const upgradeToPro = apiClient.upgradeToPro.bind(apiClient);
+export const upgradeToProYookassa = apiClient.upgradeToProYookassa.bind(apiClient);
+export const upgradeToProLemonSqueezy = apiClient.upgradeToProLemonSqueezy.bind(apiClient);
+export const cancelSubscription = apiClient.cancelSubscription.bind(apiClient);
+export const resumeSubscription = apiClient.resumeSubscription.bind(apiClient);
 
 
 // Constants

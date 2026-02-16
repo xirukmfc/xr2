@@ -81,6 +81,20 @@ class Settings(BaseSettings):
     MAX_CONNECTIONS: int = 1000
     TIMEOUT: int = 30
 
+    # YooKassa Payment Configuration (for RUB payments)
+    YOOKASSA_SHOP_ID: Optional[str] = None
+    YOOKASSA_SECRET_KEY: Optional[str] = None
+    YOOKASSA_TEST_MODE: bool = True
+    YOOKASSA_RETURN_URL: Optional[str] = None  # Falls back to FRONTEND_URL/settings
+
+    # LemonSqueezy Payment Configuration (for USD payments)
+    LEMONSQUEEZY_API_KEY: Optional[str] = None
+    LEMONSQUEEZY_STORE_ID: str = "282535"
+    LEMONSQUEEZY_VARIANT_ID: str = "1262461"  # Product variant ID for Pro subscription
+    LEMONSQUEEZY_WEBHOOK_SECRET: Optional[str] = None
+    LEMONSQUEEZY_TEST_MODE: bool = True
+    LEMONSQUEEZY_RETURN_URL: Optional[str] = None  # Falls back to FRONTEND_URL/settings
+
     class Config:
         env_file = ".env"
         case_sensitive = True

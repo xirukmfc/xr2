@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 from app.models.user_limits import UserLimits, GlobalLimits, UserAPIUsage
 from app.models.prompt import Prompt
+from app.models.subscription import UserSubscription
 
 
 class LimitsService:
@@ -75,17 +76,37 @@ class LimitsService:
         return global_limits
 
     async def get_effective_limits(self, user_id: UUID) -> Tuple[int, int]:
-        """Get effective limits for user (considering global settings)"""
+        """Get effective limits for user (considering subscription plan and custom limits)"""
+        # First check subscription plan
+        subscription_result = await self.session.execute(
+            select(UserSubscription).where(UserSubscription.user_id == user_id)
+        )
+        subscription = subscription_result.scalar_one_or_none()
+
+        # Define plan limits
+        plan_limits = {
+            "free": (10, 100),
+            "pro": (-1, 1000),  # -1 = unlimited prompts
+            "enterprise": (-1, -1),  # unlimited all
+        }
+
+        if subscription and subscription.plan != "free":
+            # Check if subscription is still active
+            if subscription.is_active:
+                return plan_limits.get(subscription.plan, plan_limits["free"])
+            # If subscription expired, fall through to free limits
+
+        # Check if user has custom limits set
         user_limits = await self.get_or_create_user_limits(user_id)
+        global_limits = await self.get_global_limits()
 
         # If user has custom limits set (different from defaults), use them
-        global_limits = await self.get_global_limits()
         if (user_limits.max_prompts != global_limits.default_max_prompts or
                 user_limits.max_api_requests_per_month != global_limits.default_max_api_requests_per_month):
             return user_limits.max_prompts, user_limits.max_api_requests_per_month
 
-        # Otherwise use global limits
-        return global_limits.default_max_prompts, global_limits.default_max_api_requests_per_month
+        # Otherwise use free plan limits
+        return plan_limits["free"]
 
     async def check_prompt_limit(self, user_id: UUID) -> Tuple[bool, int, int]:
         """

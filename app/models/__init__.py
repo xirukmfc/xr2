@@ -9,6 +9,7 @@ from .analytics import PromptEvent, ConversionFunnel, CustomFunnelConfiguration,
 from .refresh_token import RefreshToken
 from .system_event import SystemEvent
 from .pricing import PricingConfig
+from .subscription import UserSubscription, SubscriptionTransaction
 
 __all__ = [
     "User",
@@ -29,4 +30,6 @@ __all__ = [
     "RefreshToken",
     "SystemEvent",
     "PricingConfig",
+    "UserSubscription",
+    "SubscriptionTransaction",
 ]

@@ -10,43 +10,21 @@
       "pricing": "Pricing",
       "docs": "Docs",
       "public_docs": "Docs",
-      "signIn": "Sign In",
-      "getStartedFree": "Get Started Free"
+      "signIn": "Sign In"
     },
     "hero": {
-      "badge": "Prompt Management for Product Teams",
-      "titleStart": "Stop guessing which AI prompt works.",
-      "titleAccent": "Start measuring.",
-      "subtitle": "Deploy, A/B test, and track revenue per prompt — without code changes or release cycles.",
+      "titleLine1": "Stop deploying code",
+      "titleLine2": "to change a sentence.",
+      "subtitle": "Edit AI prompts in production, A/B test them, and see which version makes more money — no engineering required.",
       "cta": "Get Started Free",
-      "differentiator": "Not another Langfuse.",
-      "differentiatorAccent": "Revenue-first, owned by product."
-    },
-    "dashboard": {
-      "url": "xr2.uk/prompts",
-      "userName": "Alex Johnson",
-      "userEmail": "alex@company.com",
-      "prompts": "Prompts",
-      "analytics": "Analytics",
-      "apiKeys": "API Keys",
-      "settings": "Settings",
-      "search": "Search...",
-      "all": "All",
-      "active": "Active",
-      "draft": "Draft",
-      "newPrompt": "New Prompt",
-      "new": "New",
-      "lastUpdated": "Last Updated",
-      "name": "Name",
-      "status": "Status",
-      "updated": "Updated",
-      "usage": "Usage",
-      "owner": "Owner",
-      "calls": "calls"
+      "secondaryCta": "See how it works"
     },
     "revenue": {
       "title": "Know which prompts make money",
       "subtitle": "Track conversions and revenue per prompt — not just vibes.",
+      "bullet1": "Revenue attribution per prompt version",
+      "bullet2": "A/B test with real user traffic",
+      "bullet3": "Statistical significance detection",
       "revenueByPrompt": "Revenue by Prompt",
       "last7days": "Last 7 days",
       "promptsTracked": "prompts tracked",
@@ -55,41 +33,31 @@
       "variantB": "Variant B — New CTA",
       "winner": "Winner",
       "confidence": "confidence",
-      "deployWinner": "Deploy Winner",
+      "eventLog": "Event Log",
       "howItWorks": "How revenue tracking works: on a purchase/lead send a conversion event with the revenue amount and the prompt_version_id."
     },
     "features": {
       "title": "Built for product teams",
-      "subtitle": "Everything you need to own your AI prompts.",
+      "subtitle": "Ship prompt changes without engineering. Measure what actually works.",
       "noDevDependency": {
-        "title": "No Dev Dependency",
-        "description": "Push prompt changes yourself. No tickets, no waiting."
+        "title": "Edit prompts without engineering",
+        "description": "Push prompt changes yourself. No tickets, no waiting, no deploys."
       },
       "safeToExperiment": {
-        "title": "Safe to Experiment",
+        "title": "Instant rollback",
         "description": "One click to undo any change. Ship without fear."
       },
       "comparePerformance": {
-        "title": "Compare Performance Across Versions",
-        "description": "See how each edit impacts metrics. Make data-driven decisions."
+        "title": "A/B test with real traffic",
+        "description": "Compare prompt versions on live users. Pick winners based on data, not guesses."
       },
       "customMetrics": {
-        "title": "Custom Metrics",
-        "description": "Track signups, purchases, retention — your KPIs, not vanity metrics."
+        "title": "Track your KPIs, not vanity metrics",
+        "description": "Signups, purchases, retention — define events that match your business goals."
       }
     },
     "integrations": {
-      "badge": "For solo builders & automation fans",
-      "title": "Using n8n, Make or Zapier?",
-      "subtitle": "Stop copy-pasting prompts across scenarios. Store them in one place, call via API, edit once — changes sync everywhere.",
-      "cta": "Try Free",
-      "worksWithYourStack": "Works with your stack",
-      "python": "Python",
-      "nodejs": "Node.js",
-      "n8n": "n8n",
-      "make": "Make",
-      "zapier": "Zapier",
-      "restApi": "REST API"
+      "worksWithYourStack": "Works with your stack"
     },
     "pricing": {
       "title": "Start free. Scale as you grow.",
@@ -103,18 +71,13 @@
       },
       "pro": {
         "name": "Pro",
-        "popular": "Popular",
         "price": "$29",
         "period": "/month",
         "features": ["Unlimited prompts", "1,000 API calls/month", "A/B testing & revenue tracking", "Unlimited workspaces", "Team collaboration"],
         "cta": "Get Started"
       },
-      "enterprise": {
-        "name": "Enterprise",
-        "price": "Custom",
-        "features": ["SSO & SAML", "Dedicated support", "Custom integrations", "SLA"],
-        "cta": "Contact Sales"
-      }
+      "needMore": "Need more?",
+      "contactUs": "Contact us"
     },
     "cta": {
       "title": "Your prompts deserve better than git commits.",
@@ -122,9 +85,11 @@
       "button": "Get Started Free"
     },
     "footer": {
-      "docs": "Docs",
+      "description": "Prompt management platform for product teams. Deploy, A/B test, and track revenue per prompt.",
+      "productTitle": "Product",
+      "companyTitle": "Company",
+      "legalTitle": "Legal",
       "public_docs": "Docs",
-      "pricing": "Pricing",
       "contact": "Contact",
       "cookies": "Cookies",
       "privacy": "Privacy",
@@ -145,10 +110,12 @@
     "monthlyApiRequests": "Monthly API Requests",
     "remaining": "remaining",
     "resetsAt": "Resets at",
+    "unlimited": "Unlimited",
     "usage": "Usage",
     "apiRequestsMonthly": "API Requests (monthly)",
     "limitReached": "Limit reached",
-    "limitAlmostReached": "Limit almost reached"
+    "limitAlmostReached": "Limit almost reached",
+    "upgradeToPro": "Upgrade to Pro"
   },
   "auth": {
     "login": {
@@ -688,7 +655,8 @@
     "tabs": {
       "profile": "Profile",
       "tags": "Tags",
-      "llmKeys": "LLM API Keys"
+      "llmKeys": "LLM API Keys",
+      "subscription": "Subscription"
     },
     "profile": {
       "title": "Profile",
@@ -832,7 +800,48 @@
       "llmKeyUpdated": "API key updated successfully",
       "llmKeySaveError": "Failed to save API key",
       "llmKeyDeleted": "API key deleted successfully",
-      "llmKeyDeleteError": "Failed to delete API key"
+      "llmKeyDeleteError": "Failed to delete API key",
+      "subscriptionCancelled": "Subscription cancelled successfully",
+      "subscriptionResumed": "Subscription resumed successfully",
+      "subscriptionError": "Failed to update subscription",
+      "upgradeInitiated": "Upgrade initiated. Please complete the payment."
+    },
+    "subscription": {
+      "title": "Subscription",
+      "currentPlan": "Current Plan",
+      "free": "Free",
+      "pro": "Pro",
+      "enterprise": "Enterprise",
+      "status": "Status",
+      "statusActive": "Active",
+      "statusCancelled": "Cancelled",
+      "statusExpired": "Expired",
+      "statusPending": "Pending",
+      "validUntil": "Valid Until",
+      "daysRemaining": "days remaining",
+      "autoRenew": "Auto-renewal",
+      "autoRenewOn": "On",
+      "autoRenewOff": "Off",
+      "cancelSubscription": "Cancel Subscription",
+      "resumeSubscription": "Resume Subscription",
+      "upgradeToPro": "Upgrade to Pro",
+      "usage": "Usage",
+      "prompts": "Prompts",
+      "apiRequests": "API Requests / month",
+      "unlimited": "Unlimited",
+      "transactionHistory": "Transaction History",
+      "noTransactions": "No transactions yet",
+      "amount": "Amount",
+      "date": "Date",
+      "type": "Type",
+      "typeSubscription": "Subscription",
+      "typeRenewal": "Renewal",
+      "typeUpgrade": "Upgrade",
+      "typeRefund": "Refund",
+      "loading": "Loading subscription...",
+      "cancelConfirm": "Are you sure you want to cancel your subscription? You will retain access until the end of your billing period.",
+      "cancelButton": "Yes, Cancel",
+      "keepButton": "Keep Subscription"
     }
   },
   "logs": {
@@ -982,5 +991,34 @@
       "tokens": "Tokens",
       "models": "Models"
     }
+  },
+  "upgrade": {
+    "title": "Upgrade to Pro",
+    "subtitle": "Unlock the full power of xR2",
+    "currentPlan": "Your current plan",
+    "free": "Free",
+    "pro": "Pro",
+    "comparePlans": "Compare plans",
+    "freeFeatures": {
+      "prompts": "Up to 10 prompts",
+      "apiCalls": "100 API calls/month",
+      "analytics": "Basic analytics",
+      "workspaces": "1 workspace"
+    },
+    "proFeatures": {
+      "prompts": "Unlimited prompts",
+      "apiCalls": "1,000 API calls/month",
+      "analytics": "A/B testing & revenue tracking",
+      "workspaces": "Unlimited workspaces",
+      "collaboration": "Team collaboration"
+    },
+    "price": "Price",
+    "perMonth": "/month",
+    "upgradeNow": "Upgrade Now",
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "paymentPending": "Payment pending",
+    "paymentPendingMessage": "Your upgrade request has been submitted. Please complete the payment to activate your Pro subscription.",
+    "contactSupport": "Contact support for payment instructions"
   }
 }

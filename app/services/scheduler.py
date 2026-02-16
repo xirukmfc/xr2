@@ -5,6 +5,7 @@ from typing import Optional
 
 from app.core.database import AsyncSessionLocal
 from app.services.statistics import StatisticsService
+from app.services.subscription import SubscriptionService
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ class StatsAggregationScheduler:
         """Main scheduler loop"""
         last_hour_aggregation = None
         last_day_aggregation = None
+        last_auto_renewal = None
 
         while self.running:
             try:
@@ -59,6 +61,13 @@ class StatsAggregationScheduler:
                          current_time.date() != last_day_aggregation.date())):
                     await self._aggregate_daily_stats()
                     last_day_aggregation = current_time
+
+                # Auto-renewal processing - run at 3 AM UTC
+                if (current_time.hour == 3 and
+                        (last_auto_renewal is None or
+                         current_time.date() != last_auto_renewal.date())):
+                    await self._process_auto_renewals()
+                    last_auto_renewal = current_time
 
                 # Check every 30 minutes
                 await asyncio.sleep(1800)  # 30 minutes
@@ -110,6 +119,23 @@ class StatsAggregationScheduler:
 
         except Exception as e:
             logger.error(f"❌ Failed to aggregate daily stats: {e}")
+
+    async def _process_auto_renewals(self):
+        """Process auto-renewals for expiring subscriptions"""
+        try:
+            async with AsyncSessionLocal() as session:
+                subscription_service = SubscriptionService(session)
+
+                count = await subscription_service.process_auto_renewals()
+                await session.commit()
+
+                if count > 0:
+                    logger.info(f"💳 Auto-renewals processed: {count} subscriptions")
+                else:
+                    logger.info("💳 No subscriptions to auto-renew")
+
+        except Exception as e:
+            logger.error(f"❌ Failed to process auto-renewals: {e}")
 
 
 # Global scheduler instance

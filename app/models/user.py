@@ -48,6 +48,7 @@ class User(Base):
     # Relationships
     workspaces = relationship("Workspace", secondary="workspace_members", back_populates="members")
     limits = relationship("UserLimits", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    subscription = relationship("UserSubscription", back_populates="user", uselist=False, cascade="all, delete-orphan")
 
     def to_dict(self):
         """Convert user to dictionary for API responses"""

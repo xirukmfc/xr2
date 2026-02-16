@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from . import prompts, auth, tags, workspaces, llm, tokenize, stats, product_api_keys, product_logs, public_share, analytics, ab_tests_simple, custom_funnel_configurations, conversion_funnels, pricing
+from . import prompts, auth, tags, workspaces, llm, tokenize, stats, product_api_keys, product_logs, public_share, analytics, ab_tests_simple, custom_funnel_configurations, conversion_funnels, pricing, subscriptions
 
 # Main API router
 router = APIRouter()
@@ -23,6 +23,8 @@ router.include_router(ab_tests_simple.router, tags=["ab-tests-simple"])
 router.include_router(custom_funnel_configurations.router, tags=["custom-funnel-configurations"])
 router.include_router(conversion_funnels.router, tags=["conversion-funnels"])
 
+# Subscription management routes
+router.include_router(subscriptions.router, tags=["subscriptions"])
 
 # Public pricing endpoint (no auth required)
 router.include_router(pricing.router, tags=["public"])

@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'add_pricing_config'
-down_revision = 'b2c3d4e5f6g7'
+down_revision = 'ac325e96c088'
 branch_labels = None
 depends_on = None
 
@@ -47,7 +47,7 @@ def upgrade() -> None:
          '["Up to 10 prompts", "100 API calls/month", "Basic analytics", "1 workspace"]',
          '["До 10 промптов", "100 API запросов/мес", "Базовая аналитика", "1 workspace"]',
          true, 0),
-        (gen_random_uuid(), 'pro', 2900, '$29', 290000, '2900₽', 'month', '/month', '/мес',
+        (gen_random_uuid(), 'pro', 1900, '$19', 150000, '1500₽', 'month', '/month', '/мес',
          '["Unlimited prompts", "1,000 API calls/month", "A/B testing & revenue tracking", "Unlimited workspaces", "Team collaboration"]',
          '["Безлимит промптов", "1 000 API запросов/мес", "A/B тесты и выручка", "Безлимит workspaces", "Командная работа"]',
          true, 1),

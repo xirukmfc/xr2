@@ -25,6 +25,18 @@ const nextConfig = {
     scrollRestoration: true,
   },
 
+  // Длинный кеш для статических ресурсов из public/
+  async headers() {
+    return [
+      {
+        source: '/:path*.(svg|png|jpg|jpeg|webp|avif|ico|woff|woff2)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+    ]
+  },
+
   // Настройки webpack для максимальной оптимизации
   webpack: (config, { dev, isServer }) => {
     // Monaco Editor - динамическая загрузка

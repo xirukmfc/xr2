@@ -34,11 +34,11 @@ export default function RootLayout({
         {/* Google Analytics */}
         <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-GE84ZPSP20"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
         />
         <Script
             id="google-analytics"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             dangerouslySetInnerHTML={{
                 __html: `
                   window.dataLayer = window.dataLayer || [];

@@ -18,13 +18,16 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DataTable } from "@/components/ui/data-table"
 import type { Column } from "@/components/ui/data-table"
-import { Trash2, Edit2, Plus, Eye, EyeOff, Search, User, Tag, Key, Loader2 } from "lucide-react"
-import { apiClient } from "@/lib/api"
+import { Trash2, Edit2, Plus, Eye, EyeOff, Search, User, Tag, Key, Loader2, CreditCard, Zap, Check, X } from "lucide-react"
+import { apiClient, getCurrentSubscription, getSubscriptionTransactions, cancelSubscription, resumeSubscription, getUserLimits, type UserLimits } from "@/lib/api"
 import { useAuth } from "@/contexts/auth-context"
 import { NotificationProvider, useNotification } from "@/components/notification-provider"
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog"
 import { logger } from "@/lib/logger"
 import { useLocale } from "@/contexts/locale-context"
+import { Progress } from "@/components/ui/progress"
+import { UpgradeModal } from "@/components/upgrade-modal"
+import type { SubscriptionResponse, Transaction } from "@/types/subscription"
 
 interface LLMApiKey {
   id: string
@@ -68,6 +71,7 @@ const colorOptions = [
 
 const subsections = [
   { id: "profile", labelKey: "settings.tabs.profile", icon: User },
+  { id: "subscription", labelKey: "settings.tabs.subscription", icon: CreditCard },
   { id: "tags", labelKey: "settings.tabs.tags", icon: Tag },
   { id: "llm-keys", labelKey: "settings.tabs.llmKeys", icon: Key },
 ]
@@ -119,6 +123,16 @@ function SettingsPageContent() {
   const [deleteAccountLoading, setDeleteAccountLoading] = useState(false)
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState("")
+
+  // Subscription state
+  const [subscription, setSubscription] = useState<SubscriptionResponse | null>(null)
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true)
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [userLimits, setUserLimits] = useState<UserLimits | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const [subscriptionActionLoading, setSubscriptionActionLoading] = useState(false)
+  const didFetchSubscription = useRef(false)
 
   const localizedSubsections = useMemo(() =>
     subsections.map((section) => ({
@@ -249,6 +263,79 @@ function SettingsPageContent() {
 
     loadLLMData()
   }, [t])
+
+  // Load subscription data
+  useEffect(() => {
+    if (didFetchSubscription.current) return
+    didFetchSubscription.current = true
+
+    const loadSubscriptionData = async () => {
+      try {
+        setSubscriptionLoading(true)
+        logger.log('[Settings] Loading subscription data...')
+
+        const [subscriptionData, transactionsData, limitsData] = await Promise.all([
+          getCurrentSubscription(),
+          getSubscriptionTransactions(10, 0),
+          getUserLimits()
+        ])
+
+        logger.log('[Settings] Received subscription:', subscriptionData)
+        logger.log('[Settings] Received user limits:', limitsData)
+        setSubscription(subscriptionData)
+        setTransactions(transactionsData.transactions || [])
+        setUserLimits(limitsData)
+      } catch (error) {
+        logger.error('[Settings] Failed to load subscription data:', error)
+      } finally {
+        setSubscriptionLoading(false)
+      }
+    }
+
+    loadSubscriptionData()
+  }, [])
+
+  const handleCancelSubscription = async () => {
+    try {
+      setSubscriptionActionLoading(true)
+      await cancelSubscription()
+      showNotification(t('settings.notifications.subscriptionCancelled'), 'success')
+      // Refresh subscription data
+      const subscriptionData = await getCurrentSubscription()
+      setSubscription(subscriptionData)
+      setShowCancelDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to cancel subscription:', error)
+      showNotification(error?.message || t('settings.notifications.subscriptionError'), 'error')
+    } finally {
+      setSubscriptionActionLoading(false)
+    }
+  }
+
+  const handleResumeSubscription = async () => {
+    try {
+      setSubscriptionActionLoading(true)
+      // Resume cancelled subscription via API (calls LemonSqueezy/YooKassa resume API)
+      const result = await resumeSubscription()
+
+      // Check if subscription expired and requires new payment
+      if (result.requires_payment) {
+        // Show upgrade modal - it will use the saved payment provider
+        setShowUpgradeModal(true)
+        return
+      }
+
+      showNotification(t('settings.notifications.subscriptionResumed'), 'success')
+      // Refresh subscription data
+      const subData = await getCurrentSubscription()
+      setSubscription(subData)
+    } catch (error: any) {
+      logger.error('Failed to resume subscription:', error)
+      showNotification(error?.message || t('settings.notifications.subscriptionError'), 'error')
+    } finally {
+      setSubscriptionActionLoading(false)
+    }
+  }
 
   const handleSaveProfile = async () => {
     try {
@@ -521,6 +608,216 @@ function SettingsPageContent() {
     </div>
   )
 
+  const renderSubscriptionSection = () => {
+    if (subscriptionLoading) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
+          <span className="text-sm text-muted-foreground">{t('settings.subscription.loading')}</span>
+        </div>
+      )
+    }
+
+    if (!subscription) {
+      return (
+        <div className="text-center py-12 text-muted-foreground">
+          Failed to load subscription data
+        </div>
+      )
+    }
+
+    const planBadgeColor = {
+      free: 'bg-slate-100 text-slate-700',
+      pro: 'bg-blue-100 text-blue-700',
+      enterprise: 'bg-purple-100 text-purple-700',
+    }[subscription.plan] || 'bg-slate-100 text-slate-700'
+
+    const statusBadgeColor = {
+      active: 'bg-green-100 text-green-700',
+      cancelled: 'bg-amber-100 text-amber-700',
+      expired: 'bg-red-100 text-red-700',
+      pending: 'bg-yellow-100 text-yellow-700',
+    }[subscription.status] || 'bg-slate-100 text-slate-700'
+
+    const statusLabel = {
+      active: t('settings.subscription.statusActive'),
+      cancelled: t('settings.subscription.statusCancelled'),
+      expired: t('settings.subscription.statusExpired'),
+      pending: t('settings.subscription.statusPending'),
+    }[subscription.status] || subscription.status
+
+    const transactionTypeLabel = (type: string) => ({
+      subscription: t('settings.subscription.typeSubscription'),
+      renewal: t('settings.subscription.typeRenewal'),
+      upgrade: t('settings.subscription.typeUpgrade'),
+      refund: t('settings.subscription.typeRefund'),
+    }[type] || type)
+
+    return (
+      <div className="space-y-4">
+        {/* Current Plan Card */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">{t('settings.subscription.title')}</CardTitle>
+              <div className="flex items-center gap-1.5">
+                <Badge className={`${planBadgeColor} text-xs`}>
+                  {subscription.plan === 'free' && t('settings.subscription.free')}
+                  {subscription.plan === 'pro' && t('settings.subscription.pro')}
+                  {subscription.plan === 'enterprise' && t('settings.subscription.enterprise')}
+                </Badge>
+                <Badge className={`${statusBadgeColor} text-xs`}>{statusLabel}</Badge>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-0">
+            {/* Plan Details - compact for Pro */}
+            {subscription.plan !== 'free' && subscription.period_end && (
+              <div className="flex items-center justify-between text-sm bg-slate-50 rounded-md px-3 py-2">
+                <div className="flex items-center gap-4">
+                  <span className="text-muted-foreground">{t('settings.subscription.validUntil')}:</span>
+                  <span className="font-medium">{new Date(subscription.period_end).toLocaleDateString()}</span>
+                  <span className="text-muted-foreground">({subscription.days_remaining} {t('settings.subscription.daysRemaining')})</span>
+                </div>
+                <span className={subscription.auto_renew ? "text-green-600 text-xs" : "text-amber-600 text-xs"}>
+                  {subscription.auto_renew ? t('settings.subscription.autoRenewOn') : t('settings.subscription.autoRenewOff')}
+                </span>
+              </div>
+            )}
+
+            {/* Usage Section - inline */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-slate-50 rounded-md px-3 py-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t('settings.subscription.prompts')}</span>
+                  <span className="font-medium">
+                    {subscription.limits.max_prompts === -1
+                      ? <span className="text-green-600">{t('settings.subscription.unlimited')}</span>
+                      : userLimits
+                        ? `${userLimits.limits.prompts.current} / ${subscription.limits.max_prompts}`
+                        : subscription.limits.max_prompts
+                    }
+                  </span>
+                </div>
+                {subscription.limits.max_prompts > 0 && userLimits && (
+                  <Progress value={(userLimits.limits.prompts.current / subscription.limits.max_prompts) * 100} className="h-1.5 mt-1.5" />
+                )}
+              </div>
+              <div className="bg-slate-50 rounded-md px-3 py-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t('settings.subscription.apiRequests')}</span>
+                  <span className="font-medium">
+                    {subscription.limits.max_api_requests_per_month === -1
+                      ? <span className="text-green-600">{t('settings.subscription.unlimited')}</span>
+                      : userLimits
+                        ? `${userLimits.limits.api_requests.current.toLocaleString()} / ${subscription.limits.max_api_requests_per_month.toLocaleString()}`
+                        : subscription.limits.max_api_requests_per_month.toLocaleString()
+                    }
+                  </span>
+                </div>
+                {subscription.limits.max_api_requests_per_month > 0 && userLimits && (
+                  <Progress value={(userLimits.limits.api_requests.current / subscription.limits.max_api_requests_per_month) * 100} className="h-1.5 mt-1.5" />
+                )}
+              </div>
+            </div>
+
+            {/* Actions - compact */}
+            {(subscription.plan === 'free' && !subscription.is_superuser) ||
+             (subscription.plan !== 'free' && (subscription.status === 'active' || subscription.status === 'cancelled')) ? (
+              <div className="flex items-center gap-2 pt-1">
+                {subscription.plan === 'free' && !subscription.is_superuser && (
+                  <Button size="sm" onClick={() => setShowUpgradeModal(true)} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                    <Zap className="w-3.5 h-3.5 mr-1.5" />
+                    {t('settings.subscription.upgradeToPro')}
+                  </Button>
+                )}
+                {subscription.plan !== 'free' && subscription.status === 'active' && subscription.auto_renew && (
+                  <Button variant="outline" size="sm" onClick={() => setShowCancelDialog(true)} disabled={subscriptionActionLoading}>
+                    {t('settings.subscription.cancelSubscription')}
+                  </Button>
+                )}
+                {subscription.plan !== 'free' && subscription.status === 'cancelled' && (
+                  <Button size="sm" onClick={handleResumeSubscription} disabled={subscriptionActionLoading}>
+                    {subscriptionActionLoading && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
+                    {t('settings.subscription.resumeSubscription')}
+                  </Button>
+                )}
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
+
+        {/* Transaction History - compact */}
+        {transactions.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2 pt-3">
+              <CardTitle className="text-sm font-medium">{t('settings.subscription.transactionHistory')}</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="divide-y">
+                {transactions.map((tx) => (
+                  <div key={tx.id} className="flex items-center justify-between py-2 text-sm">
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium">{transactionTypeLabel(tx.transaction_type)}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {tx.created_at ? new Date(tx.created_at).toLocaleDateString() : '-'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{tx.amount_display}</span>
+                      <Badge variant="outline" className="text-xs py-0 px-1.5">
+                        {tx.status === 'completed' && <Check className="w-3 h-3 text-green-500" />}
+                        {tx.status === 'pending' && <Loader2 className="w-3 h-3 animate-spin" />}
+                        {tx.status === 'failed' && <X className="w-3 h-3 text-red-500" />}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Upgrade Modal */}
+        <UpgradeModal
+          open={showUpgradeModal}
+          onOpenChange={setShowUpgradeModal}
+          onUpgradeSuccess={async () => {
+            const subscriptionData = await getCurrentSubscription()
+            setSubscription(subscriptionData)
+            const txData = await getSubscriptionTransactions(10, 0)
+            setTransactions(txData.transactions || [])
+          }}
+          forcedProvider={subscription?.payment_provider}
+        />
+
+        {/* Cancel Confirmation Dialog */}
+        <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('settings.subscription.cancelSubscription')}</DialogTitle>
+              <DialogDescription>
+                {t('settings.subscription.cancelConfirm')}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCancelDialog(false)}>
+                {t('settings.subscription.keepButton')}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleCancelSubscription}
+                disabled={subscriptionActionLoading}
+              >
+                {subscriptionActionLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {t('settings.subscription.cancelButton')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    )
+  }
 
   const renderTagsSection = () => {
     if (tagsLoading) {
@@ -788,6 +1085,8 @@ function SettingsPageContent() {
     switch (activeSubsection) {
       case "profile":
         return renderProfileSection()
+      case "subscription":
+        return renderSubscriptionSection()
       case "tags":
         return renderTagsSection()
       case "llm-keys":

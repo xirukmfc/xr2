@@ -10,43 +10,21 @@
       "pricing": "Цены",
       "docs": "Доки",
       "public_docs": "Доки",
-      "signIn": "Войти",
-      "getStartedFree": "Попробовать"
+      "signIn": "Войти"
     },
     "hero": {
-      "badge": "Промпты под контролем продакта",
-      "titleStart": "Какой промпт работает?",
-      "titleAccent": "Хватит гадать.",
-      "subtitle": "Деплой промптов, A/B тесты и трекинг выручки — без разработчиков и релизов.",
-      "cta": "Попробовать",
-      "differentiator": "Это не очередной Langfuse :)",
-      "differentiatorAccent": "Продукт для продактов, а не разработчиков."
-    },
-    "dashboard": {
-      "url": "xr2.uk/prompts",
-      "userName": "Алексей Иванов",
-      "userEmail": "alex@company.com",
-      "prompts": "Промпты",
-      "analytics": "Аналитика",
-      "apiKeys": "API ключи",
-      "settings": "Настройки",
-      "search": "Поиск...",
-      "all": "Все",
-      "active": "Активные",
-      "draft": "Черновик",
-      "newPrompt": "Новый промпт",
-      "new": "Новый",
-      "lastUpdated": "Обновление",
-      "name": "Название",
-      "status": "Статус",
-      "updated": "Обновлено",
-      "usage": "Вызовы",
-      "owner": "Автор",
-      "calls": "вызовов"
+      "titleLine1": "Хватит деплоить код,",
+      "titleLine2": "чтобы изменить одно предложение.",
+      "subtitle": "Редактируйте AI-промпты в продакшене, проводите A/B тесты и смотрите, какая версия приносит больше денег — без инженеров.",
+      "cta": "Попробовать бесплатно",
+      "secondaryCta": "Как это работает"
     },
     "revenue": {
       "title": "Какие промпты приносят деньги?",
       "subtitle": "Конверсии и выручка по каждому промпту. Не vibes, а цифры.",
+      "bullet1": "Атрибуция выручки на версию промпта",
+      "bullet2": "A/B тесты на реальном трафике",
+      "bullet3": "Определение статистической значимости",
       "revenueByPrompt": "Выручка по промптам",
       "last7days": "За 7 дней",
       "promptsTracked": "промптов",
@@ -55,41 +33,31 @@
       "variantB": "Вариант B — новый",
       "winner": "Победил",
       "confidence": "уверенность",
-      "deployWinner": "Задеплоить",
+      "eventLog": "Лог событий",
       "howItWorks": "Как это работает: при покупке шлёте событие с суммой и prompt_version_id. Всё."
     },
     "features": {
       "title": "Для продуктовых команд",
-      "subtitle": "Всё для работы с промптами без боли.",
+      "subtitle": "Меняйте промпты без разработчиков. Измеряйте, что реально работает.",
       "noDevDependency": {
         "title": "Без разработчиков",
-        "description": "Меняйте промпты сами. Никаких тикетов и ожидания."
+        "description": "Меняйте промпты сами. Никаких тикетов, ожидания и деплоев."
       },
       "safeToExperiment": {
-        "title": "Эксперименты без страха",
-        "description": "Откатить любое изменение — один клик."
+        "title": "Мгновенный откат",
+        "description": "Откатить любое изменение — один клик. Шипьте без страха."
       },
       "comparePerformance": {
-        "title": "Сравнивайте версии",
-        "description": "Видно, как каждое изменение влияет на метрики. Data-driven решения."
+        "title": "A/B тесты на реальном трафике",
+        "description": "Сравнивайте версии промптов на живых пользователях. Выбирайте победителя по данным, а не по ощущениям."
       },
       "customMetrics": {
-        "title": "Свои метрики",
-        "description": "Регистрации, покупки, retention — трекайте то, что важно вам."
+        "title": "Ваши KPI, не vanity-метрики",
+        "description": "Регистрации, покупки, retention — определяйте события, которые важны вашему бизнесу."
       }
     },
     "integrations": {
-      "badge": "Для тех, кто автоматизирует всё",
-      "title": "Используете n8n, Make или Zapier?",
-      "subtitle": "Хватит копировать промпты между сценариями. Один источник, один API — меняете здесь, работает везде.",
-      "cta": "Попробовать",
-      "worksWithYourStack": "Работает с вашим стеком",
-      "python": "Python",
-      "nodejs": "Node.js",
-      "n8n": "n8n",
-      "make": "Make",
-      "zapier": "Zapier",
-      "restApi": "REST API"
+      "worksWithYourStack": "Работает с вашим стеком"
     },
     "pricing": {
       "title": "Бесплатно на старте. Растёте — апгрейдитесь.",
@@ -103,18 +71,13 @@
       },
       "pro": {
         "name": "Pro",
-        "popular": "Хит",
-        "price": "2900₽",
+        "price": "1500₽",
         "period": "/мес",
         "features": ["Безлимит промптов", "1 000 запросов/мес", "A/B тесты + выручка", "Безлимит workspaces", "Командная работа"],
         "cta": "Начать"
       },
-      "enterprise": {
-        "name": "Enterprise",
-        "price": "По запросу",
-        "features": ["SSO / SAML", "Выделенная поддержка", "Кастомные интеграции", "SLA"],
-        "cta": "Написать"
-      }
+      "needMore": "Нужно больше?",
+      "contactUs": "Напишите нам"
     },
     "cta": {
       "title": "Промпты заслуживают лучшего, чем git commit.",
@@ -122,9 +85,11 @@
       "button": "Попробовать"
     },
     "footer": {
-      "docs": "Доки",
+      "description": "Платформа управления промптами для продуктовых команд. Деплой, A/B тесты и трекинг выручки на промпт.",
+      "productTitle": "Продукт",
+      "companyTitle": "Компания",
+      "legalTitle": "Юридическое",
       "public_docs": "Доки",
-      "pricing": "Цены",
       "contact": "Контакты",
       "cookies": "Cookies",
       "privacy": "Конфиденциальность",
@@ -145,10 +110,12 @@
     "monthlyApiRequests": "Запросов в месяц",
     "remaining": "осталось",
     "resetsAt": "Обновится в",
+    "unlimited": "Безлимит",
     "usage": "Лимиты",
     "apiRequestsMonthly": "API запросы (месяц)",
     "limitReached": "Лимит достигнут",
-    "limitAlmostReached": "Лимит почти достигнут"
+    "limitAlmostReached": "Лимит почти достигнут",
+    "upgradeToPro": "Перейти на Pro"
   },
   "auth": {
     "login": {
@@ -688,7 +655,8 @@
     "tabs": {
       "profile": "Профиль",
       "tags": "Теги",
-      "llmKeys": "LLM API ключи"
+      "llmKeys": "LLM API ключи",
+      "subscription": "Подписка"
     },
     "profile": {
       "title": "Профиль",
@@ -832,7 +800,48 @@
       "llmKeyUpdated": "API ключ успешно обновлен",
       "llmKeySaveError": "Не удалось сохранить API ключ",
       "llmKeyDeleted": "API ключ удален",
-      "llmKeyDeleteError": "Не удалось удалить API ключ"
+      "llmKeyDeleteError": "Не удалось удалить API ключ",
+      "subscriptionCancelled": "Подписка успешно отменена",
+      "subscriptionResumed": "Подписка возобновлена",
+      "subscriptionError": "Не удалось обновить подписку",
+      "upgradeInitiated": "Запрос на апгрейд отправлен. Пожалуйста, завершите оплату."
+    },
+    "subscription": {
+      "title": "Подписка",
+      "currentPlan": "Текущий план",
+      "free": "Free",
+      "pro": "Pro",
+      "enterprise": "Enterprise",
+      "status": "Статус",
+      "statusActive": "Активна",
+      "statusCancelled": "Отменена",
+      "statusExpired": "Истекла",
+      "statusPending": "Ожидает оплаты",
+      "validUntil": "Действует до",
+      "daysRemaining": "дней осталось",
+      "autoRenew": "Автопродление",
+      "autoRenewOn": "Вкл",
+      "autoRenewOff": "Выкл",
+      "cancelSubscription": "Отменить подписку",
+      "resumeSubscription": "Возобновить подписку",
+      "upgradeToPro": "Перейти на Pro",
+      "usage": "Использование",
+      "prompts": "Промпты",
+      "apiRequests": "API запросы / мес",
+      "unlimited": "Безлимит",
+      "transactionHistory": "История транзакций",
+      "noTransactions": "Транзакций пока нет",
+      "amount": "Сумма",
+      "date": "Дата",
+      "type": "Тип",
+      "typeSubscription": "Подписка",
+      "typeRenewal": "Продление",
+      "typeUpgrade": "Апгрейд",
+      "typeRefund": "Возврат",
+      "loading": "Загрузка подписки...",
+      "cancelConfirm": "Вы уверены, что хотите отменить подписку? Доступ сохранится до конца оплаченного периода.",
+      "cancelButton": "Да, отменить",
+      "keepButton": "Оставить подписку"
     }
   },
   "logs": {
@@ -982,5 +991,34 @@
       "tokens": "Токенов",
       "models": "Модели"
     }
+  },
+  "upgrade": {
+    "title": "Перейти на Pro",
+    "subtitle": "Разблокируйте полный потенциал xR2",
+    "currentPlan": "Ваш текущий план",
+    "free": "Free",
+    "pro": "Pro",
+    "comparePlans": "Сравнить планы",
+    "freeFeatures": {
+      "prompts": "До 10 промптов",
+      "apiCalls": "100 API запросов/мес",
+      "analytics": "Базовая аналитика",
+      "workspaces": "1 workspace"
+    },
+    "proFeatures": {
+      "prompts": "Безлимит промптов",
+      "apiCalls": "1 000 API запросов/мес",
+      "analytics": "A/B тесты и трекинг выручки",
+      "workspaces": "Безлимит workspaces",
+      "collaboration": "Командная работа"
+    },
+    "price": "Цена",
+    "perMonth": "/мес",
+    "upgradeNow": "Перейти на Pro",
+    "cancel": "Отмена",
+    "processing": "Обработка...",
+    "paymentPending": "Ожидает оплаты",
+    "paymentPendingMessage": "Ваш запрос на апгрейд отправлен. Пожалуйста, завершите оплату для активации Pro подписки.",
+    "contactSupport": "Свяжитесь с поддержкой для получения инструкций по оплате"
   }
 }

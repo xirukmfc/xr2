@@ -10,9 +10,12 @@ import { useAuth } from "@/contexts/auth-context"
 import { UserLimitsDisplay } from "@/components/user-limits-display"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Progress } from "@/components/ui/progress"
-import { getUserLimits } from "@/lib/api"
+import { Button } from "@/components/ui/button"
+import { getUserLimits, getCurrentSubscription } from "@/lib/api"
 import { useDataPreloader } from "@/lib/preload-data"
 import { useLocale } from "@/contexts/locale-context"
+import { UpgradeModal } from "@/components/upgrade-modal"
+import type { SubscriptionResponse } from "@/types/subscription"
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed'
 
@@ -80,6 +83,8 @@ export function Sidebar() {
   const { preloadPageData } = useDataPreloader()
   const [limits, setLimits] = useState<UserLimits | null>(null)
   const [limitsLoading, setLimitsLoading] = useState(true)
+  const [subscription, setSubscription] = useState<SubscriptionResponse | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const { locale, setLocale, t } = useLocale()
 
   // Initialize collapse state from localStorage
@@ -90,25 +95,29 @@ export function Sidebar() {
     sidebarCollapseListeners.forEach((listener) => listener(stored))
   }, [])
 
-  // Fetch user limits
+  // Fetch user limits and subscription
   useEffect(() => {
-    const fetchLimits = async () => {
+    const fetchData = async () => {
       if (!isAuthenticated) {
         return
       }
-      
+
       try {
         setLimitsLoading(true)
-        const data = await getUserLimits()
-        setLimits(data)
+        const [limitsData, subscriptionData] = await Promise.all([
+          getUserLimits(),
+          getCurrentSubscription()
+        ])
+        setLimits(limitsData)
+        setSubscription(subscriptionData)
       } catch (err) {
-        console.error('[Sidebar] Error fetching limits:', err)
+        console.error('[Sidebar] Error fetching data:', err)
       } finally {
         setLimitsLoading(false)
       }
     }
 
-    fetchLimits()
+    fetchData()
   }, [isAuthenticated])
 
 
@@ -177,20 +186,27 @@ export function Sidebar() {
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-slate-600">{t('sidebar.availablePrompts')}</span>
                       <span className="text-slate-700 font-medium">
-                        {limits.limits.prompts.current} / {limits.limits.prompts.max}
+                        {limits.limits.prompts.max === -1
+                          ? t('sidebar.unlimited')
+                          : `${limits.limits.prompts.current} / ${limits.limits.prompts.max}`
+                        }
                       </span>
                     </div>
-                    <Progress 
-                      value={limits.limits.prompts.max > 0 ? (limits.limits.prompts.current / limits.limits.prompts.max) * 100 : 0} 
-                      className="h-2"
-                      indicatorClassName={
-                        (limits.limits.prompts.current / limits.limits.prompts.max) >= 0.9 ? 'bg-red-300' : 
-                        (limits.limits.prompts.current / limits.limits.prompts.max) >= 0.7 ? 'bg-amber-300' : 'bg-emerald-300'
-                      }
-                    />
-                    <div className="text-xs text-slate-500">
-                      {limits.limits.prompts.max - limits.limits.prompts.current} {t('sidebar.remaining')}
-                    </div>
+                    {limits.limits.prompts.max > 0 && (
+                      <>
+                        <Progress
+                          value={(limits.limits.prompts.current / limits.limits.prompts.max) * 100}
+                          className="h-2"
+                          indicatorClassName={
+                            (limits.limits.prompts.current / limits.limits.prompts.max) >= 0.9 ? 'bg-red-300' :
+                            (limits.limits.prompts.current / limits.limits.prompts.max) >= 0.7 ? 'bg-amber-300' : 'bg-emerald-300'
+                          }
+                        />
+                        <div className="text-xs text-slate-500">
+                          {limits.limits.prompts.max - limits.limits.prompts.current} {t('sidebar.remaining')}
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* API Requests Limit */}
@@ -198,20 +214,27 @@ export function Sidebar() {
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-slate-600">{t('sidebar.monthlyApiRequests')}</span>
                       <span className="text-slate-700 font-medium">
-                        {limits.limits.api_requests.current} / {limits.limits.api_requests.max}
+                        {limits.limits.api_requests.max === -1
+                          ? t('sidebar.unlimited')
+                          : `${limits.limits.api_requests.current} / ${limits.limits.api_requests.max}`
+                        }
                       </span>
                     </div>
-                    <Progress 
-                      value={limits.limits.api_requests.max > 0 ? (limits.limits.api_requests.current / limits.limits.api_requests.max) * 100 : 0} 
-                      className="h-2"
-                      indicatorClassName={
-                        (limits.limits.api_requests.current / limits.limits.api_requests.max) >= 0.9 ? 'bg-red-300' : 
-                        (limits.limits.api_requests.current / limits.limits.api_requests.max) >= 0.7 ? 'bg-amber-300' : 'bg-emerald-300'
-                      }
-                    />
-                    <div className="text-xs text-slate-500">
-                      {t('sidebar.resetsAt')} {new Date(limits.limits.api_requests.reset_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </div>
+                    {limits.limits.api_requests.max > 0 && (
+                      <>
+                        <Progress
+                          value={(limits.limits.api_requests.current / limits.limits.api_requests.max) * 100}
+                          className="h-2"
+                          indicatorClassName={
+                            (limits.limits.api_requests.current / limits.limits.api_requests.max) >= 0.9 ? 'bg-red-300' :
+                            (limits.limits.api_requests.current / limits.limits.api_requests.max) >= 0.7 ? 'bg-amber-300' : 'bg-emerald-300'
+                          }
+                        />
+                        <div className="text-xs text-slate-500">
+                          {t('sidebar.resetsAt')} {new Date(limits.limits.api_requests.reset_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </TooltipContent>
@@ -262,6 +285,33 @@ export function Sidebar() {
       <div className="flex-shrink-0">
         <UserLimitsDisplay isCollapsed={isCollapsed} />
       </div>
+
+      {/* Upgrade Button for Free Users - below limits */}
+      {subscription && subscription.plan === "free" && !subscription.is_superuser && (
+        <div className={`px-4 py-2 ${isCollapsed ? "px-2" : ""}`}>
+          <button
+            onClick={() => setShowUpgradeModal(true)}
+            className={`flex items-center text-sm text-slate-600 hover:text-blue-600 transition-colors ${
+              isCollapsed ? "w-8 h-8 justify-center" : "w-full"
+            }`}
+            title={t("sidebar.upgradeToPro")}
+          >
+            <Zap className={`w-4 h-4 ${isCollapsed ? "" : "mr-2"} text-amber-500`} />
+            {!isCollapsed && <span>{t("sidebar.upgradeToPro")}</span>}
+          </button>
+        </div>
+      )}
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        onUpgradeSuccess={() => {
+          // Refresh subscription data
+          getCurrentSubscription().then(setSubscription).catch(console.error)
+        }}
+        forcedProvider={subscription?.payment_provider}
+      />
 
       {/* Bottom Actions */}
       <div className="absolute bottom-4 left-4 right-4 space-y-2">

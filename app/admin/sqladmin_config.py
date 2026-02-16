@@ -28,6 +28,7 @@ from app.models.analytics import EventDefinition, ConversionFunnel, CustomFunnel
 from app.models.public_share import PublicShare
 from app.models.workspace import workspace_members
 from app.models.pricing import PricingConfig
+from app.models.subscription import UserSubscription, SubscriptionTransaction
 
 
 class AdminAuth(AuthenticationBackend):
@@ -1259,6 +1260,131 @@ class PricingConfigAdmin(ModelView, model=PricingConfig):
     page_size_options = [10, 25]
 
 
+class UserSubscriptionAdmin(ModelView, model=UserSubscription):
+    """Admin interface for User Subscriptions"""
+    column_list = [
+        UserSubscription.user,
+        UserSubscription.plan,
+        UserSubscription.status,
+        UserSubscription.period_end,
+        UserSubscription.auto_renew,
+        UserSubscription.currency,
+        UserSubscription.payment_method_id,
+        UserSubscription.created_at
+    ]
+
+    column_list_selectin_related = [UserSubscription.user]
+    column_details_selectin_related = [UserSubscription.user, UserSubscription.transactions]
+
+    column_labels = {
+        UserSubscription.user: "User",
+        UserSubscription.plan: "Plan",
+        UserSubscription.status: "Status",
+        UserSubscription.period_start: "Period Start",
+        UserSubscription.period_end: "Period End",
+        UserSubscription.auto_renew: "Auto-Renew",
+        UserSubscription.currency: "Currency",
+        UserSubscription.cancelled_at: "Cancelled At",
+        UserSubscription.payment_method_id: "Payment Method ID",
+        UserSubscription.created_at: "Created",
+        UserSubscription.updated_at: "Updated"
+    }
+
+    column_formatters = {
+        UserSubscription.user: lambda obj, attr: getattr(obj.user, "username", None) if obj.user else str(obj.user_id),
+        UserSubscription.payment_method_id: lambda obj, attr: obj.payment_method_id[:20] + "..." if obj.payment_method_id and len(obj.payment_method_id) > 20 else obj.payment_method_id or "-"
+    }
+
+    form_excluded_columns = [
+        UserSubscription.id,
+        UserSubscription.created_at,
+        UserSubscription.updated_at,
+        UserSubscription.transactions
+    ]
+
+    name = "Subscription"
+    name_plural = "Subscriptions"
+    icon = "fa-solid fa-credit-card"
+
+    page_size = 25
+    page_size_options = [10, 25, 50, 100]
+
+    def scaffold_list_query(self):
+        """Custom list query that includes user for display"""
+        return (
+            select(UserSubscription)
+            .options(selectinload(UserSubscription.user))
+            .join(User, UserSubscription.user_id == User.id, isouter=True)
+            .order_by(UserSubscription.created_at.desc())
+        )
+
+
+class SubscriptionTransactionAdmin(ModelView, model=SubscriptionTransaction):
+    """Admin interface for Subscription Transactions"""
+    column_list = [
+        SubscriptionTransaction.subscription,
+        SubscriptionTransaction.amount,
+        SubscriptionTransaction.currency,
+        SubscriptionTransaction.status,
+        SubscriptionTransaction.transaction_type,
+        SubscriptionTransaction.payment_method,
+        SubscriptionTransaction.created_at,
+        SubscriptionTransaction.completed_at
+    ]
+
+    column_list_selectin_related = [SubscriptionTransaction.subscription]
+    column_details_selectin_related = [SubscriptionTransaction.subscription]
+
+    column_labels = {
+        SubscriptionTransaction.subscription: "Subscription",
+        SubscriptionTransaction.amount: "Amount",
+        SubscriptionTransaction.currency: "Currency",
+        SubscriptionTransaction.status: "Status",
+        SubscriptionTransaction.transaction_type: "Type",
+        SubscriptionTransaction.period_start: "Period Start",
+        SubscriptionTransaction.period_end: "Period End",
+        SubscriptionTransaction.external_id: "External ID",
+        SubscriptionTransaction.payment_method: "Payment Method",
+        SubscriptionTransaction.webhook_id: "Webhook ID",
+        SubscriptionTransaction.created_at: "Created",
+        SubscriptionTransaction.completed_at: "Completed"
+    }
+
+    column_formatters = {
+        SubscriptionTransaction.subscription: lambda obj, attr: str(obj.subscription_id)[:8] + "...",
+        SubscriptionTransaction.amount: lambda obj, attr: f"{obj.amount / 100:.2f}" if obj.amount else "0",
+        SubscriptionTransaction.external_id: lambda obj, attr: obj.external_id[:20] + "..." if obj.external_id and len(obj.external_id) > 20 else obj.external_id or "-"
+    }
+
+    form_excluded_columns = [
+        SubscriptionTransaction.id,
+        SubscriptionTransaction.created_at,
+        SubscriptionTransaction.completed_at
+    ]
+
+    # Read-only for audit trail
+    can_create = False
+    can_edit = True
+    can_delete = True
+
+    name = "Transaction"
+    name_plural = "Transactions"
+    icon = "fa-solid fa-receipt"
+
+    page_size = 50
+    page_size_options = [25, 50, 100, 200]
+
+    def scaffold_list_query(self):
+        """Custom list query that includes subscription and user for display"""
+        return (
+            select(SubscriptionTransaction)
+            .options(
+                selectinload(SubscriptionTransaction.subscription).selectinload(UserSubscription.user)
+            )
+            .order_by(SubscriptionTransaction.created_at.desc())
+        )
+
+
 def create_admin(app: FastAPI) -> Admin:
     """Create and configure admin instance"""
     import os
@@ -1298,5 +1424,9 @@ def create_admin(app: FastAPI) -> Admin:
 
     # Pricing Management
     admin.add_view(PricingConfigAdmin)
+
+    # Subscription Management
+    admin.add_view(UserSubscriptionAdmin)
+    admin.add_view(SubscriptionTransactionAdmin)
 
     return admin

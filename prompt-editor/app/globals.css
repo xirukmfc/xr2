@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -154,6 +152,24 @@
     animation-delay: 500ms;
   }
 
+  /* Typewriter cursor blink */
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .typewriter-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: #58a6ff;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+    border-radius: 1px;
+  }
+
+
   /* Gradient text */
   .gradient-text {
     background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
@@ -185,6 +201,12 @@
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
   }
 
+  /* Dot pattern */
+  .dot-pattern {
+    background-image: radial-gradient(circle, #d1d5db 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
   /* Gradient border */
   .gradient-border {
     position: relative;
@@ -205,6 +227,7 @@
 @layer base {
   html {
     font-family: var(--font-sans), system-ui, sans-serif;
+    scroll-behavior: smooth;
   }
 
   :root {
@@ -303,18 +326,6 @@
   border-color: color-mix(in srgb, var(--tag-color) 20%, transparent);
 }
 
-/* Предотвращение font preload warnings */
-@font-face {
-  font-family: '__Inter_Fallback';
-  font-display: swap; /* Улучшает производительность */
-  src: local("Arial");
-}
-
-/* Глобальные настройки для всех шрифтов */
-* {
-  font-display: swap;
-}
-
 /* Стили для подсветки переменных в Monaco Editor */
 .monaco-editor .inline-variable-defined {
   color: rgb(22, 163, 74) !important;
@@ -347,11 +358,4 @@
   background-color: rgba(249, 115, 22, 0.3) !important;
   color: rgb(251, 146, 60) !important;
   text-decoration: underline wavy rgba(249, 115, 22, 0.8);
-}
-
-/* Скрытие системных font preload warnings (если нужно) */
-@media (max-width: 0px) {
-  .font-preload-warning {
-    display: none;
-  }
 }

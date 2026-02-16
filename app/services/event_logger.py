@@ -423,6 +423,84 @@ class EventLogger:
             },
         )
 
+    # ==================== Subscription Events ====================
+
+    @staticmethod
+    async def log_subscription_created(
+        db: AsyncSession,
+        subscription_id: UUID,
+        user_id: UUID,
+        plan: str,
+        amount: int,
+        currency: str,
+        payment_provider: str,
+    ) -> SystemEvent:
+        """Log new subscription creation event."""
+        return await EventLogger.log_event(
+            db=db,
+            event_type="subscription_created",
+            resource_type="subscription",
+            action="create",
+            resource_id=subscription_id,
+            user_id=user_id,
+            metadata={
+                "plan": plan,
+                "amount": amount,
+                "currency": currency,
+                "payment_provider": payment_provider,
+                "amount_display": f"${amount/100:.2f}" if currency == "USD" else f"{amount//100}₽",
+            },
+        )
+
+    @staticmethod
+    async def log_subscription_renewed(
+        db: AsyncSession,
+        subscription_id: UUID,
+        user_id: UUID,
+        plan: str,
+        amount: int,
+        currency: str,
+        payment_provider: str,
+    ) -> SystemEvent:
+        """Log subscription renewal event."""
+        return await EventLogger.log_event(
+            db=db,
+            event_type="subscription_renewed",
+            resource_type="subscription",
+            action="renew",
+            resource_id=subscription_id,
+            user_id=user_id,
+            metadata={
+                "plan": plan,
+                "amount": amount,
+                "currency": currency,
+                "payment_provider": payment_provider,
+                "amount_display": f"${amount/100:.2f}" if currency == "USD" else f"{amount//100}₽",
+            },
+        )
+
+    @staticmethod
+    async def log_subscription_cancelled(
+        db: AsyncSession,
+        subscription_id: UUID,
+        user_id: UUID,
+        plan: str,
+        payment_provider: str = None,
+    ) -> SystemEvent:
+        """Log subscription cancellation event."""
+        return await EventLogger.log_event(
+            db=db,
+            event_type="subscription_cancelled",
+            resource_type="subscription",
+            action="cancel",
+            resource_id=subscription_id,
+            user_id=user_id,
+            metadata={
+                "plan": plan,
+                "payment_provider": payment_provider,
+            },
+        )
+
 
 # Singleton instance for convenience
 event_logger = EventLogger()
