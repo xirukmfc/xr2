@@ -1111,6 +1111,264 @@
       },
       "fieldConfig": {
         "defaults": {
+          "color": { "mode": "palette-classic" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "currencyRUB"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 16 },
+      "id": 30,
+      "options": {
+        "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+        "format": "table",
+        "rawSql": "SELECT COALESCE(SUM((event_data->>'amount')::numeric / 100), 0) as value FROM system_events WHERE event_type IN ('subscription_created', 'subscription_renewed') AND (event_data->>'currency')::text = 'RUB' AND created_at >= NOW() - INTERVAL '30 days'",
+        "refId": "A"
+      }],
+      "title": "Revenue RUB (30 days)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 16 },
+      "id": 31,
+      "options": {
+        "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+        "format": "table",
+        "rawSql": "SELECT COALESCE(SUM((event_data->>'amount')::numeric / 100), 0) as value FROM system_events WHERE event_type IN ('subscription_created', 'subscription_renewed') AND (event_data->>'currency')::text = 'USD' AND created_at >= NOW() - INTERVAL '30 days'",
+        "refId": "A"
+      }],
+      "title": "Revenue USD (30 days)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 16 },
+      "id": 32,
+      "options": {
+        "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+        "format": "table",
+        "rawSql": "SELECT COUNT(*) as value FROM subscription_transactions WHERE status = 'failed' AND created_at >= NOW() - INTERVAL '30 days'",
+        "refId": "A"
+      }],
+      "title": "Failed Payments (30 days)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "yellow", "value": null }, { "color": "red", "value": 30 }] },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 16 },
+      "id": 33,
+      "options": {
+        "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+        "format": "table",
+        "rawSql": "SELECT CASE WHEN (SELECT COUNT(*) FROM system_events WHERE event_type IN ('subscription_created', 'subscription_renewed') AND created_at >= NOW() - INTERVAL '30 days') = 0 THEN 0 ELSE ROUND((SELECT COUNT(*)::numeric FROM system_events WHERE event_type = 'subscription_cancelled' AND created_at >= NOW() - INTERVAL '30 days') / (SELECT COUNT(*)::numeric FROM system_events WHERE event_type IN ('subscription_created', 'subscription_renewed') AND created_at >= NOW() - INTERVAL '30 days') * 100, 1) END as value",
+        "refId": "A"
+      }],
+      "title": "Churn Rate (30 days)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 20 },
+      "id": 34,
+      "options": {
+        "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+        "format": "table",
+        "rawSql": "SELECT COUNT(*) as value FROM user_subscriptions WHERE status = 'active' AND plan != 'free'",
+        "refId": "A"
+      }],
+      "title": "Active Paid Subscribers",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 20 },
+      "id": 35,
+      "options": {
+        "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+        "format": "table",
+        "rawSql": "SELECT COUNT(*) as value FROM subscription_transactions WHERE status = 'refunded' AND created_at >= NOW() - INTERVAL '30 days'",
+        "refId": "A"
+      }],
+      "title": "Refunds (30 days)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 20 },
+      "id": 36,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "right", "showLegend": true },
+        "pieType": "pie",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+        "format": "table",
+        "rawSql": "SELECT currency, COUNT(*) as count FROM subscription_transactions WHERE status = 'completed' AND created_at >= NOW() - INTERVAL '30 days' GROUP BY currency",
+        "refId": "A"
+      }],
+      "title": "Transactions by Currency (30 days)",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "",
+            "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars",
+            "fillOpacity": 80, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1, "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never", "spanNulls": false,
+            "stacking": { "group": "A", "mode": "normal" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 20 },
+      "id": 37,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+        "format": "time_series",
+        "rawSql": "SELECT date_trunc('day', created_at) as time, COALESCE(SUM(CASE WHEN currency = 'USD' THEN amount::numeric / 100 WHEN currency = 'RUB' THEN amount::numeric / 100 / 90 ELSE 0 END), 0) as revenue FROM subscription_transactions WHERE status = 'completed' AND created_at >= NOW() - INTERVAL '30 days' GROUP BY time ORDER BY time",
+        "refId": "A"
+      }],
+      "title": "Daily Revenue (30 days, USD)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL"
+      },
+      "fieldConfig": {
+        "defaults": {
           "color": {
             "mode": "palette-classic"
           },
@@ -1161,7 +1419,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 24
       },
       "id": 27,
       "options": {
@@ -1347,7 +1605,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 32
       },
       "id": 10,
       "options": {
