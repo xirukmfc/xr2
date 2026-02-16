@@ -110,6 +110,7 @@ async def custom_swagger_ui():
         title=app.title + " - Swagger UI",
         swagger_js_url="/static/swagger-ui-bundle.js",
         swagger_css_url="/static/swagger-ui.css",
+        swagger_favicon_url="",
     )
 
 @app.get("/redoc", include_in_schema=False)
@@ -237,6 +238,7 @@ async def admin_docs():
         title="xR2 Admin API Documentation",
         swagger_js_url="/static/swagger-ui-bundle.js",
         swagger_css_url="/static/swagger-ui.css",
+        swagger_favicon_url="",
         swagger_ui_parameters={"defaultModelsExpandDepth": -1}
     )
 
