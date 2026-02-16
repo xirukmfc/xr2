@@ -88,17 +88,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.rewrite(url)
   }
 
-  // If domain has a fixed locale, force rewrite /en and /ru to the domain's locale
+  // On production domains: redirect /en and /ru to / (clean URLs)
   if (domainLocale && (pathname === '/en' || pathname === '/ru')) {
-    if (pathname !== `/${domainLocale}`) {
-      const url = request.nextUrl.clone()
-      url.pathname = `/${domainLocale}`
-      return NextResponse.rewrite(url)
-    }
-    return NextResponse.next()
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    return NextResponse.redirect(url, 301)
   }
 
-  // Allow /en and /ru landing pages
+  // Allow /en and /ru landing pages (localhost only)
   if (pathname === '/en' || pathname === '/ru') {
     return NextResponse.next()
   }
