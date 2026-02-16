@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -104,10 +104,22 @@ app = FastAPI(
 # Serve Swagger UI with self-hosted assets (avoid CDN blocking)
 from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
 
+@app.get("/openapi.json", include_in_schema=False)
+async def custom_openapi(request: Request):
+    """Return OpenAPI schema with servers reordered based on current host"""
+    schema = app.openapi()
+    host = request.headers.get("host", "")
+    if "xr2.site" in host:
+        # Put xr2.site first so Swagger UI selects it by default
+        servers = schema.get("servers", [])
+        reordered = sorted(servers, key=lambda s: 0 if "xr2.site" in s.get("url", "") else 1)
+        schema = {**schema, "servers": reordered}
+    return schema
+
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui():
     return get_swagger_ui_html(
-        openapi_url=app.openapi_url,
+        openapi_url="/openapi.json",
         title=app.title + " - Swagger UI",
         swagger_js_url="/static/swagger-ui-bundle.js",
         swagger_css_url="/static/swagger-ui.css",
