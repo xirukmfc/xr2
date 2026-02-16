@@ -98,8 +98,16 @@ services:
       DEBUG: ${DEBUG:-false}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
 
-      # Payment return URLs (domain-specific)
+      # YooKassa payment
+      YOOKASSA_SHOP_ID: ${YOOKASSA_SHOP_ID:-}
+      YOOKASSA_SECRET_KEY: ${YOOKASSA_SECRET_KEY:-}
+      YOOKASSA_TEST_MODE: ${YOOKASSA_TEST_MODE:-true}
       YOOKASSA_RETURN_URL: ${YOOKASSA_RETURN_URL:-https://xr2.site/settings}
+
+      # LemonSqueezy payment
+      LEMONSQUEEZY_API_KEY: ${LEMONSQUEEZY_API_KEY:-}
+      LEMONSQUEEZY_WEBHOOK_SECRET: ${LEMONSQUEEZY_WEBHOOK_SECRET:-}
+      LEMONSQUEEZY_TEST_MODE: ${LEMONSQUEEZY_TEST_MODE:-true}
       LEMONSQUEEZY_RETURN_URL: ${LEMONSQUEEZY_RETURN_URL:-https://xr2.uk/settings}
 
       # API Server URL for Swagger public_docs (production)
