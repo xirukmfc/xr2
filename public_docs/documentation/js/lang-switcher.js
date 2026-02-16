@@ -1,6 +1,13 @@
-// Auto-redirect based on user's locale preference from xR2 portal
+// Auto-redirect based on domain or user's locale preference
 (function() {
-    // Read locale from cookie (shared across subdomains) or fallback to localStorage
+    var hostname = window.location.hostname;
+    var isXr2Site = hostname.indexOf('xr2.site') !== -1;  // Russian domain
+    var isDocsXr2Uk = hostname.indexOf('docs.xr2.uk') !== -1;  // English domain
+
+    // On production domains, no auto-redirect needed — domain determines language
+    if (isXr2Site || isDocsXr2Uk) return;
+
+    // Localhost: read locale from cookie or localStorage and redirect
     function getCookie(name) {
         var value = "; " + document.cookie;
         var parts = value.split("; " + name + "=");
@@ -12,17 +19,14 @@
     var isRussian = window.location.pathname.startsWith('/ru');
     var currentPath = window.location.pathname;
 
-    // Only redirect on first visit (not if user manually switched)
     var hasManuallySelected = sessionStorage.getItem('docs_lang_selected');
 
     if (!hasManuallySelected && savedLocale) {
         if (savedLocale === 'ru' && !isRussian) {
-            // User prefers Russian but is on English page - redirect to Russian
             var newPath = '/ru' + (currentPath === '/' ? '/' : currentPath);
             window.location.replace(newPath);
             return;
         } else if (savedLocale === 'en' && isRussian) {
-            // User prefers English but is on Russian page - redirect to English
             var newPath = currentPath.replace(/^\/ru/, '') || '/';
             window.location.replace(newPath);
             return;
@@ -30,32 +34,43 @@
     }
 })();
 
-// Show only the "switch to other language" link
+// Hide language switcher on production domains, show on localhost
 document.addEventListener('DOMContentLoaded', function() {
-    var isRussian = window.location.pathname.startsWith('/ru');
+    var hostname = window.location.hostname;
+    var isXr2Site = hostname.indexOf('xr2.site') !== -1;
+    var isDocsXr2Uk = hostname.indexOf('docs.xr2.uk') !== -1;
+    var isRussian = window.location.pathname.indexOf('/ru') !== -1;
 
-    // Find language links
     var links = document.querySelectorAll('.wy-menu a');
     links.forEach(function(link) {
         var href = link.getAttribute('href');
-        if (href === '/' && isRussian) {
-            // On Russian page - show EN link, rename to "Switch to English"
-            link.textContent = '🌐 Switch to English';
-            link.addEventListener('click', function() {
-                sessionStorage.setItem('docs_lang_selected', 'true');
-            });
-        } else if (href === '/' && !isRussian) {
-            // On English page - hide EN link
-            link.parentElement.style.display = 'none';
-        } else if (href === '/ru/' && !isRussian) {
-            // On English page - show RU link, rename to "Переключить на русский"
-            link.textContent = '🌐 Переключить на русский';
-            link.addEventListener('click', function() {
-                sessionStorage.setItem('docs_lang_selected', 'true');
-            });
-        } else if (href === '/ru/' && isRussian) {
-            // On Russian page - hide RU link
-            link.parentElement.style.display = 'none';
+        if (!href) return;
+
+        var isEnLink = href === '/' || href === '/documentation/';
+        var isRuLink = href === '/ru/' || href === '/documentation/ru/';
+
+        if (isXr2Site || isDocsXr2Uk) {
+            // Production: hide all language switcher links
+            if (isEnLink || isRuLink) {
+                link.parentElement.style.display = 'none';
+            }
+        } else {
+            // Localhost: show only the "switch to other language" link
+            if (isEnLink && isRussian) {
+                link.textContent = '🌐 Switch to English';
+                link.addEventListener('click', function() {
+                    sessionStorage.setItem('docs_lang_selected', 'true');
+                });
+            } else if (isEnLink && !isRussian) {
+                link.parentElement.style.display = 'none';
+            } else if (isRuLink && !isRussian) {
+                link.textContent = '🌐 Переключить на русский';
+                link.addEventListener('click', function() {
+                    sessionStorage.setItem('docs_lang_selected', 'true');
+                });
+            } else if (isRuLink && isRussian) {
+                link.parentElement.style.display = 'none';
+            }
         }
     });
 });
