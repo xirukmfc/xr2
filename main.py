@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -89,8 +90,8 @@ app = FastAPI(
     title="xR2 Public API",
     description="Public API with limited access - only get-prompt and events",
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url=None,
+    redoc_url=None,
     lifespan=lifespan,
     servers=[
         {"url": "https://xr2.uk", "description": "Production"},
@@ -98,6 +99,29 @@ app = FastAPI(
     ],
     root_path_in_servers=False,
 )
+
+# Serve Swagger UI with self-hosted assets (avoid CDN blocking)
+from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
+
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui():
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title=app.title + " - Swagger UI",
+        swagger_js_url="/static/swagger-ui-bundle.js",
+        swagger_css_url="/static/swagger-ui.css",
+    )
+
+@app.get("/redoc", include_in_schema=False)
+async def custom_redoc():
+    return get_redoc_html(
+        openapi_url=app.openapi_url,
+        title=app.title + " - ReDoc",
+        redoc_js_url="/static/redoc.standalone.js",
+    )
+
+# Mount static files for Swagger UI assets
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Add error handler middleware (should be first to catch all errors)
 app.add_middleware(ErrorHandlerMiddleware)
@@ -203,7 +227,6 @@ async def admin_login(username: str = Form(...), password: str = Form(...)):
             )
 
 # Create admin documentation app with proper URL handling
-from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 
 @app.get("/admin-docs/", include_in_schema=False)
@@ -212,6 +235,8 @@ async def admin_docs():
     return get_swagger_ui_html(
         openapi_url="/admin-docs/openapi.json",
         title="xR2 Admin API Documentation",
+        swagger_js_url="/static/swagger-ui-bundle.js",
+        swagger_css_url="/static/swagger-ui.css",
         swagger_ui_parameters={"defaultModelsExpandDepth": -1}
     )
 
