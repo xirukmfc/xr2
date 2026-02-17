@@ -132,7 +132,7 @@ import { XR2Client, renderPrompt, VariableError } from "xr2-sdk";
 
 const client = new XR2Client("YOUR_API_KEY");
 const response = await client.getPrompt({ slug: "welcome" });
-const prompt = response.data!;
+const prompt = response.data;
 
 // Render variables
 const rendered = renderPrompt(prompt, {

@@ -97,7 +97,7 @@ import { XR2Client, renderPrompt } from "xr2-sdk";
 
 const client = new XR2Client("YOUR_PRODUCT_API_KEY");
 const response = await client.getPrompt({ slug: "welcome" });
-const prompt = response.data!;
+const prompt = response.data;
 
 // Render variables into the prompt
 const rendered = renderPrompt(prompt, {
