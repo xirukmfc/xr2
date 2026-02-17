@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json as _json
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
@@ -67,6 +68,24 @@ class APIError(XR2Error):
     pass
 
 
+class VariableError(XR2Error):
+    """Raised when required variables are missing."""
+    def __init__(self, message: str, missing_variables: list[str] | None = None):
+        super().__init__(message, status_code=0)
+        self.missing_variables = missing_variables or []
+
+
+# ============== Rendered Prompt ==============
+
+class RenderedPrompt(BaseModel):
+    """Result of rendering a prompt template with variable values."""
+    system_prompt: Optional[str] = None
+    user_prompt: Optional[str] = None
+    assistant_prompt: Optional[str] = None
+    trace_id: str
+    variables_used: Dict[str, Any] = Field(default_factory=dict)
+
+
 # ============== Request Models ==============
 
 class GetPromptRequest(BaseModel):
@@ -98,6 +117,89 @@ class PromptContentResponse(BaseModel):
     ab_test_id: Optional[str] = None
     ab_test_name: Optional[str] = None
     ab_test_variant: Optional[str] = None
+
+    def render(
+        self,
+        values: Dict[str, Any] | None = None,
+        *,
+        strict: bool = True,
+        use_defaults: bool = True,
+        array_separator: str | None = None,
+    ) -> RenderedPrompt:
+        """Render prompt templates by replacing variable placeholders with values.
+
+        Args:
+            values: Variable values to substitute. Keys are variable names.
+            strict: If True, raise VariableError when required variables are missing.
+            use_defaults: If True, apply default values for variables not in `values`.
+            array_separator: If set, join array values with this separator instead of JSON.
+
+        Returns:
+            RenderedPrompt with all placeholders replaced.
+
+        Raises:
+            VariableError: When strict=True and required variables have no value or default.
+        """
+        values = values or {}
+
+        # Build lookup from variable definitions
+        var_defs: Dict[str, Dict[str, Any]] = {}
+        for var in self.variables:
+            var_defs[var["name"]] = var
+
+        # Resolve values: provided > default > missing
+        resolved: Dict[str, Any] = {}
+        missing: list[str] = []
+
+        for name, defn in var_defs.items():
+            if name in values:
+                resolved[name] = values[name]
+            elif use_defaults:
+                # Support both "default" and "defaultValue" field names
+                if "default" in defn and defn["default"] is not None:
+                    resolved[name] = defn["default"]
+                elif "defaultValue" in defn and defn["defaultValue"] is not None:
+                    resolved[name] = defn["defaultValue"]
+                elif defn.get("required", False):
+                    missing.append(name)
+            elif defn.get("required", False):
+                missing.append(name)
+
+        if strict and missing:
+            raise VariableError(
+                f"Missing required variables: {', '.join(missing)}",
+                missing_variables=missing,
+            )
+
+        # Convert resolved values to strings
+        str_values: Dict[str, str] = {}
+        for name, val in resolved.items():
+            if isinstance(val, bool):
+                str_values[name] = str(val).lower()
+            elif isinstance(val, list):
+                if array_separator is not None:
+                    str_values[name] = array_separator.join(str(item) for item in val)
+                else:
+                    str_values[name] = _json.dumps(val, ensure_ascii=False)
+            else:
+                str_values[name] = str(val)
+
+        # Replace placeholders in prompt fields
+        def _replace(text: str | None) -> str | None:
+            if text is None:
+                return None
+            for name, val in str_values.items():
+                text = text.replace("{{" + name + "}}", val)
+                text = text.replace("{" + name + "}", val)
+            return text
+
+        return RenderedPrompt(
+            system_prompt=_replace(self.system_prompt),
+            user_prompt=_replace(self.user_prompt),
+            assistant_prompt=_replace(self.assistant_prompt),
+            trace_id=self.trace_id,
+            variables_used=resolved,
+        )
 
 
 class EventRequest(BaseModel):

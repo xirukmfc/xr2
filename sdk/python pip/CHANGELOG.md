@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.0] - 2026-02-17
+
+### Added
+
+- **`render()` method on `PromptContentResponse`** — Replace `{{variable}}` placeholders with values in one call
+  - Validates required variables and applies defaults automatically
+  - Supports `strict` mode (raises `VariableError` on missing required vars)
+  - Handles type conversions: booleans → `true`/`false`, arrays → JSON or joined string
+  - `array_separator` option to join arrays with a custom delimiter
+  - `use_defaults` option to skip default value application
+- **`RenderedPrompt` model** — Typed result with `system_prompt`, `user_prompt`, `assistant_prompt`, `trace_id`, `variables_used`
+- **`VariableError` exception** — Raised when required variables are missing, includes `missing_variables` list
+
+---
+
 ## [0.2.0] - 2025-12-06
 
 ### Added

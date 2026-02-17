@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xr2-sdk"
-version = "0.2.6"
+version = "0.3.0"
 description = "Official Python SDK for xR2 — prompt management platform for AI applications"
 readme = "README.md"
 requires-python = ">=3.9"

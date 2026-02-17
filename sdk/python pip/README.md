@@ -117,6 +117,44 @@ async def main():
 asyncio.run(main())
 ```
 
+## Variable Rendering
+
+When your prompt contains `{{variable}}` placeholders, use `render()` to substitute them:
+
+```python
+response = client.get_prompt(slug="welcome")
+prompt = response.data
+
+# Render variables into the prompt
+rendered = prompt.render({"customer_name": "Alice", "language": "en"})
+
+print(rendered.system_prompt)   # Variables replaced
+print(rendered.user_prompt)     # Variables replaced
+print(rendered.trace_id)        # Preserved from original prompt
+
+# Use with OpenAI
+from openai import OpenAI
+ai = OpenAI()
+completion = ai.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": rendered.system_prompt},
+        {"role": "user", "content": rendered.user_prompt},
+    ],
+)
+```
+
+Missing required variables raise `VariableError`:
+
+```python
+from xr2_sdk import VariableError
+
+try:
+    rendered = prompt.render({})  # missing required vars
+except VariableError as e:
+    print(e.missing_variables)    # ["customer_name"]
+```
+
 ## Endpoints
 
 - GET `/api/v1/check-api-key` → validates API key and returns username
@@ -174,6 +212,21 @@ Validate your API key and get the associated username.
 - Set event name and required/optional fields in the dashboard
 - Field validation happens automatically based on your event definitions
 - Events are deduplicated by `trace_id` + `event_name`
+
+### `prompt.render()`
+
+Render a prompt template by replacing variable placeholders with values. Called on a `PromptContentResponse` object returned by `get_prompt()`.
+
+**Parameters:**
+- `values` (dict, optional): Variable values to substitute
+- `strict` (bool): Raise `VariableError` on missing required variables (default: `True`)
+- `use_defaults` (bool): Apply default values from variable definitions (default: `True`)
+- `array_separator` (str, optional): Join arrays with this separator instead of JSON
+
+**Returns:** `RenderedPrompt`
+- `system_prompt`, `user_prompt`, `assistant_prompt`: Rendered text (or `None`)
+- `trace_id`: Preserved from the original prompt
+- `variables_used`: Dict of all resolved variable values (including defaults)
 
 ## Links
 
