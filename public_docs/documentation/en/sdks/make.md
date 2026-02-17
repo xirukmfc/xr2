@@ -118,6 +118,30 @@ Retrieves prompt content by slug.
 }
 ```
 
+### Rendering Variables
+
+The Get Prompt module returns raw templates with `{{variable}}` placeholders. Use Make.com's `replace()` function to substitute values when mapping to an LLM module.
+
+**Example: mapping system_prompt to OpenAI**
+
+In the OpenAI module's System Prompt field, use:
+
+```
+{{replace(replace(replace(2.system_prompt; "{{customer_name}}"; 1.customer_name); "{{plan_name}}"; 1.plan_name); "{{language}}"; "en")}}
+```
+
+Where `2` is the Get Prompt module and `1` is the module providing your data (e.g. a database query or webhook).
+
+**For many variables**, use a **Text Parser: Replace** module between Get Prompt and OpenAI:
+
+```
+[Get Prompt] → [Text Parser: Replace] → [Text Parser: Replace] → [OpenAI]
+```
+
+Each Text Parser replaces one `{{variable}}` placeholder with the actual value.
+
+> **Tip:** Variable default values are available in the Get Prompt output under `variables[].defaultValue`. You can use `{{ifempty(1.customer_name; 2.variables[1].defaultValue)}}` to fall back to defaults.
+
 ### Track Event
 
 Sends analytics events.

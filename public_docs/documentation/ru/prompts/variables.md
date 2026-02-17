@@ -199,6 +199,16 @@ rendered = prompt.render(
 
 Затем подключите выход напрямую к ноде **LLM** (OpenAI, Anthropic и т.д.) — используйте `{{ $json.system_prompt }}` и `{{ $json.user_prompt }}`.
 
+### Make.com (с модулем xR2)
+
+[Модуль xR2 для Make.com](/documentation/ru/sdks/make/) возвращает сырые шаблоны. Используйте функцию `replace()` в Make.com для подстановки переменных при маппинге в LLM-модуль:
+
+```
+{{replace(replace(2.system_prompt; "{{customer_name}}"; 1.customer_name); "{{language}}"; "en")}}
+```
+
+Где `2` — это модуль Get Prompt, а `1` — модуль с вашими данными. Подробнее в [документации Make.com SDK](/documentation/ru/sdks/make/).
+
 ## Лучшие практики
 
 ### 1. Соглашения об именовании

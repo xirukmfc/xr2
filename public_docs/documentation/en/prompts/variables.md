@@ -200,6 +200,16 @@ The node returns prompts with all `{{placeholders}}` replaced. Missing variables
 
 Then connect the output directly to your **LLM node** (OpenAI, Anthropic, etc.) — use `{{ $json.system_prompt }}` and `{{ $json.user_prompt }}`.
 
+### Make.com (with xR2 module)
+
+The [xR2 Make.com module](/documentation/en/sdks/make/) returns raw templates. Use Make.com's `replace()` function to substitute variables when mapping to an LLM module:
+
+```
+{{replace(replace(2.system_prompt; "{{customer_name}}"; 1.customer_name); "{{language}}"; "en")}}
+```
+
+Where `2` is the Get Prompt module and `1` is the module providing your data. See the [Make.com SDK docs](/documentation/en/sdks/make/) for more details.
+
 ## Best Practices
 
 ### 1. Naming Conventions

@@ -117,6 +117,30 @@
 }
 ```
 
+### Подстановка переменных
+
+Модуль Get Prompt возвращает шаблоны с плейсхолдерами `{{переменная}}`. Используйте функцию `replace()` в Make.com для подстановки значений при маппинге в LLM-модуль.
+
+**Пример: маппинг system_prompt в OpenAI**
+
+В поле System Prompt модуля OpenAI используйте:
+
+```
+{{replace(replace(replace(2.system_prompt; "{{customer_name}}"; 1.customer_name); "{{plan_name}}"; 1.plan_name); "{{language}}"; "en")}}
+```
+
+Где `2` — это модуль Get Prompt, а `1` — модуль с вашими данными (например, запрос к базе данных или вебхук).
+
+**Для большого количества переменных** используйте модуль **Text Parser: Replace** между Get Prompt и OpenAI:
+
+```
+[Get Prompt] → [Text Parser: Replace] → [Text Parser: Replace] → [OpenAI]
+```
+
+Каждый Text Parser заменяет один плейсхолдер `{{переменная}}` на реальное значение.
+
+> **Совет:** Значения по умолчанию доступны в выводе Get Prompt в поле `variables[].defaultValue`. Используйте `{{ifempty(1.customer_name; 2.variables[1].defaultValue)}}` для подстановки значений по умолчанию.
+
 ### Отслеживание события
 
 Отправляет аналитические события.
