@@ -9,7 +9,6 @@ https://pagespeed.web.dev/analysis/https-xr2-uk/d1d5jhsu3s?utm_source=search_con
 https://webmaster.yandex.ru/site/https:xr2.uk:443/optimization/checklist/#RECOMMENDATION
 1. Подключить продовые магазины на проде 
 2. В проде убрать allowed_hosts=["xr2.uk", "www.xr2.uk", "localhost", "127.0.0.1", "app", "*.ngrok-free.app", "*.ngrok.io"
-3. Метрики оплтаы в кибану
 
 1. Маркетинговая кампания
 2. Публикации статей
@@ -22,3 +21,9 @@ https://webmaster.yandex.ru/site/https:xr2.uk:443/optimization/checklist/#RECOMM
 Product Hunt, BetaList, Hacker News. Успешный запуск там может дать вам первых 1000 пользователей.
 
 
+-- поправить SDK
+-- поправить доку
+-- решить что делать с n8n и make
+-- записать видео
+-- прогнать тесты
+-- подготовка к запуску

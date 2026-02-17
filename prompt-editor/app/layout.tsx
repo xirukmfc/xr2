@@ -4,6 +4,7 @@ import {GeistSans} from "geist/font/sans"
 import {GeistMono} from "geist/font/mono"
 import {ThemeProvider} from "next-themes"
 import Script from "next/script"
+import {headers} from "next/headers"
 import ClientLayout from "./client-layout"
 import {PromptsProvider} from '@/components/prompts-context'
 import {WorkspaceProvider} from "@/components/workspace-context"
@@ -12,6 +13,11 @@ import {AuthProvider} from "@/contexts/auth-context"
 import {LocaleProvider} from "@/contexts/locale-context"
 import {DataPreloader} from "@/lib/preload-data"
 import "./globals.css"
+
+const GA_IDS: Record<string, string> = {
+    'xr2.uk': 'G-GE84ZPSP20',
+    'xr2.site': 'G-QWEELD19D3',
+}
 
 export const metadata: Metadata = {
     title: "Prompt manager",
@@ -22,18 +28,22 @@ export const metadata: Metadata = {
     },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
                                        children,
                                    }: Readonly<{
     children: React.ReactNode
 }>) {
+    const headersList = await headers()
+    const host = headersList.get('host') || 'xr2.uk'
+    const gaId = host.includes('xr2.site') ? GA_IDS['xr2.site'] : GA_IDS['xr2.uk']
+
     return (
         <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <head suppressHydrationWarning />
       <body suppressHydrationWarning>
         {/* Google Analytics */}
         <Script
-            src="https://www.googletagmanager.com/gtag/js?id=G-GE84ZPSP20"
+            src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
             strategy="lazyOnload"
         />
         <Script
@@ -44,7 +54,7 @@ export default function RootLayout({
                   window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
                   gtag('js', new Date());
-                  gtag('config', 'G-GE84ZPSP20');
+                  gtag('config', '${gaId}');
                 `,
             }}
         />
