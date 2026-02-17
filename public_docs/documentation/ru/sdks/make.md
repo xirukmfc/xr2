@@ -119,27 +119,51 @@
 
 ### Подстановка переменных
 
-Модуль Get Prompt возвращает шаблоны с плейсхолдерами `{{переменная}}`. Используйте функцию `replace()` в Make.com для подстановки значений при маппинге в LLM-модуль.
+Модуль Get Prompt возвращает шаблоны с плейсхолдерами `{переменная}`. Есть два способа заменить их на реальные значения перед отправкой в LLM.
 
-**Пример: маппинг system_prompt в OpenAI**
+#### Вариант 1: функция replace() (рекомендуется для нескольких переменных)
 
-В поле System Prompt модуля OpenAI используйте:
-
-```
-{{replace(replace(replace(2.system_prompt; "{{customer_name}}"; 1.customer_name); "{{plan_name}}"; 1.plan_name); "{{language}}"; "en")}}
-```
-
-Где `2` — это модуль Get Prompt, а `1` — модуль с вашими данными (например, запрос к базе данных или вебхук).
-
-**Для большого количества переменных** используйте модуль **Text Parser: Replace** между Get Prompt и OpenAI:
+Используйте функцию `replace()` прямо в поле Content модуля OpenAI. Сначала задайте значения переменных в модуле **Tools: Set Multiple Variables**, затем используйте `replace()` в маппинге LLM-модуля:
 
 ```
-[Get Prompt] → [Text Parser: Replace] → [Text Parser: Replace] → [OpenAI]
+{{replace(replace(4.system_prompt; "{customer_name}"; 2.customer_name); "{plan_name}"; 2.plan_name)}}
 ```
 
-Каждый Text Parser заменяет один плейсхолдер `{{переменная}}` на реальное значение.
+Где `4` — номер модуля Get Prompt, а `2` — номер модуля Set Variables.
 
-> **Совет:** Значения по умолчанию доступны в выводе Get Prompt в поле `variables[].defaultValue`. Используйте `{{ifempty(1.customer_name; 2.variables[1].defaultValue)}}` для подстановки значений по умолчанию.
+![Модуль OpenAI — маппинг User Prompt](../../images/set_variable_make1.png)
+
+![Модуль OpenAI — System Prompt с функцией replace()](../../images/set_variable_make2.png)
+
+#### Вариант 2: модули Text Parser (визуально, без формул)
+
+Используйте модули **Text Parser: Replace** между Get Prompt и OpenAI. Каждый модуль заменяет одну переменную. Текст передаётся от модуля к модулю, и на каждом шаге заменяется ещё одна переменная.
+
+```
+[Tools] → [xR2: Get Prompt] → [Text Parser: Replace] → [Text Parser: Replace] → [OpenAI]
+```
+
+![Сценарий с модулями Text Parser](../../images/set_variable_make3.png)
+
+**Первый Text Parser** — заменяет `{customer_name}`:
+- **Pattern**: `{customer_name}`
+- **New value**: маппинг на `customer_name` из модуля Tools
+- **Text**: маппинг на `System Prompt` из модуля xR2
+
+![Text Parser: замена customer_name](../../images/set_variable_make4.png)
+
+**Второй Text Parser** — заменяет `{plan_name}`:
+- **Pattern**: `{plan_name}`
+- **New value**: маппинг на `plan_name` из модуля Tools
+- **Text**: маппинг на результат **первого** Text Parser
+
+![Text Parser: замена plan_name](../../images/set_variable_make5.png)
+
+**Модуль OpenAI** — использует результат **последнего** Text Parser как System Prompt:
+
+![Модуль OpenAI с результатом Text Parser](../../images/set_variable_make6.png)
+
+> **Совет:** Значения по умолчанию доступны в выводе Get Prompt в поле `variables[].defaultValue`.
 
 ### Отслеживание события
 

@@ -202,13 +202,11 @@ Then connect the output directly to your **LLM node** (OpenAI, Anthropic, etc.) 
 
 ### Make.com (with xR2 module)
 
-The [xR2 Make.com module](/documentation/en/sdks/make/) returns raw templates. Use Make.com's `replace()` function to substitute variables when mapping to an LLM module:
+The [xR2 Make.com module](/documentation/en/sdks/make/) returns raw templates. Use Make.com's `replace()` function or **Text Parser: Replace** modules to substitute variables. See the [Make.com SDK docs](/documentation/en/sdks/make/) for detailed examples with screenshots.
 
 ```
-{{replace(replace(2.system_prompt; "{{customer_name}}"; 1.customer_name); "{{language}}"; "en")}}
+{{replace(replace(4.system_prompt; "{customer_name}"; 2.customer_name); "{plan_name}"; 2.plan_name)}}
 ```
-
-Where `2` is the Get Prompt module and `1` is the module providing your data. See the [Make.com SDK docs](/documentation/en/sdks/make/) for more details.
 
 ## Best Practices
 

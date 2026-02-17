@@ -120,27 +120,51 @@ Retrieves prompt content by slug.
 
 ### Rendering Variables
 
-The Get Prompt module returns raw templates with `{{variable}}` placeholders. Use Make.com's `replace()` function to substitute values when mapping to an LLM module.
+The Get Prompt module returns raw templates with `{variable}` placeholders. There are two ways to replace them with actual values before sending to an LLM.
 
-**Example: mapping system_prompt to OpenAI**
+#### Option 1: replace() function (recommended for few variables)
 
-In the OpenAI module's System Prompt field, use:
-
-```
-{{replace(replace(replace(2.system_prompt; "{{customer_name}}"; 1.customer_name); "{{plan_name}}"; 1.plan_name); "{{language}}"; "en")}}
-```
-
-Where `2` is the Get Prompt module and `1` is the module providing your data (e.g. a database query or webhook).
-
-**For many variables**, use a **Text Parser: Replace** module between Get Prompt and OpenAI:
+Use Make.com's `replace()` function directly in the OpenAI module's Content field. First, set your variable values in a **Tools: Set Multiple Variables** module, then use `replace()` in the LLM module mapping:
 
 ```
-[Get Prompt] → [Text Parser: Replace] → [Text Parser: Replace] → [OpenAI]
+{{replace(replace(4.system_prompt; "{customer_name}"; 2.customer_name); "{plan_name}"; 2.plan_name)}}
 ```
 
-Each Text Parser replaces one `{{variable}}` placeholder with the actual value.
+Where `4` is the Get Prompt module number and `2` is the Set Variables module number.
 
-> **Tip:** Variable default values are available in the Get Prompt output under `variables[].defaultValue`. You can use `{{ifempty(1.customer_name; 2.variables[1].defaultValue)}}` to fall back to defaults.
+![OpenAI module — User Prompt mapping](../../images/set_variable_make1.png)
+
+![OpenAI module — System Prompt with replace() function](../../images/set_variable_make2.png)
+
+#### Option 2: Text Parser modules (visual, no formulas)
+
+Use **Text Parser: Replace** modules between Get Prompt and OpenAI. Each module replaces one variable. The text passes from module to module with one more variable replaced at each step.
+
+```
+[Tools] → [xR2: Get Prompt] → [Text Parser: Replace] → [Text Parser: Replace] → [OpenAI]
+```
+
+![Scenario flow with Text Parser modules](../../images/set_variable_make3.png)
+
+**First Text Parser** — replaces `{customer_name}`:
+- **Pattern**: `{customer_name}`
+- **New value**: map `customer_name` from the Tools module
+- **Text**: map `System Prompt` from the xR2 module
+
+![Text Parser replacing customer_name](../../images/set_variable_make4.png)
+
+**Second Text Parser** — replaces `{plan_name}`:
+- **Pattern**: `{plan_name}`
+- **New value**: map `plan_name` from the Tools module
+- **Text**: map the output from the **first** Text Parser
+
+![Text Parser replacing plan_name](../../images/set_variable_make5.png)
+
+**OpenAI module** — uses the output from the **last** Text Parser as the System Prompt:
+
+![OpenAI module with Text Parser output](../../images/set_variable_make6.png)
+
+> **Tip:** Variable default values are available in the Get Prompt output under `variables[].defaultValue`.
 
 ### Track Event
 

@@ -201,13 +201,11 @@ rendered = prompt.render(
 
 ### Make.com (с модулем xR2)
 
-[Модуль xR2 для Make.com](/documentation/ru/sdks/make/) возвращает сырые шаблоны. Используйте функцию `replace()` в Make.com для подстановки переменных при маппинге в LLM-модуль:
+[Модуль xR2 для Make.com](/documentation/ru/sdks/make/) возвращает сырые шаблоны. Используйте функцию `replace()` или модули **Text Parser: Replace** для подстановки переменных. Подробные примеры со скриншотами — в [документации Make.com SDK](/documentation/ru/sdks/make/).
 
 ```
-{{replace(replace(2.system_prompt; "{{customer_name}}"; 1.customer_name); "{{language}}"; "en")}}
+{{replace(replace(4.system_prompt; "{customer_name}"; 2.customer_name); "{plan_name}"; 2.plan_name)}}
 ```
-
-Где `2` — это модуль Get Prompt, а `1` — модуль с вашими данными. Подробнее в [документации Make.com SDK](/documentation/ru/sdks/make/).
 
 ## Лучшие практики
 
