@@ -57,6 +57,14 @@ export function Sidebar() {
   const [subscription, setSubscription] = useState<SubscriptionResponse | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const { locale, t } = useLocale()
+  const [docsUrl, setDocsUrl] = useState('https://docs.xr2.uk')
+
+  // Domain-aware docs URL
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hostname.includes('xr2.site')) {
+      setDocsUrl('/documentation/')
+    }
+  }, [])
 
   // Initialize collapse state from localStorage
   useEffect(() => {
@@ -102,14 +110,6 @@ export function Sidebar() {
     setIsCollapsed(newCollapsedState)
     notifySidebarCollapse(newCollapsedState)
   }
-
-  // Domain-aware docs URL
-  const [docsUrl, setDocsUrl] = useState('https://docs.xr2.uk')
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.hostname.includes('xr2.site')) {
-      setDocsUrl('/documentation/')
-    }
-  }, [])
 
   const navigationItems = [
     { name: t('sidebar.prompts'), href: "/prompts", icon: MessageSquare, count: promptsCount },
