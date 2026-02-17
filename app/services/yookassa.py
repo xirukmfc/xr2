@@ -88,8 +88,10 @@ class YooKassaService:
             },
             "capture": True,
             "description": description,
-            "save_payment_method": save_payment_method,
         }
+
+        if save_payment_method:
+            payload["save_payment_method"] = True
 
         if metadata:
             payload["metadata"] = metadata

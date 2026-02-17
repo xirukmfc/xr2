@@ -465,7 +465,7 @@ class SubscriptionService:
                 currency=currency,
                 description=description,
                 return_url=return_url,
-                save_payment_method=True,
+                save_payment_method=False,
                 metadata={
                     "transaction_id": str(transaction.id),
                     "user_id": str(user_id),
