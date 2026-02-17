@@ -459,6 +459,10 @@ class SubscriptionService:
         description = "Pro подписка xR2 (30 дней)"
         return_url = f"{settings.YOOKASSA_RETURN_URL}?payment=pending&transaction_id={transaction.id}"
 
+        # Get user email for receipt
+        user = await self.session.get(User, user_id)
+        customer_email = user.email if user else None
+
         try:
             payment = await yookassa_service.create_payment(
                 amount=amount,
@@ -470,7 +474,8 @@ class SubscriptionService:
                     "transaction_id": str(transaction.id),
                     "user_id": str(user_id),
                     "subscription_id": str(subscription.id),
-                }
+                },
+                customer_email=customer_email,
             )
 
             # Store YooKassa payment ID in transaction

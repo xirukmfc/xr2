@@ -55,7 +55,8 @@ class YooKassaService:
         description: str,
         return_url: Optional[str] = None,
         save_payment_method: bool = True,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
+        customer_email: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Create a payment in YooKassa
@@ -67,6 +68,7 @@ class YooKassaService:
             return_url: URL to redirect after payment
             save_payment_method: Save card for recurring payments
             metadata: Additional metadata (e.g., transaction_id)
+            customer_email: Customer email for receipt (required in live mode)
 
         Returns:
             Payment object from YooKassa API
@@ -92,6 +94,27 @@ class YooKassaService:
 
         if save_payment_method:
             payload["save_payment_method"] = True
+
+        # Receipt is required for live payments (54-FZ)
+        if customer_email and not self.test_mode:
+            payload["receipt"] = {
+                "customer": {
+                    "email": customer_email
+                },
+                "items": [
+                    {
+                        "description": description,
+                        "quantity": "1.00",
+                        "amount": {
+                            "value": amount_value,
+                            "currency": currency
+                        },
+                        "vat_code": 1,
+                        "payment_subject": "service",
+                        "payment_mode": "full_payment"
+                    }
+                ]
+            }
 
         if metadata:
             payload["metadata"] = metadata
