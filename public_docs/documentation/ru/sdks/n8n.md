@@ -73,7 +73,11 @@ npm install n8n-nodes-xr2
 2. Нажмите **Add Variable** в разделе **Variable Values**
 3. Для каждой переменной укажите **Name** (например `customer_name`) и **Value**
 
+![Поле Variable Values с кнопкой Add Variable](../../images/get_prompt_variables1.png)
+
 Значения поддерживают n8n-выражения, так что можно подтягивать данные из предыдущих нод:
+
+![Заполненные переменные с n8n-выражениями](../../images/get_prompt_variables2.png)
 
 | Name | Value |
 |------|-------|

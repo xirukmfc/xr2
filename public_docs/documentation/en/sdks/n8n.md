@@ -74,7 +74,11 @@ The xR2 node can replace `{{variable}}` placeholders directly — no Code node n
 2. Click **Add Variable** under **Variable Values**
 3. For each variable, set **Name** (e.g. `customer_name`) and **Value**
 
+![Variable Values field with Add Variable button](../../images/get_prompt_variables1.png)
+
 Values support n8n expressions, so you can pull data from previous nodes:
+
+![Filled variable values with n8n expressions](../../images/get_prompt_variables2.png)
 
 | Name | Value |
 |------|-------|
