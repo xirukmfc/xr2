@@ -1,6 +1,6 @@
 {
   "name": "xr2-sdk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Official Node.js SDK for xR2 - prompt management platform for AI applications",
   "license": "MIT",
   "author": "xR2 <hello@xr2.uk>",
