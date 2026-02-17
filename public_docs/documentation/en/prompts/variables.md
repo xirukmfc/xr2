@@ -98,6 +98,129 @@ Pass arrays as JSON in your API call:
 }
 ```
 
+## Rendering Variables in Code
+
+### Without SDK (raw API + Python)
+
+Fetch the prompt via API, then replace placeholders yourself:
+
+```bash
+curl -X POST https://xr2.uk/api/v1/get-prompt \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"slug": "welcome", "source_name": "my_app"}'
+```
+
+```python
+import requests
+
+resp = requests.post(
+    "https://xr2.uk/api/v1/get-prompt",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    json={"slug": "welcome", "source_name": "my_app"},
+).json()
+
+# Build variable values
+var_values = {"customer_name": "Alice", "language": "en"}
+
+# Apply defaults for missing variables
+for var in resp["variables"]:
+    name = var["name"]
+    if name not in var_values and var.get("default") is not None:
+        var_values[name] = var["default"]
+
+# Replace placeholders
+system = resp.get("system_prompt") or ""
+user = resp.get("user_prompt") or ""
+for name, val in var_values.items():
+    system = system.replace("{{" + name + "}}", str(val))
+    user = user.replace("{{" + name + "}}", str(val))
+
+# Use with your LLM
+messages = [
+    {"role": "system", "content": system},
+    {"role": "user", "content": user},
+]
+```
+
+### With Python SDK
+
+The SDK handles validation, defaults, and type conversion automatically:
+
+```python
+from xr2_sdk import xR2Client, VariableError
+
+client = xR2Client(api_key="YOUR_API_KEY")
+prompt = client.get_prompt(slug="welcome").data
+
+# Render with values
+rendered = prompt.render({"customer_name": "Alice", "language": "en"})
+
+print(rendered.system_prompt)     # Placeholders replaced
+print(rendered.user_prompt)       # Placeholders replaced
+print(rendered.trace_id)          # Preserved for event tracking
+print(rendered.variables_used)    # {"customer_name": "Alice", "language": "en"}
+
+# Handle missing required variables
+try:
+    rendered = prompt.render({})
+except VariableError as e:
+    print(f"Missing: {e.missing_variables}")
+
+# Array variables
+rendered = prompt.render({
+    "customer_name": "Alice",
+    "tags": ["vip", "returning"],
+})
+# tags renders as: ["vip", "returning"]
+
+# Or with a custom separator
+rendered = prompt.render(
+    {"customer_name": "Alice", "tags": ["vip", "returning"]},
+    array_separator=", ",
+)
+# tags renders as: vip, returning
+```
+
+### n8n (without SDK)
+
+In n8n, use an **HTTP Request** node to fetch the prompt, then a **Code** node to replace variables:
+
+**HTTP Request node:**
+- Method: `POST`
+- URL: `https://xr2.uk/api/v1/get-prompt`
+- Headers: `Authorization: Bearer YOUR_API_KEY`
+- Body: `{"slug": "welcome", "source_name": "n8n"}`
+
+**Code node (replace variables):**
+```javascript
+const prompt = $input.first().json;
+const values = {
+  customer_name: "Alice",
+  language: "en",
+};
+
+// Apply defaults
+for (const v of prompt.variables || []) {
+  if (!(v.name in values) && v.default != null) {
+    values[v.name] = v.default;
+  }
+}
+
+// Replace {{var}} placeholders
+let system = prompt.system_prompt || "";
+let user = prompt.user_prompt || "";
+for (const [name, val] of Object.entries(values)) {
+  const token = `{{${name}}}`;
+  system = system.split(token).join(String(val));
+  user = user.split(token).join(String(val));
+}
+
+return [{ json: { system, user, trace_id: prompt.trace_id } }];
+```
+
+Then connect the output to your **LLM node** (OpenAI, Anthropic, etc.).
+
 ## Best Practices
 
 ### 1. Naming Conventions

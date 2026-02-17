@@ -153,6 +153,46 @@ response = client.track_event(
 )
 ```
 
+### `prompt.render()`
+
+Рендерит шаблон промпта, заменяя плейсхолдеры `{{variable}}` значениями. Вызывается на объекте `PromptContentResponse`, полученном из `get_prompt()`.
+
+**Параметры:**
+
+| Параметр | Тип | Обязательный | Описание |
+|----------|-----|--------------|----------|
+| `values` | dict | Нет | Значения переменных для подстановки |
+| `strict` | bool | Нет | Выбрасывать `VariableError` при отсутствии обязательных переменных (по умолчанию: `True`) |
+| `use_defaults` | bool | Нет | Применять значения по умолчанию из определений переменных (по умолчанию: `True`) |
+| `array_separator` | str | Нет | Соединять массивы этим разделителем вместо JSON |
+
+**Возвращает:** `RenderedPrompt`
+
+- `system_prompt`, `user_prompt`, `assistant_prompt` — отрендеренный текст (или `None`)
+- `trace_id` — сохранён из исходного промпта
+- `variables_used` — словарь всех разрешённых значений, включая значения по умолчанию
+
+```python
+from xr2_sdk import VariableError
+
+response = client.get_prompt(slug="welcome")
+prompt = response.data
+
+# Рендерим переменные
+rendered = prompt.render({"customer_name": "Alice"})
+print(rendered.system_prompt)
+print(rendered.variables_used)  # {"customer_name": "Alice", "language": "en"}
+
+# Обработка отсутствующих обязательных переменных
+try:
+    rendered = prompt.render({})
+except VariableError as e:
+    print(e.missing_variables)  # ["customer_name"]
+
+# Нестрогий режим: оставить плейсхолдеры для отсутствующих переменных
+rendered = prompt.render({}, strict=False)
+```
+
 ## Обработка ошибок
 
 ```python

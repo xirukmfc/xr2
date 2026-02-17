@@ -154,6 +154,46 @@ response = client.track_event(
 )
 ```
 
+### `prompt.render()`
+
+Render a prompt template by replacing `{{variable}}` placeholders with values. Called on a `PromptContentResponse` object returned by `get_prompt()`.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `values` | dict | No | Variable values to substitute |
+| `strict` | bool | No | Raise `VariableError` on missing required variables (default: `True`) |
+| `use_defaults` | bool | No | Apply default values from variable definitions (default: `True`) |
+| `array_separator` | str | No | Join arrays with this separator instead of JSON |
+
+**Returns:** `RenderedPrompt`
+
+- `system_prompt`, `user_prompt`, `assistant_prompt` — rendered text (or `None`)
+- `trace_id` — preserved from the original prompt
+- `variables_used` — dict of all resolved values including defaults
+
+```python
+from xr2_sdk import VariableError
+
+response = client.get_prompt(slug="welcome")
+prompt = response.data
+
+# Render variables
+rendered = prompt.render({"customer_name": "Alice"})
+print(rendered.system_prompt)
+print(rendered.variables_used)  # {"customer_name": "Alice", "language": "en"}
+
+# Handle missing required variables
+try:
+    rendered = prompt.render({})
+except VariableError as e:
+    print(e.missing_variables)  # ["customer_name"]
+
+# Non-strict mode: keep placeholders for missing vars
+rendered = prompt.render({}, strict=False)
+```
+
 ## Error Handling
 
 ```python
