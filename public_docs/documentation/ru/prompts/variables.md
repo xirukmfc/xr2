@@ -207,6 +207,16 @@ rendered = prompt.render(
 {{replace(replace(4.system_prompt; "{customer_name}"; 2.customer_name); "{plan_name}"; 2.plan_name)}}
 ```
 
+### Zapier (с действием xR2)
+
+[Действие xR2 для Zapier](/documentation/ru/sdks/zapier/) подставляет переменные напрямую. В поле **Variable Values (JSON)** передайте JSON-объект:
+
+```json
+{"customer_name": "Alice", "plan_name": "Enterprise"}
+```
+
+Действие вернёт промпты с подставленными значениями. Подробнее в [документации Zapier SDK](/documentation/ru/sdks/zapier/).
+
 ## Лучшие практики
 
 ### 1. Соглашения об именовании

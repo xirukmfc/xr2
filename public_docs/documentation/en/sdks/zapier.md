@@ -32,7 +32,7 @@ Validates your API key and returns the username.
 
 ### Get Prompt
 
-Fetches a prompt from xR2 by slug.
+Fetches a prompt from xR2 by slug. Can optionally render variables.
 
 **Parameters:**
 
@@ -41,15 +41,45 @@ Fetches a prompt from xR2 by slug.
 | Slug | Yes | Unique prompt identifier |
 | Version Number | No | Specific version to fetch |
 | Status | No | Filter by status |
+| Variable Values (JSON) | No | JSON with values to replace `{variable}` placeholders |
 
 **Output:**
-* System prompt
-* User prompt
+* System prompt (with variables replaced if Variable Values provided)
+* User prompt (with variables replaced if Variable Values provided)
 * Assistant prompt
 * Variables
 * trace_id
+* variables_used (when Variable Values provided)
 * Model config
 * A/B test info
+
+### Rendering Variables
+
+The xR2 Zapier action can replace `{variable}` placeholders directly — no extra steps needed.
+
+In the **Variable Values (JSON)** field, enter a JSON object mapping variable names to values:
+
+```json
+{"customer_name": "Alice", "plan_name": "Enterprise", "top_features": "deploy, analytics"}
+```
+
+You can use Zapier field mapping to insert dynamic values from previous steps. If a variable is not provided, its **default value** from the prompt definition is used automatically.
+
+**Output with variables rendered:**
+
+```json
+{
+  "system_prompt": "Write a welcome email for Alice on the Enterprise plan.",
+  "user_prompt": "Generate a welcome email for the new user.",
+  "variables_used": {
+    "customer_name": "Alice",
+    "plan_name": "Enterprise"
+  },
+  "trace_id": "evt_xxx"
+}
+```
+
+> **Tip:** Leave Variable Values empty to get the raw template with `{placeholders}`.
 
 ### Track Event
 

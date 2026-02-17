@@ -59,6 +59,7 @@ const getPrompt = {
             { key: 'slug', label: 'Prompt Slug', required: true, type: 'string' as const, helpText: 'Unique prompt identifier from your xR2 dashboard' },
             { key: 'version_number', label: 'Version Number', required: false, type: 'integer' as const, helpText: 'Specific version to fetch (leave empty for latest deployed)' },
             { key: 'status', label: 'Status Filter', required: false, type: 'string' as const, choices: ['production', 'testing', 'draft', 'inactive', 'deprecated'], helpText: 'Filter by version status' },
+            { key: 'variable_values', label: 'Variable Values (JSON)', required: false, type: 'string' as const, helpText: 'JSON object with variable values to replace {variable} placeholders. Example: {"customer_name": "Alice", "plan_name": "Enterprise"}. Leave empty to get raw template.' },
         ],
         perform: async (z: ZObject, bundle: Bundle) => {
             const body: Record<string, any> = {
@@ -81,7 +82,44 @@ const getPrompt = {
                 },
                 body: body,
             });
-            return response.data;
+
+            const data = response.data as Record<string, any>;
+
+            // Variable rendering
+            if (bundle.inputData.variable_values) {
+                let values: Record<string, string> = {};
+                try {
+                    values = JSON.parse(bundle.inputData.variable_values as string);
+                } catch (e) {
+                    // Invalid JSON, skip rendering
+                    return data;
+                }
+
+                // Apply defaults from response variables for missing keys
+                const responseVars = (data.variables as Array<{ name: string; default?: string }>) || [];
+                for (const v of responseVars) {
+                    if (v.name && !(v.name in values) && v.default !== undefined) {
+                        values[v.name] = v.default;
+                    }
+                }
+
+                // Replace {name} and {{name}} in prompt fields
+                const promptFields = ['system_prompt', 'user_prompt', 'assistant_prompt'];
+                for (const field of promptFields) {
+                    if (typeof data[field] === 'string') {
+                        let text = data[field] as string;
+                        for (const [name, value] of Object.entries(values)) {
+                            text = text.split(`{{${name}}}`).join(String(value));
+                            text = text.split(`{${name}}`).join(String(value));
+                        }
+                        data[field] = text;
+                    }
+                }
+
+                data.variables_used = values;
+            }
+
+            return data;
         },
         sample: {
             slug: 'my-prompt',

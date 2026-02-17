@@ -1,3 +1,13 @@
+## 1.4.0
+
+Add variable rendering to Get Prompt action.
+
+- New optional field "Variable Values (JSON)" in Get Prompt
+- Replace {variable} and {{variable}} placeholders in system_prompt, user_prompt, assistant_prompt
+- Automatic default value fallback from prompt variable definitions
+- New `variables_used` field in output when variables are rendered
+- Leave Variable Values empty to get raw template (backward compatible)
+
 ## 1.3.0
 
 Switch to z.request for better Zapier platform compatibility.

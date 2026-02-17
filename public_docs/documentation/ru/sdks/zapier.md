@@ -31,7 +31,7 @@
 
 ### Получение промпта
 
-Получает промпт из xR2 по slug-идентификатору.
+Получает промпт из xR2 по slug-идентификатору. Может автоматически подставлять переменные.
 
 **Параметры:**
 
@@ -40,15 +40,45 @@
 | Slug | Да | Уникальный идентификатор промпта |
 | Version Number | Нет | Конкретная версия для получения |
 | Status | Нет | Фильтр по статусу |
+| Variable Values (JSON) | Нет | JSON со значениями для замены `{переменных}` |
 
 **Вывод:**
-* System prompt
-* User prompt
+* System prompt (с подставленными переменными, если указан Variable Values)
+* User prompt (с подставленными переменными, если указан Variable Values)
 * Assistant prompt
 * Variables
 * trace_id
+* variables_used (если указан Variable Values)
 * Model config
 * Информация об A/B-тесте
+
+### Подстановка переменных
+
+Действие xR2 для Zapier может заменять `{переменные}` напрямую — дополнительные шаги не нужны.
+
+В поле **Variable Values (JSON)** введите JSON-объект с именами переменных и их значениями:
+
+```json
+{"customer_name": "Alice", "plan_name": "Enterprise", "top_features": "deploy, analytics"}
+```
+
+Можно использовать маппинг полей Zapier для вставки динамических значений из предыдущих шагов. Если переменная не указана, автоматически используется её **значение по умолчанию** из определения промпта.
+
+**Вывод с подставленными переменными:**
+
+```json
+{
+  "system_prompt": "Write a welcome email for Alice on the Enterprise plan.",
+  "user_prompt": "Generate a welcome email for the new user.",
+  "variables_used": {
+    "customer_name": "Alice",
+    "plan_name": "Enterprise"
+  },
+  "trace_id": "evt_xxx"
+}
+```
+
+> **Совет:** Оставьте Variable Values пустым, чтобы получить сырой шаблон с `{плейсхолдерами}`.
 
 ### Отслеживание события
 

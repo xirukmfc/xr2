@@ -208,6 +208,16 @@ The [xR2 Make.com module](/documentation/en/sdks/make/) returns raw templates. U
 {{replace(replace(4.system_prompt; "{customer_name}"; 2.customer_name); "{plan_name}"; 2.plan_name)}}
 ```
 
+### Zapier (with xR2 action)
+
+The [xR2 Zapier action](/documentation/en/sdks/zapier/) renders variables directly. In the **Variable Values (JSON)** field, pass a JSON object:
+
+```json
+{"customer_name": "Alice", "plan_name": "Enterprise"}
+```
+
+The action returns prompts with all placeholders replaced. See the [Zapier SDK docs](/documentation/en/sdks/zapier/) for details.
+
 ## Best Practices
 
 ### 1. Naming Conventions
