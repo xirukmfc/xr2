@@ -63,7 +63,15 @@ In the **Variable Values (JSON)** field, enter a JSON object mapping variable na
 {"customer_name": "Alice", "plan_name": "Enterprise", "top_features": "deploy, analytics"}
 ```
 
-You can use Zapier field mapping to insert dynamic values from previous steps. If a variable is not provided, its **default value** from the prompt definition is used automatically.
+You can use Zapier field mapping to insert dynamic values from previous steps by clicking **+** and selecting fields from earlier steps:
+
+![xR2 Get Prompt with Variable Values mapping in Zapier](../../images/set_variable_zapier1.png)
+
+Then map the rendered `System Prompt` and `User Prompt` from the xR2 step directly into the OpenAI Conversation step:
+
+![OpenAI step using rendered prompts from xR2](../../images/set_variable_zapier2.png)
+
+If a variable is not provided, its **default value** from the prompt definition is used automatically.
 
 **Output with variables rendered:**
 
