@@ -122,6 +122,53 @@ const response = await client.trackEvent({
 });
 ```
 
+### `renderPrompt()`
+
+Рендерит шаблон промпта, заменяя плейсхолдеры `{{variable}}` значениями.
+
+```typescript
+import { XR2Client, renderPrompt, VariableError } from "xr2-sdk";
+
+const client = new XR2Client("YOUR_API_KEY");
+const response = await client.getPrompt({ slug: "welcome" });
+const prompt = response.data!;
+
+// Рендерим переменные
+const rendered = renderPrompt(prompt, {
+  values: { customer_name: "Alice" },
+});
+
+console.log(rendered.systemPrompt);    // Плейсхолдеры заменены
+console.log(rendered.variablesUsed);   // { customer_name: "Alice", language: "en" }
+
+// Обработка отсутствующих обязательных переменных
+try {
+  renderPrompt(prompt, { values: {} });
+} catch (e) {
+  if (e instanceof VariableError) {
+    console.log(e.missingVariables);   // ["customer_name"]
+  }
+}
+
+// Нестрогий режим: оставить плейсхолдеры для отсутствующих переменных
+const loose = renderPrompt(prompt, { values: {}, strict: false });
+```
+
+**Опции:**
+
+| Опция | Тип | По умолчанию | Описание |
+|-------|-----|--------------|----------|
+| `values` | object | `{}` | Значения переменных для подстановки |
+| `strict` | boolean | `true` | Выбрасывать `VariableError` при отсутствии обязательных переменных |
+| `useDefaults` | boolean | `true` | Применять значения по умолчанию из определений переменных |
+| `arraySeparator` | string | — | Соединять массивы этим разделителем вместо JSON |
+
+**Возвращает:** `RenderedPrompt`
+
+- `systemPrompt`, `userPrompt`, `assistantPrompt` — отрендеренный текст (или `null`)
+- `traceId` — сохранён из исходного промпта
+- `variablesUsed` — объект со всеми разрешёнными значениями, включая значения по умолчанию
+
 ## Типы TypeScript
 
 SDK экспортирует все типы TypeScript:

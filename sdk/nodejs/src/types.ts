@@ -62,3 +62,28 @@ export type CheckApiKeyResponse = {
   ok: boolean;
   user: string;
 };
+
+export type RenderOptions = {
+  values?: Record<string, unknown>;
+  strict?: boolean;
+  useDefaults?: boolean;
+  arraySeparator?: string;
+};
+
+export type RenderedPrompt = {
+  systemPrompt: string | null;
+  userPrompt: string | null;
+  assistantPrompt: string | null;
+  traceId: string;
+  variablesUsed: Record<string, unknown>;
+};
+
+export class VariableError extends Error {
+  readonly missingVariables: string[];
+
+  constructor(message: string, missingVariables: string[] = []) {
+    super(message);
+    this.name = "VariableError";
+    this.missingVariables = missingVariables;
+  }
+}

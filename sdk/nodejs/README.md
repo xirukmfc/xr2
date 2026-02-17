@@ -88,6 +88,61 @@ await client.trackEvent({
 });
 ```
 
+## Variable Rendering
+
+When your prompt contains `{{variable}}` placeholders, use `renderPrompt()` to substitute them:
+
+```ts
+import { XR2Client, renderPrompt } from "xr2-sdk";
+
+const client = new XR2Client("YOUR_PRODUCT_API_KEY");
+const response = await client.getPrompt({ slug: "welcome" });
+const prompt = response.data!;
+
+// Render variables into the prompt
+const rendered = renderPrompt(prompt, {
+  values: { customer_name: "Alice", language: "en" },
+});
+
+console.log(rendered.systemPrompt);   // Variables replaced
+console.log(rendered.userPrompt);     // Variables replaced
+console.log(rendered.traceId);        // Preserved from original prompt
+
+// Use with OpenAI
+import OpenAI from "openai";
+const ai = new OpenAI();
+const completion = await ai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    { role: "system", content: rendered.systemPrompt! },
+    { role: "user", content: rendered.userPrompt! },
+  ],
+});
+```
+
+Missing required variables throw `VariableError`:
+
+```ts
+import { renderPrompt, VariableError } from "xr2-sdk";
+
+try {
+  const rendered = renderPrompt(prompt, { values: {} });
+} catch (e) {
+  if (e instanceof VariableError) {
+    console.log(e.missingVariables); // ["customer_name"]
+  }
+}
+```
+
+### `renderPrompt()` Options
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `values` | object | `{}` | Variable values to substitute |
+| `strict` | boolean | `true` | Throw `VariableError` on missing required variables |
+| `useDefaults` | boolean | `true` | Apply default values from variable definitions |
+| `arraySeparator` | string | — | Join arrays with this separator instead of JSON |
+
 ## Endpoints
 
 - GET `/api/v1/check-api-key`

@@ -123,6 +123,53 @@ const response = await client.trackEvent({
 });
 ```
 
+### `renderPrompt()`
+
+Render a prompt template by replacing `{{variable}}` placeholders with values.
+
+```typescript
+import { XR2Client, renderPrompt, VariableError } from "xr2-sdk";
+
+const client = new XR2Client("YOUR_API_KEY");
+const response = await client.getPrompt({ slug: "welcome" });
+const prompt = response.data!;
+
+// Render variables
+const rendered = renderPrompt(prompt, {
+  values: { customer_name: "Alice" },
+});
+
+console.log(rendered.systemPrompt);    // Variables replaced
+console.log(rendered.variablesUsed);   // { customer_name: "Alice", language: "en" }
+
+// Handle missing required variables
+try {
+  renderPrompt(prompt, { values: {} });
+} catch (e) {
+  if (e instanceof VariableError) {
+    console.log(e.missingVariables);   // ["customer_name"]
+  }
+}
+
+// Non-strict mode: keep placeholders for missing vars
+const loose = renderPrompt(prompt, { values: {}, strict: false });
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `values` | object | `{}` | Variable values to substitute |
+| `strict` | boolean | `true` | Throw `VariableError` on missing required variables |
+| `useDefaults` | boolean | `true` | Apply default values from variable definitions |
+| `arraySeparator` | string | — | Join arrays with this separator instead of JSON |
+
+**Returns:** `RenderedPrompt`
+
+- `systemPrompt`, `userPrompt`, `assistantPrompt` — rendered text (or `null`)
+- `traceId` — preserved from the original prompt
+- `variablesUsed` — object with all resolved values including defaults
+
 ## TypeScript Types
 
 The SDK exports all TypeScript types:
