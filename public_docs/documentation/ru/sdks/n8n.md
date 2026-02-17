@@ -47,6 +47,7 @@ npm install n8n-nodes-xr2
 | Slug | Да | Идентификатор промпта |
 | Version Number | Нет | Конкретная версия (0 = последняя) |
 | Status | Нет | `production`, `testing`, `draft` и т.д. |
+| Variable Values | Нет | Пары ключ-значение для замены `{{переменных}}` |
 
 **Вывод:**
 
@@ -61,6 +62,43 @@ npm install n8n-nodes-xr2
   "status": "production"
 }
 ```
+
+Если указаны Variable Values, `{{плейсхолдеры}}` в полях промпта заменяются на переданные значения, а в ответ добавляется поле `variables_used`.
+
+## Подстановка переменных
+
+Нода xR2 может заменять `{{переменные}}` напрямую — нода Code не нужна.
+
+1. Добавьте ноду **xR2** с операцией **Get Prompt**
+2. Нажмите **Add Variable** в разделе **Variable Values**
+3. Для каждой переменной укажите **Name** (например `customer_name`) и **Value**
+
+Значения поддерживают n8n-выражения, так что можно подтягивать данные из предыдущих нод:
+
+| Name | Value |
+|------|-------|
+| `customer_name` | `{{ $json.customer_name }}` |
+| `plan_name` | `{{ $json.plan_name }}` |
+| `language` | `en` |
+
+Если переменная не указана, автоматически используется её **значение по умолчанию** из определения промпта.
+
+**Вывод с подставленными переменными:**
+
+```json
+{
+  "slug": "welcome",
+  "system_prompt": "You are a helpful assistant for Alice on the Enterprise plan.",
+  "user_prompt": "Generate a welcome email for the new user.",
+  "variables_used": {
+    "customer_name": "Alice",
+    "plan_name": "Enterprise"
+  },
+  "trace_id": "evt_xxx"
+}
+```
+
+> **Совет:** Оставьте Variable Values пустым, чтобы получить сырой шаблон с `{{плейсхолдерами}}` — полезно, если хотите обработать подстановку самостоятельно.
 
 ## Отслеживание событий
 
@@ -100,20 +138,34 @@ npm install n8n-nodes-xr2
 [Webhook] → [xR2: Get Prompt] → [OpenAI] → [xR2: Track Event]
 ```
 
-1. Получите промпт из xR2
-2. Используйте `system_prompt` и `user_prompt` в ноде OpenAI
+1. Получите промпт из xR2 (с заполненными Variable Values)
+2. Используйте готовые `system_prompt` и `user_prompt` в ноде OpenAI
 3. Отследите событие конверсии
+
+### С переменными из базы данных
+
+```
+[DB Query] → [xR2: Get Prompt] → [LLM Node] → [xR2: Track Event]
+```
+
+1. Получите данные пользователя из базы
+2. В ноде xR2 привяжите переменные: `customer_name` → `{{ $json.customer_name }}` и т.д.
+3. Нода вернёт промпты с подставленными значениями
+4. Передайте напрямую в любую LLM-ноду
 
 ## Доступ к данным в выражениях
 
 ```javascript
-// Get prompt content
+// Содержимое промпта (с подставленными переменными, если указаны)
 {{ $('xR2').item.json.user_prompt }}
 
-// Get trace_id
+// Trace ID
 {{ $('xR2').item.json.trace_id }}
 
-// Get variables
+// Использованные переменные (если Variable Values были указаны)
+{{ $('xR2').item.json.variables_used }}
+
+// Определения переменных
 {{ $('xR2').item.json.variables }}
 ```
 

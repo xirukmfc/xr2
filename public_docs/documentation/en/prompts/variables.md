@@ -182,44 +182,23 @@ rendered = prompt.render(
 # tags renders as: vip, returning
 ```
 
-### n8n (without SDK)
+### n8n (with xR2 node)
 
-In n8n, use an **HTTP Request** node to fetch the prompt, then a **Code** node to replace variables:
+The [xR2 n8n node](/documentation/en/sdks/n8n/) renders variables directly — no Code node needed.
 
-**HTTP Request node:**
-- Method: `POST`
-- URL: `https://xr2.uk/api/v1/get-prompt`
-- Headers: `Authorization: Bearer YOUR_API_KEY`
-- Body: `{"slug": "welcome", "source_name": "n8n"}`
+1. Add an **xR2** node → **Prompt** → **Get**
+2. Enter your prompt **Slug**
+3. Under **Variable Values**, click **Add Variable** for each placeholder
+4. Set **Name** to the variable name and **Value** to a static value or n8n expression
 
-**Code node (replace variables):**
-```javascript
-const prompt = $input.first().json;
-const values = {
-  customer_name: "Alice",
-  language: "en",
-};
+| Name | Value |
+|------|-------|
+| `customer_name` | `{{ $json.customer_name }}` |
+| `language` | `en` |
 
-// Apply defaults
-for (const v of prompt.variables || []) {
-  if (!(v.name in values) && v.default != null) {
-    values[v.name] = v.default;
-  }
-}
+The node returns prompts with all `{{placeholders}}` replaced. Missing variables use their default values automatically.
 
-// Replace {{var}} placeholders
-let system = prompt.system_prompt || "";
-let user = prompt.user_prompt || "";
-for (const [name, val] of Object.entries(values)) {
-  const token = `{{${name}}}`;
-  system = system.split(token).join(String(val));
-  user = user.split(token).join(String(val));
-}
-
-return [{ json: { system, user, trace_id: prompt.trace_id } }];
-```
-
-Then connect the output to your **LLM node** (OpenAI, Anthropic, etc.).
+Then connect the output directly to your **LLM node** (OpenAI, Anthropic, etc.) — use `{{ $json.system_prompt }}` and `{{ $json.user_prompt }}`.
 
 ## Best Practices
 

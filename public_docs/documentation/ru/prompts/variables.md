@@ -181,44 +181,23 @@ rendered = prompt.render(
 # tags рендерится как: vip, returning
 ```
 
-### n8n (без SDK)
+### n8n (с нодой xR2)
 
-В n8n используйте ноду **HTTP Request** для получения промпта, затем ноду **Code** для замены переменных:
+[Нода xR2 для n8n](/documentation/ru/sdks/n8n/) подставляет переменные напрямую — нода Code не нужна.
 
-**Нода HTTP Request:**
-- Метод: `POST`
-- URL: `https://xr2.uk/api/v1/get-prompt`
-- Заголовки: `Authorization: Bearer YOUR_API_KEY`
-- Тело: `{"slug": "welcome", "source_name": "n8n"}`
+1. Добавьте ноду **xR2** → **Prompt** → **Get**
+2. Введите **Slug** промпта
+3. В разделе **Variable Values** нажмите **Add Variable** для каждого плейсхолдера
+4. Укажите **Name** — имя переменной, **Value** — статическое значение или n8n-выражение
 
-**Нода Code (замена переменных):**
-```javascript
-const prompt = $input.first().json;
-const values = {
-  customer_name: "Alice",
-  language: "en",
-};
+| Name | Value |
+|------|-------|
+| `customer_name` | `{{ $json.customer_name }}` |
+| `language` | `en` |
 
-// Применяем значения по умолчанию
-for (const v of prompt.variables || []) {
-  if (!(v.name in values) && v.default != null) {
-    values[v.name] = v.default;
-  }
-}
+Нода вернёт промпты с подставленными значениями вместо `{{плейсхолдеров}}`. Для отсутствующих переменных автоматически используются значения по умолчанию.
 
-// Заменяем плейсхолдеры {{var}}
-let system = prompt.system_prompt || "";
-let user = prompt.user_prompt || "";
-for (const [name, val] of Object.entries(values)) {
-  const token = `{{${name}}}`;
-  system = system.split(token).join(String(val));
-  user = user.split(token).join(String(val));
-}
-
-return [{ json: { system, user, trace_id: prompt.trace_id } }];
-```
-
-Затем подключите выход к ноде **LLM** (OpenAI, Anthropic и т.д.).
+Затем подключите выход напрямую к ноде **LLM** (OpenAI, Anthropic и т.д.) — используйте `{{ $json.system_prompt }}` и `{{ $json.user_prompt }}`.
 
 ## Лучшие практики
 

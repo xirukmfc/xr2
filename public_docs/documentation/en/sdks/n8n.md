@@ -48,6 +48,7 @@ Fetches a prompt from xR2.
 | Slug | Yes | Prompt identifier |
 | Version Number | No | Specific version (0 = latest) |
 | Status | No | `production`, `testing`, `draft`, etc. |
+| Variable Values | No | Key-value pairs to replace `{{variable}}` placeholders |
 
 **Output:**
 
@@ -62,6 +63,43 @@ Fetches a prompt from xR2.
   "status": "production"
 }
 ```
+
+If Variable Values are provided, `{{placeholders}}` in prompt fields are replaced with the given values and a `variables_used` field is added to the output.
+
+## Rendering Variables
+
+The xR2 node can replace `{{variable}}` placeholders directly — no Code node needed.
+
+1. Add an **xR2** node with **Get Prompt** operation
+2. Click **Add Variable** under **Variable Values**
+3. For each variable, set **Name** (e.g. `customer_name`) and **Value**
+
+Values support n8n expressions, so you can pull data from previous nodes:
+
+| Name | Value |
+|------|-------|
+| `customer_name` | `{{ $json.customer_name }}` |
+| `plan_name` | `{{ $json.plan_name }}` |
+| `language` | `en` |
+
+If a variable is not provided, its **default value** from the prompt definition is used automatically.
+
+**Output with variables rendered:**
+
+```json
+{
+  "slug": "welcome",
+  "system_prompt": "You are a helpful assistant for Alice on the Enterprise plan.",
+  "user_prompt": "Generate a welcome email for the new user.",
+  "variables_used": {
+    "customer_name": "Alice",
+    "plan_name": "Enterprise"
+  },
+  "trace_id": "evt_xxx"
+}
+```
+
+> **Tip:** Leave Variable Values empty to get the raw template with `{{placeholders}}` — useful if you want to handle rendering yourself.
 
 ## Track Event
 
@@ -101,23 +139,34 @@ Sends an analytics event to xR2.
 [Webhook] → [xR2: Get Prompt] → [OpenAI] → [xR2: Track Event]
 ```
 
-1. Get the prompt from xR2
-2. Use `system_prompt` and `user_prompt` in OpenAI node
+1. Get the prompt from xR2 (with Variable Values filled in)
+2. Use rendered `system_prompt` and `user_prompt` in OpenAI node
 3. Track conversion event
+
+### With variables from a database
+
+```
+[DB Query] → [xR2: Get Prompt] → [LLM Node] → [xR2: Track Event]
+```
+
+1. Query your database for user data
+2. In xR2 node, map variables: `customer_name` → `{{ $json.customer_name }}`, etc.
+3. The node returns prompts with all placeholders replaced
+4. Pass directly to any LLM node
 
 ## Accessing Data in Expressions
 
 ```javascript
-// Get prompt content
+// Get prompt content (rendered if variables were provided)
 {{ $('xR2').item.json.user_prompt }}
 
 // Get trace_id
 {{ $('xR2').item.json.trace_id }}
 
-// Get model config
-{{ $('xR2').item.json.model_config.model_name }}
+// Get variables used (when Variable Values were provided)
+{{ $('xR2').item.json.variables_used }}
 
-// Get variables
+// Get variable definitions
 {{ $('xR2').item.json.variables }}
 ```
 
