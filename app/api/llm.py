@@ -402,7 +402,7 @@ async def call_openai_api(
     messages = []
 
     if system_prompt.strip():
-        messages.append({"role": "system_docs", "content": system_prompt})
+        messages.append({"role": "system", "content": system_prompt})
 
     messages.append({"role": "user", "content": user_prompt})
 
@@ -800,7 +800,7 @@ async def stream_openai_api(
     """Stream from OpenAI API using Server-Sent Events format"""
     messages = []
     if system_prompt.strip():
-        messages.append({"role": "system_docs", "content": system_prompt})
+        messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": user_prompt})
 
     request_data = {

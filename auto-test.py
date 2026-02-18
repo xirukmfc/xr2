@@ -7320,8 +7320,9 @@ class XR2AutoTester:
 
                 try:
                     # Переходим по публичной ссылке
-                    await new_page.goto(self.created_share_url)
-                    await new_page.wait_for_load_state("networkidle")
+                    await new_page.goto(self.created_share_url, timeout=60000)
+                    await new_page.wait_for_load_state("domcontentloaded")
+                    await new_page.wait_for_timeout(2000)
 
                     # Проверяем, что страница загрузилась без редиректа на логин
                     current_url = new_page.url
@@ -7394,8 +7395,9 @@ class XR2AutoTester:
                 new_page = await new_context.new_page()
 
                 try:
-                    await new_page.goto(self.created_share_url)
-                    await new_page.wait_for_load_state("networkidle")
+                    await new_page.goto(self.created_share_url, timeout=60000)
+                    await new_page.wait_for_load_state("domcontentloaded")
+                    await new_page.wait_for_timeout(2000)
 
                     functionality_checks = {
                         "prompt_name_visible": False,
@@ -8039,11 +8041,12 @@ class XR2AutoTester:
                 "event_steps": ["user_signup", "purchase_completed"]
             }
 
+            access_token = await self.get_api_token()
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     f"{self.backend_url}/internal/custom-funnel-configurations/test",
                     json=funnel_data,
-                    headers={"Content-Type": "application/json"}
+                    headers={"Content-Type": "application/json", "Authorization": f"Bearer {access_token}"}
                 ) as resp:
                     if resp.status in [200, 201]:
                         resp_data = await resp.json()
@@ -8866,13 +8869,15 @@ class XR2AutoTester:
             selected_prompt_id = None
             for option in options:
                 text = await option.text_content()
-                if text and ("2 versions" in text or "3 versions" in text or "4 versions" in text):
-                    value = await option.get_attribute("value")
-                    if value:
-                        await prompt_select.select_option(value=value)
-                        selected_prompt = text
-                        selected_prompt_id = value
-                        break
+                if text:
+                    match = re.search(r'\((\d+)\s+versions?\)', text)
+                    if match and int(match.group(1)) >= 2:
+                        value = await option.get_attribute("value")
+                        if value:
+                            await prompt_select.select_option(value=value)
+                            selected_prompt = text
+                            selected_prompt_id = value
+                            break
 
             if not selected_prompt:
                 test_result.fail_test("Не найден промпт с 2+ версиями для A/B теста")
