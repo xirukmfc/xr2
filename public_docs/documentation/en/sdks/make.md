@@ -5,11 +5,17 @@ Official Make.com (Integromat) integration for xR2.
 
 ## Installation
 
-The xR2 app is currently under review at Make.com and will be available in the marketplace soon. Once published, you'll be able to find it by searching for "xR2" in Make.com apps.
+### Quick Install (Invite Link)
 
-In the meantime, you can set up the integration manually (see below).
+The official xR2 app is currently being reviewed for publication in the Make.com marketplace. In the meantime, you can install it right now using the invite link:
+
+**[Install xR2 app for Make.com](https://eu2.make.com/app/invite/7314860fdac4e42901280ee576aed8c8)**
+
+This is the same official app — the invite link gives you full access while we wait for marketplace approval.
 
 ### Manual Setup (Custom App)
+
+Alternatively, you can set up the integration manually:
 
 1. Go to [eu2.make.com/apps](https://eu2.make.com/apps)
 2. Create a new custom app named "xR2"
