@@ -23,7 +23,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: xr2_redis_prod
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-***REMOVED_REDIS_PWD***}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-***REMOVED_REDIS_PWD***} --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes:
       - redis_data_prod:/data
     networks:
