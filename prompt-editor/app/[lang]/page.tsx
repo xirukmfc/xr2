@@ -323,10 +323,48 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
                   {t('landing.hero.secondaryCta')} <span className="ml-1">&darr;</span>
                 </a>
               </div>
+
             </div>
 
             {/* Code block — before/after with typewriter */}
             <CodeTypewriter />
+          </div>
+        </div>
+      </section>
+
+      {/* Social proof badges */}
+      <section className="pb-16 -mt-8">
+        <div className="max-w-6xl mx-auto px-6">
+          <p className="text-center text-xs text-gray-400 uppercase tracking-widest mb-4">{locale === 'en' ? 'Featured on' : 'Нас рекомендуют'}</p>
+          <div className="flex items-center justify-center gap-6 flex-wrap">
+            <a
+              href="https://www.producthunt.com/products/xr2-prompt-manager?utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-xr2-prompt-manager"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="opacity-80 hover:opacity-100 transition-opacity"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1069738&theme=light&t=1772508397995"
+                alt="xR2 Prompt Manager — Product Hunt"
+                width={190}
+                height={41}
+              />
+            </a>
+            <a
+              href="https://www.saashub.com/prompt-manager?utm_source=badge&utm_campaign=badge&utm_content=prompt-manager&badge_variant=color&badge_kind=approved"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="opacity-80 hover:opacity-100 transition-opacity"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://cdn-b.saashub.com/img/badges/approved-color.png?v=1"
+                alt="xR2 — SaaSHub Approved"
+                width={120}
+                height={41}
+              />
+            </a>
           </div>
         </div>
       </section>
