@@ -1,7 +1,7 @@
 
 "use client"
 
-import { MessageSquare, Activity, Key, FileText, Users, Settings, User, LogOut, Zap, AlertTriangle, BarChart3, BookOpen } from "lucide-react"
+import { MessageSquare, Activity, Key, FileText, Users, Settings, User, LogOut, Crown, AlertTriangle, BarChart3, BookOpen } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
@@ -273,7 +273,7 @@ export function Sidebar() {
             }`}
             title={t("sidebar.upgradeToPro")}
           >
-            <Zap className={`w-4 h-4 ${isCollapsed ? "" : "mr-2"} text-amber-500`} />
+            <Crown className={`w-4 h-4 ${isCollapsed ? "" : "mr-2"} text-amber-500`} />
             {!isCollapsed && <span>{t("sidebar.upgradeToPro")}</span>}
           </button>
         </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { AlertTriangle, Zap } from "lucide-react"
+import { AlertTriangle, Activity } from "lucide-react"
 import { getUserLimits, UserLimits } from "@/lib/api"
 import { useLocale } from "@/contexts/locale-context"
 
@@ -83,7 +83,7 @@ export function UserLimitsDisplay({ isCollapsed = false }: { isCollapsed?: boole
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                   apiUnlimited ? 'bg-green-50' : apiPercent >= 100 ? 'bg-red-50' : apiPercent >= 70 ? 'bg-amber-50' : 'bg-emerald-50'
                 }`}>
-                  <Zap className={`w-3 h-3 ${
+                  <Activity className={`w-3 h-3 ${
                     apiUnlimited ? 'text-green-500' : apiPercent >= 100 ? 'text-red-400' : apiPercent >= 70 ? 'text-amber-400' : 'text-emerald-400'
                   }`} />
                 </div>
