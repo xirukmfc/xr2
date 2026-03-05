@@ -1,11 +1,9 @@
 import type React from "react"
 import type {Metadata} from "next"
-import {GeistSans} from "geist/font/sans"
-import {GeistMono} from "geist/font/mono"
 import { Inter, Lato, JetBrains_Mono } from "next/font/google"
 
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" })
-const lato = Lato({ weight: ["400", "700", "900"], subsets: ["latin", "latin-ext"], variable: "--font-lato" })
+const lato = Lato({ weight: ["400", "700", "900"], subsets: ["latin", "latin-ext"], variable: "--font-lato", display: "swap" })
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin", "cyrillic"], variable: "--font-jetbrains" })
 import {ThemeProvider} from "next-themes"
 import Script from "next/script"
@@ -43,7 +41,7 @@ export default async function RootLayout({
     const gaId = host.includes('xr2.site') ? GA_IDS['xr2.site'] : GA_IDS['xr2.uk']
 
     return (
-        <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable} ${inter.variable} ${lato.variable} ${jetbrainsMono.variable}`}>
+        <html lang="en" suppressHydrationWarning className={`${inter.variable} ${lato.variable} ${jetbrainsMono.variable}`}>
         <head suppressHydrationWarning />
       <body suppressHydrationWarning>
         {/* Google Analytics */}
