@@ -217,23 +217,23 @@ function ParticleField({ sectionRef }: { sectionRef: React.RefObject<HTMLElement
 }
 
 /* ─── ScrollReveal ─── */
-function ScrollReveal({ children, className = '', delay = 0 }: {
-  children: React.ReactNode; className?: string; delay?: number
+function ScrollReveal({ children, className = '', delay = 0, instant = false }: {
+  children: React.ReactNode; className?: string; delay?: number; instant?: boolean
 }) {
   const ref = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(instant)
   useEffect(() => {
-    if (!ref.current) return
+    if (instant || !ref.current) return
     const el = ref.current
     const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect() } }, { threshold: 0.1 })
     obs.observe(el)
     return () => obs.disconnect()
-  }, [])
+  }, [instant])
   return (
     <div ref={ref} className={className} style={{
       opacity: visible ? 1 : 0,
       transform: visible ? 'none' : 'translateY(30px)',
-      transition: `opacity 0.7s ease-out ${delay}ms, transform 0.7s ease-out ${delay}ms`,
+      transition: instant ? 'none' : `opacity 0.7s ease-out ${delay}ms, transform 0.7s ease-out ${delay}ms`,
     }}>{children}</div>
   )
 }
@@ -452,20 +452,20 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
 
             {/* Left — text */}
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-              <ScrollReveal>
+              <ScrollReveal instant>
                 <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-[2.85rem] lg:leading-[1.2] font-display">
                   {t('landing.hero.titleLine1')}{' '}
                   <span className="text-[#E63355]">{t('landing.hero.titleLine2')}</span>
                 </h1>
               </ScrollReveal>
 
-              <ScrollReveal delay={100}>
+              <ScrollReveal instant>
                 <p className="mt-6 max-w-md text-pretty text-[1.05rem] leading-relaxed text-muted-foreground">
                   {t('landing.hero.subtitle')}
                 </p>
               </ScrollReveal>
 
-              <ScrollReveal delay={200}>
+              <ScrollReveal instant>
                 <div className="mt-8">
                   <button
                     onClick={() => router.push("/login")}
@@ -477,7 +477,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
                 </div>
               </ScrollReveal>
 
-              <ScrollReveal delay={300}>
+              <ScrollReveal instant>
                 <p className="mt-4 text-xs text-muted-foreground">
                   {en ? '10 free prompts and 100 api requests per month.' : '10 бесплатных промптов и 1000 запросов в месяц.'}
                 </p>
@@ -485,7 +485,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
             </div>
 
             {/* Right — terminal with interactive 3D tilt */}
-            <ScrollReveal delay={200}>
+            <ScrollReveal instant>
               <div
                 ref={terminalRef}
                 className="relative lg:pl-4"
