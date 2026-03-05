@@ -105,8 +105,8 @@ class LimitsService:
                 user_limits.max_api_requests_per_month != global_limits.default_max_api_requests_per_month):
             return user_limits.max_prompts, user_limits.max_api_requests_per_month
 
-        # Otherwise use free plan limits
-        return plan_limits["free"]
+        # Otherwise use global limits (configurable via admin panel)
+        return global_limits.default_max_prompts, global_limits.default_max_api_requests_per_month
 
     async def check_prompt_limit(self, user_id: UUID) -> Tuple[bool, int, int]:
         """

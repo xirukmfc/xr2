@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.user import User
+from app.models.user_limits import GlobalLimits
 from app.models.subscription import UserSubscription, SubscriptionTransaction
 from app.models.pricing import PricingConfig
 from app.services.yookassa import yookassa_service
@@ -43,6 +44,20 @@ class SubscriptionService:
 
     def __init__(self, session: AsyncSession):
         self.session = session
+
+    async def _get_free_limits(self) -> dict:
+        """Get free plan limits from global_limits table (admin-configurable)"""
+        result = await self.session.execute(
+            select(GlobalLimits).where(GlobalLimits.is_active == True)
+            .order_by(GlobalLimits.created_at.desc())
+        )
+        global_limits = result.scalar_one_or_none()
+        if global_limits:
+            return {
+                "max_prompts": global_limits.default_max_prompts,
+                "max_api_requests_per_month": global_limits.default_max_api_requests_per_month,
+            }
+        return PLAN_LIMITS["free"]
 
     async def get_or_create_subscription(self, user_id: UUID) -> UserSubscription:
         """Get existing subscription or create a new free one"""
@@ -95,8 +110,10 @@ class SubscriptionService:
                 "max_prompts": -1,
                 "max_api_requests_per_month": -1,
             }
+        elif subscription.plan == "free":
+            limits = await self._get_free_limits()
         else:
-            limits = PLAN_LIMITS.get(subscription.plan, PLAN_LIMITS["free"])
+            limits = PLAN_LIMITS.get(subscription.plan, await self._get_free_limits())
 
         return {
             "id": str(subscription.id),
@@ -128,12 +145,17 @@ class SubscriptionService:
             return -1, -1  # Unlimited for superusers
 
         subscription = await self.get_or_create_subscription(user_id)
-        limits = PLAN_LIMITS.get(subscription.plan, PLAN_LIMITS["free"])
+        free_limits = await self._get_free_limits()
+
+        if subscription.plan == "free":
+            limits = free_limits
+        else:
+            limits = PLAN_LIMITS.get(subscription.plan, free_limits)
 
         # Check if subscription is active for paid plans
         if subscription.plan != "free" and not subscription.is_active:
             # Revert to free limits if subscription expired
-            limits = PLAN_LIMITS["free"]
+            limits = free_limits
 
         return limits["max_prompts"], limits["max_api_requests_per_month"]
 
