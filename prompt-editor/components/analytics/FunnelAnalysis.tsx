@@ -379,6 +379,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
   // Date range filter
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [showCustomDates, setShowCustomDates] = useState(false);
 
   // Load saved configurations and event definitions on component mount
   useEffect(() => {
@@ -1119,7 +1120,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
     
     // Convert date presets to period format for Select
     const getPeriodFromDates = () => {
-      if (!startDate && !endDate) return 'allTime';
+      if (!startDate && !endDate) return showCustomDates ? 'custom' : 'allTime';
       // Check if dates match presets
       const today = new Date();
       const formatDate = (d: Date) => d.toISOString().split('T')[0];
@@ -1143,9 +1144,10 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
 
     const handlePeriodChange = (period: string) => {
       if (period === 'custom') {
-        // Don't clear dates, just mark as custom
+        setShowCustomDates(true);
         return;
       }
+      setShowCustomDates(false);
       if (period === 'allTime') {
         setStartDate('');
         setEndDate('');
@@ -1231,7 +1233,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                 </SelectContent>
               </Select>
 
-              {(startDate || endDate || getPeriodFromDates() === 'custom') && (
+              {(startDate || endDate || showCustomDates) && (
                 <>
                   <Input
                     id="start-date"
