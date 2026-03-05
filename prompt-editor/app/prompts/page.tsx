@@ -442,7 +442,7 @@ function PromptsPageContent() {
                 <div className="flex items-center space-x-2">
                     <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getStatusDotClasses(prompt.status as 'active' | 'draft' | 'archived')}`}></div>
                     <div className="min-w-0 flex-1">
-                        <div className="font-medium text-slate-800 text-sm truncate">
+                        <div className="font-medium text-foreground text-sm truncate">
                             {prompt.name}
                         </div>
                         <div className="flex items-center space-x-1 mt-1">
@@ -456,11 +456,11 @@ function PromptsPageContent() {
                                 </span>
                             ))}
                             {prompt.tags.length > 3 && (
-                                <span className="text-xs text-slate-400 flex-shrink-0">+{prompt.tags.length - 3}</span>
+                                <span className="text-xs text-muted-foreground/60 flex-shrink-0">+{prompt.tags.length - 3}</span>
                             )}
                         </div>
                         {prompt.description && (
-                            <div className="text-xs text-slate-500 truncate mt-0.5">
+                            <div className="text-xs text-muted-foreground truncate mt-0.5">
                                 {prompt.description}
                             </div>
                         )}
@@ -485,10 +485,10 @@ function PromptsPageContent() {
             width: "col-span-2",
             render: (prompt) => (
                 <div>
-                    <div className={`text-sm ${prompt.status === "archived" ? "text-slate-500" : "text-slate-800"} truncate`}>
+                    <div className={`text-sm ${prompt.status === "archived" ? "text-muted-foreground" : "text-foreground"} truncate`}>
                         {prompt.lastUpdated}
                     </div>
-                    <div className={`text-xs ${prompt.status === "archived" ? "text-slate-400" : "text-slate-500"} truncate`}>
+                    <div className={`text-xs ${prompt.status === "archived" ? "text-muted-foreground/60" : "text-muted-foreground"} truncate`}>
                         {t('prompts.by')} {prompt.updatedBy}
                     </div>
                 </div>
@@ -499,7 +499,7 @@ function PromptsPageContent() {
             header: t('prompts.columns.usage24h'),
             width: "col-span-2",
             render: (prompt) => (
-                <div className="text-sm font-medium text-slate-800">
+                <div className="text-sm font-medium text-foreground">
                     {prompt.usage24h.toLocaleString()}
                 </div>
             ),
@@ -509,7 +509,7 @@ function PromptsPageContent() {
             header: t('prompts.columns.owner'),
             width: "col-span-2",
             render: (prompt) => (
-                <span className="text-sm text-slate-700 truncate">{prompt.owner.name}</span>
+                <span className="text-sm text-foreground truncate">{prompt.owner.name}</span>
             ),
         },
     ]
@@ -572,7 +572,7 @@ function PromptsPageContent() {
     return (
         <div className="flex flex-col min-h-screen">
             <div className="flex-1">
-                <div className="px-4 pt-[12px] pb-[12px] h-[65px] bg-white border-b border-slate-200">
+                <div className="px-6 py-4">
                     <DataFilters
                         searchQuery={searchQuery}
                         onSearch={setSearchQuery}
@@ -586,15 +586,17 @@ function PromptsPageContent() {
                         onNewPromptClick={() => setIsNewPromptModalOpen(true)}
                     />
                 </div>
-                <div className="flex flex-col flex-1">
-                    <DataTable
-                        data={paginatedPrompts}
-                        columns={columns}
-                        selectable={true}
-                        selectedItems={selectedPrompts}
-                        onSelectionChange={setSelectedPrompts}
-                        onRowClick={(prompt) => handleEdit(prompt.id)}
-                    />
+                <div className="flex flex-col flex-1 px-6 pb-6">
+                    <div className="glass-effect rounded-xl overflow-hidden">
+                        <DataTable
+                            data={paginatedPrompts}
+                            columns={columns}
+                            selectable={true}
+                            selectedItems={selectedPrompts}
+                            onSelectionChange={setSelectedPrompts}
+                            onRowClick={(prompt) => handleEdit(prompt.id)}
+                        />
+                    </div>
                     <Pagination
                         totalItems={processedPrompts.length}
                         currentPage={currentPage}

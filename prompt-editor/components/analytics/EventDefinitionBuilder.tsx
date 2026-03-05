@@ -349,37 +349,30 @@ export default function EventDefinitionBuilder({
 
   return (
     <div className="space-y-0">
-      {/* Filters Block */}
+      {/* Filters */}
       {!modalMode && (
-        <Card>
-          <CardContent className="px-4 py-3">
-            <div className="flex gap-2 items-center">
-              <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-               <Input
-                  placeholder={t('analytics.eventsBuilder.searchPlaceholder')}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 h-9 text-xs"
-                />
-              </div>
-              {showCreateButton && (
-                <Button
-                  onClick={onNewClick || (() => setEditingEvent(createNewEvent()))}
-                  size="sm"
-                  className="bg-black hover:bg-gray-800 text-xs h-9 px-3 gap-1.5"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  {t('analytics.eventsBuilder.new')}
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex gap-2 items-center mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <Input
+              placeholder={t('analytics.eventsBuilder.searchPlaceholder')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8 h-9 text-xs"
+            />
+          </div>
+          {showCreateButton && (
+            <Button
+              onClick={onNewClick || (() => setEditingEvent(createNewEvent()))}
+              size="sm"
+              className="bg-foreground hover:bg-foreground/90 text-xs h-9 px-3 gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              {t('analytics.eventsBuilder.new')}
+            </Button>
+          )}
+        </div>
       )}
-
-      {/* Spacing between filters and content */}
-      {!modalMode && <div className="h-4"></div>}
 
       {/* Save Message */}
       {saveMessage && (
@@ -430,7 +423,7 @@ export default function EventDefinitionBuilder({
               <div className="flex justify-between items-center">
                 <div>
                   <Label className="text-sm font-medium">{t('analytics.eventsBuilder.form.fieldsTitle')}</Label>
-                  <p className="text-xs text-gray-500">{t('analytics.eventsBuilder.form.descriptionPlaceholder')}</p>
+                  <p className="text-xs text-muted-foreground">{t('analytics.eventsBuilder.form.descriptionPlaceholder')}</p>
                 </div>
                 <Button
                   onClick={() => handleAddField()}
@@ -442,7 +435,7 @@ export default function EventDefinitionBuilder({
                 </Button>
               </div>
               {editingEvent.metadata_schema.map((field, idx) => (
-                <div key={`meta-${idx}`} className="flex gap-2 items-start p-2 bg-gray-50 rounded">
+                <div key={`meta-${idx}`} className="flex gap-2 items-start p-2 bg-secondary/50 rounded">
                   <div className="flex-1 space-y-2">
                     <div className="flex gap-2">
                       <Input
@@ -493,7 +486,7 @@ export default function EventDefinitionBuilder({
                 </div>
               ))}
               {editingEvent.metadata_schema.length === 0 && (
-                <p className="text-xs text-gray-400 text-center py-2">{t('analytics.eventsBuilder.form.noFields')}</p>
+                <p className="text-xs text-muted-foreground/60 text-center py-2">{t('analytics.eventsBuilder.form.noFields')}</p>
               )}
             </div>
 
@@ -535,7 +528,7 @@ export default function EventDefinitionBuilder({
             <Card key={`${event.id}-${refreshKey}`} className="p-3">
               <div className="flex items-center justify-between">
                 <div
-                  className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-gray-50 -m-1 p-1 rounded"
+                  className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-secondary/50 -m-1 p-1 rounded"
                   onClick={() => toggleCollapse(event.id!)}
                 >
                   <div className="h-6 w-6 flex items-center justify-center">
@@ -588,10 +581,10 @@ export default function EventDefinitionBuilder({
                       <ul className="ml-4 list-disc text-xs space-y-1">
                         {event.metadata_schema.map((field, idx) => (
                           <li key={idx}>
-                            <code className="bg-gray-100 px-1 rounded">{field.name}</code>
+                            <code className="bg-secondary px-1 rounded">{field.name}</code>
                             {' '}({field.type})
                             {field.required && <span className="text-red-600"> *</span>}
-                            {field.description && <span className="text-gray-600"> - {field.description}</span>}
+                            {field.description && <span className="text-muted-foreground"> - {field.description}</span>}
                           </li>
                         ))}
                       </ul>
@@ -616,8 +609,8 @@ export default function EventDefinitionBuilder({
                       <Copy className="h-3 w-3" />
                     </Button>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-md">
-                    <pre className="text-xs font-mono text-gray-800 whitespace-pre-wrap overflow-x-auto">
+                  <div className="bg-secondary/50 p-3 rounded-md">
+                    <pre className="text-xs font-mono text-foreground whitespace-pre-wrap overflow-x-auto">
                       {generateCodeSnippet(event)}
                     </pre>
                   </div>

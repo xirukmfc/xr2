@@ -23,8 +23,8 @@ export const colors = {
 
   // Button variants
   button: {
-    default: 'bg-slate-900 text-white hover:bg-slate-800', // Black by default
-    primary: 'bg-primary text-primary-foreground hover:bg-primary/90', // Blue for special actions
+    default: 'gradient-primary text-primary-foreground', // Gradient primary by default
+    primary: 'gradient-primary text-primary-foreground', // Gradient primary
     secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
     destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
   },

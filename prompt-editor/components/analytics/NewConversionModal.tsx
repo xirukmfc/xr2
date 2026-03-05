@@ -303,7 +303,7 @@ export default function NewConversionModal({ onSave, onCancel }: NewConversionMo
           onClick={handleSave}
           disabled={saving || !canSave}
           size="sm"
-          className="bg-black hover:bg-gray-800"
+          className="bg-foreground hover:bg-foreground/90"
           data-testid="create-conversion-button"
         >
           {saving ? 'Creating...' : 'Create Conversion'}

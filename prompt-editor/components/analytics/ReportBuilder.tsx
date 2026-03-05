@@ -118,7 +118,7 @@ export default function ReportBuilder() {
   const ReportCanvas = () => {
     return (
       <div
-        className="relative bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700"
+        className="relative bg-secondary/50 dark:bg-secondary/50 rounded-lg border-2 border-dashed border-border dark:border-border"
         style={{ height: '600px' }}
       >
         {widgets.map(widget => (

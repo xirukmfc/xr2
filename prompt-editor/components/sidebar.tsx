@@ -121,11 +121,11 @@ export function Sidebar() {
 
   return (
     <div
-      className={`fixed left-0 top-0 h-full bg-white border-r border-slate-200 z-40 transition-all duration-300 ${
+      className={`fixed left-0 top-0 h-full bg-background/80 backdrop-blur-sm border-r border-border/40 z-40 transition-all duration-300 ${
         isCollapsed ? "w-16" : "w-64"
       }`}
     >
-      <div className="p-4 border-slate-200 border-b border-r-0 h-[65px] flex items-center">
+      <div className="p-4 border-b border-border/30 h-[65px] flex items-center">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -138,14 +138,14 @@ export function Sidebar() {
                   />
                 ) : (
                   <>
-                    <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <User className="w-4 h-4 text-slate-600" />
+                    <div className="w-8 h-8 gradient-card rounded-full flex items-center justify-center flex-shrink-0 border border-border">
+                      <User className="w-4 h-4 text-muted-foreground" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-medium text-slate-900 truncate">
+                      <div className="text-sm font-medium text-foreground truncate">
                         {user?.full_name || user?.username || 'User'}
                       </div>
-                      <div className="text-xs text-slate-500 truncate">{user?.email || 'PromptHub'}</div>
+                      <div className="text-xs text-muted-foreground truncate">{user?.email || 'PromptHub'}</div>
                     </div>
                   </>
                 )}
@@ -154,13 +154,13 @@ export function Sidebar() {
             {limits && !limits.is_superuser && !limits.limits.is_superuser && !limitsLoading && (
               <TooltipContent side="right" className="w-64">
                 <div className="space-y-3">
-                  <div className="text-sm font-medium text-slate-900">{t('sidebar.usageLimits')}</div>
+                  <div className="text-sm font-medium text-foreground">{t('sidebar.usageLimits')}</div>
 
                   {/* Prompts Limit */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-600">{t('sidebar.availablePrompts')}</span>
-                      <span className="text-slate-700 font-medium">
+                      <span className="text-muted-foreground">{t('sidebar.availablePrompts')}</span>
+                      <span className="text-foreground font-medium">
                         {limits.limits.prompts.max === -1
                           ? t('sidebar.unlimited')
                           : `${limits.limits.prompts.current} / ${limits.limits.prompts.max}`
@@ -177,7 +177,7 @@ export function Sidebar() {
                             (limits.limits.prompts.current / limits.limits.prompts.max) >= 0.7 ? 'bg-amber-300' : 'bg-emerald-300'
                           }
                         />
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-muted-foreground">
                           {limits.limits.prompts.max - limits.limits.prompts.current} {t('sidebar.remaining')}
                         </div>
                       </>
@@ -187,8 +187,8 @@ export function Sidebar() {
                   {/* API Requests Limit */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-600">{t('sidebar.monthlyApiRequests')}</span>
-                      <span className="text-slate-700 font-medium">
+                      <span className="text-muted-foreground">{t('sidebar.monthlyApiRequests')}</span>
+                      <span className="text-foreground font-medium">
                         {limits.limits.api_requests.max === -1
                           ? t('sidebar.unlimited')
                           : `${limits.limits.api_requests.current} / ${limits.limits.api_requests.max}`
@@ -205,7 +205,7 @@ export function Sidebar() {
                             (limits.limits.api_requests.current / limits.limits.api_requests.max) >= 0.7 ? 'bg-amber-300' : 'bg-emerald-300'
                           }
                         />
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-muted-foreground">
                           {t('sidebar.resetsAt')} {new Date(limits.limits.api_requests.reset_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </>
@@ -230,10 +230,12 @@ export function Sidebar() {
               <li key={item.name}>
                 <Link
                   href={item.href}
-                  className={`flex items-center py-2.5 h-10 transition-colors group ${
+                  className={`flex items-center py-2.5 h-10 transition-all duration-200 group ${
                       !isCollapsed ? "!space-x-3 !px-5" : "justify-center"
                     } ${
-                      isActive ? "bg-slate-100 text-slate-900" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      isActive
+                        ? "bg-secondary text-foreground font-medium"
+                        : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                     }`}
                   title={isCollapsed ? item.name : undefined}
                   onMouseEnter={() => preloadPageData(item.href)}
@@ -243,7 +245,7 @@ export function Sidebar() {
                     <>
                       <span className="text-sm">{item.name}</span>
                       {item.count !== undefined && (
-                        <span className="ml-auto px-1.5 py-0.5 rounded text-xs font-medium bg-slate-200 text-slate-700">
+                        <span className="ml-auto px-1.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-muted-foreground">
                           {item.count}
                         </span>
                       )}
@@ -266,7 +268,7 @@ export function Sidebar() {
         <div className={`px-4 py-2 ${isCollapsed ? "px-2" : ""}`}>
           <button
             onClick={() => setShowUpgradeModal(true)}
-            className={`flex items-center text-sm text-slate-600 hover:text-blue-600 transition-colors ${
+            className={`flex items-center text-sm text-muted-foreground hover:text-blue-600 transition-colors ${
               isCollapsed ? "w-8 h-8 justify-center" : "w-full"
             }`}
             title={t("sidebar.upgradeToPro")}
@@ -295,7 +297,7 @@ export function Sidebar() {
           href={docsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className={`flex items-center p-2 rounded-md transition-colors group text-slate-600 hover:bg-blue-50 hover:text-blue-700 ${
+          className={`flex items-center p-2 rounded-md transition-colors group text-muted-foreground hover:bg-blue-50 hover:text-blue-700 ${
             isCollapsed
               ? "w-8 h-8 justify-center"
               : "w-full justify-start space-x-2"
@@ -308,7 +310,7 @@ export function Sidebar() {
         {/* Logout Button */}
         <button
           onClick={() => logout()}
-          className={`flex items-center p-2 rounded-md transition-colors group text-slate-600 hover:bg-red-50 hover:text-red-700 ${
+          className={`flex items-center p-2 rounded-md transition-colors group text-muted-foreground hover:bg-red-50 hover:text-red-700 ${
             isCollapsed
               ? "w-8 h-8 justify-center"
               : "w-full justify-start space-x-2"
@@ -322,8 +324,8 @@ export function Sidebar() {
           onClick={handleToggleCollapse}
           className={`flex items-center justify-center p-2 rounded-md transition-colors group ${
             isCollapsed
-              ? "w-8 h-8 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-              : "w-full h-8 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+              ? "w-8 h-8 text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+              : "w-full h-8 text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
           }`}
           title={isCollapsed ? "Expand sidebar" : t('sidebar.collapse')}
         >

@@ -41,7 +41,7 @@ export function Pagination({
 
   return (
     <div className={`flex items-center justify-between mt-4 px-4 mb-4 ${className}`}>
-      <div className="text-xs text-slate-600">
+      <div className="text-xs text-muted-foreground">
         {totalItems === 0 ? (
           <>0 {itemName}</>
         ) : (
@@ -67,7 +67,7 @@ export function Pagination({
             size="sm"
             variant={currentPage === pageNum ? "default" : "ghost"}
             onClick={() => onPageChange(pageNum)}
-            className={`h-8 px-3 text-xs ${currentPage === pageNum ? "bg-black text-white" : ""}`}
+            className={`h-8 px-3 text-xs ${currentPage === pageNum ? "gradient-primary text-primary-foreground" : ""}`}
           >
             {pageNum}
           </Button>

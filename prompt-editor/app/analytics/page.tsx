@@ -320,44 +320,46 @@ function AnalyticsPageContent() {
   return (
     <ProtectedRoute>
       <>
-        {/* EditorHeader */}
-        <div className="px-4 pt-[12px] pb-[12px] h-[65px] bg-white border-b border-slate-200 flex items-center justify-between flex-shrink-0">
-          <div>
-            <h1 className="text-base font-semibold">{t('analytics.title')}</h1>
-            <p className="text-xs text-muted-foreground">
-              {t('analytics.subtitle')}
-            </p>
-          </div>
-        </div>
+        <div className="flex flex-col min-h-screen">
+          <div className="flex-1">
+            {/* Header with title and tabs */}
+            <div className="px-6 py-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h1 className="text-base font-semibold">{t('analytics.title')}</h1>
+                  <p className="text-xs text-muted-foreground">
+                    {t('analytics.subtitle')}
+                  </p>
+                </div>
+              </div>
 
-        {/* Content */}
-        <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
-          {/* Horizontal tabs navigation */}
-          <div className="bg-white border-b border-slate-200 px-4 h-10">
-            <div className="flex items-center gap-1 -mb-px">
-              {subsections.map((subsection) => {
-                const Icon = subsection.icon
-                const isActive = activeSubsection === subsection.id
-                return (
-                  <button
-                    key={subsection.id}
-                    onClick={() => setActiveSubsection(subsection.id)}
-                    className={`flex items-center gap-1.5 px-3 py-[11px] text-xs font-medium border-b-2 transition-colors ${
-                      isActive
-                        ? "border-slate-900 text-slate-900"
-                        : "border-transparent text-muted-foreground hover:text-foreground hover:border-slate-300"
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    <span>{t(subsection.labelKey)}</span>
-                  </button>
-                )
-              })}
+              {/* Tabs */}
+              <div className="flex items-center gap-1 border-b border-border -mb-4 pb-0">
+                {subsections.map((subsection) => {
+                  const Icon = subsection.icon
+                  const isActive = activeSubsection === subsection.id
+                  return (
+                    <button
+                      key={subsection.id}
+                      onClick={() => setActiveSubsection(subsection.id)}
+                      className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+                        isActive
+                          ? "border-foreground text-foreground"
+                          : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{t(subsection.labelKey)}</span>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
-          </div>
 
-          <div className="flex-1 p-4 overflow-y-auto">
-            <div className="max-w-full">{renderContent()}</div>
+            {/* Content */}
+            <div className="flex flex-col flex-1 px-6 pb-6 pt-4">
+              {renderContent()}
+            </div>
           </div>
         </div>
 

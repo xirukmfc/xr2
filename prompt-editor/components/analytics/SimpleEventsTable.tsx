@@ -81,7 +81,7 @@ export default function SimpleEventsTable({ events = [] }: SimpleEventsTableProp
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b bg-slate-50">
+                <tr className="border-b bg-muted/50">
                   <th className="text-left p-2 font-medium w-8"></th>
                   <th className="text-left p-2 font-medium">{t('analytics.eventsTable.headers.event')}</th>
                   <th className="text-left p-2 font-medium w-24">{t('analytics.eventsTable.headers.category')}</th>
@@ -95,7 +95,7 @@ export default function SimpleEventsTable({ events = [] }: SimpleEventsTableProp
                   const isExpanded = expandedRows.has(event.id);
                   return (
                     <React.Fragment key={event.id}>
-                      <tr className="border-b hover:bg-gray-50 transition-colors">
+                      <tr className="border-b hover:bg-secondary/50 transition-colors">
                         <td className="p-2">
                           <Button
                             variant="ghost"
@@ -164,7 +164,7 @@ export default function SimpleEventsTable({ events = [] }: SimpleEventsTableProp
                         </td>
                       </tr>
                       {isExpanded && (
-                        <tr className="bg-gray-50">
+                        <tr className="bg-secondary/50">
                           <td colSpan={6} className="p-3">
                             <div className="space-y-3">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

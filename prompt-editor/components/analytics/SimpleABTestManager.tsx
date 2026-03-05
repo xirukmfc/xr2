@@ -348,12 +348,12 @@ export default function SimpleABTestManager({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'running': return 'bg-slate-700';
-      case 'paused': return 'bg-slate-500';
-      case 'completed': return 'bg-slate-600';
-      case 'draft': return 'bg-slate-400';
-      case 'cancelled': return 'bg-slate-500';
-      default: return 'bg-slate-400';
+      case 'running': return 'bg-foreground';
+      case 'paused': return 'bg-foreground/70';
+      case 'completed': return 'bg-foreground/85';
+      case 'draft': return 'bg-muted-foreground/60';
+      case 'cancelled': return 'bg-foreground/70';
+      default: return 'bg-muted-foreground/60';
     }
   };
 
@@ -385,36 +385,29 @@ export default function SimpleABTestManager({
 
   return (
     <div className="space-y-0">
-      {/* Filters Block */}
+      {/* Filters */}
       {showCreateButton && (
-        <Card>
-          <CardContent className="px-4 py-3">
-            <div className="flex gap-2 items-center">
-              <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input
-                  placeholder={t('analytics.abTests.searchPlaceholder')}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 h-9 text-xs"
-                />
-              </div>
-              <Button
-                data-testid="ab-test-new-button"
-                onClick={() => onNewClick ? onNewClick() : setShowCreateForm(true)}
-                size="sm"
-                className="bg-black hover:bg-gray-800 text-xs h-9 px-3 gap-1.5"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                {t('analytics.abTests.new')}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex gap-2 items-center mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <Input
+              placeholder={t('analytics.abTests.searchPlaceholder')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8 h-9 text-xs"
+            />
+          </div>
+          <Button
+            data-testid="ab-test-new-button"
+            onClick={() => onNewClick ? onNewClick() : setShowCreateForm(true)}
+            size="sm"
+            className="bg-foreground hover:bg-foreground/90 text-xs h-9 px-3 gap-1.5"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            {t('analytics.abTests.new')}
+          </Button>
+        </div>
       )}
-
-      {/* Spacing between filters and content */}
-      {showCreateButton && <div className="h-4"></div>}
 
       {/* Create Form */}
       {showCreateForm && (
@@ -540,7 +533,7 @@ export default function SimpleABTestManager({
               onClick={createTest}
               disabled={loading || !formData.name || !formData.prompt_id || !formData.version_a_id || !formData.version_b_id}
               size="default"
-              className="bg-black hover:bg-gray-800 text-white"
+              className="bg-foreground hover:bg-foreground/90 text-white"
             >
               {loading ? t('analytics.abTests.form.creating') : t('analytics.abTests.form.create')}
             </Button>
@@ -717,14 +710,14 @@ export default function SimpleABTestManager({
                             {testResults[test.id].funnel_results!.statistical_significance.confidence}%
                           </span>
                         </div>
-                        <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
                           <div 
                             className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${
                               testResults[test.id].funnel_results!.statistical_significance.confidence >= 95 
                                 ? 'bg-green-500' 
                                 : testResults[test.id].funnel_results!.statistical_significance.confidence >= 80 
                                   ? 'bg-yellow-500' 
-                                  : 'bg-gray-400'
+                                  : 'bg-muted-foreground/60'
                             }`}
                             style={{ width: `${testResults[test.id].funnel_results!.statistical_significance.confidence}%` }}
                           />

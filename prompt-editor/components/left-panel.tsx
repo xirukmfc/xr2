@@ -64,21 +64,21 @@ function SourceBreakdown({
 }) {
     const data = [...sources].sort((a, b) => b.count - a.count)
     return (
-        <div className="mt-3 pt-3 border-t border-gray-200">
-            <div className="text-xs font-medium text-gray-700 mb-2">{t('leftPanel.bySource')}</div>
+        <div className="mt-3 pt-3 border-t border-border">
+            <div className="text-xs font-medium text-muted-foreground mb-2">{t('leftPanel.bySource')}</div>
             <div className="space-y-2">
                 {data.map(({name, count}, index) => {
                     const pct = Math.round((count / Math.max(total, 1)) * 100)
                     return (
                         <div key={`${name}-${index}`}>
-                            <div className="flex items-center justify-between text-xs text-gray-600">
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
                                 <span className="truncate">{name}</span>
                                 <span className="tabular-nums">
                                     {count} ({pct}%)
                                     </span>
                             </div>
-                            <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                                <div className="h-full bg-gray-900"
+                            <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                                <div className="h-full bg-foreground"
                                      style={{width: `${Math.min(100, Math.max(0, pct))}%`}}/>
                             </div>
                         </div>
@@ -329,7 +329,7 @@ export function LeftPanel({
     const hasUndefined = undefinedCount > 0
 
     return (
-        <div className="w-64 bg-white border-r border-gray-300 flex flex-col h-full">
+        <div className="w-64 bg-card border-r border-border flex flex-col h-full">
             <div className="flex-1 overflow-y-auto scrollbar-hide">
                 <style jsx>{`
                     .scrollbar-hide {
@@ -344,11 +344,11 @@ export function LeftPanel({
 
                 {/* Settings Toggle */}
                 <div
-                    className="flex items-center h-10 transition-colors group text-slate-600 hover:text-slate-900 border-b border-slate-200">
+                    className="flex items-center h-10 transition-colors group text-muted-foreground hover:text-foreground border-b border-border">
                     <Button
                         variant="ghost"
                         onClick={() => setShowSettings(!showSettings)}
-                        className="w-full justify-between text-left px-4 py-3 h-10 hover:bg-slate-50 rounded-none focus-visible:ring-0 text-slate-600 hover:text-slate-900"
+                        className="w-full justify-between text-left px-4 py-3 h-10 hover:bg-secondary/50 rounded-none focus-visible:ring-0 text-muted-foreground hover:text-foreground"
                     >
                     <span className="flex items-center gap-2">
                       <Settings className="w-4 h-4 flex-shrink-0"/>
@@ -363,7 +363,7 @@ export function LeftPanel({
                 {showSettings && (
                     <div className="px-4 py-3 space-y-3 bg-white">
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">{t('leftPanel.promptName')}</label>
+                            <label className="block text-xs font-medium text-muted-foreground mb-1">{t('leftPanel.promptName')}</label>
                             <Input
                                 value={safePromptData.name || ""}
                                 onChange={(e) => updatePromptDataAction({name: e.target.value})}
@@ -372,20 +372,20 @@ export function LeftPanel({
                         </div>
 
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">{t('leftPanel.slug')}</label>
+                            <label className="block text-xs font-medium text-muted-foreground mb-1">{t('leftPanel.slug')}</label>
                             <Input
                                 value={safePromptData.slug || ""}
                                 onChange={(e) => updatePromptDataAction({slug: e.target.value})}
-                                className="h-8 text-sm font-mono tracking-tight bg-slate-50 border-slate-300 text-slate-800 placeholder-slate-400"
+                                className="h-8 text-sm font-mono tracking-tight bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground/60"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">{t('leftPanel.description')}</label>
+                            <label className="block text-xs font-medium text-muted-foreground mb-1">{t('leftPanel.description')}</label>
                             <textarea
                                 value={safePromptData.description || ""}
                                 onChange={(e) => updatePromptDataAction({description: e.target.value})}
-                                className="w-full text-sm p-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full text-sm p-2 border border-border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 rows={5}
                                 maxLength={250}
                                 placeholder={t('leftPanel.description')}
@@ -393,7 +393,7 @@ export function LeftPanel({
                         </div>
 
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">{t('leftPanel.tags')}</label>
+                            <label className="block text-xs font-medium text-muted-foreground mb-1">{t('leftPanel.tags')}</label>
                             <div className="flex flex-wrap gap-1 mb-2">
                                 {safePromptData.tags.map((tag, index) => (
                                     <span
@@ -402,7 +402,7 @@ export function LeftPanel({
                                       style={tagStyle(tag.name)}
                                     >
                                       {tag.name}
-                                      <button onClick={() => removeTag(tag.name)} className="ml-1 hover:text-gray-600">×</button>
+                                      <button onClick={() => removeTag(tag.name)} className="ml-1 hover:text-muted-foreground">×</button>
                                     </span>
                                 ))}
                             </div>
@@ -422,11 +422,11 @@ export function LeftPanel({
                 {/* Rest of the code remains unchanged... */}
                 {/* Performance Stats Toggle */}
                 <div
-                    className="flex items-center h-10 transition-colors group text-slate-600 hover:text-slate-900 border-b border-slate-200">
+                    className="flex items-center h-10 transition-colors group text-muted-foreground hover:text-foreground border-b border-border">
                     <Button
                         variant="ghost"
                         onClick={() => setShowPerformanceStats(!showPerformanceStats)}
-                        className="w-full justify-between text-left px-4 py-3 h-10 hover:bg-slate-50 rounded-none focus-visible:ring-0 text-slate-600 hover:text-slate-900"
+                        className="w-full justify-between text-left px-4 py-3 h-10 hover:bg-secondary/50 rounded-none focus-visible:ring-0 text-muted-foreground hover:text-foreground"
                     >
                     <span className="flex items-center gap-2">
                       <BarChart3 className="w-4 h-4 flex-shrink-0"/>
@@ -441,19 +441,19 @@ export function LeftPanel({
                     <div className="px-4 py-3 space-y-3 bg-white">
                         {statsLoading ? (
                             <div className="flex items-center justify-center py-8">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-muted-foreground"></div>
                             </div>
                         ) : performanceStats ? (
                             <>
-                                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                <div className="bg-secondary/50 rounded-lg p-3 border border-border">
                                     <div className="flex items-center justify-between mb-2">
-                                        <Users className="w-4 h-4 text-gray-600"/>
-                                        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">24h</span>
+                                        <Users className="w-4 h-4 text-muted-foreground"/>
+                                        <span className="text-xs font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded">24h</span>
                                     </div>
-                                    <div className="text-2xl font-bold text-gray-900 mb-1">
+                                    <div className="text-2xl font-bold text-foreground mb-1">
                                         {performanceStats.total_requests.toLocaleString()}
                                     </div>
-                                    <div className="text-xs text-gray-600">{t('leftPanel.totalRequests')}</div>
+                                    <div className="text-xs text-muted-foreground">{t('leftPanel.totalRequests')}</div>
                                     
                                     {performanceStats.total_requests > 0 && (
                                         <SourceBreakdown
@@ -468,27 +468,27 @@ export function LeftPanel({
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-2">
-                                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                                        <CheckCircle className="w-4 h-4 text-gray-600 mb-2"/>
-                                        <div className="text-lg font-bold text-gray-900">
+                                    <div className="bg-secondary/50 rounded-lg p-3 border border-border">
+                                        <CheckCircle className="w-4 h-4 text-muted-foreground mb-2"/>
+                                        <div className="text-lg font-bold text-foreground">
                                             {performanceStats.success_rate_200_percent.toFixed(1)}%
                                         </div>
-                                        <div className="text-xs text-gray-600">{t('leftPanel.successRate')}</div>
+                                        <div className="text-xs text-muted-foreground">{t('leftPanel.successRate')}</div>
                                     </div>
-                                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                                        <Clock className="w-4 h-4 text-gray-600 mb-2"/>
-                                        <div className="text-lg font-bold text-gray-900">
+                                    <div className="bg-secondary/50 rounded-lg p-3 border border-border">
+                                        <Clock className="w-4 h-4 text-muted-foreground mb-2"/>
+                                        <div className="text-lg font-bold text-foreground">
                                             {performanceStats.avg_response_time_ms > 0
                                                 ? `${(performanceStats.avg_response_time_ms / 1000).toFixed(1)}s`
                                                 : '0s'
                                             }
                                         </div>
-                                        <div className="text-xs text-gray-600">{t('leftPanel.avgResponse')}</div>
+                                        <div className="text-xs text-muted-foreground">{t('leftPanel.avgResponse')}</div>
                                     </div>
                                 </div>
                             </>
                         ) : (
-                            <div className="text-center py-8 text-gray-500">
+                            <div className="text-center py-8 text-muted-foreground">
                                 <BarChart3 className="w-8 h-8 mx-auto mb-2 opacity-50"/>
                                 <div className="text-sm">{t('leftPanel.noDataAvailable')}</div>
                             </div>
@@ -497,11 +497,11 @@ export function LeftPanel({
                 )}
 
                 {/* Variables Toggle */}
-                <div className="flex items-center h-10 transition-colors group text-slate-600 hover:text-slate-900 border-b border-slate-200">
+                <div className="flex items-center h-10 transition-colors group text-muted-foreground hover:text-foreground border-b border-border">
                     <Button
                         variant="ghost"
                         onClick={() => setShowVariables(!showVariables)}
-                        className="w-full justify-between text-left px-4 py-3 h-10 hover:bg-slate-50 rounded-none focus-visible:ring-0 text-slate-600 hover:text-slate-900"
+                        className="w-full justify-between text-left px-4 py-3 h-10 hover:bg-secondary/50 rounded-none focus-visible:ring-0 text-muted-foreground hover:text-foreground"
                     >
                     <span className="flex items-center gap-2">
                       <Code className="w-4 h-4 flex-shrink-0"/>
@@ -530,24 +530,24 @@ export function LeftPanel({
                         </Button>
 
                         {variables.length === 0 ? (
-                            <div className="text-xs text-gray-500 text-center py-2">{t('leftPanel.noVariablesDefined')}</div>
+                            <div className="text-xs text-muted-foreground text-center py-2">{t('leftPanel.noVariablesDefined')}</div>
                         ) : (
                             <div className="space-y-2">
                                 {variables.map((variable, index) => (
                                     <div
                                         key={`${variable.name}-${index}`}
                                         className={`flex items-center justify-between p-2 border rounded text-xs ${
-                                            variable.isDefined ? "bg-white border-gray-200" : "bg-yellow-50 border-yellow-200"
+                                            variable.isDefined ? "bg-card border-border" : "bg-yellow-50 border-yellow-200"
                                         }`}
                                     >
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-medium text-gray-900 truncate">
+                                            <div className="font-medium text-foreground truncate">
                                                 {variable.name}
                                                 {!variable.isDefined && <span className="text-yellow-600 ml-1">⚠</span>}
                                             </div>
-                                            <div className="text-gray-500">{variable.type}</div>
+                                            <div className="text-muted-foreground">{variable.type}</div>
                                             {variable.defaultValue && (
-                                                <div className="text-gray-400 truncate">{variable.defaultValue}</div>
+                                                <div className="text-muted-foreground/60 truncate">{variable.defaultValue}</div>
                                             )}
                                         </div>
                                         <div className="flex items-center gap-1 ml-2">
@@ -566,7 +566,7 @@ export function LeftPanel({
                                                 onClick={() => openEdit(variable.name)}
                                                 variant="ghost"
                                                 size="sm"
-                                                className="h-6 w-6 p-0 text-gray-600 hover:text-gray-700 hover:bg-gray-100"
+                                                className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-secondary"
                                                 title={t('leftPanel.editVariable')}
                                             >
                                                 <Edit className="w-3 h-3"/>
@@ -589,11 +589,11 @@ export function LeftPanel({
                 )}
 
                 {/* Versions Toggle */}
-                <div className="flex items-center h-10 transition-colors group text-slate-600 hover:text-slate-900 border-b border-slate-200">
+                <div className="flex items-center h-10 transition-colors group text-muted-foreground hover:text-foreground border-b border-border">
                     <Button
                         variant="ghost"
                         onClick={() => setShowVersions(!showVersions)}
-                        className="w-full justify-between text-left px-4 py-3 h-10 hover:bg-slate-50 rounded-none focus-visible:ring-0 text-slate-600 hover:text-slate-900"
+                        className="w-full justify-between text-left px-4 py-3 h-10 hover:bg-secondary/50 rounded-none focus-visible:ring-0 text-muted-foreground hover:text-foreground"
                     >
                     <span className="flex items-center gap-2">
                       <Clock className="w-4 h-4 flex-shrink-0"/>
@@ -616,7 +616,7 @@ export function LeftPanel({
                         </Button>
 
                         {versions.length === 0 ? (
-                            <div className="text-xs text-gray-500 text-center py-2">{t('leftPanel.noVersions')}</div>
+                            <div className="text-xs text-muted-foreground text-center py-2">{t('leftPanel.noVersions')}</div>
                         ) : (
                             <div className="space-y-2">
                                 {versions.map((version) => (
@@ -625,7 +625,7 @@ export function LeftPanel({
                                         className={`p-2 border rounded text-xs cursor-pointer transition-colors ${
                                             currentViewingVersion === version.version
                                                 ? "bg-blue-50 border-blue-200"
-                                                : "bg-white border-gray-200 hover:bg-gray-50"
+                                                : "bg-card border-border hover:bg-secondary/50"
                                         }`}
                                         onClick={() => handleViewVersion(version)}
                                     >
@@ -636,7 +636,7 @@ export function LeftPanel({
                                               </span>
                                         </div>
                                         <div className="flex items-center justify-between">
-                                            <span className="text-gray-400">{version.timestamp} · {version.updater || 'Unknown'}</span>
+                                            <span className="text-muted-foreground/60">{version.timestamp} · {version.updater || 'Unknown'}</span>
                                             <div className="flex gap-1">
                                                 <Button
                                                     onClick={(e) => {

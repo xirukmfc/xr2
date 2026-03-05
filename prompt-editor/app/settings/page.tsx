@@ -18,7 +18,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DataTable } from "@/components/ui/data-table"
 import type { Column } from "@/components/ui/data-table"
-import { Trash2, Edit2, Plus, Eye, EyeOff, Search, User, Tag, Key, Loader2, CreditCard, Zap, Check, X } from "lucide-react"
+import { Trash2, Edit2, Plus, Eye, EyeOff, Search, Tag, Key, Loader2, Zap, Check, X } from "lucide-react"
 import { apiClient, getCurrentSubscription, getSubscriptionTransactions, cancelSubscription, resumeSubscription, getUserLimits, type UserLimits } from "@/lib/api"
 import { useAuth } from "@/contexts/auth-context"
 import { NotificationProvider, useNotification } from "@/components/notification-provider"
@@ -69,18 +69,10 @@ const colorOptions = [
 ]
 
 
-const subsections = [
-  { id: "profile", labelKey: "settings.tabs.profile", icon: User },
-  { id: "subscription", labelKey: "settings.tabs.subscription", icon: CreditCard },
-  { id: "tags", labelKey: "settings.tabs.tags", icon: Tag },
-  { id: "llm-keys", labelKey: "settings.tabs.llmKeys", icon: Key },
-]
-
 function SettingsPageContent() {
   const { t } = useLocale()
   const { user, refreshUser } = useAuth()
   const { showNotification } = useNotification()
-  const [activeSubsection, setActiveSubsection] = useState<string>("profile")
   const [tags, setTags] = useState<UserTag[]>([])
   const [tagsLoading, setTagsLoading] = useState<boolean>(true)
   const [tagsError, setTagsError] = useState<string | null>(null)
@@ -133,13 +125,6 @@ function SettingsPageContent() {
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [subscriptionActionLoading, setSubscriptionActionLoading] = useState(false)
   const didFetchSubscription = useRef(false)
-
-  const localizedSubsections = useMemo(() =>
-    subsections.map((section) => ({
-      ...section,
-      name: t(section.labelKey),
-    }))
-  , [t])
 
   const translatedColorOptions = useMemo(() =>
     colorOptions.map((option) => ({
@@ -583,29 +568,31 @@ function SettingsPageContent() {
           </Button>
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-red-600">{t('settings.account.title')}</CardTitle>
-          <CardDescription>{t('settings.account.subtitle')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="p-4 border border-red-200 rounded-lg bg-red-50">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-red-800">{t('settings.account.deleteAccount')}</h3>
-                <p className="text-sm text-red-700 mt-1">
-                  {t('settings.account.deleteAccountDescription')}
-                </p>
-              </div>
-              <Button variant="destructive" className="ml-4" onClick={openDeleteDialog} size="sm">
-                {t('settings.account.deleteAccount')}
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
+  )
+
+  const renderDangerZone = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-red-600">{t('settings.account.title')}</CardTitle>
+        <CardDescription>{t('settings.account.subtitle')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="p-4 border border-red-200 rounded-lg bg-red-50">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-red-800">{t('settings.account.deleteAccount')}</h3>
+              <p className="text-sm text-red-700 mt-1">
+                {t('settings.account.deleteAccountDescription')}
+              </p>
+            </div>
+            <Button variant="destructive" className="ml-4" onClick={openDeleteDialog} size="sm">
+              {t('settings.account.deleteAccount')}
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 
   const renderSubscriptionSection = () => {
@@ -627,17 +614,17 @@ function SettingsPageContent() {
     }
 
     const planBadgeColor = {
-      free: 'bg-slate-100 text-slate-700',
+      free: 'bg-secondary text-foreground',
       pro: 'bg-blue-100 text-blue-700',
       enterprise: 'bg-purple-100 text-purple-700',
-    }[subscription.plan] || 'bg-slate-100 text-slate-700'
+    }[subscription.plan] || 'bg-secondary text-foreground'
 
     const statusBadgeColor = {
       active: 'bg-green-100 text-green-700',
       cancelled: 'bg-amber-100 text-amber-700',
       expired: 'bg-red-100 text-red-700',
       pending: 'bg-yellow-100 text-yellow-700',
-    }[subscription.status] || 'bg-slate-100 text-slate-700'
+    }[subscription.status] || 'bg-secondary text-foreground'
 
     const statusLabel = {
       active: t('settings.subscription.statusActive'),
@@ -673,7 +660,7 @@ function SettingsPageContent() {
           <CardContent className="space-y-4 pt-0">
             {/* Plan Details - compact for Pro */}
             {subscription.plan !== 'free' && subscription.period_end && (
-              <div className="flex items-center justify-between text-sm bg-slate-50 rounded-md px-3 py-2">
+              <div className="flex items-center justify-between text-sm bg-secondary/50 rounded-md px-3 py-2">
                 <div className="flex items-center gap-4">
                   <span className="text-muted-foreground">{t('settings.subscription.validUntil')}:</span>
                   <span className="font-medium">{new Date(subscription.period_end).toLocaleDateString()}</span>
@@ -687,7 +674,7 @@ function SettingsPageContent() {
 
             {/* Usage Section - inline */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-slate-50 rounded-md px-3 py-2">
+              <div className="bg-secondary/50 rounded-md px-3 py-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t('settings.subscription.prompts')}</span>
                   <span className="font-medium">
@@ -703,7 +690,7 @@ function SettingsPageContent() {
                   <Progress value={(userLimits.limits.prompts.current / subscription.limits.max_prompts) * 100} className="h-1.5 mt-1.5" />
                 )}
               </div>
-              <div className="bg-slate-50 rounded-md px-3 py-2">
+              <div className="bg-secondary/50 rounded-md px-3 py-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t('settings.subscription.apiRequests')}</span>
                   <span className="font-medium">
@@ -837,270 +824,157 @@ function SettingsPageContent() {
       )
     }
 
-    const tagColumns: Column<UserTag>[] = [
-      {
-        key: "name",
-        header: t('settings.tags.columns.name'),
-        width: "col-span-6",
-        render: (tag) => (
-          <div className="flex items-center space-x-3">
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: tag.color }}
-            />
-            <div>
-              <span className="font-medium text-slate-900 text-sm">{tag.name}</span>
-            </div>
-          </div>
-        ),
-      },
-      {
-        key: "color",
-        header: t('settings.tags.columns.color'),
-        width: "col-span-3",
-        render: (tag) => (
-          <div className="flex items-center space-x-2">
-            <div
-              className="w-4 h-4 rounded-full"
-              style={{ backgroundColor: tag.color }}
-            />
-            <span className="text-sm text-slate-600 font-mono">{tag.color}</span>
-          </div>
-        ),
-      },
-      {
-        key: "actions",
-        header: t('settings.tags.columns.actions'),
-        width: "col-span-3",
-        render: (tag) => (
-          <div className="flex items-center space-x-1">
-            <Button variant="ghost" size="sm" onClick={() => openTagModal(tag)} className="p-1 h-auto" title={t('settings.tags.modal.titleEdit')}>
-              <Edit2 className="w-4 h-4 text-slate-400 hover:text-blue-600" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setDeletingTagId(tag.id)
-                setShowDeleteTagDialog(true)
-              }}
-              className="p-1 h-auto"
-              title={t('settings.tags.deleteDialog.title')}
-            >
-              <Trash2 className="w-4 h-4 text-slate-400 hover:text-red-600" />
-            </Button>
-          </div>
-        ),
-      },
-    ]
-
     return (
-      <div className="space-y-0">
-        {/* Filters Block */}
-        <Card>
-          <CardContent className="px-4 py-3">
-            <div className="flex gap-2 items-center">
-              <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input
-                  placeholder={t('settings.tags.searchPlaceholder')}
-                  value={tagSearch}
-                  onChange={(e) => setTagSearch(e.target.value)}
-                  className="pl-8 h-9 text-xs"
-                />
-              </div>
-              <Button
-                onClick={() => openTagModal()}
-                size="sm"
-                className="text-xs h-9 px-3 gap-1.5"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                {t('settings.tags.newTag')}
-              </Button>
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">{t('settings.tags.title')}</CardTitle>
+            <Button
+              onClick={() => openTagModal()}
+              size="sm"
+              className="text-xs h-8 px-3 gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              {t('settings.tags.newTag')}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {filteredTags.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <Tag className="w-5 h-5 text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">
+                {tagSearch ? t('settings.tags.empty.filteredTitle') : t('settings.tags.empty.title')}
+              </p>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Spacing between filters and content */}
-        <div className="h-4"></div>
-
-        {/* Table */}
-        <Card>
-          <CardContent className="p-4">
-            <DataTable
-              data={filteredTags}
-              columns={tagColumns}
-              emptyState={{
-                icon: <Tag className="w-6 h-6 text-slate-400" />,
-                title: tagSearch ? t('settings.tags.empty.filteredTitle') : t('settings.tags.empty.title'),
-                description: tagSearch ? t('settings.tags.empty.filteredDescription') : t('settings.tags.empty.description'),
-              }}
-            />
-          </CardContent>
-        </Card>
-      </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {filteredTags.map((tag) => (
+                <div
+                  key={tag.id}
+                  className="group flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border bg-secondary/30 text-sm"
+                >
+                  <div
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: tag.color }}
+                  />
+                  <span className="text-foreground">{tag.name}</span>
+                  <div className="flex items-center gap-0.5 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => openTagModal(tag)} className="p-0.5 rounded hover:bg-secondary" title={t('settings.tags.modal.titleEdit')}>
+                      <Edit2 className="w-3 h-3 text-muted-foreground hover:text-blue-600" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setDeletingTagId(tag.id)
+                        setShowDeleteTagDialog(true)
+                      }}
+                      className="p-0.5 rounded hover:bg-secondary"
+                      title={t('settings.tags.deleteDialog.title')}
+                    >
+                      <Trash2 className="w-3 h-3 text-muted-foreground hover:text-red-600" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     )
   }
 
   const renderLLMKeysSection = () => {
-    const llmColumns: Column<any>[] = [
-      {
-        key: "name",
-        header: t('settings.llmKeys.columns.name'),
-        width: "col-span-4",
-        render: (llm: LLMApiKey) => (
-          <div>
-            <div className="font-semibold text-slate-900 text-sm truncate">{llm.name}</div>
-            <div className="text-xs text-slate-500 truncate">
-              {llm.provider_display_name || llm.provider_name || t('settings.llmKeys.unknownProvider')}
-            </div>
-          </div>
-        ),
-      },
-      {
-        key: "created",
-        header: t('settings.llmKeys.columns.created'),
-        width: "col-span-2",
-        render: (llm: LLMApiKey) => (
-          <div className="text-sm text-slate-600 whitespace-nowrap">
-            {new Date(llm.created_at).toLocaleDateString()}
-          </div>
-        ),
-      },
-      {
-        key: "key_preview",
-        header: t('settings.llmKeys.columns.preview'),
-        width: "col-span-4",
-        render: (llm: LLMApiKey) => (
-          <div className="flex items-center space-x-2 min-w-0">
-            <code className="text-xs bg-slate-100 px-2 py-1 rounded font-mono text-slate-600 truncate">
-              ••••••••••••••••••••
-            </code>
-            <span className="text-xs text-slate-400 whitespace-nowrap">{t('settings.llmKeys.columns.hidden')}</span>
-          </div>
-        ),
-      },
-      {
-        key: "actions",
-        header: t('settings.llmKeys.columns.actions'),
-        width: "col-span-2",
-        render: (llm: LLMApiKey) => (
-          <div className="flex items-center space-x-1">
-            <Button variant="ghost" size="sm" onClick={() => openLLMModal(llm)} className="p-1 h-auto" title={t('settings.llmKeys.modal.titleEdit')}>
-              <Edit2 className="w-4 h-4 text-slate-400 hover:text-blue-600" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setDeletingLLMId(llm.id)
-                setShowDeleteLLMDialog(true)
-              }}
-              className="p-1 h-auto"
-              title={t('settings.llmKeys.deleteDialog.title')}
-            >
-              <Trash2 className="w-4 h-4 text-slate-400 hover:text-red-600" />
-            </Button>
-          </div>
-        ),
-      },
-    ]
-
     if (llmKeysLoading || providersLoading) {
       return (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-sm text-muted-foreground">{t('settings.llmKeys.loading')}</p>
-          </div>
-        </div>
+        <Card>
+          <CardContent className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+            <span className="text-sm text-muted-foreground">{t('settings.llmKeys.loading')}</span>
+          </CardContent>
+        </Card>
       )
     }
 
     if (llmKeysError || providersError) {
       return (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="text-red-500 mb-2">⚠️</div>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-8">
             <p className="text-sm text-red-600 mb-2">
               {llmKeysError || providersError || t('settings.llmKeys.loadError')}
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                window.location.reload()
-              }}
-            >
+            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
               {t('settings.llmKeys.retry')}
             </Button>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )
     }
 
     return (
-      <div className="space-y-0">
-        {/* Filters Block */}
-        <Card>
-          <CardContent className="px-4 py-3">
-            <div className="flex gap-2 items-center justify-end">
-              <Button
-                onClick={() => openLLMModal()}
-                size="sm"
-                className="text-xs h-9 px-3 gap-1.5"
-                disabled={!llmProviders.length}
-              >
-                <Plus className="w-3.5 h-3.5" />
-                {t('settings.llmKeys.newKey')}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Spacing between filters and content */}
-        <div className="h-4"></div>
-
-        {/* Table */}
-        <Card>
-          <CardContent className="p-4">
-            <DataTable
-              data={llmKeys}
-              columns={llmColumns}
-              emptyState={{
-                icon: <Key className="w-6 h-6 text-slate-400" />,
-                title: t('settings.llmKeys.empty.title'),
-                description: llmProviders.length === 0
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">{t('settings.llmKeys.title')}</CardTitle>
+            <Button
+              onClick={() => openLLMModal()}
+              size="sm"
+              className="text-xs h-8 px-3 gap-1.5"
+              disabled={!llmProviders.length}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              {t('settings.llmKeys.newKey')}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {llmKeys.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <Key className="w-5 h-5 text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">
+                {llmProviders.length === 0
                   ? t('settings.llmKeys.empty.noProviders')
-                  : t('settings.llmKeys.empty.description'),
-              }}
-            />
-          </CardContent>
-        </Card>
-      </div>
+                  : t('settings.llmKeys.empty.description')}
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {llmKeys.map((llm) => (
+                <div key={llm.id} className="group flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
+                  <div className="min-w-0">
+                    <div className="font-medium text-sm text-foreground truncate">{llm.name}</div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {llm.provider_display_name || llm.provider_name || t('settings.llmKeys.unknownProvider')}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-0.5 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => openLLMModal(llm)} className="p-1 rounded hover:bg-secondary" title={t('settings.llmKeys.modal.titleEdit')}>
+                      <Edit2 className="w-3.5 h-3.5 text-muted-foreground hover:text-blue-600" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setDeletingLLMId(llm.id)
+                        setShowDeleteLLMDialog(true)
+                      }}
+                      className="p-1 rounded hover:bg-secondary"
+                      title={t('settings.llmKeys.deleteDialog.title')}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-red-600" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     )
-  }
-
-  const renderContent = () => {
-    switch (activeSubsection) {
-      case "profile":
-        return renderProfileSection()
-      case "subscription":
-        return renderSubscriptionSection()
-      case "tags":
-        return renderTagsSection()
-      case "llm-keys":
-        return renderLLMKeysSection()
-      default:
-        return renderProfileSection()
-    }
   }
 
   return (
     <ProtectedRoute>
       <>
       {/* EditorHeader */}
-      <div className="px-4 pt-[12px] pb-[12px] h-[65px] bg-white border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+      <div className="px-6 py-4 flex items-center justify-between flex-shrink-0">
         <div>
           <h1 className="text-base font-semibold">{t('settings.title')}</h1>
           <p className="text-xs text-muted-foreground">
@@ -1110,34 +984,20 @@ function SettingsPageContent() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
-        {/* Horizontal tabs navigation */}
-        <div className="bg-white border-b border-slate-200 px-4 h-10">
-          <div className="flex items-center gap-1 -mb-px">
-            {localizedSubsections.map((subsection) => {
-              const Icon = subsection.icon
-              const isActive = activeSubsection === subsection.id
-              return (
-                <button
-                  key={subsection.id}
-                  onClick={() => setActiveSubsection(subsection.id)}
-                  className={`flex items-center gap-1.5 px-3 py-[11px] text-xs font-medium border-b-2 transition-colors ${
-                    isActive
-                      ? "border-slate-900 text-slate-900"
-                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-slate-300"
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{subsection.name}</span>
-                </button>
-              )
-            })}
+      <div className="px-6 py-6 overflow-y-auto space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left column: Profile + Subscription */}
+          <div className="space-y-8">
+            {renderProfileSection()}
+            {renderSubscriptionSection()}
+          </div>
+          {/* Right column: Tags + LLM Keys */}
+          <div className="space-y-8">
+            {renderTagsSection()}
+            {renderLLMKeysSection()}
           </div>
         </div>
-
-        <div className="flex-1 p-4 overflow-y-auto">
-          <div className="max-w-full">{renderContent()}</div>
-        </div>
+        {renderDangerZone()}
       </div>
 
       {/* Tag Modal */}
@@ -1170,8 +1030,8 @@ function SettingsPageContent() {
                     onClick={() => setTagForm({ ...tagForm, color: color.value })}
                     className={`flex items-center gap-2 p-2 rounded-md border transition-colors ${
                       tagForm.color === color.value
-                        ? "border-slate-400 bg-slate-50"
-                        : "border-slate-200 hover:border-slate-300"
+                        ? "border-border bg-secondary/50"
+                        : "border-border hover:border-border"
                     }`}
                   >
                     <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: color.value }} />
@@ -1188,7 +1048,7 @@ function SettingsPageContent() {
                     className="w-3 h-3 rounded-full" 
                     style={{ backgroundColor: tagForm.color }}
                   />
-                  <Badge variant="outline" className="border-gray-300">
+                  <Badge variant="outline" className="border-border">
                     {tagForm.name || t('settings.tags.modal.previewPlaceholder')}
                   </Badge>
                 </div>

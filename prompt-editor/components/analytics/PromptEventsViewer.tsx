@@ -335,57 +335,53 @@ export default function PromptEventsViewer() {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <Card>
-        <CardContent className="px-4 py-3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {/* Prompt Selector */}
-            <Select value={selectedPromptId} onValueChange={setSelectedPromptId}>
-              <SelectTrigger className="h-9">
-                <SelectValue placeholder={t('analytics.promptEvents.selectPromptPlaceholder')} />
-              </SelectTrigger>
-              <SelectContent>
-                {prompts.map(prompt => (
-                  <SelectItem key={prompt.id} value={prompt.id}>
-                    {prompt.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Prompt Selector */}
+        <Select value={selectedPromptId} onValueChange={setSelectedPromptId}>
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder={t('analytics.promptEvents.selectPromptPlaceholder')} />
+          </SelectTrigger>
+          <SelectContent>
+            {prompts.map(prompt => (
+              <SelectItem key={prompt.id} value={prompt.id}>
+                {prompt.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-            {/* Version Selector */}
-            <Select
-              value={selectedVersionId}
-              onValueChange={setSelectedVersionId}
-              disabled={!selectedPromptId}
-            >
-              <SelectTrigger className="h-9">
-                <SelectValue placeholder={t('analytics.promptEvents.selectVersionPlaceholder')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('analytics.promptEvents.allVersions')}</SelectItem>
-                {versions.map(version => (
-                  <SelectItem key={version.id} value={version.id}>
-                    v{version.version_number} ({version.status})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {/* Version Selector */}
+        <Select
+          value={selectedVersionId}
+          onValueChange={setSelectedVersionId}
+          disabled={!selectedPromptId}
+        >
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder={t('analytics.promptEvents.selectVersionPlaceholder')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t('analytics.promptEvents.allVersions')}</SelectItem>
+            {versions.map(version => (
+              <SelectItem key={version.id} value={version.id}>
+                v{version.version_number} ({version.status})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-            {/* Period Selector */}
-            <Select value={period} onValueChange={setPeriod}>
-              <SelectTrigger className="h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="today">{t('analytics.promptEvents.periodToday')}</SelectItem>
-                <SelectItem value="week">{t('analytics.promptEvents.periodWeek')}</SelectItem>
-                <SelectItem value="month">{t('analytics.promptEvents.periodMonth')}</SelectItem>
-                <SelectItem value="year">{t('analytics.promptEvents.periodYear')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Period Selector */}
+        <Select value={period} onValueChange={setPeriod}>
+          <SelectTrigger className="h-9">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="today">{t('analytics.promptEvents.periodToday')}</SelectItem>
+            <SelectItem value="week">{t('analytics.promptEvents.periodWeek')}</SelectItem>
+            <SelectItem value="month">{t('analytics.promptEvents.periodMonth')}</SelectItem>
+            <SelectItem value="year">{t('analytics.promptEvents.periodYear')}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       {/* Chart */}
       {selectedPromptId && chartData && chartData.series.length > 0 ? (
@@ -478,7 +474,7 @@ export default function PromptEventsViewer() {
                       }
                       setHiddenSeries(newHidden);
                     }}
-                    className={`flex items-center gap-2 px-3 py-1 rounded-md text-xs transition-all hover:bg-gray-100 ${
+                    className={`flex items-center gap-2 px-3 py-1 rounded-md text-xs transition-all hover:bg-secondary ${
                       isHidden ? 'opacity-50' : 'opacity-100'
                     }`}
                   >

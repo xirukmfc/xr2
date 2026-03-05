@@ -60,8 +60,8 @@ export function DataTable<T extends { id: string }>({
     <div className={`flex flex-col ${className}`}>
       <div className="overflow-auto">
         {/* Table EditorHeader */}
-        <div className="bg-slate-100 px-4 py-3 border-slate-200">
-          <div className={`grid gap-4 text-xs font-medium text-slate-600 uppercase tracking-wide ${selectable ? 'grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr]' : 'grid-cols-12'}`}>
+        <div className="px-5 py-2.5 border-b border-border/30">
+          <div className={`grid gap-4 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider ${selectable ? 'grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr]' : 'grid-cols-12'}`}>
             {selectable && (
               <div className="col-span-1 flex items-center">
                 <input
@@ -71,7 +71,7 @@ export function DataTable<T extends { id: string }>({
                     if (el) el.indeterminate = isIndeterminate
                   }}
                   onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-border text-foreground focus:ring-ring/30"
                 />
               </div>
             )}
@@ -84,19 +84,19 @@ export function DataTable<T extends { id: string }>({
         </div>
 
         {/* Table Body */}
-        <div className="divide-y divide-slate-200">
+        <div className="divide-y divide-border/20">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-8 h-8 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mb-4"></div>
-              <p className="text-slate-500">Loading...</p>
+              <div className="w-8 h-8 border-2 border-border border-t-foreground rounded-full animate-spin mb-4"></div>
+              <p className="text-muted-foreground">Loading...</p>
             </div>
           ) : data.length === 0 && emptyState ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mb-4">
                 {emptyState.icon}
               </div>
-              <h3 className="text-lg font-medium text-slate-900 mb-2">{emptyState.title}</h3>
-              <p className="text-slate-500 mb-4">{emptyState.description}</p>
+              <h3 className="text-lg font-medium text-foreground mb-2">{emptyState.title}</h3>
+              <p className="text-muted-foreground mb-4">{emptyState.description}</p>
             </div>
           ) : (
             data.map((item) => {
@@ -104,7 +104,7 @@ export function DataTable<T extends { id: string }>({
               return (
                 <div
                   key={item.id}
-                  className={`px-4 py-2 hover:bg-slate-50 transition-colors group ${isSelected ? 'bg-blue-50' : ''} ${onRowClick ? 'cursor-pointer' : ''}`}
+                  className={`px-5 py-3.5 hover:bg-secondary/30 transition-all duration-200 group ${isSelected ? 'bg-accent/20' : ''} ${onRowClick ? 'cursor-pointer' : ''}`}
                   onClick={(e) => {
                     // Don't trigger row click if clicking on checkbox
                     if (e.target instanceof HTMLInputElement && e.target.type === 'checkbox') {
@@ -128,7 +128,7 @@ export function DataTable<T extends { id: string }>({
                           type="checkbox"
                           checked={isSelected}
                           onChange={(e) => handleSelectItem(item.id, e.target.checked)}
-                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-border text-foreground focus:ring-ring/30"
                         />
                       </div>
                     )}

@@ -1226,7 +1226,7 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-slate-600">Loading prompt...</p>
+                    <p className="mt-4 text-muted-foreground">Loading prompt...</p>
                 </div>
             </div>
         )
@@ -1249,7 +1249,7 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
     }
 
     return (
-        <div className="flex flex-col h-screen bg-gray-50">
+        <div className="flex flex-col h-screen bg-secondary/50">
                 <EditorHeader
                     isPublished={publishedVersion === currentViewingVersion}
                     setIsPublished={setIsPublished}

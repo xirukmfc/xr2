@@ -177,10 +177,10 @@ function ApiKeysPageContent() {
       render: (apiKey) => (
         <div className="flex items-center space-x-3">
           <div>
-            <div className="text-sm font-medium text-slate-900">{apiKey.name}</div>
-            <div className="text-xs text-slate-500">{t('apiKeys.columns.created')} {new Date(apiKey.created_at).toLocaleDateString()}</div>
+            <div className="text-sm font-medium text-foreground">{apiKey.name}</div>
+            <div className="text-xs text-muted-foreground">{t('apiKeys.columns.created')} {new Date(apiKey.created_at).toLocaleDateString()}</div>
             {apiKey.description && (
-              <div className="text-xs text-slate-400 truncate max-w-xs">{apiKey.description}</div>
+              <div className="text-xs text-muted-foreground truncate max-w-xs">{apiKey.description}</div>
             )}
           </div>
         </div>
@@ -193,14 +193,14 @@ function ApiKeysPageContent() {
       render: (apiKey) => (
         <div>
           <div className="flex items-center space-x-1">
-            <code className="text-xs font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 select-all">
+            <code className="text-xs font-mono bg-secondary px-1.5 py-0.5 rounded text-foreground select-all">
               {apiKey.api_key}
             </code>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleCopyKey(apiKey.api_key)}
-              className="h-5 w-5 p-0 hover:bg-slate-200"
+              className="h-5 w-5 p-0 hover:bg-secondary"
               title="Copy API key"
             >
               <Copy className="w-3 h-3" />
@@ -215,7 +215,7 @@ function ApiKeysPageContent() {
       width: "col-span-2",
       render: (apiKey) => (
         <div>
-          <div className="text-sm font-medium text-slate-800">{apiKey.total_requests.toLocaleString()}</div>
+          <div className="text-sm font-medium text-foreground">{apiKey.total_requests.toLocaleString()}</div>
         </div>
       ),
     },
@@ -230,11 +230,11 @@ function ApiKeysPageContent() {
                       setRenameKeyId(apiKey.id);
                       setNewName(apiKey.name);
                     }}>
-                <Edit className="w-4 h-4 text-slate-400 hover:text-blue-600"/>
+                <Edit className="w-4 h-4 text-muted-foreground hover:text-blue-600"/>
             </Button>
             <Button variant="ghost" size="sm" className="p-1 h-auto" title="Delete"
                     onClick={() => setDeleteKeyId(apiKey.id)}>
-                <Trash2 className="w-4 h-4 text-slate-400 hover:text-red-600"/>
+                <Trash2 className="w-4 h-4 text-muted-foreground hover:text-red-600"/>
             </Button>
         </div>
       ),
@@ -255,7 +255,7 @@ function ApiKeysPageContent() {
   const paginatedApiKeys = filteredApiKeys.slice(startIndex, startIndex + itemsPerPage)
 
   const emptyState = {
-    icon: <Key className="w-6 h-6 text-slate-400" />,
+    icon: <Key className="w-6 h-6 text-muted-foreground" />,
     title: "No API keys found",
     description: "Create your first API key to get started with the API.",
   }
@@ -263,18 +263,18 @@ function ApiKeysPageContent() {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-1">
-        <div className="px-4 pt-[12px] pb-[12px] h-[65px] bg-white border-b border-slate-200">
+        <div className="px-6 py-4">
           <div className="flex items-center justify-between space-x-4">
             <div className="flex items-center space-x-4 flex-1">
               {/* Search field */}
               <div className="relative w-full max-w-xs">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"/>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"/>
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('apiKeys.searchPlaceholder')}
-                  className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-1.5 text-sm bg-secondary/40 border border-border/30 rounded-lg focus:ring-2 focus:ring-ring/10 focus:border-border/50 transition-shadow placeholder:text-muted-foreground/50"
                 />
               </div>
             </div>
@@ -284,14 +284,14 @@ function ApiKeysPageContent() {
               <Button
                 variant="outline"
                 onClick={() => window.open(`${window.location.origin}/docs`, '_blank')}
-                className="h-[35px] border-slate-300 text-slate-600 hover:bg-slate-50"
+                className="h-[35px] border-border text-muted-foreground hover:bg-secondary/50"
               >
                 <BookOpen className="w-4 h-4 mr-2" />
                 Swagger
               </Button>
               <Button
                 onClick={() => setIsNewApiKeyModalOpen(true)}
-                className="bg-black hover:bg-gray-800 text-white h-[35px] gap-2"
+                className="bg-foreground hover:bg-foreground/90 text-white h-[35px] gap-2"
               >
                 <Plus className="w-4 h-4" />
                 {t('apiKeys.newKey')}
@@ -300,8 +300,10 @@ function ApiKeysPageContent() {
           </div>
         </div>
 
-        <div className="flex flex-col flex-1">
-          <DataTable data={paginatedApiKeys} columns={columns} emptyState={emptyState} />
+        <div className="flex flex-col flex-1 px-6 pb-6">
+          <div className="glass-effect rounded-xl overflow-hidden">
+            <DataTable data={paginatedApiKeys} columns={columns} emptyState={emptyState} />
+          </div>
           <Pagination
             totalItems={filteredApiKeys.length}
             currentPage={currentPage}
@@ -358,7 +360,7 @@ function ApiKeysPageContent() {
             <Button variant="outline" onClick={() => setRenameKeyId(null)}>
               {t('apiKeys.modal.cancel')}
             </Button>
-            <Button onClick={handleRename} className="bg-black hover:bg-gray-800">
+            <Button onClick={handleRename} className="bg-foreground hover:bg-foreground/90">
               {t('apiKeys.modal.save')}
             </Button>
           </DialogFooter>

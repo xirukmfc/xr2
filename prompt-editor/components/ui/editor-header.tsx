@@ -166,26 +166,26 @@ export function EditorHeader({
     : `${t('editor.publish')} v.${currentViewingVersion}`
 
   return (
-    <header className="fixed top-0 h-[65px] left-0 right-0 bg-white/95 backdrop-blur border-b border-slate-200 px-4 py-3 z-50">
+    <header className="fixed top-0 h-[65px] left-0 right-0 bg-background/95 backdrop-blur border-b border-border px-4 py-3 z-50">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
             onClick={() => router.push("/prompts")}
             variant="ghost"
-            className="gap-1 h-9 px-3 rounded-md text-sm border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+            className="gap-1 h-9 px-3 rounded-md text-sm border border-border bg-background text-muted-foreground hover:bg-secondary/50"
           >
             <span className="text-lg leading-none">←</span>
             <span>{t('editor.back')}</span>
           </Button>
           {promptSlug && (
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-slate-500">slug:</span>
+              <span className="text-muted-foreground">slug:</span>
               <button
                 onClick={copySlug}
                 className={`px-2 py-1 rounded font-mono text-xs transition-colors cursor-pointer ${
                   slugCopied 
                     ? 'bg-green-100 text-green-700' 
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                    : 'bg-secondary hover:bg-secondary text-muted-foreground'
                 }`}
                 title="Click to copy"
               >
@@ -194,7 +194,7 @@ export function EditorHeader({
             </div>
           )}
           {currentViewingVersion && (
-            <div className="text-sm text-slate-500">
+            <div className="text-sm text-muted-foreground">
               v.{currentViewingVersion}
             </div>
           )}
@@ -205,7 +205,7 @@ export function EditorHeader({
           <Button
             onClick={handlePreviewToggle}
             variant="outline"
-            className="h-9 px-3 gap-1 border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+            className="h-9 px-3 gap-1 border-border bg-background text-muted-foreground hover:bg-secondary/50"
           >
             {isPreviewMode ? (
               <>
@@ -225,7 +225,7 @@ export function EditorHeader({
             onClick={handleTest}
             disabled={isTesting}
             variant="ghost"
-            className="h-9 px-3 gap-1 border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+            className="h-9 px-3 gap-1 border border-border bg-background text-muted-foreground hover:bg-secondary/50"
           >
             {isTesting ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -261,7 +261,7 @@ export function EditorHeader({
                       disabled={isPublishing || (!isCurrentlyPublished && hasUndefinedVariables)}
                       className={`h-9 px-3 gap-1 ${
                         isCurrentlyPublished
-                          ? "bg-slate-600 hover:bg-slate-700 text-white"
+                          ? "bg-primary hover:bg-primary/90 text-primary-foreground"
                           : hasUndefinedVariables
                             ? "bg-amber-200 text-amber-900 cursor-not-allowed border border-amber-300"
                             : "bg-amber-600 hover:bg-amber-700 text-white"

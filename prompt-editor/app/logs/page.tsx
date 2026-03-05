@@ -202,8 +202,8 @@ function LogsPageContent() {
           <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getStatusDot(log.is_success)}`}></div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center space-x-1 text-xs truncate">
-              <span className="font-medium text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded flex-shrink-0 whitespace-nowrap">{cleanText(log.method)}</span>
-              <span className="text-slate-500 truncate whitespace-nowrap">{cleanEndpoint(log.endpoint)}</span>
+              <span className="font-medium text-muted-foreground bg-secondary px-1.5 py-0.5 rounded flex-shrink-0 whitespace-nowrap">{cleanText(log.method)}</span>
+              <span className="text-muted-foreground truncate whitespace-nowrap">{cleanEndpoint(log.endpoint)}</span>
             </div>
           </div>
         </div>
@@ -216,8 +216,8 @@ function LogsPageContent() {
       render: (log) => (
         <div className="text-xs">
           <div className="flex items-center space-x-1 truncate">
-            <Clock className="w-3 h-3 text-slate-400 flex-shrink-0" />
-            <span className="text-slate-700 truncate">{new Date(log.created_at).toLocaleString()}</span>
+            <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+            <span className="text-foreground truncate">{new Date(log.created_at).toLocaleString()}</span>
           </div>
         </div>
       ),
@@ -228,8 +228,8 @@ function LogsPageContent() {
       width: "col-span-2",
       render: (log) => (
         <div className="flex items-center space-x-2 text-xs truncate">
-          <Server className="w-3 h-3 text-slate-400 flex-shrink-0" />
-          <span className="text-slate-700 truncate">{log.client_ip}</span>
+          <Server className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+          <span className="text-foreground truncate">{log.client_ip}</span>
         </div>
       ),
     },
@@ -286,7 +286,7 @@ function LogsPageContent() {
 
   return (
     <div className="flex flex-col">
-      <div className="px-4 pt-[12px] pb-[12px] h-[65px] bg-white border-b border-slate-200">
+      <div className="px-6 py-4">
           <DataFilters
             searchQuery={searchQuery}
             onSearch={setSearchQuery}
@@ -312,18 +312,20 @@ function LogsPageContent() {
           />
       </div>
 
-      <div className="flex flex-col">
-        <DataTable
-          data={sortedLogs}
-          columns={columns}
-          isLoading={loading}
-          onRowClick={(log) => openViewer(log)}
-          emptyState={{
-            icon: <AlertTriangle className="w-6 h-6 text-slate-400" />,
-            title: "No logs found",
-            description: "No API logs match your current search and filter criteria.",
-          }}
-        />
+      <div className="flex flex-col px-6 pb-6">
+        <div className="glass-effect rounded-xl overflow-hidden">
+          <DataTable
+            data={sortedLogs}
+            columns={columns}
+            isLoading={loading}
+            onRowClick={(log) => openViewer(log)}
+            emptyState={{
+              icon: <AlertTriangle className="w-6 h-6 text-muted-foreground" />,
+              title: "No logs found",
+              description: "No API logs match your current search and filter criteria.",
+            }}
+          />
+        </div>
         <Pagination
           totalItems={total}
           currentPage={currentPage}
@@ -338,16 +340,16 @@ function LogsPageContent() {
       <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
         <DialogContent className="w-screen h-screen max-w-[100vw] p-0 rounded-none">
           <div className="flex flex-col h-full">
-            <DialogHeader className="px-6 py-4 border-b border-slate-200">
+            <DialogHeader className="px-6 py-4 border-b border-border">
               <div className="flex items-start justify-between">
                 <div>
                   <DialogTitle className="text-base">
-                    <span className="mr-2 inline-flex items-center text-xs font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded whitespace-nowrap">
+                    <span className="mr-2 inline-flex items-center text-xs font-medium text-foreground bg-secondary px-2 py-0.5 rounded whitespace-nowrap">
                       {selectedLog ? cleanText(selectedLog.method) : ''}
                     </span>
                     <span className="whitespace-nowrap">{selectedLog ? cleanEndpoint(selectedLog.endpoint) : ''}</span>
                   </DialogTitle>
-                  <div className="mt-2 text-xs text-slate-600">
+                  <div className="mt-2 text-xs text-muted-foreground">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-md font-medium border mr-2 ${selectedLog ? getStatusBadge(selectedLog.status_code, selectedLog.is_success) : ""}`}>
                       {selectedLog?.status_code} {selectedLog?.is_success ? 'SUCCESS' : 'ERROR'}
                     </span>
@@ -368,11 +370,11 @@ function LogsPageContent() {
             <div className="flex-1 overflow-auto p-4">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="flex flex-col">
-                  <div className="text-sm font-medium text-slate-700 mb-2">Request</div>
-                  <div className="text-xs text-slate-500 mb-2 h-[35px]">
+                  <div className="text-sm font-medium text-foreground mb-2">Request</div>
+                  <div className="text-xs text-muted-foreground mb-2 h-[35px]">
                     Request ID: {selectedLog?.request_id}
                   </div>
-                  <div className="bg-slate-50 border border-slate-200 rounded p-4 max-h-96 overflow-auto">
+                  <div className="bg-secondary/50 border border-border rounded p-4 max-h-96 overflow-auto">
                     <pre className="text-xs leading-relaxed whitespace-pre-wrap">
 {selectedLog ? JSON.stringify({
   params: selectedLog.request_params,
@@ -382,11 +384,11 @@ function LogsPageContent() {
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <div className="text-sm font-medium text-slate-700 mb-2">Response</div>
-                  <div className="text-xs text-slate-500 mb-2 h-[35px]">
+                  <div className="text-sm font-medium text-foreground mb-2">Response</div>
+                  <div className="text-xs text-muted-foreground mb-2 h-[35px]">
                     User Agent: {selectedLog?.user_agent || 'Unknown'}
                   </div>
-                  <div className="bg-slate-50 border border-slate-200 rounded p-4 max-h-[530px] overflow-auto">
+                  <div className="bg-secondary/50 border border-border rounded p-4 max-h-[530px] overflow-auto">
                     <pre className="text-xs leading-relaxed whitespace-pre-wrap">
 {selectedLog ? (
   selectedLog.error_message 

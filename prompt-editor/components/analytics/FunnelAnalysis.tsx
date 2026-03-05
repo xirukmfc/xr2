@@ -872,55 +872,48 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
   if (!data || data.length === 0) {
     return (
       <div className="space-y-0">
-        {/* Filters Block - Search, Funnel selector and +New button */}
+        {/* Filters - Search, Funnel selector and +New button */}
         {(showCreateButton || onNewClick || renderFiltersSeparately) && (
-          <>
-            <Card>
-              <CardContent className="px-4 py-3">
-                <div className="flex gap-2 items-center">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                    <Input
-                      placeholder={t('analytics.funnelForm.searchPlaceholder')}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-8 h-9 text-xs"
-                    />
-                  </div>
-                  {savedConfigurations.length > 0 && (
-                    <Select
-                      value={currentConfiguration?.id || ''}
-                      onValueChange={(value) => {
-                        const config = savedConfigurations.find(c => c.id === value);
-                        if (config) loadConfiguration(config);
-                      }}
-                    >
-                      <SelectTrigger className="h-9 w-[200px]">
-                        <SelectValue placeholder={t('analytics.funnelForm.selectFunnelPlaceholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {savedConfigurations.map((config) => (
-                          <SelectItem key={config.id} value={config.id}>
-                            {config.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                  <Button
-                    data-testid="funnel-new-button"
-                    onClick={() => onNewClick ? onNewClick() : setShowCreateForm(true)}
-                    size="sm"
-                    className="bg-black hover:bg-gray-800 text-xs h-9 px-3 gap-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    {t('analytics.funnelForm.new')}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            <div className="h-4"></div>
-          </>
+          <div className="flex gap-2 items-center mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <Input
+                placeholder={t('analytics.funnelForm.searchPlaceholder')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8 h-9 text-xs"
+              />
+            </div>
+            {savedConfigurations.length > 0 && (
+              <Select
+                value={currentConfiguration?.id || ''}
+                onValueChange={(value) => {
+                  const config = savedConfigurations.find(c => c.id === value);
+                  if (config) loadConfiguration(config);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[200px]">
+                  <SelectValue placeholder={t('analytics.funnelForm.selectFunnelPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {savedConfigurations.map((config) => (
+                    <SelectItem key={config.id} value={config.id}>
+                      {config.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Button
+              data-testid="funnel-new-button"
+              onClick={() => onNewClick ? onNewClick() : setShowCreateForm(true)}
+              size="sm"
+              className="bg-foreground hover:bg-foreground/90 text-xs h-9 px-3 gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              {t('analytics.funnelForm.new')}
+            </Button>
+          </div>
         )}
 
         {/* Create/Edit Form or Empty State */}
@@ -981,7 +974,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                             openDownwards ? 'top-full mt-1' : 'bottom-full mb-1'
                           }`}>
                             {/* Built-in events */}
-                            <div className="px-3 py-2 border-b bg-gray-50">
+                            <div className="px-3 py-2 border-b bg-secondary/50">
                               <div className="flex items-center gap-2 text-xs font-medium text-foreground">
                                 <Lightbulb className="w-3.5 h-3.5" />
                                 {t('analytics.funnelForm.builtInEvents')}
@@ -990,7 +983,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                             {['get_prompt'].filter(name => name.toLowerCase().includes(step.toLowerCase())).map((eventName) => (
                               <button
                                 key={eventName}
-                                className="w-full text-left px-3 py-2.5 hover:bg-gray-50 border-b transition-colors"
+                                className="w-full text-left px-3 py-2.5 hover:bg-secondary/50 border-b transition-colors"
                                 onClick={() => {
                                   updateStep(index, eventName);
                                   setShowSuggestions(null);
@@ -1003,7 +996,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                             {/* Custom event definitions */}
                             {eventDefinitions.length > 0 && (
                               <>
-                                <div className="px-3 py-2 border-b bg-gray-50">
+                                <div className="px-3 py-2 border-b bg-secondary/50">
                                   <div className="flex items-center gap-2 text-xs font-medium text-foreground">
                                     <Lightbulb className="w-3.5 h-3.5" />
                                     {t('analytics.funnelForm.customEvents')}
@@ -1014,7 +1007,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                                   .map((definition) => (
                                     <button
                                       key={definition.id}
-                                      className="w-full text-left px-3 py-2.5 hover:bg-gray-50 border-b last:border-b-0 transition-colors"
+                                      className="w-full text-left px-3 py-2.5 hover:bg-secondary/50 border-b last:border-b-0 transition-colors"
                                       onClick={() => {
                                         updateStep(index, definition.event_name);
                                         setShowSuggestions(null);
@@ -1056,7 +1049,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                   data-testid="create-funnel-button"
                   onClick={handleCreateFunnel}
                   disabled={!funnelName || funnelSteps.some(step => !step.trim()) || loading}
-                  className="h-9 text-sm px-4 bg-black hover:bg-gray-800 text-white"
+                  className="h-9 text-sm px-4 bg-foreground hover:bg-foreground/90 text-white"
                 >
                   {loading ? t('analytics.funnelForm.saving') : (editingConfiguration ? t('analytics.funnelForm.update') : t('analytics.funnelForm.save'))}
                 </Button>
@@ -1159,240 +1152,235 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
     };
     
     return (
-      <Card>
-        <CardContent className="px-4 py-3">
-          <div className="space-y-2">
-            {/* Row 1: Funnel selector + Edit/Delete + Period + New */}
-            <div className="flex items-center gap-2">
-              {savedConfigurations.length > 0 && (
-                <>
-                  <Select
-                    value={currentConfiguration?.id || ''}
-                    onValueChange={(value) => {
-                      const config = savedConfigurations.find(c => c.id === value);
-                      if (config) loadConfiguration(config);
-                    }}
-                  >
-                    <SelectTrigger className="h-9 w-[200px]">
-                      <SelectValue placeholder={t('analytics.funnelForm.selectFunnelPlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {savedConfigurations.map((config) => (
-                        <SelectItem key={config.id} value={config.id}>
-                          {config.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {currentConfiguration && (
-                    <>
-                      <Button
-                        onClick={() => {
-                          if (onEditClick) {
-                            onEditClick(currentConfiguration);
-                          } else {
-                            startEditConfiguration(currentConfiguration);
-                            setShowEditForm(true);
-                          }
-                        }}
-                        variant="outline"
-                        size="sm"
-                        className="h-9 w-9 p-0"
-                        title="Edit funnel configuration"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button
-                        onClick={() => deleteFunnelConfiguration(currentConfiguration.id)}
-                        variant="outline"
-                        size="sm"
-                        className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        disabled={loading}
-                        title="Delete funnel configuration"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </>
-                  )}
-                </>
-              )}
-
-              {/* Period selector */}
+      <div className="space-y-2">
+        {/* Row 1: Funnel selector + Edit/Delete + Period + New */}
+        <div className="flex items-center gap-2">
+          {savedConfigurations.length > 0 && (
+            <>
+              <Select
+                value={currentConfiguration?.id || ''}
+                onValueChange={(value) => {
+                  const config = savedConfigurations.find(c => c.id === value);
+                  if (config) loadConfiguration(config);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[200px]">
+                  <SelectValue placeholder={t('analytics.funnelForm.selectFunnelPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {savedConfigurations.map((config) => (
+                    <SelectItem key={config.id} value={config.id}>
+                      {config.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {currentConfiguration && (
                 <>
-                  <div className="w-px h-5 bg-gray-200 mx-1" />
-                  <Select value={getPeriodFromDates()} onValueChange={handlePeriodChange}>
-                    <SelectTrigger className="h-9 w-[120px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="today">{t('analytics.funnelForm.periodToday')}</SelectItem>
-                      <SelectItem value="7days">{t('analytics.funnelForm.period7days')}</SelectItem>
-                      <SelectItem value="30days">{t('analytics.funnelForm.period30days')}</SelectItem>
-                      <SelectItem value="thisMonth">{t('analytics.funnelForm.periodThisMonth')}</SelectItem>
-                      <SelectItem value="custom">{t('analytics.funnelForm.periodCustom')}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Button
+                    onClick={() => {
+                      if (onEditClick) {
+                        onEditClick(currentConfiguration);
+                      } else {
+                        startEditConfiguration(currentConfiguration);
+                        setShowEditForm(true);
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="h-9 w-9 p-0"
+                    title="Edit funnel configuration"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button
+                    onClick={() => deleteFunnelConfiguration(currentConfiguration.id)}
+                    variant="outline"
+                    size="sm"
+                    className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    disabled={loading}
+                    title="Delete funnel configuration"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </>
+              )}
+            </>
+          )}
 
-                  {(startDate || endDate || getPeriodFromDates() === 'custom') && (
-                    <>
-                      <Input
-                        id="start-date"
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="text-xs h-9 w-[130px]"
-                      />
-                      <span className="text-xs text-muted-foreground">—</span>
-                      <Input
-                        id="end-date"
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="text-xs h-9 w-[130px]"
-                      />
-                      {(startDate || endDate) && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setStartDate('');
-                            setEndDate('');
-                          }}
-                          className="h-9 w-9 p-0 text-muted-foreground hover:text-foreground"
-                          title="Clear date filter"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </Button>
-                      )}
-                    </>
+          {/* Period selector */}
+          {currentConfiguration && (
+            <>
+              <div className="w-px h-5 bg-secondary mx-1" />
+              <Select value={getPeriodFromDates()} onValueChange={handlePeriodChange}>
+                <SelectTrigger className="h-9 w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">{t('analytics.funnelForm.periodToday')}</SelectItem>
+                  <SelectItem value="7days">{t('analytics.funnelForm.period7days')}</SelectItem>
+                  <SelectItem value="30days">{t('analytics.funnelForm.period30days')}</SelectItem>
+                  <SelectItem value="thisMonth">{t('analytics.funnelForm.periodThisMonth')}</SelectItem>
+                  <SelectItem value="custom">{t('analytics.funnelForm.periodCustom')}</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {(startDate || endDate || getPeriodFromDates() === 'custom') && (
+                <>
+                  <Input
+                    id="start-date"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="text-xs h-9 w-[130px]"
+                  />
+                  <span className="text-xs text-muted-foreground">—</span>
+                  <Input
+                    id="end-date"
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="text-xs h-9 w-[130px]"
+                  />
+                  {(startDate || endDate) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setStartDate('');
+                        setEndDate('');
+                      }}
+                      className="h-9 w-9 p-0 text-muted-foreground hover:text-foreground"
+                      title="Clear date filter"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
                   )}
                 </>
               )}
+            </>
+          )}
 
-              <div className="flex-1"></div>
+          <div className="flex-1"></div>
 
-              {/* New button at the end */}
-              {(onNewClick || showCreateButton) && (
-                <Button
-                  onClick={() => onNewClick ? onNewClick() : setShowCreateForm(true)}
-                  size="sm"
-                  className="bg-black hover:bg-gray-800 text-xs h-9"
-                >
-                  <Plus className="w-3.5 h-3.5 mr-1" />
-                  {t('analytics.funnelForm.create')}
-                </Button>
-              )}
-            </div>
+          {/* New button at the end */}
+          {(onNewClick || showCreateButton) && (
+            <Button
+              onClick={() => onNewClick ? onNewClick() : setShowCreateForm(true)}
+              size="sm"
+              className="bg-foreground hover:bg-foreground/90 text-xs h-9"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1" />
+              {t('analytics.funnelForm.create')}
+            </Button>
+          )}
+        </div>
 
-            {/* Row 2: Prompt + Version + Compare */}
-            {currentConfiguration && prompts.length > 0 && (
-              <div className="flex items-center gap-2">
+        {/* Row 2: Prompt + Version + Compare */}
+        {currentConfiguration && prompts.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Select
+              value={selectedPromptId || "all"}
+              onValueChange={(value) => {
+                setSelectedPromptId(value === "all" ? "" : value);
+                setSelectedVersionId('');
+              }}
+            >
+              <SelectTrigger className="h-9 w-[200px]">
+                <SelectValue placeholder={t('analytics.funnelForm.allPrompts')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('analytics.funnelForm.allPrompts')}</SelectItem>
+                {prompts.map((prompt) => (
+                  <SelectItem key={prompt.id} value={prompt.id}>
+                    {prompt.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Version Selector */}
+            {selectedPromptId && promptVersions.length > 0 && (
+              <>
                 <Select
-                  value={selectedPromptId || "all"}
+                  value={selectedVersionId || "all"}
                   onValueChange={(value) => {
-                    setSelectedPromptId(value === "all" ? "" : value);
-                    setSelectedVersionId('');
+                    setSelectedVersionId(value === "all" ? "" : value);
+                    if (isComparing) {
+                      setCompareVersionId('');
+                      setCompareData(null);
+                    }
                   }}
                 >
-                  <SelectTrigger className="h-9 w-[200px]">
-                    <SelectValue placeholder={t('analytics.funnelForm.allPrompts')} />
+                  <SelectTrigger className="h-9 w-[160px]">
+                    <SelectValue placeholder={t('analytics.funnelForm.allVersions')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('analytics.funnelForm.allPrompts')}</SelectItem>
-                    {prompts.map((prompt) => (
-                      <SelectItem key={prompt.id} value={prompt.id}>
-                        {prompt.name}
+                    <SelectItem value="all">{t('analytics.funnelForm.allVersions')}</SelectItem>
+                    {promptVersions.map((version) => (
+                      <SelectItem key={version.id} value={version.id}>
+                        v{version.version_number} ({version.status})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
 
-                {/* Version Selector */}
-                {selectedPromptId && promptVersions.length > 0 && (
+                {selectedVersionId && !isComparing && (
+                  <Button
+                    onClick={startComparison}
+                    variant="outline"
+                    size="sm"
+                    className="h-9 px-2 text-xs gap-1"
+                    title="Compare with another version"
+                  >
+                    <GitCompare className="w-3.5 h-3.5" />
+                    Compare
+                  </Button>
+                )}
+
+                {/* Compare version selector */}
+                {isComparing && selectedVersionId && (
                   <>
+                    <span className="text-xs text-muted-foreground">{t('analytics.funnelForm.vs')}</span>
                     <Select
-                      value={selectedVersionId || "all"}
-                      onValueChange={(value) => {
-                        setSelectedVersionId(value === "all" ? "" : value);
-                        if (isComparing) {
-                          setCompareVersionId('');
-                          setCompareData(null);
-                        }
-                      }}
+                      value={compareVersionId}
+                      onValueChange={(value) => setCompareVersionId(value)}
                     >
                       <SelectTrigger className="h-9 w-[160px]">
-                        <SelectValue placeholder={t('analytics.funnelForm.allVersions')} />
+                        <SelectValue placeholder="Select version..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">{t('analytics.funnelForm.allVersions')}</SelectItem>
-                        {promptVersions.map((version) => (
-                          <SelectItem key={version.id} value={version.id}>
-                            v{version.version_number} ({version.status})
-                          </SelectItem>
-                        ))}
+                        {promptVersions
+                          .filter(v => v.id !== selectedVersionId)
+                          .map((version) => (
+                            <SelectItem key={version.id} value={version.id}>
+                              v{version.version_number} ({version.status})
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
-
-                    {selectedVersionId && !isComparing && (
-                      <Button
-                        onClick={startComparison}
-                        variant="outline"
-                        size="sm"
-                        className="h-9 px-2 text-xs gap-1"
-                        title="Compare with another version"
-                      >
-                        <GitCompare className="w-3.5 h-3.5" />
-                        Compare
-                      </Button>
-                    )}
-
-                    {/* Compare version selector */}
-                    {isComparing && selectedVersionId && (
-                      <>
-                        <span className="text-xs text-muted-foreground">{t('analytics.funnelForm.vs')}</span>
-                        <Select
-                          value={compareVersionId}
-                          onValueChange={(value) => setCompareVersionId(value)}
-                        >
-                          <SelectTrigger className="h-9 w-[160px]">
-                            <SelectValue placeholder="Select version..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {promptVersions
-                              .filter(v => v.id !== selectedVersionId)
-                              .map((version) => (
-                                <SelectItem key={version.id} value={version.id}>
-                                  v{version.version_number} ({version.status})
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          onClick={stopComparison}
-                          variant="ghost"
-                          size="sm"
-                          className="h-9 w-9 p-0 text-muted-foreground hover:text-red-500"
-                          title="Cancel comparison"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </Button>
-                      </>
-                    )}
+                    <Button
+                      onClick={stopComparison}
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 w-9 p-0 text-muted-foreground hover:text-red-500"
+                      title="Cancel comparison"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
                   </>
                 )}
-              </div>
+              </>
             )}
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
     );
   };
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-4">
       {renderFiltersSeparately && renderFiltersBlock()}
-      {renderFiltersSeparately && <div className="h-4"></div>}
       <div className="space-y-4">
         <Card>
           <CardHeader className="px-4 py-3">
@@ -1409,7 +1397,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                   <>
                     <TrendingDown className="w-3.5 h-3.5 text-muted-foreground" />
                     <select
-                      className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[140px] h-9"
+                      className="text-sm border border-border rounded-md px-3 py-1.5 bg-background min-w-[140px] h-9"
                       value={currentConfiguration?.id || ''}
                       onChange={(e) => {
                         const config = savedConfigurations.find(c => c.id === e.target.value);
@@ -1455,13 +1443,13 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                 
                 {/* Separator */}
                 {currentConfiguration && prompts.length > 0 && (
-                  <div className="w-px h-6 bg-gray-200 mx-1" />
+                  <div className="w-px h-6 bg-secondary mx-1" />
                 )}
                 
                 {/* Prompt filter */}
                 {currentConfiguration && prompts.length > 0 && (
                   <select
-                    className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[140px] h-9"
+                    className="text-sm border border-border rounded-md px-3 py-1.5 bg-background min-w-[140px] h-9"
                     value={selectedPromptId}
                     onChange={(e) => {
                       setSelectedPromptId(e.target.value);
@@ -1480,7 +1468,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                 {currentConfiguration && selectedPromptId && promptVersions.length > 0 && (
                   <>
                     <select
-                      className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[100px] h-9"
+                      className="text-sm border border-border rounded-md px-3 py-1.5 bg-background min-w-[100px] h-9"
                       value={selectedVersionId}
                       onChange={(e) => {
                         setSelectedVersionId(e.target.value);
@@ -1516,7 +1504,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                       <>
                         <span className="text-xs text-muted-foreground">{t('analytics.funnelForm.vs')}</span>
                         <select
-                          className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white min-w-[100px] h-9"
+                          className="text-sm border border-border rounded-md px-3 py-1.5 bg-background min-w-[100px] h-9"
                           value={compareVersionId}
                           onChange={(e) => setCompareVersionId(e.target.value)}
                         >
@@ -1552,31 +1540,31 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => applyDatePreset('today')}
-                      className="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
+                      className="text-xs px-2 py-1 rounded border border-border hover:bg-secondary transition-colors"
                     >
                       {t('analytics.funnelForm.periodToday')}
                     </button>
                     <button
                       onClick={() => applyDatePreset('7days')}
-                      className="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
+                      className="text-xs px-2 py-1 rounded border border-border hover:bg-secondary transition-colors"
                     >
                       {t('analytics.funnelForm.period7days')}
                     </button>
                     <button
                       onClick={() => applyDatePreset('30days')}
-                      className="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
+                      className="text-xs px-2 py-1 rounded border border-border hover:bg-secondary transition-colors"
                     >
                       {t('analytics.funnelForm.period30days')}
                     </button>
                     <button
                       onClick={() => applyDatePreset('thisMonth')}
-                      className="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
+                      className="text-xs px-2 py-1 rounded border border-border hover:bg-secondary transition-colors"
                     >
                       {t('analytics.funnelForm.periodThisMonth')}
                     </button>
                   </div>
                   
-                  <div className="w-px h-5 bg-gray-200 mx-1" />
+                  <div className="w-px h-5 bg-secondary mx-1" />
                   
                   {/* Custom date range */}
                   <div className="flex items-center gap-2">
@@ -1765,7 +1753,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                             isNearBottom ? 'bottom-full mb-1' : 'top-full mt-1'
                           }`}>
                             {/* Built-in events */}
-                            <div className="px-3 py-2 border-b bg-gray-50">
+                            <div className="px-3 py-2 border-b bg-secondary/50">
                               <div className="flex items-center gap-2 text-xs font-medium text-foreground">
                                 <Lightbulb className="w-3.5 h-3.5" />
                                 {t('analytics.funnelForm.builtInEvents')}
@@ -1774,7 +1762,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                             {['get_prompt'].filter(name => name.toLowerCase().includes(step.toLowerCase())).map((eventName) => (
                               <button
                                 key={eventName}
-                                className="w-full text-left px-3 py-2.5 hover:bg-gray-50 border-b transition-colors"
+                                className="w-full text-left px-3 py-2.5 hover:bg-secondary/50 border-b transition-colors"
                                 onClick={() => {
                                   updateStep(index, eventName);
                                   setShowSuggestions(null);
@@ -1787,7 +1775,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                             {/* Custom event definitions */}
                             {eventDefinitions.length > 0 && (
                               <>
-                                <div className="px-3 py-2 border-b bg-gray-50">
+                                <div className="px-3 py-2 border-b bg-secondary/50">
                                   <div className="flex items-center gap-2 text-xs font-medium text-foreground">
                                     <Lightbulb className="w-3.5 h-3.5" />
                                     Custom Events
@@ -1798,7 +1786,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                                   .map((definition) => (
                                     <button
                                       key={definition.id}
-                                      className="w-full text-left px-3 py-2.5 hover:bg-gray-50 border-b last:border-b-0 transition-colors"
+                                      className="w-full text-left px-3 py-2.5 hover:bg-secondary/50 border-b last:border-b-0 transition-colors"
                                       onClick={() => {
                                         updateStep(index, definition.event_name);
                                         setShowSuggestions(null);
@@ -1839,7 +1827,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                 <Button
                   onClick={handleCreateFunnel}
                   disabled={!funnelName || funnelSteps.some(step => !step.trim()) || loading}
-                  className="text-sm h-9 px-4 bg-black hover:bg-gray-800 text-white"
+                  className="text-sm h-9 px-4 bg-foreground hover:bg-foreground/90 text-white"
                 >
                   {loading ? t('analytics.funnelForm.saving') : (editingConfiguration ? t('analytics.funnelForm.update') : t('analytics.funnelForm.save'))}
                 </Button>

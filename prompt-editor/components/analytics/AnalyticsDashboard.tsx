@@ -361,7 +361,7 @@ export default function AnalyticsDashboard({ promptId }: { promptId?: string }) 
                     </thead>
                     <tbody>
                       {conversionMetrics.map((metric, index) => (
-                        <tr key={metric.funnel_id || index} className="border-b hover:bg-gray-50">
+                        <tr key={metric.funnel_id || index} className="border-b hover:bg-secondary/50">
                           <td className="p-2 font-medium">{metric.funnel_name || metric.name || 'Unknown'}</td>
                           <td className="p-2">{metric.source_count?.toLocaleString() || metric.sources?.toLocaleString() || 0}</td>
                           <td className="p-2">{metric.target_count?.toLocaleString() || metric.targets?.toLocaleString() || 0}</td>

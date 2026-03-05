@@ -458,7 +458,7 @@ export default function ConversionsManager({ showCreateButton = true }: { showCr
           <Card key={funnel.id} className="p-3">
             <div className="flex items-center justify-between">
               <div
-                className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-gray-50 -m-1 p-1 rounded"
+                className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-secondary/50 -m-1 p-1 rounded"
                 onClick={() => toggleCollapse(funnel.id)}
               >
                 <div className="h-6 w-6 flex items-center justify-center">

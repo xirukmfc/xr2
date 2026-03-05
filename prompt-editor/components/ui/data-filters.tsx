@@ -52,26 +52,26 @@ export function DataFilters({
                 <div className="flex items-center space-x-4 flex-1">
                     {/* Search field */}
                     <div className="relative w-full max-w-xs">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"/>
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"/>
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => onSearch(e.target.value)}
                             placeholder={searchPlaceholder}
-                            className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full pl-10 pr-4 py-1.5 text-sm bg-secondary/40 border border-border/30 rounded-lg focus:ring-2 focus:ring-ring/10 focus:border-border/50 transition-shadow placeholder:text-muted-foreground/50"
                         />
                     </div>
 
                     {/* Filter buttons */}
-                    <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-lg">
+                    <div className="flex items-center space-x-0.5 bg-secondary/30 p-0.5 rounded-lg">
                         {filterOptions.map((option) => (
                             <button
                                 key={option.key}
-                                onClick={() => onFilter(option.key)} // FIXED: Call onFilter, not filterChangeAction
-                                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                                onClick={() => onFilter(option.key)}
+                                className={`px-2.5 py-1 text-sm rounded-md transition-all duration-200 ${
                                     activeFilter === option.key
-                                        ? "bg-white text-slate-800 shadow-sm"
-                                        : "bg-transparent text-slate-600 hover:bg-slate-200"
+                                        ? "bg-foreground text-background shadow-sm"
+                                        : "bg-transparent text-muted-foreground hover:text-foreground"
                                 }`}
                             >
                                 {option.label}
@@ -101,7 +101,7 @@ export function DataFilters({
                     <select
                         value={sortBy}
                         onChange={(e) => onSort(e.target.value)}
-                        className="px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                        className="px-2.5 py-1.5 text-sm border border-border/30 rounded-lg focus:ring-2 focus:ring-ring/10 focus:border-border/50 bg-secondary/40 text-foreground transition-shadow"
                     >
                         {sortOptions.map((option) => (
                             <option key={option.value} value={option.value}>

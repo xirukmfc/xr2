@@ -196,7 +196,7 @@ export default function LoginPage() {
   // Show loading during auth check
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
@@ -210,7 +210,7 @@ export default function LoginPage() {
   // Splash screen
   if (showSplash) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <img
           src="/tagline.svg"
           alt="xR2 Prompt Manager"
@@ -221,7 +221,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 animate-slide-up">
         <div className="text-center">
           <img
@@ -242,7 +242,7 @@ export default function LoginPage() {
             {enablePasswordLogin && (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="username" className="block text-sm font-medium text-foreground">
                     {t('auth.login.usernameLabel')}
                   </label>
                   <Input
@@ -258,7 +258,7 @@ export default function LoginPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="password" className="block text-sm font-medium text-foreground">
                     {t('auth.login.passwordLabel')}
                   </label>
                   <div className="relative mt-1">
@@ -277,9 +277,9 @@ export default function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-400" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-400" />
+                        <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </button>
                   </div>
@@ -297,7 +297,7 @@ export default function LoginPage() {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="h-4 w-4 text-primary border-input rounded focus:ring-primary"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-foreground">
                     {t('auth.login.remember')}
                   </label>
                 </div>
@@ -331,10 +331,10 @@ export default function LoginPage() {
                 {enablePasswordLogin && (
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-300" />
+                      <div className="w-full border-t border-border" />
                     </div>
                     <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white text-gray-500">{t('auth.login.divider')}</span>
+                      <span className="px-2 bg-card text-muted-foreground">{t('auth.login.divider')}</span>
                     </div>
                   </div>
                 )}
@@ -358,17 +358,17 @@ export default function LoginPage() {
                 </div>
               </div>
             ) : (
-              <div className="text-center text-gray-500 text-sm">
+              <div className="text-center text-muted-foreground text-sm">
                 {t('auth.login.googleNotConfigured') || 'Google OAuth не настроен'}
               </div>
             )}
 
             {enablePasswordLogin && (
               <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   {t('auth.login.demo.title')} <br />
-                  {t('auth.login.demo.username')}: <code className="bg-gray-100 px-2 py-1 rounded">www</code> <br />
-                  {t('auth.login.demo.password')}: <code className="bg-gray-100 px-2 py-1 rounded">***REMOVED_ADMIN_PWD***</code>
+                  {t('auth.login.demo.username')}: <code className="bg-secondary px-2 py-1 rounded">www</code> <br />
+                  {t('auth.login.demo.password')}: <code className="bg-secondary px-2 py-1 rounded">***REMOVED_ADMIN_PWD***</code>
                 </p>
               </div>
             )}

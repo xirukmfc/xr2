@@ -11,10 +11,6 @@
 - [ ] linkedin
 - [ ] vastr3k
 
-
 потом продакт радар https://mail.google.com/mail/u/0/#inbox/FMfcgzQfBsphHVPxFBrgTpXXMhksgJNq
 
-- мобильная версия
-- проверка через google
-
-- правака лимитов
+- забыли дизайн 404 поправить

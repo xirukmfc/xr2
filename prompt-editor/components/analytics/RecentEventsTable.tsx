@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
+import { Pagination } from '@/components/ui/pagination';
 import { CheckCircle, XCircle, Clock, AlertTriangle, Search, Filter, RefreshCw } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -146,150 +147,113 @@ export default function RecentEventsTable() {
   }
 
   return (
-    <div className="space-y-0">
-      {/* Filters Block */}
-      <Card>
-        <CardContent className="px-4 py-3">
-          <div className="flex gap-2 items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-              <Input
-                placeholder={t('analytics.recentEvents.searchPlaceholder')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 h-9 text-xs"
-              />
-            </div>
-            <Select value={eventTypeFilter} onValueChange={setEventTypeFilter}>
-              <SelectTrigger className="h-9 w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('analytics.recentEvents.filterAll')}</SelectItem>
-                <SelectItem value="prompt_request">{t('analytics.recentEvents.filterPromptRequest')}</SelectItem>
-                <SelectItem value="custom_event">{t('analytics.recentEvents.filterCustomEvent')}</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="sm" onClick={fetchEvents} className="h-9 px-3 text-xs gap-1.5">
-              <RefreshCw className="w-3.5 h-3.5" />
-              {t('analytics.recentEvents.refresh')}
-            </Button>
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex gap-2 items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <Input
+            placeholder={t('analytics.recentEvents.searchPlaceholder')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8 h-9 text-xs"
+          />
+        </div>
+        <Select value={eventTypeFilter} onValueChange={setEventTypeFilter}>
+          <SelectTrigger className="h-9 w-[140px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t('analytics.recentEvents.filterAll')}</SelectItem>
+            <SelectItem value="prompt_request">{t('analytics.recentEvents.filterPromptRequest')}</SelectItem>
+            <SelectItem value="custom_event">{t('analytics.recentEvents.filterCustomEvent')}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button variant="outline" size="sm" onClick={fetchEvents} className="h-9 px-3 text-xs gap-1.5">
+          <RefreshCw className="w-3.5 h-3.5" />
+          {t('analytics.recentEvents.refresh')}
+        </Button>
+      </div>
+
+      {/* Table */}
+      <div className="glass-effect rounded-xl overflow-hidden">
+        {hasNoEvents ? (
+          <div className="text-center py-6">
+            <p className="text-sm text-muted-foreground">{t('analytics.recentEvents.empty')}</p>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Spacing between filters and table */}
-      <div className="h-4"></div>
-
-      {/* Table Block */}
-      <Card>
-        <CardContent className="px-4 py-3">
-          {hasNoEvents ? (
-            <div className="text-center py-6">
-              <p className="text-sm text-muted-foreground">{t('analytics.recentEvents.empty')}</p>
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent border-b">
-                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.time')}</TableHead>
-                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.traceId')}</TableHead>
-                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.prompt')}</TableHead>
-                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.version')}</TableHead>
-                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.type')}</TableHead>
-                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.source')}</TableHead>
-                    <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.event')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {displayedEvents.map((event) => (
-                    <TableRow key={event.id} className="hover:bg-muted/50">
-                      <TableCell className="px-4 py-2 font-mono text-xs text-muted-foreground">
-                        {new Date(event.created_at).toLocaleString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: false
-                        })}
-                      </TableCell>
-                      <TableCell className="px-4 py-2">
-                        <code className="text-xs bg-muted/50 px-1.5 py-0.5 rounded font-mono break-all">
-                          {event.trace_id}
-                        </code>
-                      </TableCell>
-                      <TableCell className="px-4 py-2">
-                        {event.event_metadata?.prompt_name ? (
-                          <span className="text-xs">{event.event_metadata.prompt_name}</span>
-                        ) : (
-                          <span className="text-muted-foreground text-xs">{t('analytics.recentEvents.noPrompt')}</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 text-xs">
-                        {event.event_metadata?.version_number
-                          ? `v${event.event_metadata.version_number}`
-                          : '—'}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 text-xs">{formatEventType(event.event_type)}</TableCell>
-                      <TableCell className="px-4 py-2 text-xs">
-                        {event.event_metadata?.source_name ? (
-                          <span>{event.event_metadata.source_name}</span>
-                        ) : (
-                          <span className="text-muted-foreground">{t('analytics.recentEvents.noSource')}</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="px-4 py-2 text-xs">
-                        {event.event_type === 'custom_event' && event.event_metadata?.event_name ? (
-                          <span>{event.event_metadata.event_name}</span>
-                        ) : (
-                          <span className="text-muted-foreground">{t('analytics.recentEvents.noEvent')}</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-between items-center mt-3 mb-3">
-            <div className="text-xs text-muted-foreground">
-              {t('analytics.recentEvents.pagination', {
-                from: startIndex + 1,
-                to: Math.min(startIndex + eventsPerPage, filteredEvents.length),
-                total: filteredEvents.length
-              })}
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="text-xs"
-              >
-                {t('analytics.recentEvents.prev')}
-              </Button>
-              <span className="px-2 py-1 text-xs text-muted-foreground">
-                {currentPage}/{totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="text-xs"
-              >
-                {t('analytics.recentEvents.next')}
-              </Button>
-            </div>
-          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent border-b">
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.time')}</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.traceId')}</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.prompt')}</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.version')}</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.type')}</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.source')}</TableHead>
+                <TableHead className="h-10 px-4 py-2 text-xs font-medium">{t('analytics.recentEvents.columns.event')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {displayedEvents.map((event) => (
+                <TableRow key={event.id} className="hover:bg-muted/50">
+                  <TableCell className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                    {new Date(event.created_at).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false
+                    })}
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    <code className="text-xs bg-muted/50 px-1.5 py-0.5 rounded font-mono break-all">
+                      {event.trace_id}
+                    </code>
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    {event.event_metadata?.prompt_name ? (
+                      <span className="text-xs">{event.event_metadata.prompt_name}</span>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">{t('analytics.recentEvents.noPrompt')}</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="px-4 py-2 text-xs">
+                    {event.event_metadata?.version_number
+                      ? `v${event.event_metadata.version_number}`
+                      : '—'}
+                  </TableCell>
+                  <TableCell className="px-4 py-2 text-xs">{formatEventType(event.event_type)}</TableCell>
+                  <TableCell className="px-4 py-2 text-xs">
+                    {event.event_metadata?.source_name ? (
+                      <span>{event.event_metadata.source_name}</span>
+                    ) : (
+                      <span className="text-muted-foreground">{t('analytics.recentEvents.noSource')}</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="px-4 py-2 text-xs">
+                    {event.event_type === 'custom_event' && event.event_metadata?.event_name ? (
+                      <span>{event.event_metadata.event_name}</span>
+                    ) : (
+                      <span className="text-muted-foreground">{t('analytics.recentEvents.noEvent')}</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
-        </CardContent>
-      </Card>
+      </div>
+
+      {/* Pagination */}
+      <Pagination
+        totalItems={filteredEvents.length}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        itemsPerPage={eventsPerPage}
+        onPageChange={setCurrentPage}
+        itemName="events"
+      />
     </div>
   );
 }

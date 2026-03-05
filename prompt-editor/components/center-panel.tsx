@@ -373,11 +373,11 @@ export function CenterPanel({
 
         return (
             <>
-                <div ref={containerRef} className="flex-1 bg-white flex flex-col min-w-0">
-                    <div className="flex-shrink-0 bg-white/95 backdrop-blur border-b-0 px-4">
+                <div ref={containerRef} className="flex-1 bg-card flex flex-col min-w-0">
+                    <div className="flex-shrink-0 bg-background/95 backdrop-blur border-b-0 px-4">
                         <div className="flex items-center justify-between h-full border-b-0 py-1">
                             <div className="flex items-center gap-2">
-                                <h2 className="text-base font-medium text-gray-700">{t('editor.previewMode')}</h2>
+                                <h2 className="text-base font-medium text-muted-foreground">{t('editor.previewMode')}</h2>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Button variant="ghost" size="sm" onClick={handleCopyActive} className="h-8 w-8 p-0"
@@ -388,26 +388,26 @@ export function CenterPanel({
                         </div>
                     </div>
 
-                    <div className="flex-1 p-8 overflow-y-auto bg-gray-50">
+                    <div className="flex-1 p-8 overflow-y-auto bg-secondary/50">
                         <div className="max-w-4xl mx-auto space-y-8">
                             <div>
-                                <h3 className="text-sm font-medium text-gray-600 mb-4">System Prompt:</h3>
-                                <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-                                    <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">{currentSystemPrompt}</p>
+                                <h3 className="text-sm font-medium text-muted-foreground mb-4">System Prompt:</h3>
+                                <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
+                                    <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{currentSystemPrompt}</p>
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className="text-sm font-medium text-gray-600 mb-4">User Prompt:</h3>
-                                <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-                                    <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">{currentUserPrompt}</p>
+                                <h3 className="text-sm font-medium text-muted-foreground mb-4">User Prompt:</h3>
+                                <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
+                                    <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{currentUserPrompt}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="border-t border-slate-100 px-3 py-2 bg-gray-50 flex-shrink-0">
-                        <div className="flex items-center justify-between text-xs text-gray-600">
+                    <div className="border-t border-border px-3 py-2 bg-secondary/50 flex-shrink-0">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
                             <div className="flex items-center space-x-3">
                 <span>
                   {t('editor.statsPanel.characters')}:{" "}
@@ -433,8 +433,8 @@ export function CenterPanel({
     // Main editor interface
     return (
         <>
-            <div ref={containerRef} className="flex-1 bg-white flex flex-col min-w-0">
-                <div className="h-10 border-b-0 bg-gradient-to-r from-slate-50 to-slate-100 pt-0">
+            <div ref={containerRef} className="flex-1 bg-card flex flex-col min-w-0">
+                <div className="h-10 border-b-0 bg-secondary/30 pt-0">
                     <div className="flex items-center">
                         {/* Tabs */}
                         <div className="flex">
@@ -443,7 +443,7 @@ export function CenterPanel({
                                 className={`px-4 py-2 text-sm font-medium border-b-4 transition-colors ${
                                     activeTab === "system"
                                         ? "border-blue-500 text-blue-600"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                        : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                                 }`}
                             >
                                 System Prompt
@@ -453,7 +453,7 @@ export function CenterPanel({
                                 className={`px-4 py-2 text-sm font-medium border-b-4 transition-colors ${
                                     activeTab === "user"
                                         ? "border-blue-500 text-blue-600"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                        : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                                 }`}
                             >
                                 User Prompt
@@ -481,27 +481,27 @@ export function CenterPanel({
                                 className="h-8 w-8 p-0"
                                 title={editorLanguage === "markdown" ? "Disable syntax highlighting" : "Enable markdown highlighting"}
                             >
-                                <FileText className={`w-4 h-4 ${editorLanguage === "markdown" ? "text-blue-600" : "text-slate-400"}`} />
+                                <FileText className={`w-4 h-4 ${editorLanguage === "markdown" ? "text-blue-600" : "text-muted-foreground/60"}`} />
                             </Button>
 
-                            <div className="flex items-center border border-slate-300 rounded-md bg-white">
+                            <div className="flex items-center border border-border rounded-md bg-background">
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     title="Decrease font size"
                                     onClick={() => setFontSize((p) => Math.max(10, p - 2))}
-                                    className="h-8 w-8 p-0 rounded-r-none border-r border-slate-200"
+                                    className="h-8 w-8 p-0 rounded-r-none border-r border-border"
                                 >
                                     <Minus className="w-4 h-4"/>
                                 </Button>
                                 <span
-                                    className="px-3 text-sm text-slate-700 min-w-[3rem] text-center bg-slate-50">{fontSize}px</span>
+                                    className="px-3 text-sm text-muted-foreground min-w-[3rem] text-center bg-secondary/50">{fontSize}px</span>
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     title="Increase font size"
                                     onClick={() => setFontSize((p) => Math.min(32, p + 2))}
-                                    className="h-8 w-8 p-0 rounded-l-none border-l border-slate-200"
+                                    className="h-8 w-8 p-0 rounded-l-none border-l border-border"
                                 >
                                     <Plus className="w-4 h-4"/>
                                 </Button>
@@ -559,8 +559,8 @@ export function CenterPanel({
                 </div>
 
                 {/* Footer */}
-                <div className="border-t border-slate-200 px-3 py-2 bg-gray-50 flex-shrink-0">
-                    <div className="flex items-center justify-between text-xs text-gray-600">
+                <div className="border-t border-border px-3 py-2 bg-secondary/50 flex-shrink-0">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <div className="flex items-center space-x-3">
               <span>
                 {t('editor.statsPanel.characters')}: <span className="font-medium">{totalCharacters}</span>
@@ -584,7 +584,7 @@ export function CenterPanel({
                                 <ModelPicker selected={selectedModels} onChange={onChangeSelectedModelsAction}/>
                             </div>
                         </div>
-                        <div className="text-xs text-slate-500 flex items-center gap-3">
+                        <div className="text-xs text-muted-foreground flex items-center gap-3">
                             <span>⌘S Save</span>
                             <span>⌘P Deploy</span>
                         </div>

@@ -208,7 +208,7 @@ export default function NewEventModal({ onSave, onCancel, initialData }: NewEven
           </Button>
         </div>
         {formData.metadata_schema.map((field, idx) => (
-          <div key={`meta-${idx}`} className="flex gap-2 items-start p-2 bg-gray-50 rounded">
+          <div key={`meta-${idx}`} className="flex gap-2 items-start p-2 bg-secondary/50 rounded">
             <div className="flex-1 space-y-2">
               <div className="flex gap-2">
                 <Input
@@ -269,7 +269,7 @@ export default function NewEventModal({ onSave, onCancel, initialData }: NewEven
           onClick={handleSave}
           disabled={saving}
           size="sm"
-          className="bg-black hover:bg-gray-800"
+          className="bg-foreground hover:bg-foreground/90"
         >
           {saving
             ? (formData.id ? t('analytics.eventForm.updating') : t('analytics.eventForm.creating'))
