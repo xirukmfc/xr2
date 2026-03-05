@@ -1119,7 +1119,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
     
     // Convert date presets to period format for Select
     const getPeriodFromDates = () => {
-      if (!startDate && !endDate) return 'today';
+      if (!startDate && !endDate) return 'allTime';
       // Check if dates match presets
       const today = new Date();
       const formatDate = (d: Date) => d.toISOString().split('T')[0];
@@ -1144,6 +1144,11 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
     const handlePeriodChange = (period: string) => {
       if (period === 'custom') {
         // Don't clear dates, just mark as custom
+        return;
+      }
+      if (period === 'allTime') {
+        setStartDate('');
+        setEndDate('');
         return;
       }
       if (period === 'today' || period === '7days' || period === '30days' || period === 'thisMonth') {
@@ -1213,10 +1218,11 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
             <>
               <div className="w-px h-5 bg-secondary mx-1" />
               <Select value={getPeriodFromDates()} onValueChange={handlePeriodChange}>
-                <SelectTrigger className="h-9 w-[120px]">
+                <SelectTrigger className="h-9 w-[140px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="allTime">{t('analytics.funnelForm.periodAllTime')}</SelectItem>
                   <SelectItem value="today">{t('analytics.funnelForm.periodToday')}</SelectItem>
                   <SelectItem value="7days">{t('analytics.funnelForm.period7days')}</SelectItem>
                   <SelectItem value="30days">{t('analytics.funnelForm.period30days')}</SelectItem>
@@ -1232,7 +1238,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="text-xs h-9 w-[130px]"
+                    className="text-xs h-9 w-[150px]"
                   />
                   <span className="text-xs text-muted-foreground">—</span>
                   <Input
@@ -1240,7 +1246,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="text-xs h-9 w-[130px]"
+                    className="text-xs h-9 w-[150px]"
                   />
                   {(startDate || endDate) && (
                     <Button
@@ -1573,7 +1579,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="text-xs h-9 w-[130px]"
+                      className="text-xs h-9 w-[150px]"
                     />
                     <span className="text-xs text-muted-foreground">—</span>
                     <Input
@@ -1581,7 +1587,7 @@ export default function FunnelAnalysis({ data, onFunnelChange, onFilterChange, s
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="text-xs h-9 w-[130px]"
+                      className="text-xs h-9 w-[150px]"
                     />
                   </div>
                   
