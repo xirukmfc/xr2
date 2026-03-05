@@ -1,179 +1,127 @@
 # xR2 — Loom Demo Video Script
 
-**Duration:** ~2:00–2:15
+**Duration:** ~2:15–2:20
 **Language:** English
 **Use:** Product Hunt, BetaList, ads, landing page, outreach
 **Format:** Talking head + screen recording (Loom)
 
 ---
 
-## SCENE 1 — Problem (0:00–0:15)
+## Text to read
 
-**[Talking head — camera only, no screen]**
+> Legend: **BOLD** = stress this word, ... = pause, *(notes)* = delivery hints
 
-> Every team building with AI has the same problem.
->
-> Your prompts are hardcoded. They live inside your backend, inside your n8n workflows, inside your Make scenarios.
-> And every time you want to change one — you redeploy. Or you dig through ten different places.
->
-> That's slow. And you have no idea which prompts actually work.
+###
 
-**Notes:** Short punchy sentences. Speak with energy. This sets the pain.
+I had about **fifteen** n8n scenarios. ... Posts, video scripts, emails. Every prompt lived inside its **own** node.
 
----
+When I needed to change something — I had to find the right scenario, ... open the right node, ... edit the prompt there.*(list these three like steps, each one more annoying)* 
+Same prompt in **two** scenarios? Change it **twice**.  ... It was a mess.
 
-## SCENE 2 — Solution (0:15–0:25)
+###
 
-**[Talking head — camera only, no screen]**
+I'm Pavel. I built xR2 to **fix** this. It's a prompt management platform. All your prompts live in **one** place, your apps pull them through API. 
+You change a prompt **once** — **everywhere** gets the update.
 
-> I'm Pavel. I built xR2. It's a prompt management platform.
->
-> You store all your prompts in one place, serve them through API, and track what happens after. Think of it as a CMS for AI prompts — with analytics built in.
+But that's only **half** the story. The other half ... is knowing which prompts actually **work**. Let me show you both.
 
-**Notes:** Confident. Matter-of-fact. Like a YC pitch: "We do X for Y."
+###
+Here are all my prompts. I click into one — full editor, variables like `{customer_name}` that get filled in at runtime.
 
----
+I make a change and deploy it — new version goes to **Production**. My app picks it up **instantly**. No code changes, no redeploy. 
+I can always roll back if something breaks.
 
-## SCENE 3 — Editor & Versions (0:25–0:50)
+###
 
-### What to show on screen, step by step:
+Connecting takes a minute. 
+Here's an n8n workflow — xR2 node pulls the prompt, sends it to OpenAI, sends an email, tracks the result. 
+**Five** nodes, done.
 
-**Step 1** — Start on `/prompts` page. All 4 prompts visible in the table:
-- Welcome Email Generator (Active, tags: email, conversion)
-- Product Recommendations (Active, tags: e-commerce, conversion)
-- Support Ticket Classifier (Active, tags: support)
-- Checkout Upsell Message (Active, tags: e-commerce, conversion)
+We have native nodes for n8n and Make. And for developers — Python SDK, Node.js SDK, or just a REST API. It's all in the docs.
 
-Hover cursor over the list so viewer sees the names, status badges, and colored tags. Hold 2-3 seconds.
+###
 
-**Step 2** — Click on "Welcome Email Generator". Editor page opens (`/editor/[id]`).
+OK, now the **other half**. *(callback to "half the story" — slow down here)* 
+The thing I struggled with the longest — how do you **know** ... if a prompt is actually working?
 
-**Step 3** — In the center panel (Monaco editor), the prompt text is visible with variables `{customer_name}`, `{plan_name}`, `{top_features}`. Slowly move cursor over the variables so they're highlighted.
+I couldn't find a good answer. ... So I **built** one.  Same idea as Google Analytics. 
+Every prompt request gets a **trace ID**. When your user does something — buys, signs up, clicks — you send that event back with the **same** trace ID.
 
-**Step 4** — Move cursor to the left panel, version history section. Three versions visible:
-- v1 — Production (green badge)
-- v2 — Testing (yellow badge)
-- v3 — Draft (gray badge)
+Here — recent events coming in. And here's a funnel I built from them. Product viewed, ... added to cart, ... checkout, ... purchase.
+**17.5%** overall conversion. I can see **exactly** where users drop off ... and which prompt version performs better.
 
-Hover over each version to show the status labels.
+You define your **own** events — name, fields, description. xR2 even generates the API call for you, ... just copy and paste.
 
-**Step 5** — Click on v2 (Testing). Editor updates to show the shorter, action-oriented version. Viewer sees the content change.
+###
 
-### What to say:
+And you can A/B test. Two prompt versions, traffic splits **automatically**.
 
-> Let me show you. Here's a prompt in our editor. You write your prompt, add variables like `{customer_name}` — and it gets filled in at runtime.
+Look — Version B: **20%** conversion. Version A: **15%**. ... **33% lift**. **99% confidence**. 
+ You don't argue about which prompt sounds better. You look at the **data**.
 
-*(switch to versions)*
+###
 
-> Each prompt has versions — Draft, Testing, Production. Same flow as Git. You can compare any two versions, and roll back in one click.
->
-> No deploy code needed. You change the prompt — your app picks it up instantly.
+xR2 is **live**, free to start. xr2.uk — set up a prompt, connect your app, couple of minutes.
+
+If you're using AI in production ... and still managing prompts by hand — ... **try it**.
 
 ---
 
-## SCENE 4 — Integration (0:50–1:10)
+## Scene directions
 
-### What to show on screen, step by step:
+### Scene 1 — Problem (0:00–0:15)
+Talking head + landing page (xr2.uk) on screen behind. Speak naturally — you're telling a story about your own pain.
 
-**Step 1** — Switch to a browser tab with n8n open. Show a pre-built workflow canvas with 5 connected nodes in a line:
+### Scene 2 — Solution (0:15–0:30)
+Still talking head + landing page. Casual intro. "I built xR2 to fix this" — not a pitch, just what happened.
+
+### Scene 3 — Editor & Versions (0:30–0:50)
+
+**Step 1** — Start on `/prompts` page. All prompts visible in the table. Hover cursor so viewer sees names, tags, status badges. Hold 2-3 seconds.
+
+**Step 2** — Click into a prompt. Editor page opens. Show the prompt text with variables `{customer_name}`, `{plan_name}`. Move cursor over them.
+
+**Step 3** — Make a small edit in the prompt (or pretend to). Then click deploy/promote to Production. Show the version changing status.
+
+**Step 4** — Show version history in the left panel. Three versions: Production, Testing, Draft. Click between them so viewer sees the content change.
+
+### Scene 4 — Integration (0:50–1:10)
+
+**Step 1** — Switch to n8n tab. Show the workflow canvas:
 ```
 Webhook → xR2 (Get Prompt) → OpenAI (Chat) → Send Email → xR2 (Track Event)
 ```
-Hold for 3-4 seconds so the full flow is visible.
+Hold 3-4 seconds.
 
-**Step 2** — Click on the xR2 "Get Prompt" node to open its settings. Show the fields:
-- Connection: xR2 API
-- Action: Get Prompt
-- Slug: `welcome-email`
-- Source: `n8n-email-workflow`
+**Step 2** — Click on xR2 node, show its settings briefly. Close.
 
-Hold 2-3 seconds, then close.
+**Step 3** — Switch to xR2 documentation page. Show the integration options — Python SDK, Node.js SDK, REST API, n8n nodes, Make modules. Scroll through briefly so viewer sees the breadth.
 
-**Step 3** — *(optional, only if time)* Click on the xR2 "Track Event" node. Show:
-- Action: Track Event
-- Trace ID: `{{ $json.trace_id }}` (passed from previous node)
-- Event Name: `email_opened`
+### Scene 5 — Analytics (1:10–1:45)
 
-### What to say:
+**Step 1** — Switch to xR2 → Analytics. "Recent Events" tab shows live events flowing in. Hold 2-3 seconds.
 
-> Connecting to xR2 is simple. Here's an n8n workflow — the xR2 node pulls the prompt, sends it to OpenAI, fires off an email, and tracks the result. No hardcoded text anywhere.
->
-> We have native nodes for n8n and Make. And for developers — it's one API call. That's it.
+**Step 2** — Click "Funnels" tab. Click on "Recommendations to Purchase" funnel. Show the funnel visualization:
+- product_viewed: 5,700 (100%)
+- added_to_cart: 2,393 (42.0%)
+- checkout_started: 1,253 (22.0%)
+- purchase_completed: 997 (17.5%)
 
----
+Move cursor along the steps. Hold 3-4 seconds.
 
-## SCENE 5 — Analytics & Event Tracking (1:10–1:40)
+**Step 3** — Click "Define Events" tab. Click on an event (e.g. "added_to_cart"). Show the event definition with fields and the generated code example (curl command). Hold 2-3 seconds so viewer sees the code snippet.
 
-### What to show on screen, step by step:
+### Scene 6 — A/B Testing (1:45–2:00)
 
-**Step 1** — Switch back to xR2. Click "Analytics" in the left sidebar. Analytics hub page opens (`/analytics`). The default tab "Recent Events" shows a table of recent events with timestamps, event types, prompt names.
+**Step 1** — Click "A/B Tests" tab. Show the running test:
+- "Tone Experiment: Formal vs Friendly"
+- Version A: v1 — 2,847 requests
+- Version B: v2 — 2,853 requests
 
-Hold 2-3 seconds so viewer sees real activity.
+**Step 2** — Show conversion rates, confidence (99%), winner indicator. Hold 3-4 seconds.
 
-**Step 2** — Click the "Prompt Events" tab. Shows events grouped by prompt with breakdown by event type (prompt_request, email_opened, email_clicked, purchase_completed, etc.). Hover cursor over the event type counts.
-
-**Step 3** — Click the "Funnels" tab. Shows the existing funnels:
-- "Recommendations to Purchase" (product_viewed → added_to_cart → checkout_started → purchase_completed)
-- "Welcome Email to Click"
-- "Upsell Acceptance Rate"
-- "Ticket Resolution Rate"
-
-Click on "Recommendations to Purchase" funnel. The funnel visualization shows step-by-step drop-off with conversion rates between steps. Move cursor along the funnel steps.
-
-**Step 4** — Click the "Define Events" tab. Shows all 10 event definitions:
-- sign_up, purchase_completed, product_viewed, added_to_cart, checkout_started, email_opened, email_clicked, upsell_accepted, ticket_resolved, get_joke
-
-Each has name, description, and required fields listed. Hold 2 seconds.
-
-### What to say:
-
-> Now here's where it gets interesting. xR2 tracks every prompt request — which prompts are used, how often, from which app, and what they cost in tokens.
-
-*(switch to events/funnels)*
-
-> But the real value is event tracking. Every prompt returns a trace ID.
-> When your user takes an action — signs up, buys something, clicks a link — you send that event back with the same trace ID.
->
-> Now you see a full funnel. This prompt led to this many purchases. This version made more revenue than that one.
-> Your prompts are no longer a black box — they're measurable.
-
----
-
-## SCENE 6 — A/B Testing (1:40–1:55)
-
-### What to show on screen, step by step:
-
-**Step 1** — Click the "A/B Tests" tab on the analytics page. The existing test is visible:
-- Name: "Tone Experiment: Formal vs Friendly"
-- Prompt: Product Recommendations
-- Status: Running (green badge)
-- Version A: v1 (Professional) — 2,847 requests
-- Version B: v2 (Friendly) — 2,853 requests
-
-**Step 2** — The metrics section shows:
-- Conversion rates per variant
-- Statistical confidence level
-- Winner indicator
-
-Move cursor to the conversion rates and confidence number. Hold 3-4 seconds so viewer can read the data.
-
-### What to say:
-
-> And you can A/B test. Two prompt versions, traffic split automatically.
->
-> Here: Variant B converts at 8.9%, Variant A at 7.2%. 96% confidence. You don't guess — you know.
-
----
-
-## SCENE 7 — CTA (1:55–2:10)
-
-**[Talking head — camera only. URL xr2.uk can be overlaid in Loom editing or shown in browser.]**
-
-> xR2 is live and free to start. Go to xr2.uk, create your first prompt, connect it to your app — takes two minutes.
->
-> Stop guessing. Start measuring.
-
-**Notes:** Look at camera. Confident close. Hold eye contact for 2 seconds after last word. Don't rush.
+### Scene 7 — CTA (2:00–2:15)
+Talking head + landing page on screen. Look at camera. Don't rush the last line — let it land.
 
 ---
 
@@ -193,10 +141,12 @@ Move cursor to the conversion rates and confidence number. Hold 3-4 seconds so v
 ## Pre-recording Setup Checklist
 
 ### Browser tabs to have open (in order):
-1. `xr2.uk/prompts` — logged in, all 4 prompts visible
-2. `xr2.uk/editor/[welcome-email-id]` — editor open with v1 Production
-3. n8n canvas — workflow with 5 nodes ready
-4. `xr2.uk/analytics` — analytics hub page
+1. `xr2.uk` — landing page (for Problem/Solution/CTA scenes)
+2. `xr2.uk/prompts` — logged in, all prompts visible
+3. `xr2.uk/editor/[welcome-email-id]` — editor open with v1 Production
+4. n8n canvas — workflow with 5 nodes ready
+5. `xr2.uk/docs` — documentation page with SDK/integration info
+6. `xr2.uk/analytics` — analytics hub page
 
 ### Verify before recording:
 - [ ] Prompts page shows 4 prompts with correct tags and status badges
@@ -213,18 +163,18 @@ Move cursor to the conversion rates and confidence number. Hold 3-4 seconds so v
 
 ### Delivery style
 - Talk like you're explaining to a smart friend — not reading
+- You're not pitching. You're showing something you built because you were frustrated
 - Short sentences. Pause between ideas. Don't rush
-- YC energy: "This is what we built. This is why it matters. Here's the proof."
 - Be direct and serious when showing product. Smile at intro and CTA
 - When switching from talking head to screen — pause 0.5 seconds so viewer adjusts
 
 ### Structure cheat sheet
 ```
-0:00  PROBLEM   — pain point (talking head, no screen)
-0:15  SOLUTION  — what xR2 is (talking head, no screen)
-0:25  EDITOR    — /prompts → click into editor → show versions (screen)
-0:50  INTEGRATE — n8n tab → show workflow → open xR2 node (screen)
-1:10  ANALYTICS — /analytics → events → funnels → define events (screen)
-1:40  A/B TEST  — /analytics → A/B Tests tab → show numbers (screen)
-1:55  CTA       — go try it (talking head, no screen)
+0:00  PROBLEM   — my n8n mess (talking head + landing page)
+0:15  SOLUTION  — what xR2 is + tease analytics (talking head + landing page)
+0:30  EDITOR    — /prompts → edit prompt → deploy → versions (screen)
+0:50  INTEGRATE — n8n workflow → docs with SDKs (screen)
+1:10  ANALYTICS — recent events → funnel → define events with code (screen)
+1:45  A/B TEST  — A/B Tests tab → show numbers (screen)
+2:00  CTA       — try it (talking head + landing page)
 ```

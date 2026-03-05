@@ -5,7 +5,7 @@ export class XR2 implements INodeType {
     description: INodeTypeDescription = {
         displayName: 'xR2',
         name: 'xr2',
-        icon: 'file:xr2-logo.png',
+        icon: 'file:xr2-logo.svg',
         group: ['transform'],
         version: 1,
         description: 'Interact with xR2 APIs',
@@ -25,6 +25,7 @@ export class XR2 implements INodeType {
                 displayName: 'Resource',
                 name: 'resource',
                 type: 'options',
+																noDataExpression: true,
                 options: [
                     {
                         name: 'API Key',
@@ -45,6 +46,7 @@ export class XR2 implements INodeType {
                 displayName: 'Operation',
                 name: 'operation',
                 type: 'options',
+																noDataExpression: true,
                 displayOptions: {
                     show: {
                         resource: ['apiKey'],
@@ -64,6 +66,7 @@ export class XR2 implements INodeType {
                 displayName: 'Operation',
                 name: 'operation',
                 type: 'options',
+																noDataExpression: true,
                 displayOptions: {
                     show: {
                         resource: ['prompt'],
@@ -83,6 +86,7 @@ export class XR2 implements INodeType {
                 displayName: 'Operation',
                 name: 'operation',
                 type: 'options',
+																noDataExpression: true,
                 displayOptions: {
                     show: {
                         resource: ['event'],
@@ -132,11 +136,11 @@ export class XR2 implements INodeType {
                 type: 'options',
                 options: [
                     { name: 'Any (Default)', value: '' },
-                    { name: 'Production', value: 'production' },
-                    { name: 'Testing', value: 'testing' },
+                    { name: 'Deprecated', value: 'deprecated' },
                     { name: 'Draft', value: 'draft' },
                     { name: 'Inactive', value: 'inactive' },
-                    { name: 'Deprecated', value: 'deprecated' },
+                    { name: 'Production', value: 'production' },
+                    { name: 'Testing', value: 'testing' },
                 ],
                 default: '',
                 description: 'Filter by version status. Leave as "Any" to get the latest deployed version regardless of status. Only use specific statuses if you need a particular version.',
@@ -241,7 +245,7 @@ export class XR2 implements INodeType {
                 name: 'value',
                 type: 'number',
                 default: 0,
-                description: 'Numeric value for revenue tracking, order amounts, etc. (0 = not set)',
+                description: 'Numeric value for revenue tracking, order amounts, etc. (0 = not set).',
                 displayOptions: {
                     show: {
                         resource: ['event'],
@@ -276,6 +280,7 @@ export class XR2 implements INodeType {
                 },
             },
         ],
+		usableAsTool: true,
     };
 
     async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
@@ -385,7 +390,7 @@ export class XR2 implements INodeType {
                     if (Object.keys(metadata).length > 0) {
                         body.metadata = metadata;
                     }
-                } catch (e) {
+                } catch {
                     // Invalid JSON, skip metadata
                 }
 

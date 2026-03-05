@@ -1,33 +1,36 @@
-import { NodeApiError, IDataObject, JsonObject } from 'n8n-workflow';
-
-export const BASE_URL = 'https://xr2.uk';
+import { NodeApiError, IDataObject, IExecuteFunctions, IHttpRequestMethods, JsonObject } from 'n8n-workflow';
 
 export interface RequestOptions {
     url: string;
     body?: IDataObject;
-    method?: string;
-    json?: boolean;
+    method?: IHttpRequestMethods;
 }
 
-function handleXr2Error(this: any, error: any): never {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function handleXr2Error(this: IExecuteFunctions, error: Error & Record<string, unknown>): never {
+    // n8n error objects carry arbitrary fields (httpCode, statusCode, response, etc.)
+    const err = error as Record<string, any>;
+    const res = (err.response ?? {}) as Record<string, any>;
+    const causeRes = ((err.cause as Record<string, any>)?.response ?? {}) as Record<string, any>;
+
     // Extract status code from various possible locations
-    const rawStatusCode = error.httpCode || error.statusCode || error.status ||
-                         error.response?.statusCode || error.response?.status;
+    const rawStatusCode = err.httpCode || err.statusCode || err.status ||
+                         res.statusCode || res.status;
     const statusCode = rawStatusCode !== undefined && rawStatusCode !== null
         ? Number(rawStatusCode)
         : undefined;
     const statusForMessage = Number.isFinite(statusCode) ? statusCode : rawStatusCode;
 
     // Extract error details from response body - check multiple locations
-    let apiResponse: any = null;
+    let apiResponse: Record<string, unknown> | null = null;
 
     // n8n puts the response in error.errorResponse
     const possibleBodies = [
-        error.errorResponse,
-        error.response?.body,
-        error.cause?.response?.body,
-        error.body,
-        error.data,
+        err.errorResponse,
+        res.body,
+        causeRes.body,
+        err.body,
+        err.data,
     ];
 
     for (const body of possibleBodies) {
@@ -46,12 +49,12 @@ function handleXr2Error(this: any, error: any): never {
     let apiSuggestion = '';
 
     if (apiResponse?.detail) {
-        const detail = apiResponse.detail;
+        const detail = apiResponse.detail as Record<string, any>;
         if (typeof detail === 'object') {
-            apiErrorMessage = detail.message || detail.error || '';
-            apiSuggestion = detail.suggestion || '';
-            if (detail.available_statuses) {
-                apiSuggestion += `\nAvailable statuses: ${detail.available_statuses.join(', ')}`;
+            apiErrorMessage = (detail.message || detail.error || '') as string;
+            apiSuggestion = (detail.suggestion || '') as string;
+            if (Array.isArray(detail.available_statuses)) {
+                apiSuggestion += `\nAvailable statuses: ${(detail.available_statuses as string[]).join(', ')}`;
             }
             if (detail.slug) {
                 apiErrorMessage = `[${detail.slug}] ${apiErrorMessage}`;
@@ -111,40 +114,36 @@ function handleXr2Error(this: any, error: any): never {
     throw new NodeApiError(this.getNode(), enhancedError as JsonObject);
 }
 
-export async function xr2GetRequest(this: any, options: RequestOptions) {
+export async function xr2GetRequest(this: IExecuteFunctions, options: RequestOptions) {
     const requestOptions = {
-        method: 'GET',
-        json: true,
+        method: 'GET' as const,
         ...options,
     };
 
     try {
-        const response = await this.helpers.httpRequestWithAuthentication.call(
+        return await this.helpers.httpRequestWithAuthentication.call(
             this,
             'xr2Api',
             requestOptions,
         );
-        return response;
-    } catch (error: any) {
-        throw handleXr2Error.call(this, error);
+    } catch (error) {
+        throw handleXr2Error.call(this, error as Error & Record<string, unknown>);
     }
 }
 
-export async function xr2Request(this: any, options: RequestOptions) {
+export async function xr2Request(this: IExecuteFunctions, options: RequestOptions) {
     const requestOptions = {
-        method: 'POST',
-        json: true,
+        method: 'POST' as const,
         ...options,
     };
 
     try {
-        const response = await this.helpers.httpRequestWithAuthentication.call(
+        return await this.helpers.httpRequestWithAuthentication.call(
             this,
             'xr2Api',
             requestOptions,
         );
-        return response;
-    } catch (error: any) {
-        throw handleXr2Error.call(this, error);
+    } catch (error) {
+        throw handleXr2Error.call(this, error as Error & Record<string, unknown>);
     }
 }

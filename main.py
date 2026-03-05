@@ -133,7 +133,7 @@ app.add_middleware(SecurityMiddleware)
 
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["xr2.uk", "www.xr2.uk", "xr2.site", "www.xr2.site", "localhost", "127.0.0.1", "app", "*.ngrok-free.app", "*.ngrok.io"]
+    allowed_hosts=["xr2.uk", "www.xr2.uk", "xr2.site", "www.xr2.site", "localhost", "127.0.0.1", "app"]
 )
 
 # Add Swagger authentication middleware (protects admin public_docs)

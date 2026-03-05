@@ -460,7 +460,7 @@ export default function PrivacyPolicyPage() {
       const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/)
       if (linkMatch) {
         return (
-          <Link key={i} href={linkMatch[2]} className="text-gray-900 underline hover:text-gray-600">
+          <Link key={i} href={linkMatch[2]} className="text-foreground underline hover:text-muted-foreground">
             {linkMatch[1]}
           </Link>
         )
@@ -472,19 +472,19 @@ export default function PrivacyPolicyPage() {
   return (
     <article className="max-w-none">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.title}</h1>
-        <p className="text-sm text-gray-500">{t.lastUpdated}</p>
+        <h1 className="text-3xl font-bold text-foreground mb-2">{t.title}</h1>
+        <p className="text-sm text-muted-foreground">{t.lastUpdated}</p>
       </div>
 
       <div className="space-y-8">
         {t.sections.map((section, index) => (
           <section key={index}>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">{section.title}</h2>
-            <div className="text-gray-600 leading-relaxed space-y-3">
+            <h2 className="text-xl font-semibold text-foreground mb-4">{section.title}</h2>
+            <div className="text-muted-foreground leading-relaxed space-y-3">
               {section.content.split('\n').map((paragraph, pIndex) => {
                 if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
                   return (
-                    <p key={pIndex} className="font-semibold text-gray-900 mt-4">
+                    <p key={pIndex} className="font-semibold text-foreground mt-4">
                       {paragraph.replace(/\*\*/g, '')}
                     </p>
                   )
@@ -494,8 +494,8 @@ export default function PrivacyPolicyPage() {
                   if (match) {
                     return (
                       <p key={pIndex} className="mt-3">
-                        <span className="font-semibold text-gray-900">{match[1]}</span>
-                        <span className="text-gray-600">{match[2]}</span>
+                        <span className="font-semibold text-foreground">{match[1]}</span>
+                        <span className="text-muted-foreground">{match[2]}</span>
                       </p>
                     )
                   }

@@ -1,9 +1,12 @@
 {
   "name": "n8n-nodes-xr2",
-  "version": "0.2.18",
+  "version": "0.2.21",
   "description": "n8n community nodes for xR2 API (Check API Key, Get Prompt, Track Events)",
   "license": "MIT",
-  "author": "xirukmfc <pavel.kuzko@gmail.com>",
+  "author": {
+    "name": "xirukmfc",
+    "email": "pavel.kuzko@gmail.com"
+  },
   "keywords": [
     "n8n-community-node-package",
     "n8n-community-node",
@@ -23,35 +26,36 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
     "nodes": [
-      "dist/nodes/XR2/XR2.node.js"
+      "dist/nodes/XR2/Xr2.node.js"
     ],
     "credentials": [
       "dist/credentials/XR2Api.credentials.js"
     ]
   },
   "files": [
-    "dist",
-    "nodes/**/xr2.svg",
-    "README.md"
+    "dist"
   ],
   "scripts": {
-    "build": "tsc -p . && npm run copy-assets",
-    "copy-assets": "mkdir -p dist/nodes/XR2 && cp nodes/XR2/*.svg nodes/XR2/*.png dist/nodes/XR2/ 2>/dev/null || true",
-    "clean": "rimraf dist",
-    "lint": "tsc -p . --noEmit",
-    "dev": "tsc -p . --watch",
-    "prepublishOnly": "npm run clean && npm run build"
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
   },
   "devDependencies": {
+    "@n8n/node-cli": "*",
     "@types/node": "^20.11.0",
-    "rimraf": "^5.0.5",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "release-it": "^19.2.4",
     "typescript": "^5.4.0"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
-  },
-  "overrides": {
-    "form-data": "^4.0.4"
   }
 }

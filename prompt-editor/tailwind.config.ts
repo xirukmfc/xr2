@@ -82,7 +82,9 @@ const config: Config = {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
       fontFamily: {
-        mono: ["SF Mono", "Monaco", "Cascadia Code", "Roboto Mono", "Consolas", "Courier New", "monospace"],
+        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+        display: ["var(--font-lato)", "Lato", "system-ui", "sans-serif"],
+        mono: ["var(--font-jetbrains)", "JetBrains Mono", "monospace"],
       },
     },
   },

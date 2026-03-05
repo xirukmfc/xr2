@@ -1,16 +1,30 @@
 {
-  "compilerOptions": {
-    "target": "ES2019",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "declaration": true,
-    "outDir": "./dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
-  },
-  "include": ["credentials/**/*", "nodes/**/*", "helpers/**/*"],
-  "exclude": ["node_modules", "dist"]
+	"compilerOptions": {
+		"strict": true,
+		"target": "es2019",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"strictNullChecks": true,
+		"removeComments": true,
+		"declaration": true,
+		"sourceMap": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"outDir": "./dist"
+	},
+	"include": [
+		"credentials/**/*",
+		"nodes/**/*",
+		"nodes/**/*.json",
+		"helpers/**/*",
+		"package.json"
+	],
+	"exclude": [
+		"node_modules",
+		"dist"
+	]
 }
