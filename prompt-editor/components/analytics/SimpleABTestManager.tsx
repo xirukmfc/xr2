@@ -597,8 +597,8 @@ export default function SimpleABTestManager({
                             )}
                           </td>
                           <td className="px-4 py-3 text-sm">{test.prompt_name}</td>
-                          <td className="px-4 py-3">
-                            <Badge className={`${getStatusColor(test.status)} text-xs px-2 py-0.5`}>
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <Badge className={`${getStatusColor(test.status)} text-xs px-2 py-0.5 whitespace-nowrap`}>
                               {t(`analytics.abTests.statuses.${test.status}` as const)}
                             </Badge>
                           </td>
@@ -612,7 +612,7 @@ export default function SimpleABTestManager({
                               </span>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-sm text-muted-foreground">
+                          <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
                             {test.version_a_name} / {test.version_b_name}
                           </td>
                           <td className="px-4 py-3 text-sm">
