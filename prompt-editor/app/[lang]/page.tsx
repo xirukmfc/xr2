@@ -377,7 +377,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
   const integrationCode = integrationTab === 'python' ? PYTHON_CODE : integrationTab === 'nodejs' ? NODEJS_CODE : integrationTab === 'rest' ? REST_CODE : NOCODE_CODE
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background overflow-x-hidden">
 
       {/* ─── Grid background (sniffmail-style) ─── */}
       <div
@@ -574,9 +574,9 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
             ))}
           </div>
 
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-            <ScrollReveal>
-              <div>
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center min-w-0">
+            <ScrollReveal className="min-w-0">
+              <div className="min-w-0">
                 <h3 className="text-xl font-bold text-foreground font-display">
                   {integrationTab === 'python' ? 'Python SDK' : integrationTab === 'nodejs' ? 'Node.js SDK' : integrationTab === 'rest' ? 'REST API' : (en ? 'No-code platforms' : 'Без кода')}
                 </h3>
@@ -645,15 +645,15 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
               </div>
             </ScrollReveal>
 
-            <ScrollReveal delay={100}>
-              <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <ScrollReveal delay={100} className="min-w-0 hidden lg:block">
+              <div className="rounded-xl border border-border bg-card overflow-hidden min-w-0">
                 <div className="flex items-center justify-between border-b border-border bg-muted/50 px-4 py-3">
                   <code className="text-sm font-mono text-foreground">
                     {integrationTab === 'python' ? 'pip install xr2-sdk' : integrationTab === 'nodejs' ? 'npm install xr2-sdk' : integrationTab === 'rest' ? 'curl — POST /api/v1/get-prompt' : 'n8n / Make.com'}
                   </code>
                 </div>
                 <div className="p-4 overflow-x-auto">
-                  <pre className="text-sm font-mono text-muted-foreground"><code>{integrationCode}</code></pre>
+                  <pre className="text-xs sm:text-sm font-mono text-muted-foreground"><code>{integrationCode}</code></pre>
                 </div>
               </div>
             </ScrollReveal>
