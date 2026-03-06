@@ -13,7 +13,6 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { apiClient } from "@/lib/api"
 
 type SupportedLocale = 'en' | 'ru'
 
@@ -299,7 +298,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
   useEffect(() => {
     (async () => {
       try {
-        const r = await fetch(`${apiClient.getBaseUrl()}/pricing?locale=${locale}`)
+        const r = await fetch(`/internal/pricing?locale=${locale}`)
         if (r.ok) { const d = await r.json(); if (d.plans?.length) setPricing(d.plans) }
       } catch {}
     })()
