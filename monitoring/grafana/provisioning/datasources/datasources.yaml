@@ -8,7 +8,7 @@ datasources:
     url: postgres:5432
     user: xr2_user
     secureJsonData:
-      password: CHANGE_ME_ON_SERVER
+      password: $__env{POSTGRES_PASSWORD}
     jsonData:
       database: xr2_db
       sslmode: disable

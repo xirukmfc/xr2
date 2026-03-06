@@ -254,6 +254,7 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SERVER_ROOT_URL=https://xr2.uk/grafana
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana_data_prod:/var/lib/grafana
