@@ -257,6 +257,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
   const [scrolled, setScrolled] = useState(false)
   const [pricing, setPricing] = useState<PricingPlan[]>([])
   const [integrationTab, setIntegrationTab] = useState<'python' | 'nodejs' | 'rest' | 'nocode'>('python')
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
   const heroRef = useRef<HTMLElement>(null)
   const terminalRef = useRef<HTMLDivElement>(null)
   const [tilt, setTilt] = useState({ x: 4, y: -12 })
@@ -448,7 +449,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
       <section ref={heroRef} className="relative min-h-screen flex flex-col justify-center overflow-hidden">
         <ParticleField sectionRef={heroRef} />
         <div className="mx-auto max-w-7xl w-full px-6 md:px-10 pb-16 pt-28 md:pb-24 md:pt-36 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-10 lg:gap-10 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-10 lg:gap-12 items-center">
 
             {/* Left — text */}
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
@@ -479,16 +480,16 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
 
               <ScrollReveal instant>
                 <p className="mt-4 text-xs text-muted-foreground">
-                  {en ? '10 free prompts and 100 api requests per month.' : '10 бесплатных промптов и 1000 запросов в месяц.'}
+                  {en ? '10 free prompts and 1000 api requests per month.' : '10 бесплатных промптов и 1000 запросов в месяц.'}
                 </p>
               </ScrollReveal>
             </div>
 
-            {/* Right — terminal with interactive 3D tilt */}
+            {/* Right — editor screenshot with interactive 3D tilt */}
             <ScrollReveal instant>
               <div
                 ref={terminalRef}
-                className="relative lg:pl-4"
+                className="relative lg:pl-4 lg:-mr-18"
                 style={{ perspective: '800px' }}
                 onMouseMove={handleTerminalMouse}
                 onMouseLeave={handleTerminalLeave}
@@ -501,49 +502,15 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
                     transition: 'transform 0.15s ease-out',
                   }}
                 >
-                  <div className="w-full rounded-2xl border border-border/60 bg-zinc-50 dark:bg-zinc-950 shadow-2xl overflow-hidden">
-                    {/* Terminal header */}
-                    <div className="flex items-center gap-3 border-b border-zinc-200 dark:border-zinc-800 px-5 py-3 bg-zinc-200 dark:bg-zinc-900">
-                      <div className="flex gap-2">
-                        <div className="h-3 w-3 rounded-full bg-[#ff5f57]" />
-                        <div className="h-3 w-3 rounded-full bg-[#febc2e]" />
-                        <div className="h-3 w-3 rounded-full bg-[#28c840]" />
-                      </div>
-                      <span className="text-sm font-medium text-zinc-600 dark:text-zinc-300">Terminal</span>
-                    </div>
-
-                    {/* Request */}
-                    <div className="p-5 border-b border-zinc-200 dark:border-zinc-800">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-600 dark:text-green-400 font-mono font-medium">GET</span>
-                        <span className="text-xs text-zinc-500 font-mono">/v1/prompts/welcome-email</span>
-                      </div>
-                      <pre className="text-[13px] font-mono text-zinc-600 dark:text-zinc-400 overflow-x-auto"><code>{`curl -X GET https://api.xr2.uk/v1/prompts/welcome-email \\
-  -H "Authorization: Bearer sk_live_..."`}</code></pre>
-                    </div>
-
-                    {/* Response */}
-                    <div className="p-5">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs text-zinc-500">Response</span>
-                        <span className="text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-600 dark:text-green-400 font-mono font-medium">200 OK</span>
-                      </div>
-                      <pre className="text-[13px] font-mono overflow-x-auto leading-relaxed"><code>
-                        <span className="text-zinc-400 dark:text-zinc-500">{'{'}</span>{'\n'}
-                        <span className="text-zinc-600 dark:text-zinc-400">{`  "slug"`}</span><span className="text-zinc-400 dark:text-zinc-500">:</span> <span className="text-amber-600 dark:text-amber-400">{`"welcome-email"`}</span><span className="text-zinc-400 dark:text-zinc-500">,</span>{'\n'}
-                        <span className="text-zinc-600 dark:text-zinc-400">{`  "status"`}</span><span className="text-zinc-400 dark:text-zinc-500">:</span> <span className="text-green-600 dark:text-green-400">{`"production"`}</span><span className="text-zinc-400 dark:text-zinc-500">,</span>{'\n'}
-                        <span className="text-zinc-600 dark:text-zinc-400">{`  "version"`}</span><span className="text-zinc-400 dark:text-zinc-500">:</span> <span className="text-blue-600 dark:text-blue-400">{`1`}</span><span className="text-zinc-400 dark:text-zinc-500">,</span>{'\n'}
-                        <span className="text-zinc-600 dark:text-zinc-400">{`  "system_prompt"`}</span><span className="text-zinc-400 dark:text-zinc-500">:</span> <span className="text-amber-600 dark:text-amber-400">{`"You are a friendly onboarding..."`}</span><span className="text-zinc-400 dark:text-zinc-500">,</span>{'\n'}
-                        <span className="text-zinc-600 dark:text-zinc-400">{`  "user_prompt"`}</span><span className="text-zinc-400 dark:text-zinc-500">:</span> <span className="text-amber-600 dark:text-amber-400">{`"Generate a welcome email for..."`}</span><span className="text-zinc-400 dark:text-zinc-500">,</span>{'\n'}
-                        <span className="text-zinc-600 dark:text-zinc-400">{`  "variables"`}</span><span className="text-zinc-400 dark:text-zinc-500">:</span> <span className="text-zinc-400 dark:text-zinc-500">[</span>{'\n'}
-                        <span className="text-zinc-400 dark:text-zinc-500">{`    { `}</span><span className="text-zinc-600 dark:text-zinc-400">{`"name"`}</span><span className="text-zinc-400 dark:text-zinc-500">:</span> <span className="text-amber-600 dark:text-amber-400">{`"customer_name"`}</span><span className="text-zinc-400 dark:text-zinc-500">{`, `}</span><span className="text-zinc-600 dark:text-zinc-400">{`"required"`}</span><span className="text-zinc-400 dark:text-zinc-500">:</span> <span className="text-blue-600 dark:text-blue-400">{`true`}</span><span className="text-zinc-400 dark:text-zinc-500">{` },`}</span>{'\n'}
-                        <span className="text-zinc-400 dark:text-zinc-500">{`    { `}</span><span className="text-zinc-600 dark:text-zinc-400">{`"name"`}</span><span className="text-zinc-400 dark:text-zinc-500">:</span> <span className="text-amber-600 dark:text-amber-400">{`"plan_name"`}</span><span className="text-zinc-400 dark:text-zinc-500">{`, `}</span><span className="text-zinc-600 dark:text-zinc-400">{`"default"`}</span><span className="text-zinc-400 dark:text-zinc-500">:</span> <span className="text-amber-600 dark:text-amber-400">{`"Pro"`}</span><span className="text-zinc-400 dark:text-zinc-500">{` }`}</span>{'\n'}
-                        <span className="text-zinc-400 dark:text-zinc-500">{`  ]`}</span><span className="text-zinc-400 dark:text-zinc-500">,</span>{'\n'}
-                        <span className="text-zinc-600 dark:text-zinc-400">{`  "deployed_at"`}</span><span className="text-zinc-400 dark:text-zinc-500">:</span> <span className="text-amber-600 dark:text-amber-400">{`"2026-02-18T02:20:29Z"`}</span><span className="text-zinc-400 dark:text-zinc-500">,</span>{'\n'}
-                        <span className="text-zinc-600 dark:text-zinc-400">{`  "trace_id"`}</span><span className="text-zinc-400 dark:text-zinc-500">:</span> <span className="text-amber-600 dark:text-amber-400">{`"evt_693fe538_857c675d"`}</span>{'\n'}
-                        <span className="text-zinc-400 dark:text-zinc-500">{'}'}</span>
-                      </code></pre>
-                    </div>
+                  <div className="w-full lg:w-[105%] rounded-2xl border border-border/60 shadow-2xl overflow-hidden">
+                    <Image
+                      src="/screenshots/Screenshot 2026-03-06 at 11.48.00.png"
+                      alt={en ? 'Prompt Editor — version control, variables, multi-model testing' : 'Редактор промптов — версии, переменные, тестирование'}
+                      width={1480}
+                      height={900}
+                      className="w-full h-auto"
+                      priority
+                    />
                   </div>
                 </div>
               </div>
@@ -727,6 +694,31 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
                 </div>
               </ScrollReveal>
             ))}
+          </div>
+          {/* Screenshots: Funnels & A/B Tests */}
+          <div className="mt-20 grid gap-8 md:grid-cols-2">
+            <ScrollReveal delay={100}>
+              <button type="button" onClick={() => setLightboxSrc('/screenshots/analytics-funnels.png')} className="rounded-2xl border border-border/60 shadow-lg overflow-hidden bg-background cursor-zoom-in transition-shadow hover:shadow-xl">
+                <Image
+                  src="/screenshots/analytics-funnels.png"
+                  alt={en ? 'Funnel Analytics — compare prompt versions by conversion' : 'Воронки — сравнение версий промптов по конверсии'}
+                  width={1480}
+                  height={900}
+                  className="w-full h-auto"
+                />
+              </button>
+            </ScrollReveal>
+            <ScrollReveal delay={200}>
+              <button type="button" onClick={() => setLightboxSrc('/screenshots/analytics-ab-tests.png')} className="rounded-2xl border border-border/60 shadow-lg overflow-hidden bg-background cursor-zoom-in transition-shadow hover:shadow-xl">
+                <Image
+                  src="/screenshots/analytics-ab-tests.png"
+                  alt={en ? 'A/B Testing — statistical confidence and winner detection' : 'A/B тесты — статистическая значимость и определение победителя'}
+                  width={1480}
+                  height={900}
+                  className="w-full h-auto"
+                />
+              </button>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -950,6 +942,23 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
       </section>
 
       </main>
+
+      {/* ─── Lightbox ─── */}
+      {lightboxSrc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm cursor-zoom-out" onClick={() => setLightboxSrc(null)}>
+          <button type="button" onClick={() => setLightboxSrc(null)} className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors">
+            <X className="h-8 w-8" />
+          </button>
+          <Image
+            src={lightboxSrc}
+            alt=""
+            width={2960}
+            height={1800}
+            className="max-w-[90vw] max-h-[90vh] w-auto h-auto rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
       {/* ─── Footer (sniffmail-style) ─── */}
       <footer className="bg-card">
