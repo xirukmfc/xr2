@@ -139,7 +139,7 @@ export default function LoginPage() {
                 
                 if (userInfo.email) {
                   // Create a mock credential object similar to ID token flow
-                  const mockCredential = btoa(JSON.stringify({
+                  const jsonStr = JSON.stringify({
                     iss: 'accounts.google.com',
                     aud: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
                     email: userInfo.email,
@@ -148,7 +148,9 @@ export default function LoginPage() {
                     family_name: userInfo.family_name,
                     picture: userInfo.picture,
                     exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
-                  }));
+                  });
+                  // Use TextEncoder to handle Unicode names (e.g. Cyrillic, CJK)
+                  const mockCredential = btoa(String.fromCharCode(...new TextEncoder().encode(jsonStr)));
                   
                   await handleGoogleResponse({ credential: mockCredential });
                 } else {
