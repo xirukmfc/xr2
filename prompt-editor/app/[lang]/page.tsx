@@ -994,6 +994,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
                   <Link href="/legal/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.footer.privacy')}</Link>
                   <Link href="/legal/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.footer.terms')}</Link>
                   <Link href="/legal/cookies" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.footer.cookies')}</Link>
+                  <Link href="/blog" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
                 </div>
               </div>
               <div>

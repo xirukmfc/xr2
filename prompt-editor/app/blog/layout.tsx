@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useLocale } from "@/contexts/locale-context"
 
-export default function LegalLayout({
+export default function BlogLayout({
   children,
 }: {
   children: React.ReactNode

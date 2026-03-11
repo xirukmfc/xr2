@@ -17,6 +17,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/legal/cookies',
   ]
 
+  // Blog pages (SEO content)
+  const blogPages = [
+    '/blog',
+    '/blog/n8n-prompt-management',
+    '/blog/make-prompt-management',
+    '/blog/prompt-versioning',
+    '/blog/prompt-ab-testing',
+    '/blog/langfuse-alternative',
+  ]
+
   const urls: MetadataRoute.Sitemap = []
 
   if (isRussianDomain) {
@@ -53,6 +63,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.8,
     })
+
+    // Blog pages (English only, SEO content)
+    for (const page of blogPages) {
+      urls.push({
+        url: `${baseUrl}${page}`,
+        lastModified,
+        changeFrequency: 'weekly',
+        priority: page === '/blog' ? 0.8 : 0.7,
+      })
+    }
   }
 
   return urls
