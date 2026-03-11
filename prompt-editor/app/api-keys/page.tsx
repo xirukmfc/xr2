@@ -353,7 +353,11 @@ function ApiKeysPageContent() {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder={t('apiKeys.modal.namePlaceholder')}
+                maxLength={100}
               />
+              <span className={`text-xs ${newName.length > 90 ? 'text-red-500' : 'text-slate-400'} mt-1 block text-right`}>
+                {newName.length}/100
+              </span>
             </div>
           </div>
           <DialogFooter>

@@ -85,11 +85,17 @@ export function NewApiKeyModal({ isOpen, onClose, onCreateApiKey }: NewApiKeyMod
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t('apiKeys.modal.namePlaceholder')}
+                maxLength={100}
                 required
               />
-              <p className="text-sm text-slate-500 mt-1">
-                {t('apiKeys.modal.nameHelper')}
-              </p>
+              <div className="flex justify-between mt-1">
+                <p className="text-sm text-slate-500">
+                  {t('apiKeys.modal.nameHelper')}
+                </p>
+                <span className={`text-xs ${name.length > 90 ? 'text-red-500' : 'text-slate-400'}`}>
+                  {name.length}/100
+                </span>
+              </div>
             </div>
 
             <div>
