@@ -1006,8 +1006,9 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
             </div>
           </div>
 
-          <div className="pt-6 border-t border-border">
+          <div className="pt-6 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} xR2. {en ? 'All rights reserved.' : 'Все права защищены.'}</p>
+            <a href="https://portfolio.xr2.uk" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{en ? 'Built by Pavel Kuzko' : 'Создатель — Павел Кузько'}</a>
           </div>
         </div>
       </footer>

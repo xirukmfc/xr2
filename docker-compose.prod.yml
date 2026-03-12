@@ -315,6 +315,7 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot:ro
       - nginx_logs_prod:/var/log/nginx
+      - ./portfolio:/usr/share/nginx/portfolio:ro
     depends_on:
       - app
       - frontend
