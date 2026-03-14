@@ -19,11 +19,10 @@ plugins:
       docs_structure: folder
       fallback_to_default: true
       languages:
-        - locale: en
+        en:
           name: English
-          default: true
           build: true
-        - locale: ru
+        ru:
           name: Русский
           build: true
           nav_translations:
