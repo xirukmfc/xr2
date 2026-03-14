@@ -73,7 +73,7 @@ export default function BlogLayout({
                   <Link href="/legal/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.footer.privacy')}</Link>
                   <Link href="/legal/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.footer.terms')}</Link>
                   <Link href="/legal/cookies" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing.footer.cookies')}</Link>
-                  <Link href="/blog" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
+                  <Link href="/blog" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">{en ? 'Blog' : 'Блог'}</Link>
                 </div>
               </div>
               <div>

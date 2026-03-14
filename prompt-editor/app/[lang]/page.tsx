@@ -376,8 +376,29 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
 
   const integrationCode = integrationTab === 'python' ? PYTHON_CODE : integrationTab === 'nodejs' ? NODEJS_CODE : integrationTab === 'rest' ? REST_CODE : NOCODE_CODE
 
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "xR2",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "url": en ? "https://xr2.uk" : "https://xr2.site",
+    "description": en
+      ? "Prompt management platform for AI workflows. Version control, A/B testing, and dynamic prompt switching for n8n, Make.com, and REST API."
+      : "Платформа управления промптами для AI. Версионирование, A/B тесты и динамическое переключение промптов для n8n, Make.com и REST API.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+    },
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-background overflow-x-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+      />
 
       {/* ─── Grid background (sniffmail-style) ─── */}
       <div
@@ -910,6 +931,49 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
                 </ScrollReveal>
               )
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Blog highlights ─── */}
+      <section>
+        <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
+          <ScrollReveal>
+            <div className="text-center">
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{en ? 'From the Blog' : 'Блог'}</p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl text-balance font-display">
+                {en ? 'Learn how teams manage AI prompts' : 'Как команды управляют промптами'}
+              </h2>
+            </div>
+          </ScrollReveal>
+          <div className="mt-12 grid gap-6 sm:grid-cols-3">
+            {(en ? [
+              { href: "/blog/n8n-prompt-management", title: "Prompt Management for n8n", desc: "Stop hardcoding system prompts. Fetch them at runtime with a native n8n node." },
+              { href: "/blog/prompt-versioning", title: "Version Control for AI Prompts", desc: "Draft, test, and promote prompts. Roll back instantly when something breaks." },
+              { href: "/blog/prompt-ab-testing", title: "A/B Test AI Prompts", desc: "Run experiments on prompt variants. Measure conversions and revenue, not just vibes." },
+            ] : [
+              { href: "/blog/n8n-prompt-management", title: "Управление промптами в n8n", desc: "Централизуйте промпты и загружайте их на лету через нативную ноду xR2." },
+              { href: "/blog/prompt-versioning", title: "Версионирование промптов", desc: "Черновики, тестирование, продакшен. Откатывайте мгновенно при проблемах." },
+              { href: "/blog/prompt-ab-testing", title: "A/B тесты промптов", desc: "Эксперименты над вариантами промптов. Измеряйте конверсии и выручку." },
+            ]).map((post, i) => (
+              <ScrollReveal key={post.href} delay={i * 80}>
+                <Link
+                  href={post.href}
+                  className="group block rounded-xl border border-border p-6 transition-colors hover:bg-muted/50 h-full"
+                >
+                  <h3 className="text-base font-bold text-foreground font-display group-hover:underline underline-offset-4">{post.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{post.desc}</p>
+                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                    {en ? 'Read more' : 'Читать'} <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </Link>
+              </ScrollReveal>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <Link href="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              {en ? 'View all articles →' : 'Все статьи →'}
+            </Link>
           </div>
         </div>
       </section>

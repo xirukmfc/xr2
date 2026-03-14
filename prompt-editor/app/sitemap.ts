@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const lastModified = new Date()
 
-  // Public pages that should be indexed
+  // Public pages that should be indexed (root-level, no /en or /ru prefix)
   const publicPages = [
     '', // home
     '/legal/privacy',
@@ -17,7 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/legal/cookies',
   ]
 
-  // Blog pages (SEO content)
+  // Blog pages (both domains)
   const blogPages = [
     '/blog',
     '/blog/n8n-prompt-management',
@@ -29,16 +29,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const urls: MetadataRoute.Sitemap = []
 
+  // All pages at root level — locale is handled by middleware rewrite
+  for (const page of publicPages) {
+    urls.push({
+      url: `${baseUrl}${page}`,
+      lastModified,
+      changeFrequency: page === '' ? 'weekly' : 'monthly',
+      priority: page === '' ? 1.0 : 0.5,
+    })
+  }
+
+  // Blog pages (both domains)
+  for (const page of blogPages) {
+    urls.push({
+      url: `${baseUrl}${page}`,
+      lastModified,
+      changeFrequency: 'weekly',
+      priority: page === '/blog' ? 0.8 : 0.7,
+    })
+  }
+
   if (isRussianDomain) {
-    // xr2.site: only Russian locale, pages at root level via rewrite
-    for (const page of publicPages) {
-      urls.push({
-        url: `${baseUrl}/ru${page}`,
-        lastModified,
-        changeFrequency: page === '' ? 'weekly' : 'monthly',
-        priority: page === '' ? 1.0 : 0.5,
-      })
-    }
     // Documentation on xr2.site
     urls.push({
       url: `${baseUrl}/documentation/`,
@@ -47,15 +58,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     })
   } else {
-    // xr2.uk: only English locale
-    for (const page of publicPages) {
-      urls.push({
-        url: `${baseUrl}/en${page}`,
-        lastModified,
-        changeFrequency: page === '' ? 'weekly' : 'monthly',
-        priority: page === '' ? 1.0 : 0.5,
-      })
-    }
     // Documentation on docs.xr2.uk
     urls.push({
       url: 'https://docs.xr2.uk',
@@ -63,16 +65,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.8,
     })
-
-    // Blog pages (English only, SEO content)
-    for (const page of blogPages) {
-      urls.push({
-        url: `${baseUrl}${page}`,
-        lastModified,
-        changeFrequency: 'weekly',
-        priority: page === '/blog' ? 0.8 : 0.7,
-      })
-    }
   }
 
   return urls

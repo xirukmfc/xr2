@@ -27,8 +27,8 @@ function getLocaleByHostname(hostname: string): Locale | null {
   return null
 }
 
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('en')
+export function LocaleProvider({ children, initialLocale = 'en' }: { children: ReactNode; initialLocale?: Locale }) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale)
 
   // Determine locale on mount: domain-fixed or localStorage fallback
   useEffect(() => {

@@ -38,10 +38,12 @@ export default async function RootLayout({
 }>) {
     const headersList = await headers()
     const host = headersList.get('host') || 'xr2.uk'
-    const gaId = host.includes('xr2.site') ? GA_IDS['xr2.site'] : GA_IDS['xr2.uk']
+    const isRussian = host.includes('xr2.site')
+    const gaId = isRussian ? GA_IDS['xr2.site'] : GA_IDS['xr2.uk']
+    const serverLocale = isRussian ? 'ru' : 'en'
 
     return (
-        <html lang="en" suppressHydrationWarning className={`${inter.variable} ${lato.variable} ${jetbrainsMono.variable}`}>
+        <html lang={serverLocale} suppressHydrationWarning className={`${inter.variable} ${lato.variable} ${jetbrainsMono.variable}`}>
         <head suppressHydrationWarning />
       <body suppressHydrationWarning>
         {/* Google Analytics */}
@@ -137,7 +139,7 @@ export default async function RootLayout({
             }}
         />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
-          <LocaleProvider>
+          <LocaleProvider initialLocale={serverLocale}>
             <AuthProvider>
               <WorkspaceProvider>
                 <PromptsProvider>

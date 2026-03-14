@@ -88,8 +88,18 @@ export function middleware(request: NextRequest) {
     return NextResponse.rewrite(url)
   }
 
-  // On production domains: redirect /en and /ru to / (clean URLs)
+  // On production domains: handle locale paths
   if (domainLocale && (pathname === '/en' || pathname === '/ru')) {
+    const requestedLocale = pathname.slice(1) // 'en' or 'ru'
+
+    // Cross-domain redirect: wrong locale for this domain
+    if (requestedLocale !== domainLocale) {
+      // xr2.uk/ru → xr2.site, xr2.site/en → xr2.uk
+      const targetDomain = requestedLocale === 'ru' ? 'https://xr2.site' : 'https://xr2.uk'
+      return NextResponse.redirect(targetDomain, 301)
+    }
+
+    // Same locale as domain: just redirect to / (clean URL)
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url, 301)
@@ -121,6 +131,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|og|_next/static|_next/image|favicon.ico).*)',
   ],
 }

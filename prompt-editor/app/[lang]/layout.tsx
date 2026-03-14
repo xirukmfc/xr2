@@ -15,15 +15,15 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const host = headersList.get('host') || 'xr2.uk'
 
   const isRussianDomain = host.includes('xr2.site')
-  const canonical = isRussianDomain ? 'https://xr2.site' : `https://xr2.uk/${lang}`
+  const canonical = isRussianDomain ? 'https://xr2.site' : 'https://xr2.uk'
 
   return {
     alternates: {
       canonical,
       languages: {
-        'en': 'https://xr2.uk/en',
+        'en': 'https://xr2.uk',
         'ru': 'https://xr2.site',
-        'x-default': 'https://xr2.uk/en',
+        'x-default': 'https://xr2.uk',
       },
     },
   }
