@@ -17,6 +17,7 @@ plugins:
   - search
   - i18n:
       docs_structure: folder
+      default_language: en
       fallback_to_default: true
       languages:
         en:
@@ -24,7 +25,7 @@ plugins:
           build: true
         ru:
           name: Русский
-          build: true
+          build: false
           nav_translations:
             Home: Главная
             Getting Started: Начало работы
