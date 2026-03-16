@@ -2,7 +2,7 @@ site_name: xR2 Documentation
 site_url: https://docs.xr2.uk
 site_description: Documentation for xR2 - AI Prompt Management Platform
 site_author: xR2 Team
-docs_dir: documentation
+docs_dir: documentation/en
 
 theme:
   name: readthedocs
@@ -15,38 +15,6 @@ extra_css:
 
 plugins:
   - search
-  - i18n:
-      docs_structure: folder
-      default_language: en
-      fallback_to_default: true
-      languages:
-        en:
-          name: English
-          build: true
-        ru:
-          name: Русский
-          build: false
-          nav_translations:
-            Home: Главная
-            Getting Started: Начало работы
-            Quickstart: Быстрый старт
-            Authentication: Аутентификация
-            API Logs: Логи API
-            Prompt Editor: Редактор промптов
-            Overview: Обзор
-            Creating Prompts: Создание промптов
-            Variables: Переменные
-            Versions & Deployment: Версии и деплой
-            Testing Prompts: Тестирование промптов
-            Analytics: Аналитика
-            Event Tracking: Отслеживание событий
-            Conversion Funnels: Воронки конверсии
-            A/B Testing: A/B тестирование
-            Creating Tests: Создание тестов
-            Measuring Results: Измерение результатов
-            Statistical Significance: Статистическая значимость
-            API & SDKs: API и SDK
-            API Reference: Справочник API
 
 markdown_extensions:
   - admonition
