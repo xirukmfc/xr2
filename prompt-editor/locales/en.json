@@ -270,6 +270,11 @@
       "title": "No prompts found",
       "message": "Create a prompt to begin"
     },
+    "zeroBanner": {
+      "title": "Your prompts are live but haven't received any API calls yet",
+      "subtitle": "Connect your app to start using your prompts via API or integrations.",
+      "cta": "Get API Key"
+    },
     "itemsPerPage": "prompts",
     "pagination": {
       "showing": "Showing",
@@ -625,7 +630,8 @@
     "noVersions": "No versions",
     "shareVersion": "Share version",
     "deleteVersion": "Delete version",
-    "deleteVersionConfirm": "Are you sure you want to delete version"
+    "deleteVersionConfirm": "Are you sure you want to delete version",
+    "integration": "Integration"
   },
   "bulkActions": {
     "selected": "selected",
@@ -1021,5 +1027,15 @@
     "paymentPending": "Payment pending",
     "paymentPendingMessage": "Your upgrade request has been submitted. Please complete the payment to activate your Pro subscription.",
     "contactSupport": "Contact support for payment instructions"
+  },
+  "firstPublish": {
+    "title": "Your prompt is live!",
+    "subtitle": "Now connect it to your app via API or integrations.",
+    "getApiKey": "Get API Key",
+    "viewDocs": "View Docs",
+    "gotIt": "Got it"
+  },
+  "integration": {
+    "copy": "Copy code"
   }
 }

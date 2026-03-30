@@ -9,6 +9,7 @@ import {LeftPanel} from "@/components/left-panel"
 import {CenterPanel} from "@/components/center-panel"
 import {AddVariableModal} from "@/components/add-variable-modal"
 import {TestModal} from "@/components/test-modal"
+import {FirstPublishModal} from "@/components/first-publish-modal"
 import {NotificationProvider, useNotification} from "@/components/notification-provider"
 import {
     AlertDialog,
@@ -224,6 +225,7 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
     const [activeTab, setActiveTab] = useLocalStorage<"system" | "user" | "assistant">("editor-active-tab", "user")
     const [isAddVariableModalOpen, setIsAddVariableModalOpen] = useState(false)
     const [isTestModalOpen, setIsTestModalOpen] = useState(false)
+    const [isFirstPublishModalOpen, setIsFirstPublishModalOpen] = useState(false)
     const [isPublished, setIsPublished] = useState(false)
     const [selectedModels, setSelectedModels] = useState<ModelId[]>(["gpt-5", "claude-sonnet-4"])
     const [isPreviewMode, setIsPreviewMode] = useState(false)
@@ -1062,6 +1064,9 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
         // Находим версию по номеру версии (version), а не по ID
         const versionToPublish = versions.find(v => v.version === versionNumber)
         if (versionToPublish) {
+            // Check if this is the first publish (no production version before)
+            const hadProductionBefore = !!publishedVersion
+
             // Use version ID for API request
             await apiClient.deployPromptVersion(promptId, versionToPublish.id.toString())
 
@@ -1072,6 +1077,15 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
                     status: v.version === versionNumber ? "Production" : v.status === "Production" ? "Inactive" : v.status,
                 }))
             )
+
+            // Show first publish modal if this prompt had no production version before
+            if (!hadProductionBefore) {
+                const hintShown = localStorage.getItem('first_publish_hint_shown')
+                if (!hintShown) {
+                    setIsFirstPublishModalOpen(true)
+                    localStorage.setItem('first_publish_hint_shown', 'true')
+                }
+            }
 
             // Invalidate prompts cache to update status on /prompts page
             const { invalidatePromptsCache } = await import('@/lib/api')
@@ -1312,6 +1326,13 @@ function PromptEditorContent({ params }: { params: Promise<{ id: string }> }) {
                     open={isTestModalOpen}
                     onOpenChange={setIsTestModalOpen}
                     prompt={promptData}
+                />
+
+                <FirstPublishModal
+                    isOpen={isFirstPublishModalOpen}
+                    onClose={() => setIsFirstPublishModalOpen(false)}
+                    slug={promptData.slug}
+                    variables={promptData.variables.filter(v => v.isDefined)}
                 />
 
                 {/* Unsaved Changes Dialog */}

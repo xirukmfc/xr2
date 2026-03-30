@@ -2,7 +2,7 @@
 
 import React, {useState, useEffect, useMemo, useCallback} from "react"
 import {ProtectedRoute} from "@/components/protected-route"
-import {Copy, Eye, RotateCcw, TrendingUp, TrendingDown} from "lucide-react"
+import {Copy, Eye, RotateCcw, TrendingUp, TrendingDown, Plug, X} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {NewPromptModal} from "@/components/new-prompt-modal"
 import {DataFilters} from "@/components/ui/data-filters"
@@ -108,6 +108,12 @@ function PromptsPageContent() {
     const [bulkActionsLoading, setBulkActionsLoading] = useState(false)
     const [showOnboarding, setShowOnboarding] = useState(false)
     const [userApiKey, setUserApiKey] = useState<string | null>(null)
+    const [zeroBannerDismissed, setZeroBannerDismissed] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('zero_calls_banner_dismissed') === 'true'
+        }
+        return false
+    })
     const countsContext = useCountsContext()
     const workspaceContext = useWorkspaceContext()
     const { showNotification } = useNotification()
@@ -569,6 +575,11 @@ function PromptsPageContent() {
 
     const hasNoPrompts = prompts.length === 0 && !loading && !error
 
+    // Show banner when user has published prompts but zero API calls
+    const hasPublishedPrompts = prompts.some(p => p.status === 'active')
+    const totalUsage = prompts.reduce((sum, p) => sum + (p.usage_24h || 0), 0)
+    const showZeroCallsBanner = hasPublishedPrompts && totalUsage === 0 && !zeroBannerDismissed && !loading
+
     return (
         <div className="flex flex-col min-h-screen">
             <div className="flex-1">
@@ -586,6 +597,39 @@ function PromptsPageContent() {
                         onNewPromptClick={() => setIsNewPromptModalOpen(true)}
                     />
                 </div>
+
+                {/* Zero API calls banner */}
+                {showZeroCallsBanner && (
+                    <div className="mx-6 mb-3 flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+                        <Plug className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-blue-900">
+                                {t('prompts.zeroBanner.title')}
+                            </p>
+                            <p className="text-xs text-blue-700 mt-0.5">
+                                {t('prompts.zeroBanner.subtitle')}
+                            </p>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-shrink-0 text-xs border-blue-300 text-blue-700 hover:bg-blue-100"
+                            onClick={() => router.push('/api-keys')}
+                        >
+                            {t('prompts.zeroBanner.cta')}
+                        </Button>
+                        <button
+                            onClick={() => {
+                                setZeroBannerDismissed(true)
+                                localStorage.setItem('zero_calls_banner_dismissed', 'true')
+                            }}
+                            className="text-blue-400 hover:text-blue-600 flex-shrink-0"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
+
                 <div className="flex flex-col flex-1 px-6 pb-6">
                     <div className="glass-effect rounded-xl overflow-hidden">
                         <DataTable
