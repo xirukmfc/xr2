@@ -26,7 +26,7 @@ deploy: ## 🚀 Деплой на production (без контейнерного 
 		echo "$(RED)⚠️  ВАЖНО: Отредактируйте .env.prod с production паролями!$(NC)"; \
 	fi
 	@echo "$(YELLOW)Сборка и запуск сервисов (без nginx)...$(NC)"
-	@docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build redis postgres db-init app frontend tgsight --remove-orphans
+	@docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build redis postgres db-init app frontend tgsight mcp-todoist --remove-orphans
 	@echo ""
 	@echo "$(YELLOW)Ожидание запуска сервисов...$(NC)"
 	@sleep 15

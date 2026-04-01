@@ -226,6 +226,32 @@ services:
       retries: 3
       start_period: 60s
 
+  # MCP Server — Todoist (remote connector for Claude)
+  mcp-todoist:
+    build: ./mcp-todoist
+    container_name: xr2_mcp_todoist_prod
+    environment:
+      - TODOIST_API_KEY=${TODOIST_API_KEY}
+      - MCP_OAUTH_CLIENT_ID=${MCP_OAUTH_CLIENT_ID}
+      - MCP_OAUTH_CLIENT_SECRET=${MCP_OAUTH_CLIENT_SECRET}
+      - MCP_AUTH_PASSWORD=${MCP_AUTH_PASSWORD}
+      - MCP_BASE_URL=https://xr2.uk/mcp-todoist
+      - MCP_PORT=8808
+    networks:
+      - xr2_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8808/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
   # Prometheus for metrics collection
   prometheus:
     image: prom/prometheus:latest
@@ -321,6 +347,7 @@ services:
       - frontend
       - tgsight
       - docs
+      - mcp-todoist
       - grafana
       - prometheus
       - node-exporter
