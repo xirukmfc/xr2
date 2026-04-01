@@ -19,7 +19,7 @@ from collections.abc import AsyncIterator
 import httpx
 import uvicorn
 from starlette.applications import Starlette
-from starlette.routing import Route, Mount
+from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import JSONResponse, HTMLResponse, RedirectResponse, Response
 from mcp.server import Server
@@ -484,7 +484,11 @@ session_manager = StreamableHTTPSessionManager(
 
 
 class AuthMiddleware:
-    """Raw ASGI middleware — does not buffer responses, safe for SSE streams."""
+    """Raw ASGI middleware — does not buffer responses, safe for SSE streams.
+
+    Also routes /mcp directly to the session manager, bypassing Starlette's
+    Mount (which would 307-redirect /mcp → /mcp/ with a wrong Location).
+    """
 
     OPEN_PATHS = frozenset([
         "/.well-known/oauth-protected-resource",
@@ -497,30 +501,40 @@ class AuthMiddleware:
     def __init__(self, app):
         self.app = app
 
+    def _extract_token(self, scope):
+        headers = dict(scope.get("headers", []))
+        auth = headers.get(b"authorization", b"").decode()
+        if auth.startswith("Bearer "):
+            return auth[7:]
+        qs = scope.get("query_string", b"").decode()
+        for pair in qs.split("&"):
+            if pair.startswith("access_token="):
+                return pair[13:]
+        return None
+
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
 
         path = scope.get("path", "")
+
+        # Open paths — no auth needed
         if path in self.OPEN_PATHS:
             return await self.app(scope, receive, send)
 
-        # Extract Bearer token from Authorization header
-        headers = dict(scope.get("headers", []))
-        auth = headers.get(b"authorization", b"").decode()
-        token = auth[7:] if auth.startswith("Bearer ") else None
+        # MCP endpoint — handle directly (bypass Starlette Mount/redirect)
+        if path == "/mcp":
+            token = self._extract_token(scope)
+            if token and _token_valid(token):
+                await session_manager.handle_request(scope, receive, send)
+                return
+            # Fall through to 401 below
 
-        if not token:
-            qs = scope.get("query_string", b"").decode()
-            for pair in qs.split("&"):
-                if pair.startswith("access_token="):
-                    token = pair[13:]
-                    break
-
+        # All other protected paths
+        token = self._extract_token(scope)
         if token and _token_valid(token):
             return await self.app(scope, receive, send)
 
-        logger.debug("Auth rejected: path=%s has_token=%s", path, token is not None)
         response = JSONResponse(
             {"error": "unauthorized"},
             status_code=401,
@@ -555,8 +569,7 @@ _inner_app = Starlette(
         # OAuth flow
         Route("/authorize", authorize, methods=["GET", "POST"]),
         Route("/token", token_endpoint, methods=["POST"]),
-        # MCP (Streamable HTTP) — handles POST, GET, DELETE
-        Mount("/mcp", app=session_manager.handle_request),
+        # MCP is handled directly in AuthMiddleware (bypasses Mount redirect)
         # Health
         Route("/health", lambda r: JSONResponse({"status": "ok", "server": "todoist-mcp"})),
     ],
