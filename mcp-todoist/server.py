@@ -13,6 +13,9 @@ import logging
 from html import escape
 from urllib.parse import urlencode, parse_qs
 
+import contextlib
+from collections.abc import AsyncIterator
+
 import httpx
 import uvicorn
 from starlette.applications import Starlette
@@ -20,7 +23,7 @@ from starlette.routing import Route, Mount
 from starlette.requests import Request
 from starlette.responses import JSONResponse, HTMLResponse, RedirectResponse, Response
 from mcp.server import Server
-from mcp.server.sse import SseServerTransport
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 import mcp.types as types
 
 # ============================================================
@@ -470,25 +473,18 @@ async def _dispatch(name: str, a: dict):
 
 
 # ============================================================
-# SSE Transport + Auth Middleware
+# Streamable HTTP Transport + Auth Middleware
 # ============================================================
 
-# The endpoint path must include the nginx prefix so the client
-# constructs the correct external URL for POST messages.
-sse_transport = SseServerTransport("/mcp-todoist/messages/")
-
-
-async def handle_sse(request: Request):
-    async with sse_transport.connect_sse(
-        request.scope, request.receive, request._send
-    ) as (read_stream, write_stream):
-        await mcp_server.run(
-            read_stream, write_stream, mcp_server.create_initialization_options()
-        )
+session_manager = StreamableHTTPSessionManager(
+    app=mcp_server,
+    json_response=False,
+    stateless=False,
+)
 
 
 class AuthMiddleware:
-    """Raw ASGI middleware — does not buffer responses, safe for SSE."""
+    """Raw ASGI middleware — does not buffer responses, safe for SSE streams."""
 
     OPEN_PATHS = frozenset([
         "/.well-known/oauth-protected-resource",
@@ -509,7 +505,7 @@ class AuthMiddleware:
         if path in self.OPEN_PATHS:
             return await self.app(scope, receive, send)
 
-        # Extract Bearer token from header or query string
+        # Extract Bearer token from Authorization header
         headers = dict(scope.get("headers", []))
         auth = headers.get(b"authorization", b"").decode()
         token = auth[7:] if auth.startswith("Bearer ") else None
@@ -524,6 +520,7 @@ class AuthMiddleware:
         if token and _token_valid(token):
             return await self.app(scope, receive, send)
 
+        logger.debug("Auth rejected: path=%s has_token=%s", path, token is not None)
         response = JSONResponse(
             {"error": "unauthorized"},
             status_code=401,
@@ -540,7 +537,17 @@ class AuthMiddleware:
 # Starlette Application
 # ============================================================
 
+
+@contextlib.asynccontextmanager
+async def lifespan(app: Starlette) -> AsyncIterator[None]:
+    async with session_manager.run():
+        logger.info("MCP session manager started")
+        yield
+        logger.info("MCP session manager stopping")
+
+
 _inner_app = Starlette(
+    lifespan=lifespan,
     routes=[
         # OAuth discovery
         Route("/.well-known/oauth-protected-resource", oauth_protected_resource),
@@ -548,9 +555,8 @@ _inner_app = Starlette(
         # OAuth flow
         Route("/authorize", authorize, methods=["GET", "POST"]),
         Route("/token", token_endpoint, methods=["POST"]),
-        # MCP (SSE)
-        Route("/sse", handle_sse),
-        Mount("/messages/", app=sse_transport.handle_post_message),
+        # MCP (Streamable HTTP) — handles POST, GET, DELETE
+        Mount("/mcp", app=session_manager.handle_request),
         # Health
         Route("/health", lambda r: JSONResponse({"status": "ok", "server": "todoist-mcp"})),
     ],
