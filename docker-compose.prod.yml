@@ -232,8 +232,6 @@ services:
     container_name: xr2_mcp_todoist_prod
     environment:
       - TODOIST_API_KEY=${TODOIST_API_KEY}
-      - MCP_OAUTH_CLIENT_ID=${MCP_OAUTH_CLIENT_ID}
-      - MCP_OAUTH_CLIENT_SECRET=${MCP_OAUTH_CLIENT_SECRET}
       - MCP_AUTH_PASSWORD=${MCP_AUTH_PASSWORD}
       - MCP_BASE_URL=https://xr2.uk/mcp-todoist
       - MCP_PORT=8808
