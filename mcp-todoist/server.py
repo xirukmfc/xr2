@@ -50,7 +50,7 @@ logger = logging.getLogger("mcp-todoist")
 # Todoist API Client
 # ============================================================
 
-TODOIST_API = "https://api.todoist.com/rest/v2"
+TODOIST_API = "https://api.todoist.com/api/v1"
 
 
 async def _todoist(method: str, path: str, params=None, json_data=None):
@@ -67,7 +67,13 @@ async def _todoist(method: str, path: str, params=None, json_data=None):
             headers=headers,
         )
         resp.raise_for_status()
-        return resp.json() if resp.status_code != 204 else {"success": True}
+        if resp.status_code == 204:
+            return {"success": True}
+        data = resp.json()
+        # API v1 wraps list responses in {"results": [...]}
+        if isinstance(data, dict) and "results" in data and isinstance(data["results"], list):
+            return data["results"]
+        return data
 
 
 # ============================================================
