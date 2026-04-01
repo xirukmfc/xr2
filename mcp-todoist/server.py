@@ -525,6 +525,13 @@ class AuthMiddleware:
         # MCP endpoint — handle directly (bypass Starlette Mount/redirect)
         if path == "/mcp":
             token = self._extract_token(scope)
+            logger.info(
+                "MCP auth: has_token=%s token_prefix=%s valid=%s stored=%d",
+                token is not None,
+                (token[:12] + "...") if token else "-",
+                _token_valid(token) if token else False,
+                len(_access_tokens),
+            )
             if token and _token_valid(token):
                 await session_manager.handle_request(scope, receive, send)
                 return
