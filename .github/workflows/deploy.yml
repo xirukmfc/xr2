@@ -26,8 +26,8 @@ jobs:
       - name: Execute on server
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: <PROD_HOST>
-          username: root
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 30m
           script: |

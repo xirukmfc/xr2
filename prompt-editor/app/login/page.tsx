@@ -365,15 +365,6 @@ export default function LoginPage() {
               </div>
             )}
 
-            {enablePasswordLogin && (
-              <div className="mt-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                  {t('auth.login.demo.title')} <br />
-                  {t('auth.login.demo.username')}: <code className="bg-secondary px-2 py-1 rounded">www</code> <br />
-                  {t('auth.login.demo.password')}: <code className="bg-secondary px-2 py-1 rounded">***REMOVED_ADMIN_PWD***</code>
-                </p>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>

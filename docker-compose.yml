@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: xr2_db
       POSTGRES_USER: xr2_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-***REMOVED_PG_PWD***}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
@@ -25,7 +25,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: xr2_redis
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-***REMOVED_REDIS_PWD***}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
     volumes:
       - redis_data:/data
     ports:
@@ -44,22 +44,22 @@ services:
     build: .
     container_name: xr2_db_init
     environment:
-      DATABASE_URL: postgresql+asyncpg://xr2_user:${POSTGRES_PASSWORD:-***REMOVED_PG_PWD***}@postgres:5432/xr2_db
+      DATABASE_URL: postgresql+asyncpg://xr2_user:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/xr2_db
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: xr2_user
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-***REMOVED_PG_PWD***}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       DB_NAME: xr2_db
 
       # Security
-      SECRET_KEY: ${SECRET_KEY:-your_super_secret_key_change_in_production}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-***REMOVED_ADMIN_PWD***}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-pavel.kuzko@gmail.com}
 
       # OAuth
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-dummy_client_id}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-dummy_client_secret}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?GOOGLE_CLIENT_SECRET is required}
     depends_on:
       postgres:
         condition: service_healthy
@@ -93,20 +93,20 @@ services:
     container_name: xr2_app
     environment:
       # Database
-      DATABASE_URL: postgresql+asyncpg://xr2_user:${POSTGRES_PASSWORD:-***REMOVED_PG_PWD***}@postgres:5432/xr2_db
+      DATABASE_URL: postgresql+asyncpg://xr2_user:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/xr2_db
 
       # Redis
-      REDIS_URL: redis://:${REDIS_PASSWORD:-***REMOVED_REDIS_PWD***}@redis:6379/0
+      REDIS_URL: redis://:${REDIS_PASSWORD:?REDIS_PASSWORD is required}@redis:6379/0
 
       # Security
-      SECRET_KEY: ${SECRET_KEY:-your_super_secret_key_change_in_production}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-***REMOVED_ADMIN_PWD***}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-pavel.kuzko@gmail.com}
 
       # OAuth
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-dummy_client_id}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-dummy_client_secret}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?GOOGLE_CLIENT_SECRET is required}
 
       # API Security
       RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
@@ -126,7 +126,7 @@ services:
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: xr2_user
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-***REMOVED_PG_PWD***}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       DB_NAME: xr2_db
     ports:
       - "8000:8000"

@@ -40,9 +40,16 @@ export LOG_TO_FILE="true"
 export LOG_DIR="logs/auto-tests"
 export LOG_LEVEL="${LOG_LEVEL:-INFO}"
 
-# Учетные данные для тестов (берутся из переменных окружения или используются значения по умолчанию для прода)
+# Учетные данные для тестов — обязательно задавать через переменные окружения
+# (TEST_USERNAME, TEST_PASSWORD или ADMIN_PASSWORD). Хардкодить пароли в репозитории нельзя.
 export TEST_USERNAME="${TEST_USERNAME:-www}"
-export TEST_PASSWORD="${TEST_PASSWORD:-${ADMIN_PASSWORD:-***REMOVED_TEST_PWD***}}"
+export TEST_PASSWORD="${TEST_PASSWORD:-${ADMIN_PASSWORD:-}}"
+
+if [ -z "$TEST_PASSWORD" ]; then
+    echo -e "${RED}❌ TEST_PASSWORD (или ADMIN_PASSWORD) не задан.${NC}"
+    echo -e "${YELLOW}   Пример: export TEST_PASSWORD='...' && $0${NC}"
+    exit 1
+fi
 
 echo -e "${GREEN}📋 Конфигурация тестов:${NC}"
 echo "  FRONTEND_URL: $FRONTEND_URL"

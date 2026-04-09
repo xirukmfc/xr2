@@ -8,7 +8,7 @@
 \c xr2_db;
 
 -- Создание пользователя (если не существует)
--- CREATE USER xr2_user WITH PASSWORD '***REMOVED_PG_PWD***';
+-- CREATE USER xr2_user WITH PASSWORD '<your_password_here>';
 
 -- Предоставление прав
 -- GRANT ALL PRIVILEGES ON DATABASE xr2_db TO xr2_user;

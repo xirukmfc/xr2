@@ -47,28 +47,38 @@ def setup_database():
 
 
 async def create_admin_user():
-    """Create admin user with username 'WWW' and password '***REMOVED_ADMIN_PWD***'"""
+    """Create admin user. Credentials are taken from env vars ADMIN_USERNAME, ADMIN_PASSWORD, ADMIN_EMAIL."""
     print("👤 Creating admin user...")
+
+    admin_username = os.environ.get("ADMIN_USERNAME", "WWW")
+    admin_password = os.environ.get("ADMIN_PASSWORD")
+    admin_email = os.environ.get("ADMIN_EMAIL", "admin@xr2.local")
+
+    if not admin_password:
+        raise RuntimeError(
+            "ADMIN_PASSWORD is not set. Export it before running setup_project.py "
+            "(например: export ADMIN_PASSWORD='...')."
+        )
 
     async with AsyncSessionLocal() as session:
         try:
             # Check if admin user already exists
             result = await session.execute(
                 text("SELECT id FROM users WHERE username = :username"),
-                {"username": "WWW"}
+                {"username": admin_username}
             )
             existing_user = result.fetchone()
 
             if existing_user:
-                print("✅ Admin user 'WWW' already exists")
+                print(f"✅ Admin user '{admin_username}' already exists")
                 return
 
             # Create admin user
-            hashed_password = get_password_hash("***REMOVED_ADMIN_PWD***")
+            hashed_password = get_password_hash(admin_password)
             admin_user = User(
                 id=str(uuid.uuid4()),
-                username="WWW",
-                email="pavel.kuzko@gmail.com",
+                username=admin_username,
+                email=admin_email,
                 hashed_password=hashed_password,
                 is_active=True,
                 is_superuser=True
@@ -96,7 +106,7 @@ async def create_admin_user():
                 session.add(test_user)
 
             await session.commit()
-            print("✅ Created admin user 'WWW' with password '***REMOVED_ADMIN_PWD***'")
+            print(f"✅ Created admin user '{admin_username}'")
             if not existing_eee:
                 print("✅ Created test user 'eee' with password '123'")
 
@@ -167,7 +177,7 @@ async def main():
         print("📋 Setup Summary:")
         print("   • Database 'xr2_db' created with user 'xr2_user'")
         print("   • Database migrations applied")
-        print("   • Admin user 'WWW' created (password: ***REMOVED_ADMIN_PWD***)")
+        print("   • Admin user created (credentials from ADMIN_USERNAME / ADMIN_PASSWORD env vars)")
         print("   • LLM providers initialized")
         print()
         print("🚀 You can now start the application with: ./start.sh")

@@ -2,6 +2,9 @@
 
 # Скрипт для деплоя автотестов на production сервер
 # Запускать локально: ./scripts/deploy-auto-tests-to-prod.sh
+#
+# Требуется настроенный SSH-ключ для подключения к production серверу.
+# Хост задаётся через переменную окружения PROD_SERVER (например, root@1.2.3.4).
 
 set -e
 
@@ -18,28 +21,23 @@ echo -e "${BLUE}========================================${NC}"
 echo ""
 
 # Параметры подключения
-SERVER="root@<PROD_HOST>"
-SERVER_DIR="/opt/xr2"
-PASSWORD="***REMOVED***"
-
-# Проверка наличия sshpass
-if ! command -v sshpass &> /dev/null; then
-    echo -e "${YELLOW}⚠️  sshpass не установлен. Установите:${NC}"
-    echo "  macOS: brew install hudochenkov/sshpass/sshpass"
-    echo "  Linux: apt-get install sshpass"
-    echo ""
-    echo -e "${YELLOW}Или подключитесь вручную и выполните команды на сервере${NC}"
+if [ -z "${PROD_SERVER:-}" ]; then
+    echo -e "${RED}❌ Переменная окружения PROD_SERVER не задана.${NC}"
+    echo -e "${YELLOW}   Пример: export PROD_SERVER=root@your-server${NC}"
     exit 1
 fi
 
-# Функция для выполнения команд на сервере
+SERVER="$PROD_SERVER"
+SERVER_DIR="${PROD_SERVER_DIR:-/opt/xr2}"
+
+# Функция для выполнения команд на сервере (через SSH-ключ)
 run_on_server() {
-    sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no "$SERVER" "$1"
+    ssh -o StrictHostKeyChecking=no "$SERVER" "$1"
 }
 
 # Функция для копирования файлов на сервер
 copy_to_server() {
-    sshpass -p "$PASSWORD" scp -o StrictHostKeyChecking=no "$1" "$SERVER:$2"
+    scp -o StrictHostKeyChecking=no "$1" "$SERVER:$2"
 }
 
 echo -e "${YELLOW}📋 Шаг 1: Проверка подключения к серверу...${NC}"
@@ -47,6 +45,7 @@ if run_on_server "echo 'Connected'" > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Подключение к серверу успешно${NC}"
 else
     echo -e "${RED}❌ Не удалось подключиться к серверу${NC}"
+    echo -e "${YELLOW}   Проверьте, что SSH-ключ добавлен в ~/.ssh/authorized_keys на сервере.${NC}"
     exit 1
 fi
 
@@ -88,4 +87,3 @@ echo ""
 echo "  4. Или посмотрите инструкцию:"
 echo "     cat QUICK_START_TESTS.md"
 echo ""
-

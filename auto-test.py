@@ -217,10 +217,10 @@ class XR2AutoTester:
         self.page: Optional[Page] = None
         self.playwright = None
 
-        # Тестовые данные - берутся из переменных окружения для прода
+        # Тестовые данные - берутся из переменных окружения (TEST_PASSWORD или ADMIN_PASSWORD)
         self.test_user = {
             "username": os.getenv('TEST_USERNAME', 'www'),
-            "password": os.getenv('TEST_PASSWORD', os.getenv('ADMIN_PASSWORD', '***REMOVED_TEST_PWD***'))
+            "password": os.getenv('TEST_PASSWORD', os.getenv('ADMIN_PASSWORD', ''))
         }
 
         self.test_data = {
@@ -1341,12 +1341,14 @@ class XR2AutoTester:
                         if api_key_captured:
                             break
 
-                # Если все еще нет ключа, используем предоставленный Bearer token
+                # Если все еще нет ключа, используем Bearer token из переменной окружения
                 if not self.created_api_key:
-                    # Используем предоставленный Bearer token как fallback
-                    bearer_token = "***REMOVED_JWT_TOKEN***"
-                    self.created_api_key = bearer_token
-                    logger.info("Используем предоставленный Bearer token для API тестирования")
+                    bearer_token = os.environ.get("AUTO_TEST_BEARER_TOKEN", "")
+                    if bearer_token:
+                        self.created_api_key = bearer_token
+                        logger.info("Используем Bearer token из AUTO_TEST_BEARER_TOKEN для API тестирования")
+                    else:
+                        logger.warning("AUTO_TEST_BEARER_TOKEN не задан — fallback Bearer token недоступен")
 
                 if not self.created_api_key:
                     raise Exception("Не удалось получить API ключ для тестирования")
@@ -5289,8 +5291,11 @@ class XR2AutoTester:
         test_result.start()
 
         try:
-            # Токен для авторизации API запросов
-            bearer_token = "***REMOVED_JWT_TOKEN***"
+            # Токен для авторизации API запросов — задаётся через env var AUTO_TEST_BEARER_TOKEN
+            bearer_token = os.environ.get("AUTO_TEST_BEARER_TOKEN", "")
+            if not bearer_token:
+                test_result.complete(False, "AUTO_TEST_BEARER_TOKEN не задан")
+                return test_result
 
             # Базовые headers для всех запросов
             headers = {
@@ -5499,8 +5504,11 @@ class XR2AutoTester:
         test_result.start()
 
         try:
-            # Токен для авторизации API запросов
-            bearer_token = "***REMOVED_JWT_TOKEN***"
+            # Токен для авторизации API запросов — задаётся через env var AUTO_TEST_BEARER_TOKEN
+            bearer_token = os.environ.get("AUTO_TEST_BEARER_TOKEN", "")
+            if not bearer_token:
+                test_result.complete(False, "AUTO_TEST_BEARER_TOKEN не задан")
+                return test_result
 
             headers = {
                 "Authorization": f"Bearer {bearer_token}",
