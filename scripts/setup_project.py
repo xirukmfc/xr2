@@ -35,8 +35,13 @@ def setup_database():
     """Set up the PostgreSQL database and user"""
     print("🗄️  Setting up PostgreSQL database...")
 
+    # Пароль берётся из переменной окружения POSTGRES_PASSWORD — не хардкодить!
+    postgres_password = os.environ.get("POSTGRES_PASSWORD")
+    if not postgres_password:
+        raise RuntimeError("POSTGRES_PASSWORD env var is required for database setup")
+
     sql_commands = [
-        "CREATE USER xr2_user WITH PASSWORD '***REMOVED_PG_PWD***';",
+        f"CREATE USER xr2_user WITH PASSWORD '{postgres_password}';",
         "CREATE DATABASE xr2_db OWNER xr2_user;",
         "GRANT ALL PRIVILEGES ON DATABASE xr2_db TO xr2_user;",
         "ALTER USER xr2_user CREATEDB;"

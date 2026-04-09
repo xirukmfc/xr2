@@ -75,7 +75,7 @@ class EventRequest(BaseModel):
     summary="Track Custom Events",
     description="""Track custom events to measure business outcomes and enable conversion funnel analytics.
 
-**Authentication:** Requires API key in header `Authorization': Bearer xr2_prod_YOUR_API_KEY
+**Authentication:** Requires API key in header `Authorization: Bearer xr2_prod_YOUR_API_KEY`
 
 **Workflow:**
 1. Call POST /get-prompt and save the `trace_id`

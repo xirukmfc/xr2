@@ -24,3 +24,4 @@ system_docs/PROD_TEST_CREDENTIALS.md
 
 # TGSight deployment guide (temporary, not needed in repo)
 TGSIGHT_DEPLOY_GUIDE.md
+/nginx/nginx.prod.conf

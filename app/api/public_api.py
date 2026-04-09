@@ -224,7 +224,7 @@ class PromptContentResponse(BaseModel):
     summary="Get Prompt Content",
     description="""Retrieve prompt content by slug. Returns production version by default or specific version if filters are provided.
 
-**Authentication:** Requires API key in header `Authorization': Bearer xr2_prod_YOUR_API_KEY
+**Authentication:** Requires API key in header `Authorization: Bearer xr2_prod_YOUR_API_KEY`
 
 **Get API Key:** Visit https://xr2.uk/api-keys → Click "Create Keys" → Copy your key
 
