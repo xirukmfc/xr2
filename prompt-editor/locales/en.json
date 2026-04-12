@@ -60,28 +60,21 @@
       "worksWithYourStack": "Works with your stack"
     },
     "pricing": {
-      "title": "Start free. Scale as you grow.",
-      "subtitle": "No credit card required.",
+      "title": "Completely free. No catch.",
+      "subtitle": "All features included. No credit card. No hidden fees. Ever.",
       "free": {
         "name": "Free",
         "price": "$0",
-        "period": "/month",
-        "features": ["Up to 10 prompts", "100 API calls/month", "Basic analytics", "1 workspace"],
+        "period": "forever",
+        "features": ["Up to 100 prompts", "5,000 API calls/month", "A/B testing & revenue tracking", "Analytics dashboard", "All integrations (n8n, Make, Zapier)", "Unlimited workspaces", "Team collaboration"],
         "cta": "Get Started"
       },
-      "pro": {
-        "name": "Pro",
-        "price": "$29",
-        "period": "/month",
-        "features": ["Unlimited prompts", "1,000 API calls/month", "A/B testing & revenue tracking", "Unlimited workspaces", "Team collaboration"],
-        "cta": "Get Started"
-      },
-      "needMore": "Need more?",
+      "questions": "Questions?",
       "contactUs": "Contact us"
     },
     "cta": {
       "title": "Change any prompt in 10 seconds. No deploy needed.",
-      "subtitle": "Free plan. No credit card. Set up in 2 minutes.",
+      "subtitle": "Completely free. No credit card. Set up in 2 minutes.",
       "button": "Get Started Free"
     },
     "footer": {

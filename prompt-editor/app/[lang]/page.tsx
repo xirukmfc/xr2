@@ -25,12 +25,8 @@ interface PricingPlan {
 
 const DEFAULT_PRICING: Record<string, Record<SupportedLocale, PricingPlan>> = {
   free: {
-    en: { plan_name: 'free', price_display: '$0', period_display: '/month', features: ['Up to 10 prompts', '100 API calls/month', 'Basic analytics', '1 workspace'] },
-    ru: { plan_name: 'free', price_display: '0\u20BD', period_display: '/\u043C\u0435\u0441', features: ['\u0414\u043E 10 \u043F\u0440\u043E\u043C\u043F\u0442\u043E\u0432', '100 API \u0437\u0430\u043F\u0440\u043E\u0441\u043E\u0432/\u043C\u0435\u0441', '\u0411\u0430\u0437\u043E\u0432\u0430\u044F \u0430\u043D\u0430\u043B\u0438\u0442\u0438\u043A\u0430', '1 workspace'] }
-  },
-  pro: {
-    en: { plan_name: 'pro', price_display: '$19', period_display: '/month', features: ['Unlimited prompts', '1,000 API calls/month', 'A/B testing & revenue tracking', 'Unlimited workspaces'] },
-    ru: { plan_name: 'pro', price_display: '1500\u20BD', period_display: '/\u043C\u0435\u0441', features: ['\u0411\u0435\u0437\u043B\u0438\u043C\u0438\u0442 \u043F\u0440\u043E\u043C\u043F\u0442\u043E\u0432', '1 000 API \u0437\u0430\u043F\u0440\u043E\u0441\u043E\u0432/\u043C\u0435\u0441', 'A/B \u0442\u0435\u0441\u0442\u044B \u0438 \u0432\u044B\u0440\u0443\u0447\u043A\u0430', '\u0411\u0435\u0437\u043B\u0438\u043C\u0438\u0442 workspaces', '\u041A\u043E\u043C\u0430\u043D\u0434\u043D\u0430\u044F \u0440\u0430\u0431\u043E\u0442\u0430'] }
+    en: { plan_name: 'free', price_display: '$0', period_display: 'forever', features: ['Up to 100 prompts', '5,000 API calls/month', 'A/B testing & revenue tracking', 'Analytics dashboard', 'All integrations (n8n, Make, Zapier)', 'Unlimited workspaces', 'Team collaboration'] },
+    ru: { plan_name: 'free', price_display: '0\u20BD', period_display: '\u043D\u0430\u0432\u0441\u0435\u0433\u0434\u0430', features: ['\u0414\u043E 100 \u043F\u0440\u043E\u043C\u043F\u0442\u043E\u0432', '5 000 \u0437\u0430\u043F\u0440\u043E\u0441\u043E\u0432/\u043C\u0435\u0441', 'A/B \u0442\u0435\u0441\u0442\u044B + \u0432\u044B\u0440\u0443\u0447\u043A\u0430', '\u0414\u0430\u0448\u0431\u043E\u0440\u0434 \u0430\u043D\u0430\u043B\u0438\u0442\u0438\u043A\u0438', '\u0412\u0441\u0435 \u0438\u043D\u0442\u0435\u0433\u0440\u0430\u0446\u0438\u0438 (n8n, Make, Zapier)', '\u0411\u0435\u0437\u043B\u0438\u043C\u0438\u0442 workspaces', '\u041A\u043E\u043C\u0430\u043D\u0434\u043D\u0430\u044F \u0440\u0430\u0431\u043E\u0442\u0430'] }
   }
 }
 
@@ -351,7 +347,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
   const comparisonFeatures = en
     ? [
         { feature: 'Built for', xr2: 'Product & marketing teams', promptlayer: 'ML engineers', langfuse: 'ML engineers', humanloop: 'AI teams' },
-        { feature: 'Free tier', xr2: '10 prompts, 1k API calls', promptlayer: '10 prompts, 2.5k API calls', langfuse: '50k events, 30-day history', humanloop: '10k events' },
+        { feature: 'Free tier', xr2: '100 prompts, 5k API calls', promptlayer: '10 prompts, 2.5k API calls', langfuse: '50k events, 30-day history', humanloop: '10k events' },
         { feature: 'A/B testing', xr2: 'Built-in + revenue attribution', promptlayer: 'Built-in', langfuse: 'Manual setup in code', humanloop: 'Built-in' },
         { feature: 'Prompt analytics dashboard', xr2: 'Per-prompt metrics + funnels', promptlayer: 'Basic metrics', langfuse: 'Traces & costs', humanloop: 'Eval scores' },
         { feature: 'Custom events & revenue', xr2: 'Any event + revenue + ROI', promptlayer: false, langfuse: false, humanloop: false },
@@ -359,11 +355,11 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
         { feature: 'Conversion funnels', xr2: true, promptlayer: false, langfuse: false, humanloop: false },
         { feature: 'No-code (n8n, Make, Zapier)', xr2: true, promptlayer: false, langfuse: 'Zapier only', humanloop: 'Zapier only' },
         { feature: 'Built for non-technical teams', xr2: true, promptlayer: false, langfuse: false, humanloop: 'Partial' },
-        { feature: 'Starting price', xr2: '$19/mo', promptlayer: '$49/mo', langfuse: '$29/mo', humanloop: '~$100/mo' },
+        { feature: 'Starting price', xr2: 'Free', promptlayer: '$49/mo', langfuse: '$29/mo', humanloop: '~$100/mo' },
       ]
     : [
         { feature: 'Для кого', xr2: 'Продакты и маркетологи', promptlayer: 'ML-инженеры', langfuse: 'ML-инженеры', humanloop: 'AI-команды' },
-        { feature: 'Бесплатно', xr2: '10 промптов, 1 000 запросов', promptlayer: '10 промптов, 2 500 запросов', langfuse: '50 000 событий, 30 дней истории', humanloop: '10 000 событий' },
+        { feature: 'Бесплатно', xr2: '100 промптов, 5 000 запросов', promptlayer: '10 промптов, 2 500 запросов', langfuse: '50 000 событий, 30 дней истории', humanloop: '10 000 событий' },
         { feature: 'A/B тесты', xr2: 'Встроенные + атрибуция выручки', promptlayer: 'Встроенные', langfuse: 'Нужно настраивать в коде', humanloop: 'Встроенные' },
         { feature: 'Аналитика по промптам', xr2: 'Метрики + воронки по каждому', promptlayer: 'Базовые метрики', langfuse: 'Трейсы и расходы', humanloop: 'Оценки качества' },
         { feature: 'Кастомные события и выручка', xr2: 'Любые события + выручка + ROI', promptlayer: false, langfuse: false, humanloop: false },
@@ -371,7 +367,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
         { feature: 'Воронки конверсии', xr2: true, promptlayer: false, langfuse: false, humanloop: false },
         { feature: 'Без кода (n8n, Make, Zapier)', xr2: true, promptlayer: false, langfuse: 'Только Zapier', humanloop: 'Только Zapier' },
         { feature: 'UI для нетехнических команд', xr2: true, promptlayer: false, langfuse: false, humanloop: 'Частично' },
-        { feature: 'Стартовая цена', xr2: '$19/мес', promptlayer: '$49/мес', langfuse: '$29/мес', humanloop: '~$100/мес' },
+        { feature: 'Стартовая цена', xr2: 'Бесплатно', promptlayer: '$49/мес', langfuse: '$29/мес', humanloop: '~$100/мес' },
       ]
 
   const integrationCode = integrationTab === 'python' ? PYTHON_CODE : integrationTab === 'nodejs' ? NODEJS_CODE : integrationTab === 'rest' ? REST_CODE : NOCODE_CODE
@@ -754,42 +750,17 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
             </div>
           </ScrollReveal>
 
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 max-w-3xl mx-auto">
+          <div className="mt-12 max-w-md mx-auto">
             {(() => {
               const plan = getPlan('free')
               return (
                 <ScrollReveal delay={100}>
-                  <div className="relative rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+                  <div className="relative overflow-hidden rounded-xl border border-primary p-8 transition-shadow hover:shadow-md bg-card">
+                    <div className="absolute top-0 right-0 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-bl-lg">
+                      {en ? '100% Free' : '100% Бесплатно'}
+                    </div>
                     <div className="text-center">
                       <p className="text-sm font-medium text-muted-foreground">{t('landing.pricing.free.name')}</p>
-                      <p className="mt-3 text-4xl font-bold tracking-tight text-foreground font-display">{plan.price_display}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{plan.period_display}</p>
-                    </div>
-                    <ul className="mt-6 space-y-3 text-sm">
-                      {plan.features.map((f, i) => (
-                        <li key={i} className="flex items-center gap-2.5 text-muted-foreground">
-                          <Check className="h-4 w-4 text-muted-foreground/40 flex-shrink-0" />{f}
-                        </li>
-                      ))}
-                    </ul>
-                    <button onClick={() => router.push("/login")} className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 text-sm font-medium transition-colors">
-                      {t('landing.pricing.free.cta')} <ArrowRight className="h-4 w-4" />
-                    </button>
-                  </div>
-                </ScrollReveal>
-              )
-            })()}
-
-            {(() => {
-              const plan = getPlan('pro')
-              return (
-                <ScrollReveal delay={200}>
-                  <div className="relative overflow-hidden rounded-xl border border-primary p-6 transition-shadow hover:shadow-md bg-card">
-                    <div className="absolute top-0 right-0 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-bl-lg">
-                      {en ? 'Most Popular' : 'Популярный'}
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm font-medium text-muted-foreground">{t('landing.pricing.pro.name')}</p>
                       <p className="mt-3 text-4xl font-bold tracking-tight text-foreground font-display">{plan.price_display}</p>
                       <p className="mt-1 text-sm text-muted-foreground">{plan.period_display}</p>
                     </div>
@@ -801,7 +772,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
                       ))}
                     </ul>
                     <button onClick={() => router.push("/login")} className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 text-sm font-medium transition-colors">
-                      {t('landing.pricing.pro.cta')} <ArrowRight className="h-4 w-4" />
+                      {t('landing.pricing.free.cta')} <ArrowRight className="h-4 w-4" />
                     </button>
                   </div>
                 </ScrollReveal>
@@ -810,7 +781,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
           </div>
 
           <p className="text-center text-sm text-muted-foreground mt-8">
-            {t('landing.pricing.needMore')}{' '}
+            {t('landing.pricing.questions')}{' '}
             <a href="mailto:hello@xr2.uk" className="text-foreground hover:text-primary underline transition-colors">{t('landing.pricing.contactUs')}</a>
           </p>
         </div>
@@ -884,7 +855,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
                       <p className="text-sm font-medium text-foreground">{row.feature}</p>
                       <p className="text-xs text-muted-foreground">
                         {row.feature === (en ? 'Starting price' : 'Стартовая цена')
-                          ? <><span className="text-emerald-600 font-medium">{xr2Val}</span>{en ? ' — lowest on the market' : ' — самая низкая на рынке'}</>
+                          ? <><span className="text-emerald-600 font-medium">{xr2Val}</span>{en ? ' — the only free platform' : ' — единственная бесплатная платформа'}</>
                           : row.feature === (en ? 'Built for' : 'Для кого')
                           ? <span className="font-medium text-foreground">{xr2Val as string}</span>
                           : <>{typeof xr2Val === 'string' ? xr2Val : (en ? 'Supported' : 'Поддерживается')}{othersWorse && (en ? ' — unique to xR2' : ' — только у xR2')}</>
@@ -996,7 +967,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
                   </button>
                 </div>
                 <p className="mt-6 text-sm text-background/70">
-                  {en ? '10 free prompts/month. No credit card required.' : '10 бесплатных промптов и 1000 запросов в месяц.'}
+                  {en ? 'Completely free. No credit card required.' : 'Полностью бесплатно. Без карты.'}
                 </p>
               </div>
             </div>
