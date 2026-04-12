@@ -347,7 +347,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
   const comparisonFeatures = en
     ? [
         { feature: 'Built for', xr2: 'Product & marketing teams', promptlayer: 'ML engineers', langfuse: 'ML engineers', humanloop: 'AI teams' },
-        { feature: 'Free tier', xr2: '100 prompts, 5k API calls', promptlayer: '10 prompts, 2.5k API calls', langfuse: '50k events, 30-day history', humanloop: '10k events' },
+        { feature: 'Free tier', xr2: '100 prompts, 100k API calls', promptlayer: '10 prompts, 2.5k API calls', langfuse: '50k events, 30-day history', humanloop: '10k events' },
         { feature: 'A/B testing', xr2: 'Built-in + revenue attribution', promptlayer: 'Built-in', langfuse: 'Manual setup in code', humanloop: 'Built-in' },
         { feature: 'Prompt analytics dashboard', xr2: 'Per-prompt metrics + funnels', promptlayer: 'Basic metrics', langfuse: 'Traces & costs', humanloop: 'Eval scores' },
         { feature: 'Custom events & revenue', xr2: 'Any event + revenue + ROI', promptlayer: false, langfuse: false, humanloop: false },
@@ -496,7 +496,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
 
               <ScrollReveal instant>
                 <p className="mt-4 text-xs text-muted-foreground">
-                  {en ? '10 free prompts and 1000 api requests per month.' : '10 бесплатных промптов и 1000 запросов в месяц.'}
+                  {en ? 'Completely free. No credit card required.' : 'Полностью бесплатно.'}
                 </p>
               </ScrollReveal>
             </div>
