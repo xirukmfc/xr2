@@ -359,7 +359,7 @@ export default function LandingPage({ params }: { params: Promise<{ lang: string
       ]
     : [
         { feature: 'Для кого', xr2: 'Продакты и маркетологи', promptlayer: 'ML-инженеры', langfuse: 'ML-инженеры', humanloop: 'AI-команды' },
-        { feature: 'Бесплатно', xr2: '100 промптов, 5 000 запросов', promptlayer: '10 промптов, 2 500 запросов', langfuse: '50 000 событий, 30 дней истории', humanloop: '10 000 событий' },
+        { feature: 'Бесплатно', xr2: '100 промптов, 100,000 запросов', promptlayer: '10 промптов, 2 500 запросов', langfuse: '50 000 событий, 30 дней истории', humanloop: '10 000 событий' },
         { feature: 'A/B тесты', xr2: 'Встроенные + атрибуция выручки', promptlayer: 'Встроенные', langfuse: 'Нужно настраивать в коде', humanloop: 'Встроенные' },
         { feature: 'Аналитика по промптам', xr2: 'Метрики + воронки по каждому', promptlayer: 'Базовые метрики', langfuse: 'Трейсы и расходы', humanloop: 'Оценки качества' },
         { feature: 'Кастомные события и выручка', xr2: 'Любые события + выручка + ROI', promptlayer: false, langfuse: false, humanloop: false },
