@@ -239,6 +239,31 @@ http {
         keepalive 32;
     }
 
+    # ============================================
+    # Default servers: reject unknown Host headers
+    # Любой домен, направленный на наш IP и не совпавший
+    # ни с одним server_name ниже, получит 444 (drop).
+    # ============================================
+    server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        server_name _;
+        access_log off;
+        return 444;
+    }
+
+    server {
+        listen 443 ssl default_server;
+        listen [::]:443 ssl default_server;
+        http2 on;
+        server_name _;
+        access_log off;
+
+        ssl_certificate /etc/nginx/ssl/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/key.pem;
+        ssl_reject_handshake on;
+    }
+
     # Редирект с HTTP на HTTPS
     # Специальный сервер для внутренних health-check'ов (без Cloudflare заголовков)
     server {
