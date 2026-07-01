@@ -330,6 +330,56 @@ http {
     }
 
     # ============================================
+    # pavelkuzko.com — same static portfolio (primary domain)
+    # ============================================
+    server {
+        listen 80;
+        server_name pavelkuzko.com www.pavelkuzko.com;
+
+        if ($is_from_cloudflare_ip = 0) {
+            return 403;
+        }
+
+        return 301 https://pavelkuzko.com$request_uri;
+    }
+
+    # www.pavelkuzko.com -> apex redirect (canonical host)
+    server {
+        listen 443 ssl;
+        http2 on;
+        server_name www.pavelkuzko.com;
+
+        ssl_certificate /etc/nginx/ssl/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/key.pem;
+        ssl_protocols TLSv1.2 TLSv1.3;
+
+        return 301 https://pavelkuzko.com$request_uri;
+    }
+
+    server {
+        listen 443 ssl;
+        http2 on;
+        server_name pavelkuzko.com;
+
+        ssl_certificate /etc/nginx/ssl/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/key.pem;
+        ssl_protocols TLSv1.2 TLSv1.3;
+
+        root /usr/share/nginx/portfolio;
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        # Cache static assets
+        location ~* \.(jpg|jpeg|png|webp|gif|svg|ico|css|js|woff2)$ {
+            expires 30d;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+
+    # ============================================
     # xr2.site — прямой домен для РФ (без Cloudflare)
     # ============================================
     server {
