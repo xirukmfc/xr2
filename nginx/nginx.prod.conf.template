@@ -293,7 +293,7 @@ http {
     }
 
     # ============================================
-    # portfolio.xr2.uk — static portfolio site
+    # portfolio.xr2.uk -> pavelkuzko.com redirect (canonical domain)
     # ============================================
     server {
         listen 80;
@@ -303,7 +303,7 @@ http {
             return 403;
         }
 
-        return 301 https://$server_name$request_uri;
+        return 301 https://pavelkuzko.com$request_uri;
     }
 
     server {
@@ -315,18 +315,7 @@ http {
         ssl_certificate_key /etc/nginx/ssl/key.pem;
         ssl_protocols TLSv1.2 TLSv1.3;
 
-        root /usr/share/nginx/portfolio;
-        index index.html;
-
-        location / {
-            try_files $uri $uri/ /index.html;
-        }
-
-        # Cache static assets
-        location ~* \.(jpg|jpeg|png|webp|gif|svg|ico|css|js|woff2)$ {
-            expires 30d;
-            add_header Cache-Control "public, immutable";
-        }
+        return 301 https://pavelkuzko.com$request_uri;
     }
 
     # ============================================
