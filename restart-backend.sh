@@ -11,7 +11,9 @@ RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-REMOTE_HOST="root@<PROD_HOST>"
+# Хост берётся из .deploy.env (в .gitignore) или из окружения
+[ -f "$(dirname "$0")/.deploy.env" ] && . "$(dirname "$0")/.deploy.env"
+REMOTE_HOST="${XR2_PROD_HOST:?не задан XR2_PROD_HOST — создайте .deploy.env по образцу .deploy.env.example}"
 REMOTE_PATH="/opt/xr2"
 
 echo -e "${BLUE}🔄 Перезапуск бэкенда на продакшн${NC}"
