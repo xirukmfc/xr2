@@ -26,7 +26,7 @@ deploy: ## 🚀 Деплой на production (без контейнерного 
 		echo "$(RED)⚠️  ВАЖНО: Отредактируйте .env.prod с production паролями!$(NC)"; \
 	fi
 	@echo "$(YELLOW)Сборка и запуск сервисов (без nginx)...$(NC)"
-	@docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build redis postgres db-init app frontend tgsight mcp-todoist --remove-orphans
+	@docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build redis postgres db-init app frontend mcp-todoist --remove-orphans
 	@echo ""
 	@echo "$(YELLOW)Ожидание запуска сервисов...$(NC)"
 	@sleep 15
@@ -36,7 +36,6 @@ deploy: ## 🚀 Деплой на production (без контейнерного 
 	@echo "$(YELLOW)🌐 Приложение: https://xr2.uk$(NC)"
 	@echo "$(YELLOW)📚 API Docs:   https://xr2.uk/docs$(NC)"
 	@echo "$(YELLOW)🔐 Admin:      https://xr2.uk/admin$(NC)"
-	@echo "$(YELLOW)🔍 TGSight:    https://xr2.uk/tgsight$(NC)"
 
 deploy-fast: ## ⚡ Быстрый деплой с оптимизациями (BuildKit, увеличенная память)
 	@export DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 && ./deploy-optimized.sh
@@ -93,9 +92,6 @@ logs-db: ## Показать логи базы данных
 logs-frontend: ## Показать логи frontend (production)
 	@docker-compose --env-file .env.prod -f docker-compose.prod.yml -p xr2-platform logs -f frontend
 
-logs-tgsight: ## Показать логи TGSight
-	@docker-compose --env-file .env.prod -f docker-compose.prod.yml -p xr2-platform logs -f tgsight
-
 health: ## Проверить здоровье сервисов
 	@echo "$(GREEN)🏥 Проверка здоровья сервисов...$(NC)"
 	@echo ""
@@ -104,7 +100,6 @@ health: ## Проверить здоровье сервисов
 	@docker exec xr2_postgres pg_isready -U xr2_user > /dev/null 2>&1 && echo "$(GREEN)✅ PostgreSQL: OK$(NC)" || echo "$(RED)❌ PostgreSQL: FAIL$(NC)"
 	@docker exec xr2_redis redis-cli ping > /dev/null 2>&1 && echo "$(GREEN)✅ Redis: OK$(NC)" || echo "$(RED)❌ Redis: FAIL$(NC)"
 	@curl -s http://localhost:3000 > /dev/null 2>&1 && echo "$(GREEN)✅ Frontend: OK$(NC)" || echo "$(YELLOW)⚠️  Frontend: Not accessible$(NC)"
-	@curl -s http://localhost:3001/tgsight > /dev/null 2>&1 && echo "$(GREEN)✅ TGSight: OK$(NC)" || echo "$(YELLOW)⚠️  TGSight: Not accessible$(NC)"
 
 ##@ Обслуживание
 
@@ -170,63 +165,6 @@ test-local: ## 🧪 Запустить автотесты локально
 	@echo "$(GREEN)🧪 Запуск автотестов локально...$(NC)"
 	@python auto-test.py
 	@echo "$(GREEN)✅ Локальные автотесты завершены!$(NC)"
-
-##@ TGSight управление
-
-tgsight-up: ## 🚀 Запустить только TGSight (production)
-	@echo "$(GREEN)🚀 Запуск TGSight...$(NC)"
-	@docker compose --env-file .env.prod -f docker-compose.prod.yml up -d tgsight
-	@echo "$(GREEN)✅ TGSight запущен!$(NC)"
-	@echo "$(YELLOW)🔍 Доступен по адресу: https://xr2.uk/tgsight$(NC)"
-
-tgsight-up-local: ## 🚀 Запустить TGSight для локальной разработки (без basePath, с hot reload)
-	@echo "$(GREEN)🚀 Запуск TGSight для локальной разработки...$(NC)"
-	@docker compose -f docker-compose.tgsight.local.yml up -d --build
-	@echo "$(GREEN)✅ TGSight запущен!$(NC)"
-	@echo "$(YELLOW)🔍 Доступен по адресу: http://localhost:3001$(NC)"
-	@echo "$(YELLOW)🔄 Hot reload включен - изменения применяются автоматически$(NC)"
-
-tgsight-up-dev: ## 🚀 Запустить TGSight для разработки (production контейнер с hot reload)
-	@echo "$(GREEN)🚀 Запуск TGSight для разработки (production контейнер)...$(NC)"
-	@docker compose -f docker-compose.tgsight.dev.yml up -d --build
-	@echo "$(GREEN)✅ TGSight запущен!$(NC)"
-	@echo "$(YELLOW)🔍 Доступен по адресу: http://localhost:3001/tgsight$(NC)"
-	@echo "$(YELLOW)🔄 Hot reload включен - изменения применяются автоматически$(NC)"
-
-tgsight-down: ## 🛑 Остановить TGSight (production)
-	@echo "$(RED)🛑 Остановка TGSight...$(NC)"
-	@docker compose --env-file .env.prod -f docker-compose.prod.yml stop tgsight
-	@echo "$(GREEN)✅ TGSight остановлен$(NC)"
-
-tgsight-down-local: ## 🛑 Остановить TGSight (локальная разработка)
-	@echo "$(RED)🛑 Остановка TGSight (локальная)...$(NC)"
-	@docker compose -f docker-compose.tgsight.local.yml down
-	@echo "$(GREEN)✅ TGSight остановлен$(NC)"
-
-tgsight-down-dev: ## 🛑 Остановить TGSight (dev режим production контейнера)
-	@echo "$(RED)🛑 Остановка TGSight (dev)...$(NC)"
-	@docker compose -f docker-compose.tgsight.dev.yml down
-	@echo "$(GREEN)✅ TGSight остановлен$(NC)"
-
-tgsight-rebuild: ## 🔨 Пересобрать TGSight
-	@echo "$(YELLOW)🔨 Пересборка TGSight...$(NC)"
-	@docker compose --env-file .env.prod -f docker-compose.prod.yml build --no-cache tgsight
-	@echo "$(GREEN)✅ TGSight пересобран$(NC)"
-	@echo "$(YELLOW)Запустите: make tgsight-up$(NC)"
-
-tgsight-restart: ## 🔄 Перезапустить TGSight
-	@echo "$(YELLOW)🔄 Перезапуск TGSight...$(NC)"
-	@docker compose --env-file .env.prod -f docker-compose.prod.yml restart tgsight
-	@echo "$(GREEN)✅ TGSight перезапущен$(NC)"
-
-tgsight-remove: ## ❌ Удалить TGSight (с подтверждением)
-	@echo "$(RED)⚠️  ВНИМАНИЕ: Это удалит контейнер TGSight!$(NC)"
-	@read -p "Продолжить? [y/N] " -n 1 -r; \
-	echo; \
-	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		docker compose --env-file .env.prod -f docker-compose.prod.yml rm -f -s tgsight; \
-		echo "$(GREEN)✅ TGSight удален$(NC)"; \
-	fi
 
 ##@ База данных
 

@@ -181,18 +181,10 @@ http {
         # Note: curl/wget/python-requests removed - Cloudflare handles bot filtering
     }
 
-    # TGSight access control via cookie (xr2.uk + xr2.site)
-    # TEMPORARILY DISABLED - default changed from 0 to 1 to allow all access
-    map $cookie_tgsight_access $tgsight_auth {
-        default 1;
-        "__TGSIGHT_UNLOCK_TOKEN__" 1;
-    }
-
     # Rate limiting зоны (PRODUCTION - более строгие лимиты)
     limit_req_zone $binary_remote_addr zone=api:10m rate=30r/s;
     limit_req_zone $binary_remote_addr zone=login:10m rate=5r/s;
     limit_req_zone $binary_remote_addr zone=general:10m rate=20r/s;
-    limit_req_zone $binary_remote_addr zone=tgsight:10m rate=10r/s;
 
     # Connection limiting
     limit_conn_zone $binary_remote_addr zone=conn_limit_per_ip:10m;
@@ -207,12 +199,6 @@ http {
     # Upstream для фронтенда (запущен локально)
     upstream xr2_frontend {
         server frontend:3000;
-        keepalive 32;
-    }
-
-    # Upstream для TGSight 2.0 (временный проект)
-    upstream tgsight_app {
-        server tgsight:3001;
         keepalive 32;
     }
 
@@ -616,78 +602,6 @@ http {
             add_header Cache-Control "public, immutable";
         }
 
-        # TGSight access: secret unlock URL sets cookie (valid 30 days)
-        location = /tgsight-unlock/__TGSIGHT_UNLOCK_TOKEN__ {
-            add_header Set-Cookie "tgsight_access=__TGSIGHT_UNLOCK_TOKEN__; Path=/tgsight; Max-Age=2592000; Secure; HttpOnly; SameSite=Lax" always;
-            return 302 /tgsight;
-        }
-
-        # TGSight static files (_next) - более специфичное префиксное правило должно быть перед общим
-        location /tgsight/_next/ {
-            if ($tgsight_auth = 0) { return 403; }
-            proxy_pass http://tgsight_app;
-            proxy_set_header Host $host;
-            proxy_cache_valid 200 60m;
-            add_header Cache-Control "public, immutable";
-        }
-
-        # TGSight public static files (screenshots) - более специфичное префиксное правило должно быть перед общим
-        location /tgsight/screenshots/ {
-            if ($tgsight_auth = 0) { return 403; }
-            proxy_pass http://tgsight_app;
-            proxy_set_header Host $host;
-            proxy_cache_valid 200 60m;
-            add_header Cache-Control "public, max-age=31536000, immutable";
-        }
-
-        # TGSight public static files (images) - более специфичное префиксное правило должно быть перед общим
-        location /tgsight/images/ {
-            if ($tgsight_auth = 0) { return 403; }
-            proxy_pass http://tgsight_app;
-            proxy_set_header Host $host;
-            proxy_cache_valid 200 60m;
-            add_header Cache-Control "public, max-age=31536000, immutable";
-        }
-
-        # TGSight public static files (admin images only) - только изображения, не HTML страницы
-        location ~ ^/tgsight/admin/.*\.(png|jpg|jpeg|gif|svg|webp|ico)$ {
-            if ($tgsight_auth = 0) { return 403; }
-            proxy_pass http://tgsight_app;
-            proxy_set_header Host $host;
-            proxy_cache_valid 200 60m;
-            add_header Cache-Control "public, max-age=31536000, immutable";
-        }
-
-        # TGSight 2.0 - Временный проект для демонстрации (общее правило в конце)
-        location /tgsight {
-            if ($tgsight_auth = 0) { return 403; }
-
-            # Rate limiting для TGSight (увеличен для нормальной загрузки страницы)
-            limit_req zone=tgsight burst=30 nodelay;
-            limit_req_status 429;
-
-            # Ограничение соединений (увеличено с 5 до 20 для Next.js)
-            limit_conn conn_limit_per_ip 100;
-
-            proxy_pass http://tgsight_app;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-
-            # WebSocket support for Next.js
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection "upgrade";
-
-            proxy_connect_timeout 5s;
-            proxy_send_timeout 60s;
-            proxy_read_timeout 60s;
-
-            # Ограничение размера запроса для tgsight
-            client_max_body_size 1M;
-        }
-
         # ============================================
         # MCP Todoist — remote MCP server for Claude
         # ============================================
@@ -969,73 +883,6 @@ http {
             proxy_set_header Host $host;
             proxy_cache_valid 200 60m;
             add_header Cache-Control "public, immutable";
-        }
-
-        # TGSight access: secret unlock URL sets cookie (valid 30 days)
-        location = /tgsight-unlock/__TGSIGHT_UNLOCK_TOKEN__ {
-            add_header Set-Cookie "tgsight_access=__TGSIGHT_UNLOCK_TOKEN__; Path=/tgsight; Max-Age=2592000; Secure; HttpOnly; SameSite=Lax" always;
-            return 302 /tgsight;
-        }
-
-        # TGSight static files (_next)
-        location /tgsight/_next/ {
-            if ($tgsight_auth = 0) { return 403; }
-            proxy_pass http://tgsight_app;
-            proxy_set_header Host $host;
-            proxy_cache_valid 200 60m;
-            add_header Cache-Control "public, immutable";
-        }
-
-        # TGSight public static files (screenshots)
-        location /tgsight/screenshots/ {
-            if ($tgsight_auth = 0) { return 403; }
-            proxy_pass http://tgsight_app;
-            proxy_set_header Host $host;
-            proxy_cache_valid 200 60m;
-            add_header Cache-Control "public, max-age=31536000, immutable";
-        }
-
-        # TGSight public static files (images)
-        location /tgsight/images/ {
-            if ($tgsight_auth = 0) { return 403; }
-            proxy_pass http://tgsight_app;
-            proxy_set_header Host $host;
-            proxy_cache_valid 200 60m;
-            add_header Cache-Control "public, max-age=31536000, immutable";
-        }
-
-        # TGSight public static files (admin images only)
-        location ~ ^/tgsight/admin/.*\.(png|jpg|jpeg|gif|svg|webp|ico)$ {
-            if ($tgsight_auth = 0) { return 403; }
-            proxy_pass http://tgsight_app;
-            proxy_set_header Host $host;
-            proxy_cache_valid 200 60m;
-            add_header Cache-Control "public, max-age=31536000, immutable";
-        }
-
-        # TGSight 2.0
-        location /tgsight {
-            if ($tgsight_auth = 0) { return 403; }
-
-            limit_req zone=tgsight burst=30 nodelay;
-            limit_req_status 429;
-            limit_conn conn_limit_per_ip 100;
-
-            proxy_pass http://tgsight_app;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection "upgrade";
-
-            proxy_connect_timeout 5s;
-            proxy_send_timeout 60s;
-            proxy_read_timeout 60s;
-
-            client_max_body_size 1M;
         }
 
         # ============================================

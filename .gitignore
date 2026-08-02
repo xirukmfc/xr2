@@ -24,11 +24,6 @@ PRODUCTION_SERVER.md
 # Локальные настройки Claude Code (могут содержать креды)
 .claude/settings.local.json
 
-# Выгрузки справочника интересов TGSight (~17 МБ, не для репозитория)
-tgsight2.0/exports/
-
 system_docs/PROD_TEST_CREDENTIALS.md
 
-# TGSight deployment guide (temporary, not needed in repo)
-TGSIGHT_DEPLOY_GUIDE.md
 /nginx/nginx.prod.conf

@@ -16,7 +16,6 @@ on:
           - rebuild-frontend
           - rebuild-frontend-nocache
           - rebuild-docs
-          - rebuild-tgsight
           - rebuild-nginx
 
 jobs:
@@ -96,14 +95,6 @@ jobs:
               git reset --hard origin/master
               docker compose --env-file .env.prod -f docker-compose.prod.yml build --no-cache docs
               docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --no-deps docs
-            fi
-
-            # Rebuild TGSight
-            if [ "$ACTION" = "rebuild-tgsight" ]; then
-              git fetch origin
-              git reset --hard origin/master
-              docker compose --env-file .env.prod -f docker-compose.prod.yml build --no-cache tgsight
-              docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --no-deps tgsight
             fi
 
             # Rebuild Nginx
