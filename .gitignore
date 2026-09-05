@@ -27,3 +27,17 @@ PRODUCTION_SERVER.md
 system_docs/PROD_TEST_CREDENTIALS.md
 
 /nginx/nginx.prod.conf
+portfolio-archive/
+
+# Портфолио живёт в отдельном приватном репозитории xirukmfc/portfolio
+# (оттуда его собирает Cloudflare Workers). Здесь лежит только рабочая копия:
+# в публичном xr2 ей делать нечего -- внутри CV, фото и личные контакты.
+portfolio/
+
+# Локальные настройки Claude Code: содержат адрес прод-сервера, который
+# коммитом 888e3f4 из репозитория как раз убирали.
+.claude/settings.local.json
+.vscode/
+
+# Личные фотографии не место в публичном репозитории
+DSC04231.jpg
