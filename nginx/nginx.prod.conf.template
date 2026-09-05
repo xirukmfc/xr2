@@ -343,6 +343,11 @@ http {
         root /usr/share/nginx/portfolio;
         index index.html;
 
+        # Портфолио монтируется целиком, поэтому закрываем всё, что не является
+        # частью сайта: бэкапы, рабочие заметки, скрытые файлы.
+        location ~ /\. { deny all; }
+        location ~* \.(bak|md|log|old|orig|save|swp)$ { deny all; }
+
         location / {
             try_files $uri $uri/ /index.html;
         }
